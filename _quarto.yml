@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Andy Timm"
+  description: "Personal website of Andy Timm"
+  site-url: https://andytimm.github.io
+  repo-url: https://github.com/andytimm/andytimm.github.io
+  open-graph: true
+ # favicon: favicon.png
+  twitter-card: 
+    creator: "@andy_timm"
+    site: "@andy_timm"
+    card-style: "summary_large_image"
+  navbar:
+    background: dark
+    foreground: light
+    right:
+      - href: index.qmd
+        text: About
+      - href: projects.qmd
+      - href: software.qmd
+      - href: blog.qmd
+
+format:
+  html:
+    theme: journal
+    css: styles.css
+    toc: true
+    toc-depth: 4
+    toc-title: "Contents"
+    html-math-method: katex
+    include-in-header:
+      - includes.html
+    highlight-style: tango

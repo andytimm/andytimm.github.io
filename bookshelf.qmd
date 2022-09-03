@@ -1,0 +1,6 @@
+---
+title: "bookshelf"
+editor: visual
+---
+
+!\[\](assets/sept-2022-bookshelf.jpg)

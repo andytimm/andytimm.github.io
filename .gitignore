@@ -1,0 +1,5 @@
+/.quarto/
+*.RData
+*.rdb
+*.rdx
+.Rproj.user
