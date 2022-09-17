@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2018-04-10">
+
+<title>Andy Timm - Predicting race part 1- Bayes’ rule method and extensions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Andy Timm - Predicting race part 1- Bayes’ rule method and extensions">
+<meta property="og:description" content="Race is a defining part of political identity in the United States, and so it should be no surprise that accurately modeling race can be beneficial for many political campaign activities.">
+<meta property="og:site-name" content="Andy Timm">
+<meta name="twitter:title" content="Andy Timm - Predicting race part 1- Bayes’ rule method and extensions">
+<meta name="twitter:description" content="Race is a defining part of political identity in the United States, and so it should be no surprise that accurately modeling race can be beneficial for many political campaign activities.">
+<meta name="twitter:creator" content="@andy_timm">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andy Timm</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html">Personal Projects</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html">Software</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">Not Yet Updated Blog</a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Predicting race part 1- Bayes’ rule method and extensions</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">from-old-website</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Andy Timm </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 10, 2018</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#a-simple-first-method" id="toc-a-simple-first-method" class="nav-link active" data-scroll-target="#a-simple-first-method">A simple first method</a></li>
+  <li><a href="#use-and-evaluation" id="toc-use-and-evaluation" class="nav-link" data-scroll-target="#use-and-evaluation">Use and Evaluation</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>Race is a defining part of political identity in the United States, and so it should be no surprise that accurately modeling race can be beneficial for many political campaign activities. For instance, many organizations work to improve turnout in specific communities of color, or want to target persuasion on a given issue to certain racial group. Alternatively, race and ethnicity might be desired as an input to a larger voting or support likelihood model, given that race is generally predictive of both <a href="http://www.electproject.org/home/voter-turnout/demographics">voting likelihood</a> and <a href="https://www.nytimes.com/interactive/2016/11/08/us/politics/election-exit-polls.html">candidate support</a>.</p>
+<p>Unfortunately, complete self-reported race data is only available in 7 states, where it is required by law: Alabama, Florida, Georgia, Louisiana, Mississippi, North Carolina, and South Carolina. Pennsylvania and Tennessee also have an optional field on voter registration forms. Outside of these states, race and ethnicity need to be collected individually, or modeled. These models commonly take advantage of the name (especially surname) of the individual voter, and other information in the voter file to do so.</p>
+<p>In this post, I’ll explore a Bayes’ rule based method for modeling racial identity, and how it can be extended with additional information from state voter files where available. Obviously, it won’t be as predictive as something like Catalist or Civis Analytics’ ones (which have the benefit of huges swathes of additional survey and other data, not to mention more sophisticated modeling), but it can help illustrate the benfits and limitations of such tools. In the next posts, I’ll explain how natural language processing models can achieve still higher accuracy by extracting more information from names themselves. Since the Florida voter file has self-reported race data and is <a href="http://flvoters.com/downloads.html">easy to access</a>, we’ll test our models’ effectiveness against that ground truth.</p>
+<section id="a-simple-first-method" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-first-method">A simple first method</h2>
+<p>The <a href="https://www.census.gov/data/developers/data-sets/surnames.html">census surname files</a> are a an incredible source of information on how race correlates with names, and are the starting point of our model. In these files, the census provides race percentage breakdowns for any surname with more than 100 occurrences in the United States, except where redacted for privacy reasons. The data is available only aggregated at the national level. In practice, this means coverage of about 90% of the population.</p>
+<p>For many voters, surname is the only information we need to make an accurate classification: names such as Carlson, Meyer, and Hanson are in excess of 90% white, with similar surnames existing for other races. Unfortunately, many names aren’t as clear cut, and some names like Chavis are less than 40% likely to be any race. This is a good starting point, but we can do better.</p>
+<p>As our first improvement, <a href="https://link.springer.com/article/10.1007/s10742-009-0047-1">Elliot et al.&nbsp;(2009)</a> incorporates census geolocation (county, tract, or block) data, using Bayes’ theorem.</p>
+<p>Bayes’ theorem is a natural way to integrate the new census evidence we have, updating our initial beliefs with more data. <span class="math display">P(A) </span> and <span class="math display">P(B) </span> are the probabilities of events A and B occurring independently of each other, and <span class="math display">P(A \vert B) </span> and <span class="math display">P(B \vert A) </span> are conditional probabilities, such as the probability a given voter is white given their surname, or <span class="math display"> P(white \vert surname) </span>. Bayes’ theorem appears in it’s simplest form below, giving us an updated probability utilizing the new information:</p>
+<p>$$</p>
+<p>P(A|B) = </p>
+<p>$$</p>
+<p>Of course, we’re interested in integrating multiple pieces of evidence (surname/geolocation for now, with more coming later), and applying it to multiple voters. The equations will be much more involved, but remember that we’re essentially just extending the above equation to work with multiple inputs, over multiple voters. Note that I’ll be using the notation from <a href="https://imai.princeton.edu/research/race.html">Imai and Khanna (2016)</a>, which is somewhat clearer than the notion from Elliot et al.</p>
+<p>We want <span class="math display"> P(R_i = r \vert S_i = s, G_i = g) </span>, the conditional probability that the voter <span class="math display">i</span> belongs to the racial group <span class="math display">r</span> given their surname <span class="math display">s</span> and geolocation <span class="math display">g</span>. <span class="math display">R</span>, <span class="math display">S</span>, and <span class="math display">G</span> are the sets of all racial groups, all surnames, and all geolocations respectively. Thus, as a final expression we’ll get:</p>
+<p>$$</p>
+<p>P(R_i = r S_i = s, G_i = g) = </p>
+<p>$$</p>
+<p>We already have almost all these probabilities between the census surname list and census demographic data. <span class="math display"> P(R_i = r \vert S_i = s) </span> is the racial composition of surnames from the surname list. But what about <span class="math display"> P(G_i = g \vert R_i = r) </span>? As an intermediate step, we first need to calculate <span class="math display"> P(G_i = g \vert R_i = r)  </span> , which we can calculate using Bayes’ rule again. <span class="math display"> P(G_i = g \vert R_i = r)  </span> is then <span class="math display"> \frac{P(R_i = r \vert G_i = g) P(G_i = g)} {\sum_{r'\in R} P(R_i = r \vert G_i = g') P(G_i = g)} </span>, completing everything we need to produce our second model.</p>
+<p>This model, like the surname list, produces probabilistic predictions of race, for instance, a given voter is 94.3% likely to be white, given their name and geolocation. The probabilities sum to 1 across the races.</p>
+<p>We’ll get to how to use and evaluate such models soon, but first: given that we’ve started to include information from the voter file to improve our predictions, why don’t we use other fields we have such as age, party registration, and gender? They all are likely to contain some conditional information about a voter’s race, and while party registration isn’t reported in every state, it is in Florida.</p>
+<p>That’s exactly the proposal of <a href="https://imai.princeton.edu/research/race.html">Imai and Khanna (2016)</a>, and it works well. The equations get slightly more complicated, but extending Bayes’ rule to include more and more variables doesn’t change all that much. We have to calculate more intermediate probabilities, but the essential process and reasoning of incorporating new information to update our belief is the same. If you want to see the full model written out, with space for an arbitrary number of new variables <span class="math display"> X_i </span>, you can find it in the linked paper.</p>
+</section>
+<section id="use-and-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="use-and-evaluation">Use and Evaluation</h2>
+<p>Now that we have a probability distribution over the racial groups, how do we utilize them?</p>
+<p>We might take the highest probability race and use that as our prediction. Alternatively, as an input in a later model, we might choose to simply incorporate all 5 probabilities, allowing our following model as much information as possible about the racial identity of a voter. Catalist, the democratic data vendor, turns probabilities into simple categories such as “likely white” or “possibly black”, which simplify working with the results on a campaign.</p>
+<p>As a final idea, we might have an application in mind where you want to only predict a certain race when you’re very confident in your prediction. For example, you might be hoping to target a turnout mailer written in Spanish to only Hispanics, and as few non-Hispanics as possible. To do this, we’d utilize only high probability predictions- say, above 85% likely to be Hispanic. By changing that threshold, you could optimize the size of your mail universe versus the specificity and efficiency of it, finding the best balance for your campaign.</p>
+<p>As our last example showed, when utilizing such probabilistic predictions, there is naturally an accuracy tradeoff involved in selecting what type of threshold to use. We could misleadingly say our model is extremely accurate if we only use a high threshold, but a fairer, more systematic evaluation would require looking at how it preforms over multiple such thresholds. That’s what we’ll develop next: Area Under the Curve (AUC), a systematic method for evaluating classifiers.</p>
+<p>There are 4 possible outcomes to making a classification: a True Positive (TP), False Positive (FP), True negative (TN), and False Negative (FN). As an example then, a true positive is when we predicted positive, and the ground truth label was actually positive.</p>
+<p>Rather than building a table of these 4 outcomes, called a confusion matrix, we’ll be working with summary statistics of these outcomes. The True Positive Rate (or sensitivity or recall) is <span class="math display"> \frac{TP}{TP+FN} </span>. In other words, out of all the points that are (ground truth) positive, how many did we correctly classify? Similarly, the False Positive Rate is <span class="math display"> \frac{FP}{FP+TN} </span>. High True Positive Rate is good: it means we’ll miss relatively few positive examples. On the other end of things, low False Positive Rate is what we want: it means fewer negative points will be misclassified.</p>
+<p>By calculating these two statistics at a variety of thresholds, then plotting a curve with the FPR on the x-axis and TPR on the y-axis, we can get a deeper understanding of the tradeoff. This is called an Receiver Operating Characteristic. Given what I’ve said about the meaning of the TPR and FPR, can you figure out quality of the 3 classifiers that are graphed below?</p>
+<p><img src="%7B%7B%20site.baseurl%20%7D%7D/assets/img/example_curves.jpg" class="img-fluid" alt="Example ROCs"> The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it’s equivalent to guessing.</p>
+<p>As an overall summary then, the area under this curve (AUC) is of our one number summary of these graphs. The shown classifiers have AUC 1, .8, and .5 respectively.</p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>Now that we’ve built up a relatively complex model, and learned how to use and evaluate it, let’s plot some ROC curves, and look at AUCs for our models.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="%7B%7B%20site.baseurl%20%7D%7D/assets/img/ROC_for_wru.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">ROC graphs for 4 models</figcaption><p></p>
+</figure>
+</div>
+<p>And here’s the AUC table: bold is the highest overall for each race.</p>
+<table class="table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>White</strong></th>
+<th><strong>Black</strong></th>
+<th><strong>Hispanic</strong></th>
+<th><strong>Asian</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Surname</strong></td>
+<td>0.8414369</td>
+<td>0.8562679</td>
+<td>0.9325489</td>
+<td>0.8606716</td>
+</tr>
+<tr class="even">
+<td><strong>Geo/Surname</strong></td>
+<td>0.8792853</td>
+<td>0.8918873</td>
+<td><strong>0.9492531</strong></td>
+<td><strong>0.8717517</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Kitchen Sink</strong></td>
+<td><strong>0.8903922</strong></td>
+<td><strong>0.8979003</strong></td>
+<td>0.9362794</td>
+<td>0.7648270</td>
+</tr>
+</tbody>
+</table>
+<p>Looking at these, there are a lot of interesting patterns!</p>
+<p><strong>White:</strong> The White models’ results are perhaps what we most expected. With more data, each subsequent model does better, and the overall result is strong.</p>
+<p><strong>Black:</strong> Interestingly, the kitchen sink model still does the best overall with black voters, but by a much smaller margin than with whites. Also, once the true positive rate gets to around .90, curves cross! This is a good illustration of the importance of plotting ROC curves when doing classification- depending on your campaign, you might correctly choose either the Geo/Surname model or the Kitchen Sink one, depending on what type of cutoff you need.</p>
+<p><strong>Hispanic:</strong> The Hispanic models are all very close together: with surname information being so effective in classifying Hispanics (more effective than any model for the other races), there isn’t much room for census or voter file data to improve things.</p>
+<p><strong>Asian:</strong> These models are significantly weaker than all the others, but still reasonable. The unexpected trend though, is that the kitchen sink model preforms much worse than the other two. Given how few Asian voters there are overall in Florida, this downturn is probably explained by the relatively low density of any Asians across the other inputs, like age, sex, or party. Thus, while geographic information might slightly improve things, Floridians are so unlikely to be Asian overall that all of those extra variables don’t carry any useful information about who might be Asian.</p>
+<p>Overall, these Bayes’ Theorem models have a lot of attractive features. While the predictiveness of names, and what variables you have from the voter file might vary state to state, the models can used anywhere in the US. They’re also quite a strong baseline for accuracy as well- far, far better than random, even for Asian voters. Unlike models we’ll discuss in the next post, these models require no training data. Finally, they’re transparent- if you want to check how surname, geolocation, and party weighed in to a particular decision, it’s only a few calculations with Bayes’ rule away.</p>
+<p>Of course, we’d love higher accuracy, and we can get there with natural language processing. What about those ~10% of voters whose name aren’t in the census surname file? If a name starts with “Mc”, but isn’t in the census surname list, I personally would guess they’re of Irish descent, and therefore white. And what about using first names, middle names, and name suffixes? It’s linguistic patterns like these that we’ll hope to exploit with NLP, in the next post.</p>
+<p>You can find the code used to write this post <a href="https://github.com/andytimm/CampaignBlog/tree/master/Race_Prediction/part1_wru">here</a>.</p>
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2018,
+  author = {Andy Timm},
+  title = {Predicting Race Part 1- {Bayes’} Rule Method and Extensions},
+  date = {2018-04-10},
+  url = {https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2018" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
+Andy Timm. 2018. <span>“Predicting Race Part 1- Bayes’ Rule Method and
+Extensions.”</span> April 10, 2018. <a href="https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html">https://andytimm.github.io/posts/Race
+Models Pt 1/2018-04-10-race-models-pt1.html</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

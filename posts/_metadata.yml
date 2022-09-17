@@ -14,10 +14,8 @@ smooth-scroll: true
 
 # Default author
 author:
-  - name: Drew Dimmery
-    url: https://ddimmery.com
-    affiliation: Data Science @ University of Vienna
-    affiliation-url: https://datascience.univie.ac.at/
+  - name: Andy Timm
+    url: https://andytimm.github.io
 
 # citation
 citation: true
