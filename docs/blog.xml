@@ -9,7 +9,7 @@
 <link>https://andytimm.github.io/blog.html</link>
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
-<generator>quarto-1.0.37</generator>
+<generator>quarto-1.1.251</generator>
 <lastBuildDate>Tue, 10 Apr 2018 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Predicting race part 1- Bayes’ rule method and extensions</title>
@@ -119,6 +119,7 @@
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2018,
   author = {Andy Timm},
+  editor = {},
   title = {Predicting Race Part 1- {Bayes’} Rule Method and Extensions},
   date = {2018-04-10},
   url = {https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html},
