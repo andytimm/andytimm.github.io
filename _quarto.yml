@@ -22,6 +22,7 @@ website:
       - href: projects.qmd
       - href: software.qmd
       - href: blog.qmd
+        text: Rarely Updated Blog
 
 format:
   html:

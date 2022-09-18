@@ -3,7 +3,7 @@ layout: post
 title: Why the normal distribution?
 date: 2018-05-11
 categories:
-- from_old_website
+- From Old Website
 ---
 
 ![](boring_normal.jpg){fig-align="center"}

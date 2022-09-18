@@ -3,8 +3,8 @@ layout: post
 title: Is Voting Habit Forming? Replication, and additional robustness checks
 date: 2019-07-03
 categories:
-- from_old_website
-- causal_inference
+- From Old Website
+- causal inference
 ---
 
 This post walks through my replication of the fuzzy regression discontinuity portion of Coppock and Green's 2016 paper [Is Voting Habit Forming? New Evidence from Experiments and Regression Discontinuities](https://onlinelibrary.wiley.com/doi/full/10.1111/ajps.12210), and details some additional robustness checks I conducted. While I was able to reproduce all of their estimates fairly easily due to great [replication materials](http://dx.doi.org/10.7910/DVN/ALZVAW), my additional robustness checks suggest that their results are more sensitive to bandwith choices than their testing suggests. Additionally, Coppock and Green argue the effects they find are likely due to habit alone, whereas I'm unconvinced that's the sole mechanism involved. This is my work from Jennifer Hill and Joe Robinson-Cimpian's Causal Inference class at NYU, and I'm grateful for both their feedback on the project.

@@ -13,7 +13,7 @@ Most of the cool stuff I get to build these days isn't public unfortunately. Hop
 <a class="btn btn-outline-dark btn-sm" ,="" href="https://cran.r-project.org/web/packages/retrodesign/vignettes/Intro_To_retrodesign.html" target="_blank" rel="noopener noreferrer">
         <i class="bi bi-info" role="img" aria-label="Website"></i>
         Website
-    </a> <a class="btn btn-outline-dark btn-sm" ,="" href="https://github.com/andytimm/retrodesign" target="_blank" rel="noopener noreferrer">
+    </a> <a class="btn btn-outline-dark btn-sm" ,="" href="https://andytimm.github.io/posts/Intro%20to%20Retrodesign/2019-02-05-Intro_To_retrodesign.html" target="_blank" rel="noopener noreferrer">
         <i class="bi bi-github" role="img" aria-label="Github"></i>
         Github
     </a> <a class="btn btn-outline-dark btn-sm" ,="" href="https://cran.r-project.org/web/packages/retrodesign/index.html" target="_blank" rel="noopener noreferrer">

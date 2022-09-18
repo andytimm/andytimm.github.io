@@ -3,7 +3,7 @@ layout: post
 title: Convention Prediction with a Bayesian Hierarchical Multinomial Model
 date: 2019-07-03
 categories:
-- from_old_website
+- From Old Website
 - Stan
 ---
 

@@ -3,7 +3,7 @@ layout: post
 title: Type S/M errors in R with retrodesign()
 date: 2018-05-11
 categories:
-- from_old_website
+- From Old Website
 ---
 
 This is a online version of the vignette for my r package **retrodesign**. It can be installed with:
