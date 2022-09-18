@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2018-05-11">
 
 <title>Andy Timm - Type S/M errors in R with retrodesign()</title>
 <style>
@@ -191,7 +192,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Type S/M errors in R with retrodesign()</h1>
-                      </div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">from_old_website</div>
+              </div>
+                  </div>
   </div>
     
   
@@ -204,6 +208,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             </div>
     </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 11, 2018</p>
+      </div>
+    </div>
       
     </div>
     
@@ -240,9 +250,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 class="anchored" data-anchor-id="an-initial-example">An Initial Example</h2>
 <p>To nail down the assumptions we’re working with, we’ll start with an abstract example from <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/bmsp.12132">Lu et al.</a> (2018); the second will draw on a real world scenario and follow Gelman and Carlin’s suggested workflow for design analysis more closely.</p>
 <p>Let’s say we’re testing whether a true effect size is zero or not, in a two tailed test.</p>
-<p><span class="math display">
-H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0
-</span></p>
+<p><span class="math display">H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0</span></p>
 <p>We’re assuming that the test statistic here is normally distributed. As <a href="http://www.stat.columbia.edu/~gelman/research/published/francis8.pdf">Gelman and Tuerlinckx</a> (2009) note, this is a pretty widely applicable assumption; through the Central Limit Theorem, it applies to common settings like differences between test and control groups in a randomized experiment, averages, or linear regression coefficients. If it helps, imagine the following in the context of one of those from your field.</p>
 <p>Traditionally, we’d focus on Type I/II errors. <strong>Type I error</strong> is rejecting the null hypothesis, when it is true. <strong>Type II error</strong> is failing to reject the null hypothesis, when it is not true. The <strong>power</strong>, then, is just is the probability that the test correctly rejects the null hypothesis when a specific alternative hypothesis is true.</p>
 <p>Beyond those, we’ll also consider:</p>
@@ -253,7 +261,7 @@ H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0
 <p>Notice that both of these are conditional on the test statistic being statistically significant; we’ll come back to this fact several times.</p>
 <p>To visualize these, we’ll draw 5000 samples from a normal distribution with mean .5, and standard deviation 1. We’ll then analyze these in a NHST setting where we have a standard error of 1. We can use <code>sim_plot()</code> to do so, with the first parameter being our postulated effect size .5, and the second being our hypothetical standard error of 1. If you prefer to not use ggplot graphics like I do here, set the <code>gg</code> argument to FALSE.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sim_plot</span>(.<span class="dv">5</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><img src="{{ site.baseurl }}/assets/img/Intro_To_retrodesign_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" alt="Visual of what type S and M errors are"><!-- --></p>
+<p><img src="unnamed-chunk-2-1.png" class="img-fluid" alt="Visual of what type S and M errors are"><!-- --></p>
 <p>Here, the dotted line is the true effect size, and the full lines are where the statistic becomes statistically significantly different from 0, given our standard error of 1. The greyed out points aren’t statistically significant, the squares are type M errors, and the triangles are type S errors.</p>
 <p>Even though the full distribution is faithfully centered around the true effect, once we filter using statistical significance, we will both exaggerate the effect and get its sign wrong often.</p>
 <p>Of course, trying to find a true effect size of .5 with a standard error of 1 is extremely underpowered. More precisely, the power, Type S and type M error here are:</p>
@@ -272,7 +280,7 @@ H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0
 <section id="a-severe-example" class="level2">
 <h2 class="anchored" data-anchor-id="a-severe-example">A Severe Example</h2>
 <p>Now that you hopefully have a sense of what type S/M error add to our understanding of NHST in the context of noisy, small sample studies, we’ll move onto a real world example, where we’ll focus on following Gelman and Carlin’s suggested design analysis through one of their examples.</p>
-<p>We’ll be working with <a href="https://www.ncbi.nlm.nih.gov/pubmed/16949101">Kanazawa</a> (2007), which claims to have found that the most attractive people are more likely to have girls. To be more specific, each of their ~3,000 people surveyed had been assigned a “attractiveness” score from 1-5, and they then compared the first born children of the most attractive to other groups; 56% were girls compared to 48% in the other groups. They thus obtained a difference estimate of 8%, with a p-value of .015, so significant at the traditional <span class="math display">\alpha = .05</span>.</p>
+<p>We’ll be working with <a href="https://www.ncbi.nlm.nih.gov/pubmed/16949101">Kanazawa</a> (2007), which claims to have found that the most attractive people are more likely to have girls. To be more specific, each of their ~3,000 people surveyed had been assigned a “attractiveness” score from 1-5, and they then compared the first born children of the most attractive to other groups; 56% were girls compared to 48% in the other groups. They thus obtained a difference estimate of 8%, with a p-value of .015, so significant at the traditional <span class="math inline">\alpha = .05</span>.</p>
 <p>Stepping back for a second, this is fishy in numerous ways. First, comparing the first borne children is an oddly specific comparison to have run- at worst, this might be a case of p-hacking. Or maybe they saw a strong comparison, and decided to test it, and in doing so fell into a <a href="http://www.stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf">Garden of Forking Paths</a> problem. Second, if attractive people had many more girls, it seems unlikely that gender balance would be as even as it is. So again, this example has a likely spurious result, is likely to have low power, and a high chance of S/M errors.</p>
 <p>To do a design analysis of this, Gelman and Carlin’s first step is to review the literature for a posited true effect size. There is plenty of prior research on variation in sex ratio of human births. A huge variety of factors have been studied such as race, parental age, season of birth, and so on, only finding effects from .3% to 2%. In the most extreme cases (conditions like extreme poverty or famine), these effects only rise to 3%. (If you’re interested, the causal reasoning seems to be that male fetuses are more likely than female ones to die under adverse conditions.)</p>
 <p>Like traditional design analyses, we’ll posit a wide range of effects here, and see how our power, type S error, and type M error rates change correspondingly. Gelman and Carlin end up looking at .1-1%, reasoning that sex ratios vary very little in general, and that the subject attractiveness rating is quite noisy as well. Even if we compare their effect size to the effect sizes found in the most extreme scenarios in prior literature, it doesn’t look good.</p>
@@ -312,17 +320,17 @@ H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>m_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(effect_m_pairs, <span class="fu">aes</span>(possible_effects, type_m)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(s_plot, m_plot, <span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><img src="{{ site.baseurl }}/assets/img/Intro_To_retrodesign_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" alt="Comparison of Type S/M error across effect sizes"><!-- --></p>
+<p><img src="unnamed-chunk-5-1.png" class="img-fluid" alt="Comparison of Type S/M error across effect sizes"><!-- --></p>
 <p>As <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/bmsp.12132">Lu et al.</a> (2018) note, the type S and M error shrink at very different rates as power rises.</p>
-<p>They find the probability of type S error decreases rapidly. To ensure that <span class="math display">s \leq 0.1 </span> and <span class="math display">s\leq 0.01</span>, we only need <span class="math display">power = 0.08</span> and <span class="math display">power = 0.17</span>, respectively. Thus, unless your study is severely underpowered, you shouldn’t need to worry about type s errors very often.</p>
-<p>On the other hand, The type m error decreases relatively slowly. To ensure that <span class="math display">m \leq 1.5</span> and <span class="math display">m \leq 1.1</span>, we need <span class="math display">power = 0.52</span> and <span class="math display">power = 0.85</span>, respectively. Whereas even moderately powered studies make type s errors relatively improbable, only very high powered studies keep exaggeration of effect sizes down. If your field requires a power of .80, you should thus be cognizant that effect sizes are likely somewhat inflated.</p>
+<p>They find the probability of type S error decreases rapidly. To ensure that $s $ and <span class="math inline">s\leq 0.01</span>, we only need <span class="math inline">power = 0.08</span> and <span class="math inline">power = 0.17</span>, respectively. Thus, unless your study is severely underpowered, you shouldn’t need to worry about type s errors very often.</p>
+<p>On the other hand, The type m error decreases relatively slowly. To ensure that <span class="math inline">m \leq 1.5</span> and <span class="math inline">m \leq 1.1</span>, we need <span class="math inline">power = 0.52</span> and <span class="math inline">power = 0.85</span>, respectively. Whereas even moderately powered studies make type s errors relatively improbable, only very high powered studies keep exaggeration of effect sizes down. If your field requires a power of .80, you should thus be cognizant that effect sizes are likely somewhat inflated.</p>
 </section>
 <section id="solutions-outside-nhst" class="level2">
 <h2 class="anchored" data-anchor-id="solutions-outside-nhst">Solutions outside NHST</h2>
 <p>For the majority of this vignette, I’ve avoided questioning whether we should be working in the NHST framework. However, <code>retrodesign</code> is a package to help address some limitations of NHST work as it’s traditionally practiced, so it makes sense to address these solutions.</p>
 <p>Going back to the plot we started with, remember that the underlying gaussian does actually faithfully center around it’s mean of .5.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sim_plot</span>(.<span class="dv">5</span>,<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><img src="{{ site.baseurl }}/assets/img/Intro_To_retrodesign_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" alt="Return to showing first plot"><!-- --></p>
+<p><img src="unnamed-chunk-6-1.png" class="img-fluid" alt="Return to showing first plot"><!-- --></p>
 <p>Type S and M errors are an artifact of the hard thresholding implicit in a NHST environment, where an arbitrary p-value (usually .05) decides what is and isn’t noteworthy.</p>
 <p>If you have to work in the NHST framework because it’s what your discipline publishes, you can better understand some problems it might cause by exploring type S and M errors. If you’re able to choose how you analyze your experiments though, you can avoid these errors (and many others) by abandoning statistical significance as a hard filter entirely. If learning more about problems with NHST beyond type S and M errors, and suggestions for alternative strategies is interesting to you, check out the <strong>Abandon Statistical Significance</strong> paper linked in the further reading below.</p>
 </section>
@@ -338,16 +346,17 @@ H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm,
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2018,
   author = {Andy Timm},
   editor = {},
   title = {Type {S/M} Errors in {R} with Retrodesign()},
+  date = {2018-05-11},
   url = {https://andytimm.github.io/2019-02-05-Intro_To_retrodesign.html},
   langid = {en}
 }
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
-Andy Timm. n.d. <span>“Type S/M Errors in R with Retrodesign().”</span>
-<a href="https://andytimm.github.io/2019-02-05-Intro_To_retrodesign.html">https://andytimm.github.io/2019-02-05-Intro_To_retrodesign.html</a>.
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2018" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
+Andy Timm. 2018. <span>“Type S/M Errors in R with Retrodesign().”</span>
+May 11, 2018. <a href="https://andytimm.github.io/2019-02-05-Intro_To_retrodesign.html">https://andytimm.github.io/2019-02-05-Intro_To_retrodesign.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {

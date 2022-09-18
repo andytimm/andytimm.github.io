@@ -1,7 +1,9 @@
 ---
 layout: post
 title: Type S/M errors in R with retrodesign()
-tags: [R, R studio, hypothesis testing]
+date: 2018-05-11
+categories:
+- from_old_website
 ---
 
 This is a online version of the vignette for my r package **retrodesign**. It can be installed with:
@@ -42,9 +44,7 @@ Gelman and Carlin's suggested workflow for design analysis more closely.
 Let's say we're testing whether a true effect size is zero or not, in a two
 tailed test.
 
-$$
-H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0
-$$
+$$H _ { 0 } : \mu = 0 \quad \text { vs. } \quad H _ { 1 } : \mu \neq 0$$
 
 We're assuming that the test statistic here is normally distributed. As
 [Gelman and Tuerlinckx](http://www.stat.columbia.edu/~gelman/research/published/francis8.pdf)
@@ -82,7 +82,7 @@ here, set the `gg` argument to FALSE.
 sim_plot(.5,1)
 ~~~
 
-![Visual of what type S and M errors are]({{ site.baseurl }}/assets/img/Intro_To_retrodesign_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![Visual of what type S and M errors are](unnamed-chunk-2-1.png)<!-- -->
 
 Here, the dotted line is the true effect size, and the full lines are where
 the statistic becomes statistically significantly different from 0,
@@ -140,7 +140,7 @@ girls. To be more specific, each of their ~3,000 people surveyed had been
 assigned a "attractiveness" score from 1-5, and they then compared the first born
 children of the most attractive to other groups; 56% were girls compared to
 48% in the other groups. They thus obtained a difference estimate of 8%, with
-a p-value of .015, so significant at the traditional $$\alpha = .05$$.
+a p-value of .015, so significant at the traditional $\alpha = .05$.
 
 Stepping back for a second, this is fishy in numerous ways. First, comparing
 the first borne children is an oddly specific comparison to have run- at worst,
@@ -237,20 +237,20 @@ m_plot <- ggplot(effect_m_pairs, aes(possible_effects, type_m)) + geom_point()
 grid.arrange(s_plot, m_plot, ncol=2)
 ```
 
-![Comparison of Type S/M error across effect sizes]({{ site.baseurl }}/assets/img/Intro_To_retrodesign_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![Comparison of Type S/M error across effect sizes](unnamed-chunk-5-1.png)<!-- -->
 
 As [Lu et al.](https://onlinelibrary.wiley.com/doi/full/10.1111/bmsp.12132)
 (2018) note, the type S and M error shrink at very different rates as power
 rises.
 
-They find the probability of type S error decreases rapidly. To ensure that $$s \leq 0.1 $$
-and $$s\leq 0.01$$, we only need $$power = 0.08$$ and $$power = 0.17$$, respectively. Thus,
+They find the probability of type S error decreases rapidly. To ensure that $s \leq 0.1 $
+and $s\leq 0.01$, we only need $power = 0.08$ and $power = 0.17$, respectively. Thus,
 unless your study is severely underpowered, you shouldn't
 need to worry about type s errors very often.
 
 On the other hand, The type m error decreases relatively slowly.
-To ensure that $$m \leq 1.5$$ and $$m \leq 1.1$$, we
-need $$power = 0.52$$ and $$power = 0.85$$, respectively. Whereas even moderately
+To ensure that $m \leq 1.5$ and $m \leq 1.1$, we
+need $power = 0.52$ and $power = 0.85$, respectively. Whereas even moderately
 powered studies make type s errors relatively improbable, only very high powered
 studies keep exaggeration of effect sizes down. If your field requires a power
 of .80, you should thus be cognizant that effect sizes are likely somewhat
@@ -271,7 +271,7 @@ does actually faithfully center around it's mean of .5.
 sim_plot(.5,1)
 ```
 
-![Return to showing first plot]({{ site.baseurl }}/assets/img/Intro_To_retrodesign_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![Return to showing first plot](unnamed-chunk-6-1.png)<!-- -->
 
 
 Type S and M errors are an artifact of the hard thresholding
