@@ -29,11 +29,7 @@ Of course, we're interested in integrating multiple pieces of evidence (surname/
 
 We want $$ P(R_i = r \vert S_i = s, G_i = g) $$, the conditional probability that the voter $$i$$ belongs to the racial group $$r$$ given their surname $$s$$ and geolocation $$g$$. $$R$$, $$S$$, and $$G$$ are the sets of all racial groups, all surnames, and all geolocations respectively. Thus, as a final expression we'll get:
 
-\$\$
-
-P(R_i = r \vert S_i = s, G_i = g) = \frac{P(G_i = g \vert R_i = r) P(R_i = r|S_i = s)}{\sum_{r'\in R} P(G_i = g|R_i = r) P(R_i = r|S_i = s) }
-
-\$\$
+$$ P(R_i = r \vert S_i = s, G_i = g) = \frac{P(G_i = g \vert R_i = r) P(R_i = r|S_i = s)}{\sum_{r'\in R} P(G_i = g|R_i = r) P(R_i = r|S_i = s) } $$
 
 We already have almost all these probabilities between the census surname list and census demographic data. $$ P(R_i = r \vert S_i = s) $$ is the racial composition of surnames from the surname list. But what about $$ P(G_i = g \vert R_i = r) $$? As an intermediate step, we first need to calculate $$ P(G_i = g \vert R_i = r)  $$ , which we can calculate using Bayes' rule again. $$ P(G_i = g \vert R_i = r)  $$ is then $$ \frac{P(R_i = r \vert G_i = g) P(G_i = g)} {\sum_{r'\in R} P(R_i = r \vert G_i = g') P(G_i = g)} $$, completing everything we need to produce our second model.
 

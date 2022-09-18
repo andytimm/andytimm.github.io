@@ -3,6 +3,7 @@
     "listing": "/blog.html",
     "items": [
       "/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html",
+      "/posts/testing/test_latex_paragraph_break_bug.html",
       "/posts/Race Models Pt 1/race_models_part1.html"
     ]
   }
