@@ -202,7 +202,7 @@ ul.task-list li input[type="checkbox"] {
 <p>There are 4 possible outcomes to making a classification: a True Positive (TP), False Positive (FP), True negative (TN), and False Negative (FN). As an example then, a true positive is when we predicted positive, and the ground truth label was actually positive.</p>
 <p>Rather than building a table of these 4 outcomes, called a confusion matrix, we’ll be working with summary statistics of these outcomes. The True Positive Rate (or sensitivity or recall) is <span class="math inline">\frac{TP}{TP+FN}</span>. In other words, out of all the points that are (ground truth) positive, how many did we correctly classify? Similarly, the False Positive Rate is <span class="math inline">\frac{FP}{FP+TN}</span>. High True Positive Rate is good: it means we’ll miss relatively few positive examples. On the other end of things, low False Positive Rate is what we want: it means fewer negative points will be misclassified.</p>
 <p>By calculating these two statistics at a variety of thresholds, then plotting a curve with the FPR on the x-axis and TPR on the y-axis, we can get a deeper understanding of the tradeoff. This is called an Receiver Operating Characteristic. Given what I’ve said about the meaning of the TPR and FPR, can you figure out quality of the 3 classifiers that are graphed below?</p>
-<p><img src="{{ site.baseurl }}/assets/img/example_curves.jpg" class="img-fluid" alt="Example ROCs"> The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it’s equivalent to guessing.</p>
+<p><img src="example_curves.jpg" class="img-fluid" alt="Example ROCs"> The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it’s equivalent to guessing.</p>
 <p>As an overall summary then, the area under this curve (AUC) is of our one number summary of these graphs. The shown classifiers have AUC 1, .8, and .5 respectively.</p>
 </section>
 <section id="results" class="level2">
@@ -210,7 +210,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Now that we’ve built up a relatively complex model, and learned how to use and evaluate it, let’s plot some ROC curves, and look at AUCs for our models.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="{{ site.baseurl }}/assets/img/ROC_for_wru.png" class="img-fluid figure-img"></p>
+<p><img src="ROC_for_wru.png" class="img-fluid figure-img"></p>
 <p></p><figcaption class="figure-caption">ROC graphs for 4 models</figcaption><p></p>
 </figure>
 </div>

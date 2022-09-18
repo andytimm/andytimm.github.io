@@ -47,7 +47,7 @@
 <p>There are 4 possible outcomes to making a classification: a True Positive (TP), False Positive (FP), True negative (TN), and False Negative (FN). As an example then, a true positive is when we predicted positive, and the ground truth label was actually positive.</p>
 <p>Rather than building a table of these 4 outcomes, called a confusion matrix, we’ll be working with summary statistics of these outcomes. The True Positive Rate (or sensitivity or recall) is <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7BTP%7D%7BTP+FN%7D">. In other words, out of all the points that are (ground truth) positive, how many did we correctly classify? Similarly, the False Positive Rate is <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7BFP%7D%7BFP+TN%7D">. High True Positive Rate is good: it means we’ll miss relatively few positive examples. On the other end of things, low False Positive Rate is what we want: it means fewer negative points will be misclassified.</p>
 <p>By calculating these two statistics at a variety of thresholds, then plotting a curve with the FPR on the x-axis and TPR on the y-axis, we can get a deeper understanding of the tradeoff. This is called an Receiver Operating Characteristic. Given what I’ve said about the meaning of the TPR and FPR, can you figure out quality of the 3 classifiers that are graphed below?</p>
-<p><img src="https://andytimm.github.io/posts/Race Models Pt 1/{{ site.baseurl }}/assets/img/example_curves.jpg" class="img-fluid" alt="Example ROCs"> The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it’s equivalent to guessing.</p>
+<p><img src="https://andytimm.github.io/posts/Race Models Pt 1/example_curves.jpg" class="img-fluid" alt="Example ROCs"> The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it’s equivalent to guessing.</p>
 <p>As an overall summary then, the area under this curve (AUC) is of our one number summary of these graphs. The shown classifiers have AUC 1, .8, and .5 respectively.</p>
 </section>
 <section id="results" class="level2">
@@ -55,7 +55,7 @@
 <p>Now that we’ve built up a relatively complex model, and learned how to use and evaluate it, let’s plot some ROC curves, and look at AUCs for our models.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://andytimm.github.io/posts/Race Models Pt 1/{{ site.baseurl }}/assets/img/ROC_for_wru.png" class="img-fluid figure-img"></p>
+<p><img src="https://andytimm.github.io/posts/Race Models Pt 1/ROC_for_wru.png" class="img-fluid figure-img"></p>
 <p></p><figcaption class="figure-caption">ROC graphs for 4 models</figcaption><p></p>
 </figure>
 </div>
@@ -128,7 +128,7 @@ Extensions.”</span> April 10, 2018. <a href="https://andytimm.github.io/race_m
   <category>from-old-website</category>
   <guid>https://andytimm.github.io/posts/Race Models Pt 1/race_models_part1.html</guid>
   <pubDate>Tue, 10 Apr 2018 04:00:00 GMT</pubDate>
-  <media:content url="https://andytimm.github.io/posts/Race Models Pt 1/%7B%7B%20site.baseurl%20%7D%7D/assets/img/example_curves.jpg" medium="image" type="image/jpeg"/>
+  <media:content url="https://andytimm.github.io/posts/Race Models Pt 1/example_curves.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
   <title>testing latex paragraph breaks</title>
@@ -154,7 +154,7 @@ Extensions.”</span> April 10, 2018. <a href="https://andytimm.github.io/race_m
 Andy Timm. n.d. <span>“Testing Latex Paragraph Breaks.”</span> <a href="https://andytimm.github.io/test_latex_paragraph_break_bug.html">https://andytimm.github.io/test_latex_paragraph_break_bug.html</a>.
 </div></div></section></div> ]]></description>
   <guid>https://andytimm.github.io/posts/testing/test_latex_paragraph_break_bug.html</guid>
-  <pubDate>Sun, 18 Sep 2022 01:35:26 GMT</pubDate>
+  <pubDate>Sun, 18 Sep 2022 01:38:37 GMT</pubDate>
 </item>
 </channel>
 </rss>

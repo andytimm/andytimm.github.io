@@ -55,7 +55,7 @@ Rather than building a table of these 4 outcomes, called a confusion matrix, we'
 
 By calculating these two statistics at a variety of thresholds, then plotting a curve with the FPR on the x-axis and TPR on the y-axis, we can get a deeper understanding of the tradeoff. This is called an Receiver Operating Characteristic. Given what I've said about the meaning of the TPR and FPR, can you figure out quality of the 3 classifiers that are graphed below?
 
-![Example ROCs](%7B%7B%20site.baseurl%20%7D%7D/assets/img/example_curves.jpg) The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it's equivalent to guessing.
+![Example ROCs](example_curves.jpg) The first is a perfect classifier: at all tradeoff points, it has a TPR of 1, and FPR of 0. The second is pretty good: at most tradeoff points it does well. The third, a straight line from (0, 0) to (1,1) is a random classifier: it's equivalent to guessing.
 
 As an overall summary then, the area under this curve (AUC) is of our one number summary of these graphs. The shown classifiers have AUC 1, .8, and .5 respectively.
 
@@ -63,7 +63,7 @@ As an overall summary then, the area under this curve (AUC) is of our one number
 
 Now that we've built up a relatively complex model, and learned how to use and evaluate it, let's plot some ROC curves, and look at AUCs for our models.
 
-![ROC graphs for 4 models](%7B%7B%20site.baseurl%20%7D%7D/assets/img/ROC_for_wru.png)
+![ROC graphs for 4 models](ROC_for_wru.png)
 
 And here's the AUC table: bold is the highest overall for each race.
 
