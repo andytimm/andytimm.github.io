@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2019-07-03">
 
 <title>Andy Timm - Convention Prediction with a Bayesian Hierarchical Multinomial Model</title>
 <style>
@@ -144,10 +145,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Convention Prediction with a Bayesian Hierarchical Multinomial Model">
-<meta property="og:description" content="Here, I use a bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party Unit level (ex: State…">
+<meta property="og:description" content="Here, I use a Bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party Unit level (ex: State…">
 <meta property="og:site-name" content="Andy Timm">
 <meta name="twitter:title" content="Andy Timm - Convention Prediction with a Bayesian Hierarchical Multinomial Model">
-<meta name="twitter:description" content="Here, I use a bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party Unit level (ex: State…">
+<meta name="twitter:description" content="Here, I use a Bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party Unit level (ex: State…">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
 </head>
@@ -191,7 +192,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Convention Prediction with a Bayesian Hierarchical Multinomial Model</h1>
-                      </div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">from_old_website</div>
+                <div class="quarto-category">Stan</div>
+              </div>
+                  </div>
   </div>
     
   
@@ -204,6 +209,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             </div>
     </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 3, 2019</p>
+      </div>
+    </div>
       
     </div>
     
@@ -233,7 +244,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<p>Here, I use a bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party Unit level (ex: State Senate district) to guarantee anonymity. While using aggregated data obviously isn’t ideal, this sort of strategy shows a lot of promise, especially if individual level predictors could be harnessed as another level of the hierarchical model. As it stands, this is mostly a proof of concept for bayesian hierarchical models in this context. To use something like this in practice, one could use prior predictive simulation to game out the convention under various assumptions, or condition on the first ballot data and use it to analyze trends in support and predict subsequent ballots as your floor team collects further data.</p>
+<p>Here, I use a Bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party Unit level (ex: State Senate district) to guarantee anonymity. While using aggregated data obviously isn’t ideal, this sort of strategy shows a lot of promise, especially if individual level predictors could be harnessed as another level of the hierarchical model. As it stands, this is mostly a proof of concept for Bayesian hierarchical models in this context. To use something like this in practice, one could use prior predictive simulation to game out the convention under various assumptions, or condition on the first ballot data and use it to analyze trends in support and predict subsequent ballots as your floor team collects further data.</p>
 <p>At this convention, I was working for Erin Murphy (who ultimately won) on her data team, and so I have access to their database on the Delegates heading into the convention. A winner is declared if any candidate reaches 60% of the Delegate pool of 1307.5 Delegates, so 785 votes. For simplicity, I focus in this project solely on predicting the first ballot results.</p>
 <!--more-->
 <p>Briefly, my goals with this project are:</p>
@@ -267,11 +278,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Divide by 2 after summing the totals to put back on original delegate count scale</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(<span class="fu">apply</span>(linpred, <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>), <span class="at">FUN =</span> sumdiv2), <span class="at">pch =</span> <span class="st">"."</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"No Endorse"</span>, <span class="st">"Erin Murphy"</span>, <span class="st">"Rebeca Otto"</span>, <span class="st">"Tim Walz"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><img src="{{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-2-1.png" class="img-fluid" alt="test"><!-- --></p>
+<p><img src="unnamed-chunk-2-1.png" class="img-fluid" alt="first test"><!-- --></p>
 </section>
 <section id="initial-posterior" class="level1">
 <h1>Initial Posterior</h1>
-<p>Now let’s add in our non-CD predictors and condition on our data. I add a <span class="math display">N(0,3)</span> prior over all the <span class="math display">\beta</span>’s as a weakly informative prior to help the model fit. The model fits well; there are no divergences, all <span class="math display">\hat{R}</span> were 1, and I got a good number of effective samples for each parameter.</p>
+<p>Now let’s add in our non-CD predictors and condition on our data. I add a <span class="math inline">N(0,3)</span> prior over all the <span class="math inline">\beta</span>’s as a weakly informative prior to help the model fit. The model fits well; there are no divergences, all <span class="math inline">\hat{R}</span> were 1, and I got a good number of effective samples for each parameter.</p>
 <p>As we’d expect with so little data, the standard errors are very large compared to the coefficients, but generally point the right ways- the Strong/Lean Erin predictions have a positive influence on Erin’s support (mu2), for example, and similar with Walz (mu4), and Otto (mu2). Later, when I look at marginal plots, I’ll talk more about some of the more interesting coefficients, namely the ISAIAH and Unknown ones.</p>
 <pre><code>##  Family: multinomial
 ##   Links: mu2 = logit; mu3 = logit; mu4 = logit
@@ -401,15 +412,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Interesting Marginal Plots</h1>
 <p>For the most part, the marginal plots were what I’d expect- for instance, PUs with a greater estimated strong support for Erin (“Strong Erin”), had increasingly greater support for Erin, and vice versa for Walz, and so I don’t show most of these.</p>
 <p>Even though the predictions are obviously very noisy however, they did pick up on two important, more subtle trends. First, in the ISAIAH plot below, it’s beginning to appear that Murphy (2) does well in places with many ISAIAH delegates, whereas Walz (4) does progressively worse.</p>
-<p><img src="{{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-6-1.png" class="img-fluid"><!-- --></p>
+<p><img src="unnamed-chunk-6-1.png" class="img-fluid"><!-- --></p>
 <p>The other interesting trend the model picked up on was that it tends to be harder to ID your opponent’s supporters than your own- as your supporters want to contact and work with the campaign, but the opponents’ have no reason to do so, and help their candidate by not giving you much information. This is correctly reflected in the negative slope in Unknown for Erin (2), but positive one for Walz (4), given the predictor data comes from the Murphy campaign.</p>
 <p>While these plots suggest a understandably high level of uncertainty, the fact that they’re correctly reflecting many of the relationships I believe to be true offers some level of face validity of the model.</p>
-<p><img src="{{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-7-1.png" class="img-fluid" alt="Marginal_Plot"><!-- --></p>
+<p><img src="unnamed-chunk-7-1.png" class="img-fluid" alt="Marginal_Plot"><!-- --></p>
 </section>
 <section id="posterior-predictive-check" class="level1">
 <h1>Posterior Predictive Check</h1>
 <p>Plotting the predictions for Erin Murphy (blue) and Tim Walz (red) against the actual results, we can see the predictions track reasonably closely considering the limited data. While many point predictions fall outside the 25-75 quantile range, the vast majority stay within the boxplot’s whiskers. Again, stressing the limitations of the small dataset we have, this is a fairly reasonable range of outcomes to predict, and there’s no systematic pattern I can see to which Party Units the model struggles with.</p>
-<p><img src="{{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-8-1.png" class="img-fluid" alt="Murphy"><!-- --><img src="{{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-8-2.png" class="img-fluid" alt="Walz"><!-- --></p>
+<p><img src="unnamed-chunk-8-1.png" class="img-fluid" alt="Murphy"><!-- --><img src="unnamed-chunk-8-2.png" class="img-fluid" alt="Walz"><!-- --></p>
 </section>
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
@@ -418,17 +429,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm,
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2019,
   author = {Andy Timm},
   editor = {},
   title = {Convention {Prediction} with a {Bayesian} {Hierarchical}
     {Multinomial} {Model}},
+  date = {2019-07-03},
   url = {https://andytimm.github.io/2019-07-13-convention-model.html},
   langid = {en}
 }
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
-Andy Timm. n.d. <span>“Convention Prediction with a Bayesian
-Hierarchical Multinomial Model.”</span> <a href="https://andytimm.github.io/2019-07-13-convention-model.html">https://andytimm.github.io/2019-07-13-convention-model.html</a>.
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2019" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
+Andy Timm. 2019. <span>“Convention Prediction with a Bayesian
+Hierarchical Multinomial Model.”</span> July 3, 2019. <a href="https://andytimm.github.io/2019-07-13-convention-model.html">https://andytimm.github.io/2019-07-13-convention-model.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {

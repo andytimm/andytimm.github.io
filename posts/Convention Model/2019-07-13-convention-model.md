@@ -1,10 +1,13 @@
 ---
 layout: post
 title: Convention Prediction with a Bayesian Hierarchical Multinomial Model
-tags: [brms, Stan, conventions]
+date: 2019-07-03
+categories:
+- from_old_website
+- Stan
 ---
 
-Here, I use a bayesian hierarchical multinomial model to predict the first ballot results at the  2018 DFL (Democratic) State Convention,  with data aggregated to the Party Unit level (ex: State Senate district) to guarantee anonymity. While using aggregated data obviously isn't ideal, this sort of strategy shows a lot of promise, especially if individual level predictors could be harnessed as another level of the hierarchical model. As it stands, this is mostly a proof of concept for bayesian hierarchical models in this context. To use something like this in practice, one could use prior predictive simulation to game out the convention under various assumptions, or condition on the first ballot data and use it to analyze trends in support and predict subsequent ballots as your floor team collects further data.
+Here, I use a Bayesian hierarchical multinomial model to predict the first ballot results at the  2018 DFL (Democratic) State Convention,  with data aggregated to the Party Unit level (ex: State Senate district) to guarantee anonymity. While using aggregated data obviously isn't ideal, this sort of strategy shows a lot of promise, especially if individual level predictors could be harnessed as another level of the hierarchical model. As it stands, this is mostly a proof of concept for Bayesian hierarchical models in this context. To use something like this in practice, one could use prior predictive simulation to game out the convention under various assumptions, or condition on the first ballot data and use it to analyze trends in support and predict subsequent ballots as your floor team collects further data.
 
 
  At this convention, I was
@@ -93,14 +96,14 @@ boxplot(apply(linpred, c(1,3), FUN = sumdiv2), pch = ".", las = 1,
         names = c("No Endorse", "Erin Murphy", "Rebeca Otto", "Tim Walz"))
 ```
 
-![test]({{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![first test](unnamed-chunk-2-1.png)<!-- -->
 
 # Initial Posterior
 
 Now let’s add in our non-CD predictors and condition on our data. I add
-a $$N(0,3)$$ prior over all the $$\beta$$'s as a weakly informative
+a $N(0,3)$ prior over all the $\beta$'s as a weakly informative
 prior to help the model fit. The model fits well; there are no
-divergences, all $$\hat{R}$$ were 1, and I got a good number of
+divergences, all $\hat{R}$ were 1, and I got a good number of
 effective samples for each parameter.
 
 As we’d expect with so little data, the standard errors are very large
@@ -264,7 +267,7 @@ pick up on two important, more subtle trends. First, in the ISAIAH plot
 below, it’s beginning to appear that Murphy (2) does well in places with
 many ISAIAH delegates, whereas Walz (4) does progressively worse.
 
-![]({{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](unnamed-chunk-6-1.png)<!-- -->
 
 The other interesting trend the model picked up on was that it tends to
 be harder to ID your opponent’s supporters than your own- as your
@@ -278,7 +281,7 @@ While these plots suggest a understandably high level of uncertainty,
 the fact that they’re correctly reflecting many of the relationships I
 believe to be true offers some level of face validity of the model.
 
-![Marginal_Plot]({{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![Marginal_Plot](unnamed-chunk-7-1.png)<!-- -->
 
 # Posterior Predictive Check
 
@@ -291,7 +294,7 @@ fairly reasonable range of outcomes to predict, and there’s no
 systematic pattern I can see to which Party Units the model struggles
 with.
 
-![Murphy]({{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->![Walz]({{ site.baseurl }}/assets/img/2019-07-13-convention-model_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![Murphy](unnamed-chunk-8-1.png)<!-- -->![Walz](unnamed-chunk-8-2.png)<!-- -->
 
 # Conclusion
 
