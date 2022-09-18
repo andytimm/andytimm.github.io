@@ -2,42 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2022-09-18T01:23:00.108Z</lastmod>
+    <lastmod>2022-09-18T01:35:26.704Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/bookshelf.html</loc>
-    <lastmod>2022-09-05T02:13:44.313Z</lastmod>
+    <lastmod>2022-09-18T01:32:48.540Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2022-09-18T01:24:23.573Z</lastmod>
+    <lastmod>2022-09-18T01:32:57.730Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/LICENSE.html</loc>
-    <lastmod>2022-09-05T02:13:44.991Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/projects.html</loc>
-    <lastmod>2022-09-18T01:24:36.502Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/software.html</loc>
-    <lastmod>2022-09-11T02:46:21.791Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.qmd.html</loc>
-    <lastmod>2022-09-17T20:04:09.764Z</lastmod>
+    <lastmod>2022-09-18T01:32:49.162Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html</loc>
-    <lastmod>2022-09-18T01:15:29.127Z</lastmod>
+    <lastmod>2022-09-18T01:32:49.482Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Race Models Pt 1/race_models_part1.html</loc>
-    <lastmod>2022-09-18T01:18:01.771Z</lastmod>
+    <lastmod>2022-09-18T01:35:27.695Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/testing/test_latex_paragraph_break_bug.html</loc>
-    <lastmod>2022-09-18T01:23:01.034Z</lastmod>
+    <lastmod>2022-09-18T01:33:31.254Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/projects.html</loc>
+    <lastmod>2022-09-18T01:32:50.551Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/software.html</loc>
+    <lastmod>2022-09-18T01:32:50.795Z</lastmod>
   </url>
 </urlset>
