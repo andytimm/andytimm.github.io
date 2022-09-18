@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.126">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2018-05-11">
+
+<title>Andy Timm - Why the normal distribution?</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Andy Timm - Why the normal distribution?">
+<meta property="og:description" content="When I was first studying probability theory as an undergrad, I had a bit of a conceptual hang-up with the Central Limit Theorem.">
+<meta property="og:site-name" content="Andy Timm">
+<meta name="twitter:title" content="Andy Timm - Why the normal distribution?">
+<meta name="twitter:description" content="When I was first studying probability theory as an undergrad, I had a bit of a conceptual hang-up with the Central Limit Theorem.">
+<meta name="twitter:creator" content="@andy_timm">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andy Timm</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html">Personal Projects</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html">Software</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">Not Yet Updated Blog</a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Why the normal distribution?</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">from_old_website</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Authors</div>
+      <div class="quarto-title-meta-contents">
+               <p>Andy Timm </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 11, 2018</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#entropy" id="toc-entropy" class="nav-link active" data-scroll-target="#entropy">Entropy</a></li>
+  <li><a href="#the-normal-distribution" id="toc-the-normal-distribution" class="nav-link" data-scroll-target="#the-normal-distribution">The Normal Distribution</a></li>
+  <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources:</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="boring_normal.jpg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>When I was first studying probability theory as an undergrad, I had a bit of a conceptual hang-up with the Central Limit Theorem. <a href="http://www.rpubs.com/christopher_castle/137490">Simulating it in R</a> gave a nice visual of how each additional random variable smoothed out some of the original distribution’s individuality, and asymptotically we were left with a more generic shape. The proofs were relatively straightforward. One part, however, didn’t really make sense to me. My problem was this: <strong>Of all the many possible distributions, why is the normal distribution in particular that our i.i.d random variables converge to in distribution?</strong></p>
+<!--more-->
+<p>The normal distribution has lots of interesting properties that I looked at to gain some intuition, but many of the them seem to follow from the CLT, rather than explaining it. In fact, it wasn’t until a later course in machine learning that integrated some <a href="https://en.wikipedia.org/wiki/Information_theory">information theory</a> that I found a satisfactory answer to my question.</p>
+<p>In this post, I’ll explain an insight from the principle of maximum entropy that conceptually justifies the normal distribution’s role in the CLT. To do so, we’ll first build up a basic introduction to entropy, how probability and entropy interact, and then explain the entropy property of the normal distribution that helped me understand the question above. For this post, all you’ll really need is a rough idea of what a random variable is, and some familiarity with common probability distributions; we’ll build up the rest from scratch.</p>
+<section id="entropy" class="level2">
+<h2 class="anchored" data-anchor-id="entropy">Entropy</h2>
+<p>Imagine two situations in which you’ve lost your keys at home. In the first scenario, you’re well and truly confused as to where they are. As far as you’re concerned, any location within your home is equally likely. In the second scenario, you remember having them by your kitchen counter, so you’re pretty sure they’re there, or at least somewhere near there. Intuitively, the knowledge that they’re probably in your kitchen is much, much more informative that the idea that they’re equally likely to be anywhere in your house. In fact, once you accept the constraint that they’re within the bounds of your house, it’s pretty hard to imagine a more useless, uninformative statement than “they’re equally likely to be anywhere”.</p>
+<p>Information theory helps makes rigorous many of our informal ideas about how much information or uncertainty is contained in situations like the above. Let’s start then, by defining <strong>entropy</strong>, a measure of the uncertainty of a random variable:</p>
+<p><span class="math display">H(X) = - \int_{I} p(x) \log{p(x)} dx</span></p>
+<p>Where p(x) is our continuous probability distribution over some interval I. It can be analogously defined for the discrete case by replacing the integral with a summation. To stress the intuition here, the higher the entropy, the less we know about the value of the random variable. As an example, a uniform distribution over the bounds <span class="math inline">[a,b]</span> is analogous to our “keys could be anywhere” scenario- the entropy of our variable is high. In fact, once you accept the constraint that the distribution is supported on [a,b], one can prove that the uniform distribution is the maximum entropy distribution among all continuous distributions on that interval. We won’t include the proof here, but showing a similar maximum entropy property about the normal distribution is where we’re headed.</p>
+<p>Before we get back to the normal distribution and CLT though, let’s think a little bit more about the concept of maximum entropy. Why would we want to use something specifically because it’s minimally informative? Let’s think about how we’d express or model our belief that our keys are equally likely to be anywhere. If we’re truly of the belief that they’re equally likely to be anywhere in our house, then some sort of model based on a uniform distribution over the space likely makes sense. If they’re equally likely to be anywhere, placing high probability in a specific room would be wrong, and making that additional assumption would probably slow down our search. This is Jaynes’ principle of maximum entropy- we should use the distribution with the highest entropy, subject to any prior constraints we already have.</p>
+<p>This principle, then, is about epistemic modesty. We can want to choose the distribution that meets our constraints, and assumes as little additional information as possible.</p>
+</section>
+<section id="the-normal-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="the-normal-distribution">The Normal Distribution</h2>
+<p>Once you specify a variance <span class="math inline">\sigma^{2}</span>, and that the distribution be supported on the reals from <span class="math inline">(- \infty, \infty)</span>, the normal distribution is the maximum entropy distribution! <a href="http://notstatschat.tumblr.com/post/146886495511/how-do-we-prove-the-central-limit-theorem">Thomas Lumley</a> calls this a “a precise characterization of the normal’s boringness”. In our mental image of the CLT at work then, we’re approaching the normal because of it’s generic-ness, it’s lack of information. If we were mixing colors, the normal would be a nondescript grey.</p>
+<p>In one sense, this result may be counter intuitive. As statisticians, when we find out that a distribution we’re working with is roughly normal, we tend to feel like we have a lot to work with. Many of our favorite tools like maximum likelihood will work well, and we have straightforward ways to estimate most quantities of interest. However, this result illustrates a subtle point: ease of use and information content aren’t the same thing.</p>
+<p>If you found this use of information theory improved your intuition for probability and want more, here are some suggestions for further reading-</p>
+</section>
+<section id="resources" class="level2">
+<h2 class="anchored" data-anchor-id="resources">Resources:</h2>
+<ul>
+<li>If you’re wondering how we actually prove that the normal is the maximum entropy distribution for a specified variance, there’s a self-contained proof in section <a href="http://www.deeplearningbook.org/contents/inference.html">19.4.2 of Deep Learning</a>. I excluded it in this post because it required a lot of extra math, and didn’t add much to the intuitive point I was trying to show.</li>
+<li><a href="http://colah.github.io/posts/2015-09-Visual-Information/">Chris Olah’s Visual Information Theory</a> is a great introduction to the information compression and distribution comparison parts of information theory.</li>
+</ul>
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2018,
+  author = {Andy Timm},
+  editor = {},
+  title = {Why the Normal Distribution?},
+  date = {2018-05-11},
+  url = {https://andytimm.github.io/2018-05-11-maxentropynormal.html},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2018" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
+Andy Timm. 2018. <span>“Why the Normal Distribution?”</span> May 11,
+2018. <a href="https://andytimm.github.io/2018-05-11-maxentropynormal.html">https://andytimm.github.io/2018-05-11-maxentropynormal.html</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

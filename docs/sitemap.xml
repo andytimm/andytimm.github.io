@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2022-09-18T01:38:37.253Z</lastmod>
+    <lastmod>2022-09-18T01:51:21.764Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/bookshelf.html</loc>
@@ -10,7 +10,7 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2022-09-18T01:32:57.730Z</lastmod>
+    <lastmod>2022-09-18T01:46:51.310Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/LICENSE.html</loc>
@@ -18,11 +18,11 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html</loc>
-    <lastmod>2022-09-18T01:32:49.482Z</lastmod>
+    <lastmod>2022-09-18T01:46:30.362Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Race Models Pt 1/race_models_part1.html</loc>
-    <lastmod>2022-09-18T01:38:38.256Z</lastmod>
+    <lastmod>2022-09-18T01:46:30.805Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/testing/test_latex_paragraph_break_bug.html</loc>
@@ -35,5 +35,25 @@
   <url>
     <loc>https://andytimm.github.io/software.html</loc>
     <lastmod>2022-09-18T01:32:50.795Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/BART VI/2020-03-06-BART-vi.html</loc>
+    <lastmod>2022-09-18T01:46:27.803Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Convention Model/2019-07-13-convention-model.html</loc>
+    <lastmod>2022-09-18T01:46:28.385Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html</loc>
+    <lastmod>2022-09-18T01:46:28.984Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html</loc>
+    <lastmod>2022-09-18T01:46:29.642Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html</loc>
+    <lastmod>2022-09-18T01:51:22.797Z</lastmod>
   </url>
 </urlset>

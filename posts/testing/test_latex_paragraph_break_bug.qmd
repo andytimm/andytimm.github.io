@@ -1,6 +1,0 @@
----
-title: "testing latex paragraph breaks"
-editor: visual
----
-
-Bayes' theorem is a natural way to integrate the new census evidence we have, updating our initial beliefs with more data. $P(A)$ and $P(B)$ are the probabilities of events A and B occurring independently of each other, and $P(A \vert B)$ and $P(B \vert A)$ are conditional probabilities, such as the probability a given voter is white given their surname, or $P(white \vert surname)$. Bayes' theorem appears in it's simplest form below, giving us an updated probability utilizing the new information:
