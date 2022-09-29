@@ -29,5 +29,24 @@ If we can get VI to fit well, we can make complex Bayesian models a lot more pra
 
 
 # Spherical Cow Sadness
+##### I've got that...
 
-# 
+::: {layout="[25,-2,10]" layout-valign="top"}
+![](rstanarm_disclaimer.png)
+
+![](blei_vi_spherical.png)
+:::
+
+If VI can make Bayesian inference much faster, what's the catch? The above two images encapsulate the problem pretty well. First, as the left screenshot from [rstanarm's documentation](https://mc-stan.org/rstanarm/reference/rstanarm-package.html#estimation-algorithms) shows, variational inference requires a (bold text warning requiring) set of approximating distribution choices in order to be tractable to optimize. On the right, in their survey paper on VI, [Blei et al., 2018](https://arxiv.org/pdf/1601.00670.pdf) are showing one of the potential posterior distorting consequences of our choice to approximate.
+
+So stepping back for a second, we've taken a problem for which there's usually no closed form solution (Bayesian inference), where even the best approximation algorithm we can usually use (MCMC) isn't always enough for valid inference without very careful validation and tinkering. Then we decided our approximation could do with being more approximate.
+
+That was perhaps an overly bleak description, but it should give some intuition why this is a hard problem. We want to choose some method of approximating our posterior such that it is amenable to optimization-based solving instead of requiring sampling, but not trade away our ability to correctly understand the full complexity of the posterior distribution[^1].
+
+# Introducing MRP and our running example
+
+# Introducing Variational Inference
+
+# A first try at VI on this dataset
+
+[^1]: If I were that type of Bayesian, this is where I'd complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.

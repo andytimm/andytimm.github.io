@@ -152,7 +152,9 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#motivation-for-series" id="toc-motivation-for-series" class="nav-link active" data-scroll-target="#motivation-for-series">Motivation for series</a></li>
   <li><a href="#spherical-cow-sadness" id="toc-spherical-cow-sadness" class="nav-link" data-scroll-target="#spherical-cow-sadness">Spherical Cow Sadness</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  <li><a href="#introducing-mrp-and-our-running-example" id="toc-introducing-mrp-and-our-running-example" class="nav-link" data-scroll-target="#introducing-mrp-and-our-running-example">Introducing MRP and our running example</a></li>
+  <li><a href="#introducing-variational-inference" id="toc-introducing-variational-inference" class="nav-link" data-scroll-target="#introducing-variational-inference">Introducing Variational Inference</a></li>
+  <li><a href="#a-first-try-at-vi-on-this-dataset" id="toc-a-first-try-at-vi-on-this-dataset" class="nav-link" data-scroll-target="#a-first-try-at-vi-on-this-dataset">A first try at VI on this dataset</a></li>
   </ul>
 </nav>
     </div>
@@ -178,14 +180,45 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="spherical-cow-sadness" class="level1">
 <h1>Spherical Cow Sadness</h1>
+<section id="ive-got-that" class="level5">
+<h5 class="anchored" data-anchor-id="ive-got-that">I’ve got that…</h5>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 67.6%;justify-content: center;">
+<p><img src="rstanarm_disclaimer.png" class="img-fluid"></p>
+</div>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 5.4%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 27.0%;justify-content: center;">
+<p><img src="blei_vi_spherical.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+<p>If VI can make Bayesian inference much faster, what’s the catch? The above two images encapsulate the problem pretty well. First, as the left screenshot from <a href="https://mc-stan.org/rstanarm/reference/rstanarm-package.html#estimation-algorithms">rstanarm’s documentation</a> shows, variational inference requires a (bold text warning requiring) set of approximating distribution choices in order to be tractable to optimize. On the right, in their survey paper on VI, <a href="https://arxiv.org/pdf/1601.00670.pdf">Blei et al., 2018</a> are showing one of the potential posterior distorting consequences of our choice to approximate.</p>
+<p>So stepping back for a second, we’ve taken a problem for which there’s usually no closed form solution (Bayesian inference), where even the best approximation algorithm we can usually use (MCMC) isn’t always enough for valid inference without very careful validation and tinkering. Then we decided our approximation could do with being more approximate.</p>
+<p>That was perhaps an overly bleak description, but it should give some intuition why this is a hard problem. We want to choose some method of approximating our posterior such that it is amenable to optimization-based solving instead of requiring sampling, but not trade away our ability to correctly understand the full complexity of the posterior distribution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 </section>
-<section id="section" class="level1">
-<h1></h1>
+</section>
+<section id="introducing-mrp-and-our-running-example" class="level1">
+<h1>Introducing MRP and our running example</h1>
+</section>
+<section id="introducing-variational-inference" class="level1">
+<h1>Introducing Variational Inference</h1>
+</section>
+<section id="a-first-try-at-vi-on-this-dataset" class="level1">
+<h1>A first try at VI on this dataset</h1>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>If I were that type of Bayesian, this is where I’d complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
   editor = {},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
