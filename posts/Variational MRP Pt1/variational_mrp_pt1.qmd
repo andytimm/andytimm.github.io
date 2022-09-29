@@ -17,10 +17,17 @@ The rough plan for the series is as follows:
 1. **(This post)** Introducing the Problem- Why is VI useful, why VI can produce spherical cows
 2. How far does iteration on classic VI algorithms like mean-field and full rank get us?
 3. Some theory on why posterior approximation with VI can be so poor
-4. Seeing if some more sophisticated techniques like normalizing flows do
+4. Seeing if some more sophisticated techniques like normalizing flows help
 
-# Quick motivation for series
+# Motivation for series
 
-# Things to do, places to be
+I learn well by explaining things to others, and I've been particularly excited to learn about variational inference and ways to improve it over the past few months. There are lots of Bayesian models I would like to fit, especially my political work, that I would categorize as being incredibly useful, but on the edge of practically acceptable run times. For example, the somewhat but not particularly complex model I'll use as a running example for the series **takes ~6 hours to fix on 60k observations**. 
+
+Having a model run overnight or for a full work day can be fine sometimes, but what if there is a more urgent need for the results? What if we need to  iterate to find the "right" model? What if the predictions from this model need to feed into a later one? How constrained do we feel about adding just a little bit more complexity to the model, or increasing our N size just a bit more?
+
+If we can get VI to fit well, we can make complex Bayesian models a lot more practical to use in a wider variety of scenarios, and maybe even extend the complexity of what we can build given time and resource constraints.
+
+
+# Spherical Cow Sadness
 
 # 
