@@ -1,0 +1,26 @@
+---
+layout: post
+title: Variational Inference for MRP with Reliable Posterior Distributions
+subtitle: Introductions- things to do, places to be
+date: 2022-09-28
+categories:
+- MRP
+- BART
+- Variational Inference
+draft: true
+---
+
+This post introduces a series of posts I intend to write, exploring using [Variational Inference](https://en.wikipedia.org/wiki/Variational_Bayesian_methods) to massively speed up running complex survey estimation models like variants of [MRP](https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification) while aiming to keep approximation error from completely ruining the model.
+
+The rough plan for the series is as follows:
+
+1. **(This post)** Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2. How far does iteration on classic VI algorithms like mean-field and full rank get us?
+3. Some theory on why posterior approximation with VI can be so poor
+4. Seeing if some more sophisticated techniques like normalizing flows do
+
+# Quick motivation for series
+
+# Things to do, places to be
+
+# 
