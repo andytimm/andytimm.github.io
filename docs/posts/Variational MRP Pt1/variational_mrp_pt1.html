@@ -63,6 +63,22 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
@@ -202,6 +218,17 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="introducing-mrp-and-our-running-example" class="level1">
 <h1>Introducing MRP and our running example</h1>
+<p>While I’m mostly focused on the way we choose to actually fit a given model with this series, here’s a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec’s <a href="https://scholar.princeton.edu/jkastellec/publications">MRP Primer</a> is a great starting point.</p>
+<p>MRP casts estimation of a population quantity of interest <span class="math inline">\theta</span> as a prediction problem. That is, instead of the more traditional approach of like <a href="https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking">simple raked weights</a>, MRP leans more heavily on modeling and then poststratification to make the estimates representative.</p>
+<p>To sketch out the steps-</p>
+<ol type="1">
+<li>Either gather or run a survey or collection of surveys that collect both information on the outcome of interest, <span class="math inline">y</span>, and a set of demographic and geographic predictors, <span class="math inline">\left(X_{1}, X_{2}, X_{3}, \ldots, X_{m}\right)</span>.</li>
+<li>Build a poststratification table, with population counts or estimated population counts <span class="math inline">N_{j}</span> for each possible combination of the features gathered above. Each possible combination <span class="math inline">j</span> is called a cell, one of <span class="math inline">J</span> possible cells. For example, if we poststratified only on state, there would be <span class="math inline">J=51</span> (with DC) total cells; in practice, <span class="math inline">J</span> is often several thousand.</li>
+<li>Build a model, usually a Bayesian multilevel regression, to predict <span class="math inline">y</span> using the demographic characteristic from the survey or set of surveys, estimating model parameters along the way.</li>
+<li>Estimate <span class="math inline">y</span> for each cell in the poststratification table, using the model built on the sample.</li>
+<li>Aggregate the cells to the population of interest, weighting by the <span class="math inline">N_{j}</span>’s to obtain population level estimates: <span class="math display">\theta_{\mathrm{POP}}=\frac{\sum_{j \in J} N_{j} \theta_{j}}{\sum_{j \in J} N_{J}}</span></li>
+</ol>
+<p>Why would we want to do this over building more typical survey weights? To the extent your new model has desirable properties like the ability to incorporate priors, partially pool to manage rare subpopulations where you don’t have a lot of sample, and so on, you can get the benefits of that more efficient model through MRP. Raking in its simplest form is really just a linear model; we have plenty of methods that can do better. Outside of bayesian multilevel models which are the most common, there’s an increasing literature on using a wide variety of machine learning algorithms like BART<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to do the estimation stage; Andrew Gelman calls this <a href="https://statmodeling.stat.columbia.edu/2018/05/19/regularized-prediction-poststratification-generalization-mister-p/">RRP</a>.</p>
 </section>
 <section id="introducing-variational-inference" class="level1">
 <h1>Introducing Variational Inference</h1>
@@ -217,6 +244,7 @@ ul.task-list li input[type="checkbox"] {
 
 <ol>
 <li id="fn1"><p>If I were that type of Bayesian, this is where I’d complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my <a href="https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html">masters thesis</a>. This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you’re willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than <a href="https://github.com/jbisbee1/BARP">BARP</a>. A lot of pretty cool things you can do like jointly model multiple question responses at the same time aren’t<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},

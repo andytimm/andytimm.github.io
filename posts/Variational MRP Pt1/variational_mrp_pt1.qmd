@@ -45,8 +45,25 @@ That was perhaps an overly bleak description, but it should give some intuition 
 
 # Introducing MRP and our running example
 
+While I'm mostly focused on the way we choose to actually fit a given model with this series, here's a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec's [MRP Primer](https://scholar.princeton.edu/jkastellec/publications) is a great starting point.
+
+MRP casts estimation of a population quantity of interest $\theta$ as a prediction problem. That is, instead of the more traditional approach of like [simple raked weights](https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking), MRP leans more heavily on modeling and then poststratification to make the estimates representative.
+
+To sketch out the steps-
+
+1.  Either gather or run a survey or collection of surveys that collect both information on the outcome of interest, $y$, and a set of demographic and geographic predictors, $\left(X_{1}, X_{2}, X_{3}, \ldots, X_{m}\right)$.
+2.  Build a poststratification table, with population counts or estimated population counts $N_{j}$ for each possible combination of the features gathered above. Each possible combination $j$ is called a cell, one of $J$ possible cells. For example, if we poststratified only on state, there would be $J=51$ (with DC) total cells; in practice, $J$ is often several thousand.
+3.  Build a model, usually a Bayesian multilevel regression, to predict $y$ using the demographic characteristic from the survey or set of surveys, estimating model parameters along the way.
+4.  Estimate $y$ for each cell in the poststratification table, using the model built on the sample.
+5.  Aggregate the cells to the population of interest, weighting by the $N_{j}$'s to obtain population level estimates: 
+  $$\theta_{\mathrm{POP}}=\frac{\sum_{j \in J} N_{j} \theta_{j}}{\sum_{j \in J} N_{J}}$$
+
+Why would we want to do this over building more typical survey weights? To the extent your new model has desirable properties like the ability to incorporate priors, partially pool to manage rare subpopulations where you don't have a lot of sample, and so on, you can get the benefits of that more efficient model through MRP. Raking in its simplest form is really just a linear model; we have plenty of methods that can do better. Outside of bayesian multilevel models which are the most common, there's an increasing literature on using a wide variety of machine learning algorithms like BART[^2] to do the estimation stage; Andrew Gelman calls this [RRP](https://statmodeling.stat.columbia.edu/2018/05/19/regularized-prediction-poststratification-generalization-mister-p/).
+
 # Introducing Variational Inference
 
 # A first try at VI on this dataset
 
 [^1]: If I were that type of Bayesian, this is where I'd complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.
+
+[^2]: In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my [masters thesis](https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html). This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you're willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than [BARP](https://github.com/jbisbee1/BARP). A lot of pretty cool things you can do like jointly model multiple question responses at the same time aren't 
