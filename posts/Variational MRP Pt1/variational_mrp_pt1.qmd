@@ -64,11 +64,50 @@ Rather than reinvent the wheel, I'll follow the lead of the excellent [Multileve
 
 > Allow employers to decline coverage of abortions in insurance plans (Support / Oppose)
 
-Describe model in math
+From the CCES, we get information on each participant's state, age, gender, ethnicity, education level. Supplementing this individual level data, we also include region flags for each state, and Republican vote share in the 2016 election- these state level predictors have been shown to be critical for getting strong MRP estimates by [Lax and Philips (2009)](http://www.columbia.edu/~jhp2121/publications/HowShouldWeEstimateOpinion.pdf) and others. and If you'd like deeper detail on the dataset itself, I'd refer you to [this part](https://bookdown.org/jl5522/MRP-case-studies/introduction-to-mister-p.html#ref-2018CCES) MRP case study.
+
+Using these, we setup the model for $Pr(y_i = 1)$ the probability of supporting allowing employers to decline coverage of abortions in insurance plans as:
+
+$$
+\begin{aligned}
+Pr(y_i = 1) =& logit^{-1}(
+\gamma^0
++ \alpha_{\rm s[i]}^{\rm state}
++ \alpha_{\rm a[i]}^{\rm age}
++ \alpha_{\rm r[i]}^{\rm eth}
++ \alpha_{\rm e[i]}^{\rm educ}
++ \beta^{\rm male} \cdot {\rm Male}_{\rm i} \\
+&+ \alpha_{\rm g[i], r[i]}^{\rm male.eth}
++ \alpha_{\rm e[i], a[i]}^{\rm educ.age}
++ \alpha_{\rm e[i], r[i]}^{\rm educ.eth}
++ \gamma^{\rm south} \cdot {\rm South}_{\rm s} \\
+&+ \gamma^{\rm northcentral} \cdot {\rm NorthCentral}_{\rm s} 
++ \gamma^{\rm west} \cdot {\rm West}_{\rm s} 
++ \gamma^{\rm repvote} \cdot {\rm RepVote}_{\rm s})
+\end{aligned}
+$$
+
+Where we incorporate pretty much all of our predictors as varying intercepts to allow for pooling across demographic and geographic characteristics:
+
+* $\alpha_{\rm a}^{\rm age}$: The effect of subject $i$'s age on the probability of supporting the statement.
+
+* $\alpha_{\rm r}^{\rm eth}$: The effect of subject $i$'s ethnicity on the probability of supporting the statement.
+
+* $\alpha_{\rm e}^{\rm educ}$: The effect of subject $i$'s education on the probability of supporting the statement.
+
+* $\alpha_{\rm s}^{\rm state}$: The effect of subject $i$'s state on the probability of supporting the statement.
+
+* $\beta^{\rm male}$: The average effect of being male on the probability of supporting abortion. Note that it doesn't really make much sense to model a two category[^3] factor as a varying intercept. 
+
+* $\alpha_{\rm e,r}^{\rm male.eth}$, $\alpha_{\rm e,r}^{\rm educ.age}$, $\alpha_{\rm e,r}^{\rm educ.eth}$: Are several reasonable guesses at important interactions for this question. We could add many more two way, or even some three way interactions here, but this is enough for my testing here.
+
+* $\gamma^{\rm south}, \gamma^{\rm northcentral}, \gamma^{\rm west},\gamma^{\rm repvote}$: are the state level predictors which are not represented as varying intercepts. Following the case study, I use $\gamma$'s for the state level coefficients, keeping $\beta$'s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn't get it's own coefficient.
+
+Stepping back for a second,
 
 Describe model in code
 
-Visalize and explain initial runtime/fit of this model
+Visualize and explain initial runtime/fit of this model
 
 Why this dataset and this model for this series? The question we model itself isn't super important- as long as we can expect some significant regional and demographic variation in the outcome we'll be able to explore if VI smooths away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison's sake, and something challenging enough that it should teach us something about VI's ability to handle non-toy models of the world.
 
@@ -79,3 +118,4 @@ Why this dataset and this model for this series? The question we model itself is
 [^1]: If I were that type of Bayesian, this is where I'd complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.
 
 [^2]: In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my [masters thesis](https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html). This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you're willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than [BARP](https://github.com/jbisbee1/BARP). Also, a lot of pretty cool things you can do like jointly model multiple question responses at the same time aren't going to be easily to implement unless you get way in the weeds of your own BART implementation. 
+[^3]: Insert snark about CCES folks doing a poor job at gender inclusivity despite 80+ researchers working on it here.
