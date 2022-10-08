@@ -14,21 +14,21 @@ This post introduces a series of posts I intend to write, exploring using [Varia
 
 The rough plan for the series is as follows:
 
-1. **(This post)** Introducing the Problem- Why is VI useful, why VI can produce spherical cows
-2. How far does iteration on classic VI algorithms like mean-field and full rank get us?
-3. Some theory on why posterior approximation with VI can be so poor
-4. Seeing if some more sophisticated techniques like normalizing flows help
+1.  **(This post)** Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2.  How far does iteration on classic VI algorithms like mean-field and full rank get us?
+3.  Some theory on why posterior approximation with VI can be so poor
+4.  Seeing if some more sophisticated techniques like normalizing flows help
 
 # Motivation for series
 
-I learn well by explaining things to others, and I've been particularly excited to learn about variational inference and ways to improve it over the past few months. There are lots of Bayesian models I would like to fit, especially my political work, that I would categorize as being incredibly useful, but on the edge of practically acceptable run times. For example, the somewhat but not particularly complex model I'll use as a running example for the series **takes ~6 hours to fix on 60k observations**. 
+I learn well by explaining things to others, and I've been particularly excited to learn about variational inference and ways to improve it over the past few months. There are lots of Bayesian models I would like to fit, especially my political work, that I would categorize as being incredibly useful, but on the edge of practically acceptable run times. For example, the somewhat but not particularly complex model I'll use as a running example for the series **takes \~8 hours to fix on 60k observations**.
 
-Having a model run overnight or for a full work day can be fine sometimes, but what if there is a more urgent need for the results? What if we need to  iterate to find the "right" model? What if the predictions from this model need to feed into a later one? How constrained do we feel about adding just a little bit more complexity to the model, or increasing our N size just a bit more?
+Having a model run overnight or for a full work day can be fine sometimes, but what if there is a more urgent need for the results? What if we need to iterate to find the "right" model? What if the predictions from this model need to feed into a later one? How constrained do we feel about adding just a little bit more complexity to the model, or increasing our N size just a bit more?
 
 If we can get VI to fit well, we can make complex Bayesian models a lot more practical to use in a wider variety of scenarios, and maybe even extend the complexity of what we can build given time and resource constraints.
 
-
 # Spherical Cow Sadness
+
 ##### I've got that...
 
 ::: {layout="[25,-2,10]" layout-valign="top"}
@@ -43,6 +43,8 @@ So stepping back for a second, we've taken a problem for which there's usually n
 
 That was perhaps an overly bleak description, but it should give some intuition why this is a hard problem. We want to choose some method of approximating our posterior such that it is amenable to optimization-based solving instead of requiring sampling, but not trade away our ability to correctly understand the full complexity of the posterior distribution[^1].
 
+[^1]: If I were that type of Bayesian, this is where I'd complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.
+
 # Introducing MRP and our running example
 
 While I'm mostly focused on the way we choose to actually fit a given model with this series, here's a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec's [MRP Primer](https://scholar.princeton.edu/jkastellec/publications) is a great starting point.
@@ -55,10 +57,11 @@ To sketch out the steps-
 2.  Build a poststratification table, with population counts or estimated population counts $N_{j}$ for each possible combination of the features gathered above. Each possible combination $j$ is called a cell, one of $J$ possible cells. For example, if we poststratified only on state, there would be $J=51$ (with DC) total cells; in practice, $J$ is often several thousand.
 3.  Build a model, usually a Bayesian multilevel regression, to predict $y$ using the demographic characteristic from the survey or set of surveys, estimating model parameters along the way.
 4.  Estimate $y$ for each cell in the poststratification table, using the model built on the sample.
-5.  Aggregate the cells to the population of interest, weighting by the $N_{j}$'s to obtain population level estimates: 
-  $$\theta_{\mathrm{POP}}=\frac{\sum_{j \in J} N_{j} \theta_{j}}{\sum_{j \in J} N_{J}}$$
+5.  Aggregate the cells to the population of interest, weighting by the $N_{j}$'s to obtain population level estimates: $$\theta_{\mathrm{POP}}=\frac{\sum_{j \in J} N_{j} \theta_{j}}{\sum_{j \in J} N_{J}}$$
 
 Why would we want to do this over building more typical survey weights? To the extent your new model has desirable properties like the ability to incorporate priors, can partially pool to manage rare subpopulations where you don't have a lot of sample, and so on, you can get the benefits of that more efficient model through MRP. Raking in its simplest form is really just a linear model; we have plenty of methods that can do better. Outside of bayesian multilevel models which are the most common, there's an increasing literature on using a wide variety of machine learning algorithms like BART[^2] to do the estimation stage; Andrew Gelman calls this [RRP](https://statmodeling.stat.columbia.edu/2018/05/19/regularized-prediction-poststratification-generalization-mister-p/).
+
+[^2]: In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my [masters thesis](https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html). This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you're willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than [BARP](https://github.com/jbisbee1/BARP). Also, a lot of pretty cool things you can do like jointly model multiple question responses at the same time aren't going to be easily to implement unless you get way in the weeds of your own BART implementation.
 
 Rather than reinvent the wheel, I'll follow the lead of the excellent [Multilevel Regression and Poststratification Case Studies](https://bookdown.org/jl5522/MRP-case-studies/) by Lopez-Martin, Philips, and Gelman, and model survey binary responses from the [2018 CCES](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ZSBZ7K) for the following question:
 
@@ -89,23 +92,30 @@ $$
 
 Where we incorporate pretty much all of our predictors as varying intercepts to allow for pooling across demographic and geographic characteristics:
 
-* $\alpha_{\rm a}^{\rm age}$: The effect of subject $i$'s age on the probability of supporting the statement.
+-   $\alpha_{\rm a}^{\rm age}$: The effect of subject $i$'s age on the probability of supporting the statement.
 
-* $\alpha_{\rm r}^{\rm eth}$: The effect of subject $i$'s ethnicity on the probability of supporting the statement.
+-   $\alpha_{\rm r}^{\rm eth}$: The effect of subject $i$'s ethnicity on the probability of supporting the statement.
 
-* $\alpha_{\rm e}^{\rm educ}$: The effect of subject $i$'s education on the probability of supporting the statement.
+-   $\alpha_{\rm e}^{\rm educ}$: The effect of subject $i$'s education on the probability of supporting the statement.
 
-* $\alpha_{\rm s}^{\rm state}$: The effect of subject $i$'s state on the probability of supporting the statement.
+-   $\alpha_{\rm s}^{\rm state}$: The effect of subject $i$'s state on the probability of supporting the statement.
 
-* $\beta^{\rm male}$: The average effect of being male on the probability of supporting abortion. Note that it doesn't really make much sense to model a two category[^3] factor as a varying intercept. 
+-   $\beta^{\rm male}$: The average effect of being male on the probability of supporting abortion. Note that it doesn't really make much sense to model a two category[^3] factor as a varying intercept.
 
-* $\alpha_{\rm e,r}^{\rm male.eth}$, $\alpha_{\rm e,r}^{\rm educ.age}$, $\alpha_{\rm e,r}^{\rm educ.eth}$: Are several reasonable guesses at important interactions for this question. We could add many more two way, or even some three way interactions here, but this is enough for my testing here.
+-   $\alpha_{\rm e,r}^{\rm male.eth}$, $\alpha_{\rm e,r}^{\rm educ.age}$, $\alpha_{\rm e,r}^{\rm educ.eth}$: Are several reasonable guesses at important interactions for this question. We could add many more two way, or even some three way interactions here, but this is enough for my testing here.
 
-* $\gamma^{\rm south}, \gamma^{\rm northcentral}, \gamma^{\rm west},\gamma^{\rm repvote}$: are the state level predictors which are not represented as varying intercepts. Following the case study, I use $\gamma$'s for the state level coefficients, keeping $\beta$'s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn't get it's own coefficient.
+-   $\gamma^{\rm south}, \gamma^{\rm northcentral}, \gamma^{\rm west},\gamma^{\rm repvote}$: are the state level predictors which are not represented as varying intercepts. Following the case study, I use $\gamma$'s for the state level coefficients, keeping $\beta$'s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn't get it's own coefficient.
 
-Stepping back for a second, let's describe the complexity of this model in more general terms. This certainly isn't state of the art for MRP, and you could definitely add in things like a lot more interactions, some varying slopes, non-univariate prior and/or pooling structure, or other elements to make this a more interesting model. That said, this is already clearly enough of a model to improve on simple raking in many cases, and it produces a nuanced enough posterior that we can feasibly imagine a bad approximation going all spherical cow shaped on us. 
+[^3]: Insert snark about CCES folks doing a poor job at gender exclusivity despite 80+ researchers working on it here.
 
-Fitting this with MCMC[^4] in `rstanarm` is as simple as:
+Stepping back for a second, let's describe the complexity of this model in more general terms. This certainly isn't state of the art for MRP, and you could definitely add in things like a lot more interactions, some varying slopes, non-univariate prior and/or pooling structure, or other elements to make this a more interesting model. That said, this is already clearly enough of a model to improve on simple raking in many cases, and it produces a nuanced enough posterior that we can feasibly imagine a bad approximation going all spherical cow shaped on us.
+
+Why this dataset and this model for this series? The question we model itself isn't super important- as long as we can expect some significant regional and demographic variation in the outcome we'll be able to explore if VI smoothes away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Practically, fitting this with `rstanarm` allows us to switch easily from a great MCMC implementation to a decent VI optimizer quickly for some early tests. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison's sake, and something challenging enough that it should teach us something about VI's ability to handle non-toy models of the world.
+
+Fitting this[^4] with MCMC in `rstanarm` is as simple as:
+
+[^4]: Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I'll be leaving out most such details that aren't relevant for comparisons to fitting this model with VI from now on.
+
 ```{r, eval=FALSE}
 # Fit in stan_glmer
 fit <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) + male +
@@ -122,19 +132,26 @@ fit <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) + male +
 
 Since it isn't relevant for the rest of my discussion here, I'll summarize the model diagnostics here and say that this seems to be a pretty reasonable fit- no issues with divergences, and no issues with poor $\hat{r}$'s. Worth quickly pointing out that we did have to tune `adapt_delta` a bit to get no divergences though- even before getting to fitting this with VI, a model like this requires some adjustments to fit correctly.
 
-With a model like this, we can produce state level predictions that have clearly benefited from being fit with a Bayesian multilevel model:
-![](5k_sample_full_results.png)
-With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. Somewhat less neat is that even a 5k sample here takes about 
+With a model like this, we can produce state level predictions that have clearly benefited from being fit with a Bayesian multilevel model: 
 
+![](5k_sample_full_results.png) 
 
-Why this dataset and this model for this series? The question we model itself isn't super important- as long as we can expect some significant regional and demographic variation in the outcome we'll be able to explore if VI smooths away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison's sake, and something challenging enough that it should teach us something about VI's ability to handle non-toy models of the world.
+With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. That's certainly not a fully fair comparison, but it gives some intution around the promise of this approach.
+
+Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. How does this change as we fit on more and more of the data?
+
+| Sample Size | Runtime |
+|:------------|:--------|
+| 5,000       | 13 minutes     |
+| 10,000      | 44 minutes     |
+| 60,000      | 526 minutes (~8 hours!)    |
+
+: {tbl-colwidths="\[25,75\]"}
+
+As the table above should illustrate, if you're fitting a decently complex Bayesian model on even somewhat large N sizes, you're pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you're scaling N past the above example, or deepening the modeling complexity, you'll pretty quickly feel effectively locked out of using these models in fast-paced environments.
+
+Hopefully fitting my running example has helped for building intution here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when fit time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
 
 # Introducing Variational Inference
 
 # A first try at VI on this dataset
-
-[^1]: If I were that type of Bayesian, this is where I'd complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.
-
-[^2]: In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my [masters thesis](https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html). This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you're willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than [BARP](https://github.com/jbisbee1/BARP). Also, a lot of pretty cool things you can do like jointly model multiple question responses at the same time aren't going to be easily to implement unless you get way in the weeds of your own BART implementation. 
-[^3]: Insert snark about CCES folks doing a poor job at gender exclusivity despite 80+ researchers working on it here.
-[^4]: Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I'll be leaving out most such details that aren't relevant for comparisons to fitting this model with VI from now on.

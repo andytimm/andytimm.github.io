@@ -253,7 +253,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ol>
 <section id="motivation-for-series" class="level1">
 <h1>Motivation for series</h1>
-<p>I learn well by explaining things to others, and I’ve been particularly excited to learn about variational inference and ways to improve it over the past few months. There are lots of Bayesian models I would like to fit, especially my political work, that I would categorize as being incredibly useful, but on the edge of practically acceptable run times. For example, the somewhat but not particularly complex model I’ll use as a running example for the series <strong>takes ~6 hours to fix on 60k observations</strong>.</p>
+<p>I learn well by explaining things to others, and I’ve been particularly excited to learn about variational inference and ways to improve it over the past few months. There are lots of Bayesian models I would like to fit, especially my political work, that I would categorize as being incredibly useful, but on the edge of practically acceptable run times. For example, the somewhat but not particularly complex model I’ll use as a running example for the series <strong>takes ~8 hours to fix on 60k observations</strong>.</p>
 <p>Having a model run overnight or for a full work day can be fine sometimes, but what if there is a more urgent need for the results? What if we need to iterate to find the “right” model? What if the predictions from this model need to feed into a later one? How constrained do we feel about adding just a little bit more complexity to the model, or increasing our N size just a bit more?</p>
 <p>If we can get VI to fit well, we can make complex Bayesian models a lot more practical to use in a wider variety of scenarios, and maybe even extend the complexity of what we can build given time and resource constraints.</p>
 </section>
@@ -327,7 +327,8 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 <li><p><span class="math inline">\gamma^{\rm south}, \gamma^{\rm northcentral}, \gamma^{\rm west},\gamma^{\rm repvote}</span>: are the state level predictors which are not represented as varying intercepts. Following the case study, I use <span class="math inline">\gamma</span>’s for the state level coefficients, keeping <span class="math inline">\beta</span>’s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn’t get it’s own coefficient.</p></li>
 </ul>
 <p>Stepping back for a second, let’s describe the complexity of this model in more general terms. This certainly isn’t state of the art for MRP, and you could definitely add in things like a lot more interactions, some varying slopes, non-univariate prior and/or pooling structure, or other elements to make this a more interesting model. That said, this is already clearly enough of a model to improve on simple raking in many cases, and it produces a nuanced enough posterior that we can feasibly imagine a bad approximation going all spherical cow shaped on us.</p>
-<p>Fitting this with MCMC<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> in <code>rstanarm</code> is as simple as:</p>
+<p>Why this dataset and this model for this series? The question we model itself isn’t super important- as long as we can expect some significant regional and demographic variation in the outcome we’ll be able to explore if VI smoothes away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Practically, fitting this with <code>rstanarm</code> allows us to switch easily from a great MCMC implementation to a decent VI optimizer quickly for some early tests. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison’s sake, and something challenging enough that it should teach us something about VI’s ability to handle non-toy models of the world.</p>
+<p>Fitting this<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> with MCMC in <code>rstanarm</code> is as simple as:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit in stan_glmer</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">stan_glmer</span>(abortion <span class="sc">~</span> (<span class="dv">1</span> <span class="sc">|</span> state) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ) <span class="sc">+</span> male <span class="sc">+</span></span>
@@ -342,8 +343,38 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">605</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Since it isn’t relevant for the rest of my discussion here, I’ll summarize the model diagnostics here and say that this seems to be a pretty reasonable fit- no issues with divergences, and no issues with poor <span class="math inline">\hat{r}</span>’s. Worth quickly pointing out that we did have to tune <code>adapt_delta</code> a bit to get no divergences though- even before getting to fitting this with VI, a model like this requires some adjustments to fit correctly.</p>
-<p>With a model like this, we can produce state level predictions that have clearly benefited from being fit with a Bayesian multilevel model: <img src="5k_sample_full_results.png" class="img-fluid"> With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. Somewhat less neat is that even a 5k sample here takes about</p>
-<p>Why this dataset and this model for this series? The question we model itself isn’t super important- as long as we can expect some significant regional and demographic variation in the outcome we’ll be able to explore if VI smooths away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison’s sake, and something challenging enough that it should teach us something about VI’s ability to handle non-toy models of the world.</p>
+<p>With a model like this, we can produce state level predictions that have clearly benefited from being fit with a Bayesian multilevel model:</p>
+<p><img src="5k_sample_full_results.png" class="img-fluid"></p>
+<p>With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. That’s certainly not a fully fair comparison, but it gives some intution around the promise of this approach.</p>
+<p>Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. How does this change as we fit on more and more of the data?</p>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Sample Size</th>
+<th style="text-align: left;">Runtime</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">5,000</td>
+<td style="text-align: left;">13 minutes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10,000</td>
+<td style="text-align: left;">44 minutes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">60,000</td>
+<td style="text-align: left;">526 minutes (~8 hours!)</td>
+</tr>
+</tbody>
+</table>
+<p>As the table above should illustrate, if you’re fitting a decently complex Bayesian model on even somewhat large N sizes, you’re pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you’re scaling N past the above example, or deepening the modeling complexity, you’ll pretty quickly feel effectively locked out of using these models in fast-paced environments.</p>
+<p>Hopefully fitting my running example has helped for building intution here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when fit time matters, we’d really like to scale these fitting times back. Can Variational Inference help?</p>
 </section>
 <section id="introducing-variational-inference" class="level1">
 <h1>Introducing Variational Inference</h1>
