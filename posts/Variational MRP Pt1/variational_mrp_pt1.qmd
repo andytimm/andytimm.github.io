@@ -103,11 +103,29 @@ Where we incorporate pretty much all of our predictors as varying intercepts to 
 
 * $\gamma^{\rm south}, \gamma^{\rm northcentral}, \gamma^{\rm west},\gamma^{\rm repvote}$: are the state level predictors which are not represented as varying intercepts. Following the case study, I use $\gamma$'s for the state level coefficients, keeping $\beta$'s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn't get it's own coefficient.
 
-Stepping back for a second,
+Stepping back for a second, let's describe the complexity of this model in more general terms. This certainly isn't state of the art for MRP, and you could definitely add in things like a lot more interactions, some varying slopes, non-univariate prior and/or pooling structure, or other elements to make this a more interesting model. That said, this is already clearly enough of a model to improve on simple raking in many cases, and it produces a nuanced enough posterior that we can feasibly imagine a bad approximation going all spherical cow shaped on us. 
 
-Describe model in code
+Fitting this with MCMC[^4] in `rstanarm` is as simple as:
+```{r, eval=FALSE}
+# Fit in stan_glmer
+fit <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) + male +
+                    (1 | male:eth) + (1 | educ:age) + (1 | educ:eth) +
+                    repvote + factor(region),
+  family = binomial(link = "logit"),
+  data = cces_df,
+  prior = normal(0, 1, autoscale = TRUE),
+  prior_covariance = decov(scale = 0.50),
+  adapt_delta = 0.99,
+  refresh = 0,
+  seed = 605)
+```
 
-Visualize and explain initial runtime/fit of this model
+Since it isn't relevant for the rest of my discussion here, I'll summarize the model diagnostics here and say that this seems to be a pretty reasonable fit- no issues with divergences, and no issues with poor $\hat{r}$'s. Worth quickly pointing out that we did have to tune `adapt_delta` a bit to get no divergences though- even before getting to fitting this with VI, a model like this requires some adjustments to fit correctly.
+
+With a model like this, we can produce state level predictions that have clearly benefited from being fit with a Bayesian multilevel model:
+![](5k_sample_full_results.png)
+With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. Somewhat less neat is that even a 5k sample here takes about 
+
 
 Why this dataset and this model for this series? The question we model itself isn't super important- as long as we can expect some significant regional and demographic variation in the outcome we'll be able to explore if VI smooths away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison's sake, and something challenging enough that it should teach us something about VI's ability to handle non-toy models of the world.
 
@@ -118,4 +136,5 @@ Why this dataset and this model for this series? The question we model itself is
 [^1]: If I were that type of Bayesian, this is where I'd complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.
 
 [^2]: In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my [masters thesis](https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html). This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you're willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than [BARP](https://github.com/jbisbee1/BARP). Also, a lot of pretty cool things you can do like jointly model multiple question responses at the same time aren't going to be easily to implement unless you get way in the weeds of your own BART implementation. 
-[^3]: Insert snark about CCES folks doing a poor job at gender inclusivity despite 80+ researchers working on it here.
+[^3]: Insert snark about CCES folks doing a poor job at gender exclusivity despite 80+ researchers working on it here.
+[^4]: Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I'll be leaving out most such details that aren't relevant for comparisons to fitting this model with VI from now on.
