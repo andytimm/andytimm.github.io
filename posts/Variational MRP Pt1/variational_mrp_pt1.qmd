@@ -150,7 +150,7 @@ Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. 
 
 As the table above should illustrate, if you're fitting a decently complex Bayesian model on even somewhat large N sizes, you're pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you're scaling N past the above example, or deepening the modeling complexity, you'll pretty quickly feel effectively locked out of using these models in fast-paced environments.
 
-Hopefully fitting my running example has helped for building intution here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when fit time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
+Hopefully fitting my running example has helped for building intution here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
 
 # Introducing Variational Inference
 
