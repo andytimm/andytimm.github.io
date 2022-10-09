@@ -154,4 +154,6 @@ Hopefully fitting my running example has helped for building intution here. Even
 
 # Introducing Variational Inference
 
+testing math script: $\mathscr{Q}$
+
 # A first try at VI on this dataset
