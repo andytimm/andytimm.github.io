@@ -10,7 +10,7 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.2.126</generator>
-<lastBuildDate>Wed, 28 Sep 2022 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 10 Oct 2022 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
   <dc:creator>Andy Timm</dc:creator>
@@ -20,7 +20,7 @@
 
 
 
-<p>This post introduces a series of posts I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">MRP</a> while aiming to keep approximation error from completely ruining the model.</p>
+<p>This post introduces a series I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">MRP</a> while aiming to keep approximation error from completely ruining the model.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
 <li><strong>(This post)</strong> Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
@@ -223,27 +223,27 @@
 <li id="fn4"><p>Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I’ll be leaving out most such details that aren’t relevant for comparisons to fitting this model with VI from now on.↩︎</p></li>
 <li id="fn5"><p>In grad school, I had a friend who insisted on calling this “spicy Q”. For a while we had a latex package that made <code>\spicy{}</code> equivalent to <code>\mathscr{}</code>. Apologies for the footnote for the dumb LaTeX joke, but now I’m pretty sure you won’t have a sudden moment of “what is that symbol again” discussing VI ever.↩︎</p></li>
 <li id="fn6"><p>Why is this a lower bound? Notice that we could write the evidence from above equations as <img src="https://latex.codecogs.com/png.latex?logp(x)%20=%20KL(q(z)%7C%7Cp(z%7Cx))%20+%20ELBO(q)">. Since the KL divergence is non-negative (it’s zero when distributions <img src="https://latex.codecogs.com/png.latex?p"> and <img src="https://latex.codecogs.com/png.latex?q"> are identical), the ELBO is a lower bound of the evidence.↩︎</p></li>
-<li id="fn7"><p>If this seems like it could go fully spherical cow, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.↩︎</p></li>
+<li id="fn7"><p>If this seems like it could go fully spherical cow, both literally in the sense that if we use a bunch of independent normals we make a sphere, and in the sense that this may not represent the full complexity of public opinion, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.↩︎</p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
   editor = {},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
-  date = {2022-09-28},
+  date = {2022-10-10},
   url = {https://andytimm.github.io/variational_mrp_pt1.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas">
 Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> September 28, 2022. <a href="https://andytimm.github.io/variational_mrp_pt1.html">https://andytimm.github.io/variational_mrp_pt1.html</a>.
+Posterior Distributions.”</span> October 10, 2022. <a href="https://andytimm.github.io/variational_mrp_pt1.html">https://andytimm.github.io/variational_mrp_pt1.html</a>.
 </div></div></section></div> ]]></description>
   <category>MRP</category>
   <category>BART</category>
   <category>Variational Inference</category>
   <guid>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</guid>
-  <pubDate>Wed, 28 Sep 2022 04:00:00 GMT</pubDate>
-  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt1/rstanarm_disclaimer.png" medium="image" type="image/png" height="50" width="144"/>
+  <pubDate>Mon, 10 Oct 2022 04:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt1/elboplot.png" medium="image" type="image/png" height="43" width="144"/>
 </item>
 <item>
   <title>BART with varying intercepts in the MRP framework</title>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
-<meta name="dcterms.date" content="2022-09-28">
+<meta name="dcterms.date" content="2022-10-10">
 
 <title>Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions</title>
 <style>
@@ -146,11 +146,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta property="og:description" content="Introductions- things to do, places to be">
+<meta property="og:image" content="https://andytimm.github.io/posts\Variational MRP Pt1\elboplot.png">
 <meta property="og:site-name" content="Andy Timm">
+<meta property="og:image:height" content="514">
+<meta property="og:image:width" content="1726">
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta name="twitter:description" content="Introductions- things to do, places to be">
+<meta name="twitter:image" content="https://andytimm.github.io/posts\Variational MRP Pt1\elboplot.png">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="514">
+<meta name="twitter:image-width" content="1726">
 </head>
 
 <body class="nav-fixed">
@@ -214,7 +220,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">September 28, 2022</p>
+        <p class="date">October 10, 2022</p>
       </div>
     </div>
       
@@ -250,7 +256,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<p>This post introduces a series of posts I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">MRP</a> while aiming to keep approximation error from completely ruining the model.</p>
+<p>This post introduces a series I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">MRP</a> while aiming to keep approximation error from completely ruining the model.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
 <li><strong>(This post)</strong> Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
@@ -470,20 +476,20 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 <li id="fn4"><p>Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I’ll be leaving out most such details that aren’t relevant for comparisons to fitting this model with VI from now on.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>In grad school, I had a friend who insisted on calling this “spicy Q”. For a while we had a latex package that made <code>\spicy{}</code> equivalent to <code>\mathscr{}</code>. Apologies for the footnote for the dumb LaTeX joke, but now I’m pretty sure you won’t have a sudden moment of “what is that symbol again” discussing VI ever.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p>Why is this a lower bound? Notice that we could write the evidence from above equations as <span class="math inline">logp(x) = KL(q(z)||p(z|x)) + ELBO(q)</span>. Since the KL divergence is non-negative (it’s zero when distributions <span class="math inline">p</span> and <span class="math inline">q</span> are identical), the ELBO is a lower bound of the evidence.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>If this seems like it could go fully spherical cow, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>If this seems like it could go fully spherical cow, both literally in the sense that if we use a bunch of independent normals we make a sphere, and in the sense that this may not represent the full complexity of public opinion, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
   editor = {},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
-  date = {2022-09-28},
+  date = {2022-10-10},
   url = {https://andytimm.github.io/variational_mrp_pt1.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
 Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> September 28, 2022. <a href="https://andytimm.github.io/variational_mrp_pt1.html">https://andytimm.github.io/variational_mrp_pt1.html</a>.
+Posterior Distributions.”</span> October 10, 2022. <a href="https://andytimm.github.io/variational_mrp_pt1.html">https://andytimm.github.io/variational_mrp_pt1.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {

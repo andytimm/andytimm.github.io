@@ -2,14 +2,15 @@
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Introductions- things to do, places to be
-date: 2022-09-28
+date: 2022-10-10
+image: elboplot.png
 categories:
 - MRP
 - BART
 - Variational Inference
 ---
 
-This post introduces a series of posts I intend to write, exploring using [Variational Inference](https://en.wikipedia.org/wiki/Variational_Bayesian_methods) to massively speed up running complex survey estimation models like variants of [MRP](https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification) while aiming to keep approximation error from completely ruining the model.
+This post introduces a series I intend to write, exploring using [Variational Inference](https://en.wikipedia.org/wiki/Variational_Bayesian_methods) to massively speed up running complex survey estimation models like variants of [MRP](https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification) while aiming to keep approximation error from completely ruining the model.
 
 The rough plan for the series is as follows:
 
@@ -214,7 +215,7 @@ For further intuition- notice that we can only do this trick in one direction. T
 
 Ok, so we have an objective to optimize that should actually work. What's a good $\mathscr{Q}$? The choice has been shown to matter a lot, but for purposes of a first swing here, let's try one of the simpler ideas people have explored, the mean-field family. These latent variables will be assumed mutually independent[^7] and each get it's own distinct factor in the variational density. A member of this would look something like:
 
-[^7]: If this seems like it could go fully spherical cow, you're correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn't have the best overlap with fully realistic distributional assumptions over our latent variables.
+[^7]: If this seems like it could go fully spherical cow, both literally in the sense that if we use a bunch of independent normals we make a sphere, and in the sense that this may not represent the full complexity of public opinion, you're correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn't have the best overlap with fully realistic distributional assumptions over our latent variables.
 
 $$q(z) = \prod_{j=1}^{m} q_j(z_j)$$
 
