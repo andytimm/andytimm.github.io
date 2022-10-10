@@ -405,10 +405,56 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 <p>To start working with this approach though, there’s one major remaining problem. Do you see it in the equation above?</p>
 <section id="the-elbo" class="level2">
 <h2 class="anchored" data-anchor-id="the-elbo">The ELBO</h2>
+<p>If you haven’t seen it yet, this quick substitution should clarify a potential issue with VI as I’ve described it so far:</p>
+<p><span class="math display">q^*(z) = argmin_{q(z) \in \mathscr{Q}}(q(z)||\frac{p(z,x)}{\bf p(x)}) = \mathbb{E}[logq(z)] - \mathbb{E}[logp(z,x)] + {\bf logp(x)}</span> Without some new trick, all I’ve said so far is to approximate a thing I can’t analytically calculate (the posterior, specially having an issue evidence piece of it), I’m going to calculate the distance between my approximation and… the thing I said has a component can’t calculate?</p>
+<p>Fortunately, a clever solution exists here that makes this strategy possible. Instead of trying to minimize the above KL divergence, we can optimize the alternative objective:</p>
+<p><span class="math display">\mathbb{E}[logp(z,x)] - \mathbb{E}[logq(z)]</span></p>
+<p>This is just the negative of the first two terms above, leaving aside the <span class="math inline">logp(x)</span>. Why can we treat maximizing this as minimizing the KL divergence? The <span class="math inline">logp(x)</span> term is just a constant (wrt to q), so regardless of how we vary q, this will still be a valid alternative objective. We call this the Evidence Lower Bound (ELBO)<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+<p>If it’s helpful for intuition, play around with this great interactive ELBO optimizer by Felix Köhler:</p>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p><img src="elboplot.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="elboeqs.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Link to demonstration <a href="https://englishprobabilistic-machine-learningelbo-interactive--or5u7m.streamlitapp.com/">here</a>; check out Felix’s Youtube explanation of the ELBO <a href="https://www.youtube.com/watch?v=HxQ94L8n0vU">also</a>!</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>By twiddling the knobs on <span class="math inline">\mu</span> and <span class="math inline">\sigma</span> for our approximating normal, we can get our surrogate distribution pretty close to the True Posterior (which we know for purposes of demonstration, so we can calculate the true KL, not just it’s ELBO component). No matter how we twiddle though, the evidence remains constant.</p>
+<p>For further intuition- notice that we can only do this trick in one direction. The KL divergence isn’t symmetrical, and if we wanted to calculate the “reverse” KL, we couldn’t use this strategy as <span class="math inline">logq(x)</span> would not be a constant. Even if we thought that optimizing other direction of KL might have desirable properties like emphasizing <a href="https://agustinus.kristia.de/techblog/2016/12/21/forward-reverse-kl/">mass-seeking over mode-seeking behavior</a>, that simply isn’t an option.</p>
 </section>
 </section>
 <section id="a-first-try-at-vi-on-this-dataset" class="level1">
 <h1>A first try at VI on this dataset</h1>
+<p>Ok, so we have an objective to optimize that should actually work. What’s a good <span class="math inline">\mathscr{Q}</span>? The choice has been shown to matter a lot, but for purposes of a first swing here, let’s try one of the simpler ideas people have explored, the mean-field family. These latent variables will be assumed mutually independent<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> and each get it’s own distinct factor in the variational density. A member of this would look something like:</p>
+<p><span class="math display">q(z) = \prod_{j=1}^{m} q_j(z_j)</span></p>
+<p>Each latent <span class="math inline">z_j</span> get it’s own variational factor with density <span class="math inline">q_j(z_j)</span>, whose knobs we play with to maximize the ELBO.</p>
+<p>Probably not the best we can do, but let’s give it a roll. Since we’ve been told this will scale really well too supposedly, let’s use all 60k of the observations just to get a sense how it’ll compare to our 8+ hours in that case.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit_60k <span class="ot">&lt;-</span> <span class="fu">stan_glmer</span>(abortion <span class="sc">~</span> (<span class="dv">1</span> <span class="sc">|</span> state) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ) <span class="sc">+</span> male <span class="sc">+</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                    (<span class="dv">1</span> <span class="sc">|</span> male<span class="sc">:</span>eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ<span class="sc">:</span>age) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ<span class="sc">:</span>eth) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                    repvote <span class="sc">+</span> <span class="fu">factor</span>(region),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cces_all_df,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">autoscale =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior_covariance =</span> <span class="fu">decov</span>(<span class="at">scale =</span> <span class="fl">0.50</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">adapt_delta =</span> <span class="fl">0.99</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">"meanfield"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">605</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This finishes in a blazing <strong>144.03 seconds</strong>. Is this a good fit, or have we created a ridiculous spherical cow?</p>
+<p>You’ll have to find out in the next post. Thanks for reading!</p>
 
 
 </section>
@@ -422,6 +468,8 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 <li id="fn3"><p>Insert snark about CCES folks doing a poor job at gender exclusivity despite 80+ researchers working on it here.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I’ll be leaving out most such details that aren’t relevant for comparisons to fitting this model with VI from now on.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>In grad school, I had a friend who insisted on calling this “spicy Q”. For a while we had a latex package that made <code>\spicy{}</code> equivalent to <code>\mathscr{}</code>. Apologies for the footnote for the dumb LaTeX joke, but now I’m pretty sure you won’t have a sudden moment of “what is that symbol again” discussing VI ever.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Why is this a lower bound? Notice that we could write the evidence from above equations as <span class="math inline">logp(x) = KL(q(z)||p(z|x)) + ELBO(q)</span>. Since the KL divergence is non-negative (it’s zero when distributions <span class="math inline">p</span> and <span class="math inline">q</span> are identical), the ELBO is a lower bound of the evidence.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>If this seems like it could go fully spherical cow, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},

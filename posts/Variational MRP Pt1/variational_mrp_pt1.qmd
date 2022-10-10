@@ -186,6 +186,59 @@ To start working with this approach though, there's one major remaining problem.
 
 ## The ELBO 
 
+If you haven't seen it yet, this quick substitution should clarify a potential issue with VI as I've described it so far:
 
+$$q^*(z) = argmin_{q(z) \in \mathscr{Q}}(q(z)||\frac{p(z,x)}{\bf p(x)}) = \mathbb{E}[logq(z)] - \mathbb{E}[logp(z,x)] + {\bf logp(x)}$$
+Without some new trick, all I've said so far is to approximate a thing I can't analytically calculate (the posterior, specially having an issue evidence piece of it), I'm going to calculate the distance between my approximation and... the thing I said has a component can't calculate?
+
+Fortunately, a clever solution exists here that makes this strategy possible. Instead of trying to minimize the above KL divergence, we can optimize the alternative objective:
+
+$$\mathbb{E}[logp(z,x)] - \mathbb{E}[logq(z)]$$
+
+This is just the negative of the first two terms above, leaving aside the $logp(x)$. Why can we treat maximizing this as minimizing the KL divergence? The $logp(x)$ term is just a constant (wrt to q), so regardless of how we vary q, this will still be a valid alternative objective. We call this the Evidence Lower Bound (ELBO)[^6].
+
+[^6]: Why is this a lower bound? Notice that we could write the evidence from above equations as $logp(x) = KL(q(z)||p(z|x)) + ELBO(q)$. Since the KL divergence is non-negative (it's zero when distributions $p$ and $q$ are identical), the ELBO is a lower bound of the evidence. 
+
+If it's helpful for intuition, play around with this great interactive ELBO optimizer by Felix Köhler:
+
+::: {layout-nrow=2}
+![](elboplot.png)
+
+![Link to demonstration [here](https://englishprobabilistic-machine-learningelbo-interactive--or5u7m.streamlitapp.com/); check out Felix's Youtube explanation of the ELBO [also](https://www.youtube.com/watch?v=HxQ94L8n0vU)!](elboeqs.png)
+:::
+
+By twiddling the knobs on $\mu$ and $\sigma$ for our approximating normal, we can get our surrogate distribution pretty close to the True Posterior (which we know for purposes of demonstration, so we can calculate the true KL, not just it's ELBO component). No matter how we twiddle though, the evidence remains constant.
+
+For further intuition- notice that we can only do this trick in one direction. The KL divergence isn't symmetrical, and if we wanted to calculate the "reverse" KL, we couldn't use this strategy as $logq(x)$ would not be a constant. Even if we thought that optimizing other direction of KL might have desirable properties like emphasizing [mass-seeking over mode-seeking behavior](https://agustinus.kristia.de/techblog/2016/12/21/forward-reverse-kl/), that simply isn't an option.
 
 # A first try at VI on this dataset
+
+Ok, so we have an objective to optimize that should actually work. What's a good $\mathscr{Q}$? The choice has been shown to matter a lot, but for purposes of a first swing here, let's try one of the simpler ideas people have explored, the mean-field family. These latent variables will be assumed mutually independent[^7] and each get it's own distinct factor in the variational density. A member of this would look something like:
+
+[^7]: If this seems like it could go fully spherical cow, you're correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn't have the best overlap with fully realistic distributional assumptions over our latent variables.
+
+$$q(z) = \prod_{j=1}^{m} q_j(z_j)$$
+
+Each latent $z_j$ get it's own variational factor with density $q_j(z_j)$, whose knobs we play with to maximize the ELBO.
+
+Probably not the best we can do, but let's give it a roll. Since we've been told this will scale really well too supposedly, let's use all 60k of the observations just to get a sense how it'll compare to our 8+ hours in that case.
+
+```{r, eval=FALSE}
+tic()
+fit_60k <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) + male +
+                    (1 | male:eth) + (1 | educ:age) + (1 | educ:eth) +
+                    repvote + factor(region),
+  family = binomial(link = "logit"),
+  data = cces_all_df,
+  prior = normal(0, 1, autoscale = TRUE),
+  prior_covariance = decov(scale = 0.50),
+  adapt_delta = 0.99,
+  refresh = 0,
+  algorithm = "meanfield",
+  seed = 605)
+toc()
+```
+
+This finishes in a blazing **144.03 seconds**. Is this a good fit, or have we created a ridiculous spherical cow?
+
+You'll have to find out in the next post. Thanks for reading!
