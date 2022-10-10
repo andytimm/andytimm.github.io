@@ -231,8 +231,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#motivation-for-series" id="toc-motivation-for-series" class="nav-link active" data-scroll-target="#motivation-for-series">Motivation for series</a></li>
   <li><a href="#spherical-cow-sadness" id="toc-spherical-cow-sadness" class="nav-link" data-scroll-target="#spherical-cow-sadness">Spherical Cow Sadness</a></li>
-  <li><a href="#introducing-mrp-and-our-running-example" id="toc-introducing-mrp-and-our-running-example" class="nav-link" data-scroll-target="#introducing-mrp-and-our-running-example">Introducing MRP and our running example</a></li>
-  <li><a href="#introducing-variational-inference" id="toc-introducing-variational-inference" class="nav-link" data-scroll-target="#introducing-variational-inference">Introducing Variational Inference</a></li>
+  <li><a href="#introducing-mrp-and-our-running-example" id="toc-introducing-mrp-and-our-running-example" class="nav-link" data-scroll-target="#introducing-mrp-and-our-running-example">Introducing MRP and our running example</a>
+  <ul>
+  <li><a href="#introducing-mrp" id="toc-introducing-mrp" class="nav-link" data-scroll-target="#introducing-mrp">Introducing MRP</a></li>
+  <li><a href="#introducing-the-running-example" id="toc-introducing-the-running-example" class="nav-link" data-scroll-target="#introducing-the-running-example">Introducing the Running Example</a></li>
+  </ul></li>
+  <li><a href="#introducing-variational-inference" id="toc-introducing-variational-inference" class="nav-link" data-scroll-target="#introducing-variational-inference">Introducing Variational Inference</a>
+  <ul>
+  <li><a href="#the-elbo" id="toc-the-elbo" class="nav-link" data-scroll-target="#the-elbo">The ELBO</a></li>
+  </ul></li>
   <li><a href="#a-first-try-at-vi-on-this-dataset" id="toc-a-first-try-at-vi-on-this-dataset" class="nav-link" data-scroll-target="#a-first-try-at-vi-on-this-dataset">A first try at VI on this dataset</a></li>
   </ul>
 </nav>
@@ -281,8 +288,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="introducing-mrp-and-our-running-example" class="level1">
 <h1>Introducing MRP and our running example</h1>
+<section id="introducing-mrp" class="level2">
+<h2 class="anchored" data-anchor-id="introducing-mrp">Introducing MRP</h2>
 <p>While I’m mostly focused on the way we choose to actually fit a given model with this series, here’s a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec’s <a href="https://scholar.princeton.edu/jkastellec/publications">MRP Primer</a> is a great starting point.</p>
-<p>MRP casts estimation of a population quantity of interest <span class="math inline">\theta</span> as a prediction problem. That is, instead of the more traditional approach of like <a href="https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking">simple raked weights</a>, MRP leans more heavily on modeling and then poststratification to make the estimates representative.</p>
+<p>MRP casts estimation of a population quantity of interest <span class="math inline">\theta</span> as a prediction problem. That is, instead of the more traditional approach of building <a href="https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking">simple raked weights</a> and using weighted estimators, MRP leans more heavily on modeling and then poststratification to make the estimates representative.</p>
 <p>To sketch out the steps-</p>
 <ol type="1">
 <li>Either gather or run a survey or collection of surveys that collect both information on the outcome of interest, <span class="math inline">y</span>, and a set of demographic and geographic predictors, <span class="math inline">\left(X_{1}, X_{2}, X_{3}, \ldots, X_{m}\right)</span>.</li>
@@ -292,6 +301,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>Aggregate the cells to the population of interest, weighting by the <span class="math inline">N_{j}</span>’s to obtain population level estimates: <span class="math display">\theta_{\mathrm{POP}}=\frac{\sum_{j \in J} N_{j} \theta_{j}}{\sum_{j \in J} N_{J}}</span></li>
 </ol>
 <p>Why would we want to do this over building more typical survey weights? To the extent your new model has desirable properties like the ability to incorporate priors, can partially pool to manage rare subpopulations where you don’t have a lot of sample, and so on, you can get the benefits of that more efficient model through MRP. Raking in its simplest form is really just a linear model; we have plenty of methods that can do better. Outside of bayesian multilevel models which are the most common, there’s an increasing literature on using a wide variety of machine learning algorithms like BART<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to do the estimation stage; Andrew Gelman calls this <a href="https://statmodeling.stat.columbia.edu/2018/05/19/regularized-prediction-poststratification-generalization-mister-p/">RRP</a>.</p>
+</section>
+<section id="introducing-the-running-example" class="level2">
+<h2 class="anchored" data-anchor-id="introducing-the-running-example">Introducing the Running Example</h2>
 <p>Rather than reinvent the wheel, I’ll follow the lead of the excellent <a href="https://bookdown.org/jl5522/MRP-case-studies/">Multilevel Regression and Poststratification Case Studies</a> by Lopez-Martin, Philips, and Gelman, and model survey binary responses from the <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ZSBZ7K">2018 CCES</a> for the following question:</p>
 <blockquote class="blockquote">
 <p>Allow employers to decline coverage of abortions in insurance plans (Support / Oppose)</p>
@@ -374,11 +386,21 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 </tbody>
 </table>
 <p>As the table above should illustrate, if you’re fitting a decently complex Bayesian model on even somewhat large N sizes, you’re pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you’re scaling N past the above example, or deepening the modeling complexity, you’ll pretty quickly feel effectively locked out of using these models in fast-paced environments.</p>
-<p>Hopefully fitting my running example has helped for building intution here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we’d really like to scale these fitting times back. Can Variational Inference help?</p>
+<p>Hopefully fitting my running example has helped for building intuition here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we’d really like to scale these fitting times back. Can Variational Inference help?</p>
+</section>
 </section>
 <section id="introducing-variational-inference" class="level1">
 <h1>Introducing Variational Inference</h1>
+<p>I’ve gotten relatively far in this post without clearly explaining what Variational Inference is, and why it might provide a more efficient and scalable way to fix large Bayesian models. Let’s fully flesh that out here to ground the rest of the series.</p>
+<p>In the bigger picture, pretty much all of our efforts in Bayesian inference are a form of approximate inference. Almost no models we care about for real world applications have closed form solutions- conjugate prior type situations are a math problem for stats classes, not a general tool for inference.</p>
+<p>Following <a href="https://arxiv.org/abs/1601.00670">Blei et al.&nbsp;(2018)</a>’s notation, let’s setup the general problem first, describe (briefly) how MCMC solves it, and then more slowly demonstrate how VI does. Let’s say we have some observations <span class="math inline">x_{1:N}</span>, and and some latent variables that define the model <span class="math inline">z_{1:M}</span>. Note for concreteness these latent variables represent our quantities of interest: key parameters and so on- we’re calling them latent in the sense that we can’t go out and directly measure a <span class="math inline">\beta</span> or <span class="math inline">\gamma</span> from the model above, we have to gather data that allows us to estimate them. We call <span class="math inline">p(z)</span> priors, and they define our model prior to contact with the data. The goal of Bayesian inference then is conditioning on our data in order to get the posterior:</p>
+<p><span class="math display">p(z|x) = \frac{p(z,x)}{p(x)}</span></p>
+<p>If you’re reading this post series, it’s likely you recognize that the denominator here (often called the “evidence”) is the sticking point; the integral <span class="math inline">p(x) = \int{p(z,x)dz}</span> won’t have a closed form solution.</p>
+<p>When we use Markov Chain Monte Carlo as we did above to estimate the model, we’re defining</p>
+<section id="the-elbo" class="level2">
+<h2 class="anchored" data-anchor-id="the-elbo">The ELBO</h2>
 <p>testing math script: <span class="math inline">\mathscr{Q}</span></p>
+</section>
 </section>
 <section id="a-first-try-at-vi-on-this-dataset" class="level1">
 <h1>A first try at VI on this dataset</h1>

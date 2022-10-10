@@ -47,9 +47,11 @@ That was perhaps an overly bleak description, but it should give some intuition 
 
 # Introducing MRP and our running example
 
+## Introducing MRP
+
 While I'm mostly focused on the way we choose to actually fit a given model with this series, here's a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec's [MRP Primer](https://scholar.princeton.edu/jkastellec/publications) is a great starting point.
 
-MRP casts estimation of a population quantity of interest $\theta$ as a prediction problem. That is, instead of the more traditional approach of like [simple raked weights](https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking), MRP leans more heavily on modeling and then poststratification to make the estimates representative.
+MRP casts estimation of a population quantity of interest $\theta$ as a prediction problem. That is, instead of the more traditional approach of building [simple raked weights](https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking) and using weighted estimators, MRP leans more heavily on modeling and then poststratification to make the estimates representative.
 
 To sketch out the steps-
 
@@ -62,6 +64,8 @@ To sketch out the steps-
 Why would we want to do this over building more typical survey weights? To the extent your new model has desirable properties like the ability to incorporate priors, can partially pool to manage rare subpopulations where you don't have a lot of sample, and so on, you can get the benefits of that more efficient model through MRP. Raking in its simplest form is really just a linear model; we have plenty of methods that can do better. Outside of bayesian multilevel models which are the most common, there's an increasing literature on using a wide variety of machine learning algorithms like BART[^2] to do the estimation stage; Andrew Gelman calls this [RRP](https://statmodeling.stat.columbia.edu/2018/05/19/regularized-prediction-poststratification-generalization-mister-p/).
 
 [^2]: In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my [masters thesis](https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html). This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you're willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than [BARP](https://github.com/jbisbee1/BARP). Also, a lot of pretty cool things you can do like jointly model multiple question responses at the same time aren't going to be easily to implement unless you get way in the weeds of your own BART implementation.
+
+## Introducing the Running Example    
 
 Rather than reinvent the wheel, I'll follow the lead of the excellent [Multilevel Regression and Poststratification Case Studies](https://bookdown.org/jl5522/MRP-case-studies/) by Lopez-Martin, Philips, and Gelman, and model survey binary responses from the [2018 CCES](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ZSBZ7K) for the following question:
 
@@ -150,9 +154,25 @@ Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. 
 
 As the table above should illustrate, if you're fitting a decently complex Bayesian model on even somewhat large N sizes, you're pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you're scaling N past the above example, or deepening the modeling complexity, you'll pretty quickly feel effectively locked out of using these models in fast-paced environments.
 
-Hopefully fitting my running example has helped for building intution here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
+Hopefully fitting my running example has helped for building intuition here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
 
 # Introducing Variational Inference
+
+I've gotten relatively far in this post without clearly explaining what Variational Inference is, and why it might provide a more efficient and scalable way to fix large Bayesian models. Let's fully flesh that out here to ground the rest of the series.
+
+In the bigger picture, pretty much all of our efforts in Bayesian inference are a form of approximate inference. Almost no models we care about for real world applications have closed form solutions- conjugate prior type situations are a math problem for stats classes, not a general tool for inference.
+
+Following [Blei et al. (2018)](https://arxiv.org/abs/1601.00670)'s notation, let's setup the general problem first, describe (briefly) how MCMC solves it, and then more slowly demonstrate how VI does. Let's say we have some observations $x_{1:N}$, and and some latent variables that define the model $z_{1:M}$. Note for concreteness these latent variables represent our quantities of interest: key parameters and so on- we're calling them latent in the sense that we can't go out and directly measure a $\beta$ or $\gamma$ from the model above, we have to gather data that allows us to estimate them. We call $p(z)$ priors, and they define our model prior to contact with the data. The goal of Bayesian inference then is conditioning on our data in order to get the posterior:
+
+$$p(z|x) = \frac{p(z,x)}{p(x)}$$
+
+If you're reading this post series, it's likely you recognize that the denominator here (often called the "evidence") is the sticking point; the integral $p(x) = \int{p(z,x)dz}$ won't have a closed form solution.
+
+When we use Markov Chain Monte Carlo as we did above to estimate the model, we're defining 
+
+## The ELBO 
+
+
 
 testing math script: $\mathscr{Q}$
 
