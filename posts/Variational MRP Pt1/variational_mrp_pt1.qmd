@@ -7,7 +7,6 @@ categories:
 - MRP
 - BART
 - Variational Inference
-draft: true
 ---
 
 This post introduces a series of posts I intend to write, exploring using [Variational Inference](https://en.wikipedia.org/wiki/Variational_Bayesian_methods) to massively speed up running complex survey estimation models like variants of [MRP](https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification) while aiming to keep approximation error from completely ruining the model.

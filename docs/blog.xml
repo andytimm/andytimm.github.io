@@ -10,7 +10,241 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.2.126</generator>
-<lastBuildDate>Wed, 03 Jul 2019 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 28 Sep 2022 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This post introduces a series of posts I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">MRP</a> while aiming to keep approximation error from completely ruining the model.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li><strong>(This post)</strong> Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
+<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Some theory on why posterior approximation with VI can be so poor</li>
+<li>Seeing if some more sophisticated techniques like normalizing flows help</li>
+</ol>
+<section id="motivation-for-series" class="level1">
+<h1>Motivation for series</h1>
+<p>I learn well by explaining things to others, and I’ve been particularly excited to learn about variational inference and ways to improve it over the past few months. There are lots of Bayesian models I would like to fit, especially my political work, that I would categorize as being incredibly useful, but on the edge of practically acceptable run times. For example, the somewhat but not particularly complex model I’ll use as a running example for the series <strong>takes ~8 hours to fix on 60k observations</strong>.</p>
+<p>Having a model run overnight or for a full work day can be fine sometimes, but what if there is a more urgent need for the results? What if we need to iterate to find the “right” model? What if the predictions from this model need to feed into a later one? How constrained do we feel about adding just a little bit more complexity to the model, or increasing our N size just a bit more?</p>
+<p>If we can get VI to fit well, we can make complex Bayesian models a lot more practical to use in a wider variety of scenarios, and maybe even extend the complexity of what we can build given time and resource constraints.</p>
+</section>
+<section id="spherical-cow-sadness" class="level1">
+<h1>Spherical Cow Sadness</h1>
+<section id="ive-got-that" class="level5">
+<h5 class="anchored" data-anchor-id="ive-got-that">I’ve got that…</h5>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 67.6%;justify-content: center;">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/rstanarm_disclaimer.png" class="img-fluid"></p>
+</div>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 5.4%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 27.0%;justify-content: center;">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/blei_vi_spherical.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+<p>If VI can make Bayesian inference much faster, what’s the catch? The above two images encapsulate the problem pretty well. First, as the left screenshot from <a href="https://mc-stan.org/rstanarm/reference/rstanarm-package.html#estimation-algorithms">rstanarm’s documentation</a> shows, variational inference requires a (bold text warning requiring) set of approximating distribution choices in order to be tractable to optimize. On the right, in their survey paper on VI, <a href="https://arxiv.org/pdf/1601.00670.pdf">Blei et al.&nbsp;(2018)</a> are showing one of the potential posterior distorting consequences of our choice to approximate.</p>
+<p>So stepping back for a second, we’ve taken a problem for which there’s usually no closed form solution (Bayesian inference), where even the best approximation algorithm we can usually use (MCMC) isn’t always enough for valid inference without very careful validation and tinkering. Then we decided our approximation could do with being more approximate.</p>
+<p>That was perhaps an overly bleak description, but it should give some intuition why this is a hard problem. We want to choose some method of approximating our posterior such that it is amenable to optimization-based solving instead of requiring sampling, but not trade away our ability to correctly understand the full complexity of the posterior distribution<sup>1</sup>.</p>
+</section>
+</section>
+<section id="introducing-mrp-and-our-running-example" class="level1">
+<h1>Introducing MRP and our running example</h1>
+<section id="introducing-mrp" class="level2">
+<h2 class="anchored" data-anchor-id="introducing-mrp">Introducing MRP</h2>
+<p>While I’m mostly focused on the way we choose to actually fit a given model with this series, here’s a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec’s <a href="https://scholar.princeton.edu/jkastellec/publications">MRP Primer</a> is a great starting point, as are the case studies I link a bit later.</p>
+<p>MRP casts estimation of a population quantity of interest <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> as a prediction problem. That is, instead of the more traditional approach of building <a href="https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking">simple raked weights</a> and using weighted estimators, MRP leans more heavily on modeling and then poststratification to make the estimates representative.</p>
+<p>To sketch out the steps-</p>
+<ol type="1">
+<li>Either gather or run a survey or collection of surveys that collect both information on the outcome of interest, <img src="https://latex.codecogs.com/png.latex?y">, and a set of demographic and geographic predictors, <img src="https://latex.codecogs.com/png.latex?%5Cleft(X_%7B1%7D,%20X_%7B2%7D,%20X_%7B3%7D,%20%5Cldots,%20X_%7Bm%7D%5Cright)">.</li>
+<li>Build a poststratification table, with population counts or estimated population counts <img src="https://latex.codecogs.com/png.latex?N_%7Bj%7D"> for each possible combination of the features gathered above. Each possible combination <img src="https://latex.codecogs.com/png.latex?j"> is called a cell, one of <img src="https://latex.codecogs.com/png.latex?J"> possible cells. For example, if we poststratified only on state, there would be <img src="https://latex.codecogs.com/png.latex?J=51"> (with DC) total cells; in practice, <img src="https://latex.codecogs.com/png.latex?J"> is often several thousand.</li>
+<li>Build a model, usually a Bayesian multilevel regression, to predict <img src="https://latex.codecogs.com/png.latex?y"> using the demographic characteristic from the survey or set of surveys, estimating model parameters along the way.</li>
+<li>Estimate <img src="https://latex.codecogs.com/png.latex?y"> for each cell in the poststratification table, using the model built on the sample.</li>
+<li>Aggregate the cells to the population of interest, weighting by the <img src="https://latex.codecogs.com/png.latex?N_%7Bj%7D">’s to obtain population level estimates: <img src="https://latex.codecogs.com/png.latex?%5Ctheta_%7B%5Cmathrm%7BPOP%7D%7D=%5Cfrac%7B%5Csum_%7Bj%20%5Cin%20J%7D%20N_%7Bj%7D%20%5Ctheta_%7Bj%7D%7D%7B%5Csum_%7Bj%20%5Cin%20J%7D%20N_%7BJ%7D%7D"></li>
+</ol>
+<p>Why would we want to do this over building more typical survey weights? To the extent your new model has desirable properties like the ability to incorporate priors, can partially pool to manage rare subpopulations where you don’t have a lot of sample, and so on, you can get the benefits of that more efficient model through MRP. Raking in its simplest form is really just a linear model; we have plenty of methods that can do better. Outside of bayesian multilevel models which are the most common, there’s an increasing literature on using a wide variety of machine learning algorithms like BART<sup>2</sup> to do the estimation stage; Andrew Gelman calls this <a href="https://statmodeling.stat.columbia.edu/2018/05/19/regularized-prediction-poststratification-generalization-mister-p/">RRP</a>.</p>
+</section>
+<section id="introducing-the-running-example" class="level2">
+<h2 class="anchored" data-anchor-id="introducing-the-running-example">Introducing the Running Example</h2>
+<p>Rather than reinvent the wheel, I’ll follow the lead of the excellent <a href="https://bookdown.org/jl5522/MRP-case-studies/">Multilevel Regression and Poststratification Case Studies</a> by Lopez-Martin, Philips, and Gelman, and model survey binary responses from the <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/ZSBZ7K">2018 CCES</a> for the following question:</p>
+<blockquote class="blockquote">
+<p>Allow employers to decline coverage of abortions in insurance plans (Support / Oppose)</p>
+</blockquote>
+<p>From the CCES, we get information on each participant’s state, age, gender, ethnicity, and education level. Supplementing this individual level data, we also include region flags for each state, and Republican vote share in the 2016 election- these state level predictors have been shown to be critical for getting strong MRP estimates by <a href="http://www.columbia.edu/~jhp2121/publications/HowShouldWeEstimateOpinion.pdf">Lax and Philips (2009)</a> and others. and If you’d like deeper detail on the dataset itself, I’d refer you to <a href="https://bookdown.org/jl5522/MRP-case-studies/introduction-to-mister-p.html#ref-2018CCES">this part</a> MRP case study.</p>
+<p>Using these, we setup the model for <img src="https://latex.codecogs.com/png.latex?Pr(y_i%20=%201)"> the probability of supporting allowing employers to decline coverage of abortions in insurance plans as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0APr(y_i%20=%201)%20=&amp;%20logit%5E%7B-1%7D(%0A%5Cgamma%5E0%0A+%20%5Calpha_%7B%5Crm%20s%5Bi%5D%7D%5E%7B%5Crm%20state%7D%0A+%20%5Calpha_%7B%5Crm%20a%5Bi%5D%7D%5E%7B%5Crm%20age%7D%0A+%20%5Calpha_%7B%5Crm%20r%5Bi%5D%7D%5E%7B%5Crm%20eth%7D%0A+%20%5Calpha_%7B%5Crm%20e%5Bi%5D%7D%5E%7B%5Crm%20educ%7D%0A+%20%5Cbeta%5E%7B%5Crm%20male%7D%20%5Ccdot%20%7B%5Crm%20Male%7D_%7B%5Crm%20i%7D%20%5C%5C%0A&amp;+%20%5Calpha_%7B%5Crm%20g%5Bi%5D,%20r%5Bi%5D%7D%5E%7B%5Crm%20male.eth%7D%0A+%20%5Calpha_%7B%5Crm%20e%5Bi%5D,%20a%5Bi%5D%7D%5E%7B%5Crm%20educ.age%7D%0A+%20%5Calpha_%7B%5Crm%20e%5Bi%5D,%20r%5Bi%5D%7D%5E%7B%5Crm%20educ.eth%7D%0A+%20%5Cgamma%5E%7B%5Crm%20south%7D%20%5Ccdot%20%7B%5Crm%20South%7D_%7B%5Crm%20s%7D%20%5C%5C%0A&amp;+%20%5Cgamma%5E%7B%5Crm%20northcentral%7D%20%5Ccdot%20%7B%5Crm%20NorthCentral%7D_%7B%5Crm%20s%7D%0A+%20%5Cgamma%5E%7B%5Crm%20west%7D%20%5Ccdot%20%7B%5Crm%20West%7D_%7B%5Crm%20s%7D%0A+%20%5Cgamma%5E%7B%5Crm%20repvote%7D%20%5Ccdot%20%7B%5Crm%20RepVote%7D_%7B%5Crm%20s%7D)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>Where we incorporate pretty much all of our predictors as varying intercepts to allow for pooling across demographic and geographic characteristics:</p>
+<ul>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20a%7D%5E%7B%5Crm%20age%7D">: The effect of subject <img src="https://latex.codecogs.com/png.latex?i">’s age on the probability of supporting the statement.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20r%7D%5E%7B%5Crm%20eth%7D">: The effect of subject <img src="https://latex.codecogs.com/png.latex?i">’s ethnicity on the probability of supporting the statement.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20e%7D%5E%7B%5Crm%20educ%7D">: The effect of subject <img src="https://latex.codecogs.com/png.latex?i">’s education on the probability of supporting the statement.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20s%7D%5E%7B%5Crm%20state%7D">: The effect of subject <img src="https://latex.codecogs.com/png.latex?i">’s state on the probability of supporting the statement.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Cbeta%5E%7B%5Crm%20male%7D">: The average effect of being male on the probability of supporting abortion. Note that it doesn’t really make much sense to model a two category<sup>3</sup> factor as a varying intercept.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20e,r%7D%5E%7B%5Crm%20male.eth%7D">, <img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20e,r%7D%5E%7B%5Crm%20educ.age%7D">, <img src="https://latex.codecogs.com/png.latex?%5Calpha_%7B%5Crm%20e,r%7D%5E%7B%5Crm%20educ.eth%7D">: Are several reasonable guesses at important interactions for this question. We could add many more two way, or even some three way interactions here, but this is enough for my testing here.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?%5Cgamma%5E%7B%5Crm%20south%7D,%20%5Cgamma%5E%7B%5Crm%20northcentral%7D,%20%5Cgamma%5E%7B%5Crm%20west%7D,%5Cgamma%5E%7B%5Crm%20repvote%7D">: are the state level predictors which are not represented as varying intercepts. Following the case study, I use <img src="https://latex.codecogs.com/png.latex?%5Cgamma">’s for the state level coefficients, keeping <img src="https://latex.codecogs.com/png.latex?%5Cbeta">’s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn’t get it’s own coefficient.</p></li>
+</ul>
+<p>Stepping back for a second, let’s describe the complexity of this model in more general terms. This certainly isn’t state of the art for MRP, and you could definitely add in things like a lot more interactions, some varying slopes, non-univariate prior and/or pooling structure, or other elements to make this a more interesting model. That said, this is already clearly enough of a model to improve on simple raking in many cases, and it produces a nuanced enough posterior that we can feasibly imagine a bad approximation going all spherical cow shaped on us.</p>
+<p>Why this dataset and this model for this series? The question we model itself isn’t super important- as long as we can expect some significant regional and demographic variation in the outcome we’ll be able to explore if VI smoothes away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Practically, fitting this with <code>rstanarm</code> allows us to switch easily from a great MCMC implementation to a decent VI optimizer quickly for some early tests. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison’s sake, and something challenging enough that it should teach us something about VI’s ability to handle non-toy models of the world.</p>
+<p>Fitting this<sup>4</sup> with MCMC in <code>rstanarm</code> is as simple as:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="co" style="color: #5E5E5E;"># Fit in stan_glmer</span></span>
+<span id="cb1-2">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">stan_glmer</span>(abortion <span class="sc" style="color: #5E5E5E;">~</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> state) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ) <span class="sc" style="color: #5E5E5E;">+</span> male <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-3">                    (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> male<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>age) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-4">                    repvote <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">factor</span>(region),</span>
+<span id="cb1-5">  <span class="at" style="color: #657422;">family =</span> <span class="fu" style="color: #4758AB;">binomial</span>(<span class="at" style="color: #657422;">link =</span> <span class="st" style="color: #20794D;">"logit"</span>),</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;">data =</span> cces_df,</span>
+<span id="cb1-7">  <span class="at" style="color: #657422;">prior =</span> <span class="fu" style="color: #4758AB;">normal</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">autoscale =</span> <span class="cn" style="color: #8f5902;">TRUE</span>),</span>
+<span id="cb1-8">  <span class="at" style="color: #657422;">prior_covariance =</span> <span class="fu" style="color: #4758AB;">decov</span>(<span class="at" style="color: #657422;">scale =</span> <span class="fl" style="color: #AD0000;">0.50</span>),</span>
+<span id="cb1-9">  <span class="at" style="color: #657422;">adapt_delta =</span> <span class="fl" style="color: #AD0000;">0.99</span>,</span>
+<span id="cb1-10">  <span class="at" style="color: #657422;">refresh =</span> <span class="dv" style="color: #AD0000;">0</span>,</span>
+<span id="cb1-11">  <span class="at" style="color: #657422;">seed =</span> <span class="dv" style="color: #AD0000;">605</span>)</span></code></pre></div>
+</div>
+<p>Since it isn’t relevant for the rest of my discussion here, I’ll summarize the model diagnostics here and say that this seems to be a pretty reasonable fit- no issues with divergences, and no issues with poor <img src="https://latex.codecogs.com/png.latex?%5Chat%7Br%7D">’s. Worth quickly pointing out that we did have to tune <code>adapt_delta</code> a bit to get no divergences though- even before getting to fitting this with VI, a model like this requires some adjustments to fit correctly.</p>
+<p>With a model like this on just a 5k sample, we can produce pretty solid state level predictions that have clearly benefited from being fit with a Bayesian multilevel model:</p>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/5k_sample_full_results.png" class="img-fluid"></p>
+<p>With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. That’s certainly not a fully fair comparison, but it gives some intution around the promise of this approach.</p>
+<p>Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. How does this change as we fit on more and more of the data?</p>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Sample Size</th>
+<th style="text-align: left;">Runtime</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">5,000</td>
+<td style="text-align: left;">13 minutes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10,000</td>
+<td style="text-align: left;">44 minutes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">60,000</td>
+<td style="text-align: left;">526 minutes (~8 hours!)</td>
+</tr>
+</tbody>
+</table>
+<p>As the table above should illustrate, if you’re fitting a decently complex Bayesian model on even somewhat large N sizes, you’re pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you’re scaling N past the above example, or deepening the modeling complexity, you’ll pretty quickly feel effectively locked out of using these models in fast-paced environments.</p>
+<p>Hopefully fitting my running example has helped for building intuition here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on modelling choices faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we’d really like to scale these fitting times back. Can Variational Inference help?</p>
+</section>
+</section>
+<section id="introducing-variational-inference" class="level1">
+<h1>Introducing Variational Inference</h1>
+<p>I’ve gotten relatively far in this post without clearly explaining what Variational Inference is, and why it might provide a more efficient and scalable way to fix large Bayesian models. Let’s fully flesh that out here to ground the rest of the series.</p>
+<p>In the bigger picture, pretty much all of our efforts in Bayesian inference are a form of approximate inference. Almost no models we care about for real world applications have closed form solutions- conjugate prior type situations are a math problem for stats classes, not a general tool for inference.</p>
+<p>Following <a href="https://arxiv.org/abs/1601.00670">Blei et al.&nbsp;(2018)</a>’s notation, let’s setup the general problem first, describe (briefly) how MCMC solves it, and then more slowly demonstrate how VI does. Let’s say we have some observations <img src="https://latex.codecogs.com/png.latex?x_%7B1:N%7D">, and and some latent variables that define the model <img src="https://latex.codecogs.com/png.latex?z_%7B1:M%7D">. Note for concreteness these latent variables represent our quantities of interest: key parameters and so on- we’re calling them latent in the sense that we can’t go out and directly measure a <img src="https://latex.codecogs.com/png.latex?%5Cbeta"> or <img src="https://latex.codecogs.com/png.latex?%5Cgamma"> from the model above, we have to gather data that allows us to estimate them. We call <img src="https://latex.codecogs.com/png.latex?p(z)"> priors, and they define our model prior to contact with the data. The goal of Bayesian inference then is conditioning on our data in order to get the posterior:</p>
+<p><img src="https://latex.codecogs.com/png.latex?p(z%7Cx)%20=%20%5Cfrac%7Bp(z,x)%7D%7Bp(x)%7D"></p>
+<p>If you’re reading this post series, it’s likely you recognize that the denominator on the right here (often called the “evidence”) is the sticking point; the integral <img src="https://latex.codecogs.com/png.latex?p(x)%20=%20%5Cint%7Bp(z,x)dz%7D"> won’t have a closed form solution.</p>
+<p>When we use Markov Chain Monte Carlo as we did above to estimate the model, we’re defining a Markov Chain on <img src="https://latex.codecogs.com/png.latex?z">, whose stationary distribution if we’ve done everything right is <img src="https://latex.codecogs.com/png.latex?p(z%7Cx)">. There are better and worse ways to do this certainly- the development of the <a href="https://mc-stan.org/">Stan</a> language, with associated <a href="https://mc-stan.org/docs/2_19/reference-manual/hamiltonian-monte-carlo.html">Hamiltonian Monte Carlo</a> with <a href="https://arxiv.org/abs/1111.4246">NUTS</a> sampler has massively expanded what was possible to fit in recent years. However, while actively improving the speed and scalability of sampling is an active area of research (for example, by using <a href="https://mc-stan.org/cmdstanr/articles/opencl.html">GPU compute</a> where possible), some of the speed challenges just seem a bit baked into the approach. For example, the sequential nature of markov chains makes parallelization within chains seem out of reach absent some as-yet unknown clever tricks.</p>
+<p>Instead of sampling, variational inference asks what we’d need to figure out to treat the Bayesian inference problem as an <strong>optimization problem</strong>, where we could bring to bear all the tools for efficient, scalable, and parallelizable optimization we have developed.</p>
+<p>Let’s start with the idea of a family of approximate densities <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D"> over our latent variables<sup>5</sup>.</p>
+<p>Within that <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D">, we want to try the best <img src="https://latex.codecogs.com/png.latex?q(z)">, call it <img src="https://latex.codecogs.com/png.latex?q%5E*(z)">, that minimizes the Kullback-Leibler divergence to the true posterior:</p>
+<p><img src="https://latex.codecogs.com/png.latex?q%5E*(z)%20=%20argmin_%7Bq(z)%20%5Cin%20%5Cmathscr%7BQ%7D%7D(q(z)%7C%7Cp(z%7Cx))"></p>
+<p>If we choose a good <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D">, managing the complexity so that it includes a density close to <img src="https://latex.codecogs.com/png.latex?p(z%7Cx)">, without becoming too slow or impossible to optimize, this approach may provide a significant speed boost.</p>
+<p>To start working with this approach though, there’s one major remaining problem. Do you see it in the equation above?</p>
+<section id="the-elbo" class="level2">
+<h2 class="anchored" data-anchor-id="the-elbo">The ELBO</h2>
+<p>If you haven’t seen it yet, this quick substitution should clarify a potential issue with VI as I’ve described it so far:</p>
+<p><img src="https://latex.codecogs.com/png.latex?q%5E*(z)%20=%20argmin_%7Bq(z)%20%5Cin%20%5Cmathscr%7BQ%7D%7D(q(z)%7C%7C%5Cfrac%7Bp(z,x)%7D%7B%5Cbf%20p(x)%7D)%20=%20%5Cmathbb%7BE%7D%5Blogq(z)%5D%20-%20%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20+%20%7B%5Cbf%20logp(x)%7D"> Without some new trick, all I’ve said so far is to approximate a thing I can’t analytically calculate (the posterior, specially the issue evidence piece of it), I’m going to calculate the distance between my approximation and… the thing I said has a component can’t calculate?</p>
+<p>Fortunately, a clever solution exists here that makes this strategy possible. Instead of trying to minimize the above KL divergence, we can optimize the alternative objective:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20-%20%5Cmathbb%7BE%7D%5Blogq(z)%5D"></p>
+<p>This is just the negative of the first two terms above, leaving aside the <img src="https://latex.codecogs.com/png.latex?logp(x)">. Why can we treat maximizing this as minimizing the KL divergence? The <img src="https://latex.codecogs.com/png.latex?logp(x)"> term is just a constant (with respect to q), so regardless of how we vary q, this will still be a valid alternative objective. We call this the Evidence Lower Bound (ELBO)<sup>6</sup>.</p>
+<p>If it’s helpful for intuition, play around with this great interactive ELBO optimizer by Felix Köhler:</p>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/elboplot.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/elboeqs.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Link to demonstration <a href="https://englishprobabilistic-machine-learningelbo-interactive--or5u7m.streamlitapp.com/">here</a>; check out Felix’s Youtube explanation of the ELBO <a href="https://www.youtube.com/watch?v=HxQ94L8n0vU">also</a>!</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>By twiddling the knobs on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma"> for our approximating normal, we can get our surrogate distribution pretty close to the True Posterior (which we know for purposes of demonstration, so we can calculate the true KL, not just it’s ELBO component). No matter how we twiddle though, the evidence remains constant.</p>
+<p>For further intuition- notice that we can only do this trick in one direction. The KL divergence isn’t symmetrical, and if we wanted to calculate the “reverse” KL, we couldn’t use this strategy as <img src="https://latex.codecogs.com/png.latex?logq(x)"> would not be a constant. Even if we thought that optimizing other direction of KL might have desirable properties like emphasizing <a href="https://agustinus.kristia.de/techblog/2016/12/21/forward-reverse-kl/">mass-seeking over mode-seeking behavior</a>, that simply isn’t an option.</p>
+</section>
+</section>
+<section id="a-first-try-at-vi-on-this-dataset" class="level1">
+<h1>A first try at VI on this dataset</h1>
+<p>Ok, so we have an objective to optimize that should actually work. What’s a good <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D">? The choice has been shown to matter a lot, but for purposes of a first swing here, let’s try one of the simpler ideas people have explored, the mean-field family. These latent variables will be assumed mutually independent<sup>7</sup> and each get it’s own distinct factor in the variational density. A member of this would look something like:</p>
+<p><img src="https://latex.codecogs.com/png.latex?q(z)%20=%20%5Cprod_%7Bj=1%7D%5E%7Bm%7D%20q_j(z_j)"></p>
+<p>Each latent <img src="https://latex.codecogs.com/png.latex?z_j"> get it’s own variational factor with density <img src="https://latex.codecogs.com/png.latex?q_j(z_j)">, whose knobs we play with to maximize the ELBO.</p>
+<p>Probably not the best we can do, but let’s give it a roll. Since we’ve been told this will scale really well too supposedly, let’s use all 60k of the observations just to get a sense how it’ll compare to our 8+ hours in that case.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;">tic</span>()</span>
+<span id="cb2-2">fit_60k <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">stan_glmer</span>(abortion <span class="sc" style="color: #5E5E5E;">~</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> state) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ) <span class="sc" style="color: #5E5E5E;">+</span> male <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-3">                    (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> male<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>age) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-4">                    repvote <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">factor</span>(region),</span>
+<span id="cb2-5">  <span class="at" style="color: #657422;">family =</span> <span class="fu" style="color: #4758AB;">binomial</span>(<span class="at" style="color: #657422;">link =</span> <span class="st" style="color: #20794D;">"logit"</span>),</span>
+<span id="cb2-6">  <span class="at" style="color: #657422;">data =</span> cces_all_df,</span>
+<span id="cb2-7">  <span class="at" style="color: #657422;">prior =</span> <span class="fu" style="color: #4758AB;">normal</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">autoscale =</span> <span class="cn" style="color: #8f5902;">TRUE</span>),</span>
+<span id="cb2-8">  <span class="at" style="color: #657422;">prior_covariance =</span> <span class="fu" style="color: #4758AB;">decov</span>(<span class="at" style="color: #657422;">scale =</span> <span class="fl" style="color: #AD0000;">0.50</span>),</span>
+<span id="cb2-9">  <span class="at" style="color: #657422;">adapt_delta =</span> <span class="fl" style="color: #AD0000;">0.99</span>,</span>
+<span id="cb2-10">  <span class="at" style="color: #657422;">refresh =</span> <span class="dv" style="color: #AD0000;">0</span>,</span>
+<span id="cb2-11">  <span class="at" style="color: #657422;">algorithm =</span> <span class="st" style="color: #20794D;">"meanfield"</span>,</span>
+<span id="cb2-12">  <span class="at" style="color: #657422;">seed =</span> <span class="dv" style="color: #AD0000;">605</span>)</span>
+<span id="cb2-13"><span class="fu" style="color: #4758AB;">toc</span>()</span></code></pre></div>
+</div>
+<p>This finishes in a blazing <strong>144.03 seconds</strong>. Is this a good fit, or have we created a ridiculous spherical cow?</p>
+<p>You’ll have to find out in the next post. Thanks for reading!</p>
+<p><em>Typically, I’ll include links to code at the end of these posts, but since the only thing going on in this notebook is mentioning some runtimes of the models displayed inline at various sample sizes, I’m skipping that for now.</em></p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>If I were that type of Bayesian, this is where I’d complain that if we screw this up badly enough, we might as well be frequentists or worse, machine learning folk.↩︎</p></li>
+<li id="fn2"><p>In grad school, using BART as the estimator (also combining it with some portions of the model being estimated as multilevel models) was the focus of my <a href="https://andytimm.github.io/posts/BART%20VI/2020-03-06-BART-vi.html">masters thesis</a>. This pairs the best parts of relatively black box machine learning sensibility with the advantages of still having a truly Bayesian model. With comparatively minimal iteration you can get a pretty decent set of MRP models that will be better than many basic versions of multilevel models fit early in the MRP literature. Of course, if you’re willing to spend a bunch of time iterating on the absolute best models for a given problem, and incorporate lots of problem specific knowledge into model forms you can and should do better than <a href="https://github.com/jbisbee1/BARP">BARP</a>. Also, a lot of pretty cool things you can do like jointly model multiple question responses at the same time aren’t going to be easily to implement unless you get way in the weeds of your own BART implementation.↩︎</p></li>
+<li id="fn3"><p>Insert snark about CCES folks doing a poor job at gender inclusivity despite 80+ researchers working on it here.↩︎</p></li>
+<li id="fn4"><p>Again, see the MRP case studies linked above if you want see all the data prep and draw manipulation here; I’ll be leaving out most such details that aren’t relevant for comparisons to fitting this model with VI from now on.↩︎</p></li>
+<li id="fn5"><p>In grad school, I had a friend who insisted on calling this “spicy Q”. For a while we had a latex package that made <code>\spicy{}</code> equivalent to <code>\mathscr{}</code>. Apologies for the footnote for the dumb LaTeX joke, but now I’m pretty sure you won’t have a sudden moment of “what is that symbol again” discussing VI ever.↩︎</p></li>
+<li id="fn6"><p>Why is this a lower bound? Notice that we could write the evidence from above equations as <img src="https://latex.codecogs.com/png.latex?logp(x)%20=%20KL(q(z)%7C%7Cp(z%7Cx))%20+%20ELBO(q)">. Since the KL divergence is non-negative (it’s zero when distributions <img src="https://latex.codecogs.com/png.latex?p"> and <img src="https://latex.codecogs.com/png.latex?q"> are identical), the ELBO is a lower bound of the evidence.↩︎</p></li>
+<li id="fn7"><p>If this seems like it could go fully spherical cow, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+  author = {Andy Timm},
+  editor = {},
+  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
+    {Distributions}},
+  date = {2022-09-28},
+  url = {https://andytimm.github.io/variational_mrp_pt1.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas">
+Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> September 28, 2022. <a href="https://andytimm.github.io/variational_mrp_pt1.html">https://andytimm.github.io/variational_mrp_pt1.html</a>.
+</div></div></section></div> ]]></description>
+  <category>MRP</category>
+  <category>BART</category>
+  <category>Variational Inference</category>
+  <guid>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</guid>
+  <pubDate>Wed, 28 Sep 2022 04:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt1/rstanarm_disclaimer.png" medium="image" type="image/png" height="50" width="144"/>
+</item>
 <item>
   <title>BART with varying intercepts in the MRP framework</title>
   <dc:creator>Andy Timm</dc:creator>
