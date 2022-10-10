@@ -15,7 +15,7 @@ This post introduces a series of posts I intend to write, exploring using [Varia
 The rough plan for the series is as follows:
 
 1.  **(This post)** Introducing the Problem- Why is VI useful, why VI can produce spherical cows
-2.  How far does iteration on classic VI algorithms like mean-field and full rank get us?
+2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
 3.  Some theory on why posterior approximation with VI can be so poor
 4.  Seeing if some more sophisticated techniques like normalizing flows help
 
@@ -37,7 +37,7 @@ If we can get VI to fit well, we can make complex Bayesian models a lot more pra
 ![](blei_vi_spherical.png)
 :::
 
-If VI can make Bayesian inference much faster, what's the catch? The above two images encapsulate the problem pretty well. First, as the left screenshot from [rstanarm's documentation](https://mc-stan.org/rstanarm/reference/rstanarm-package.html#estimation-algorithms) shows, variational inference requires a (bold text warning requiring) set of approximating distribution choices in order to be tractable to optimize. On the right, in their survey paper on VI, [Blei et al., 2018](https://arxiv.org/pdf/1601.00670.pdf) are showing one of the potential posterior distorting consequences of our choice to approximate.
+If VI can make Bayesian inference much faster, what's the catch? The above two images encapsulate the problem pretty well. First, as the left screenshot from [rstanarm's documentation](https://mc-stan.org/rstanarm/reference/rstanarm-package.html#estimation-algorithms) shows, variational inference requires a (bold text warning requiring) set of approximating distribution choices in order to be tractable to optimize. On the right, in their survey paper on VI, [Blei et al. (2018)](https://arxiv.org/pdf/1601.00670.pdf) are showing one of the potential posterior distorting consequences of our choice to approximate.
 
 So stepping back for a second, we've taken a problem for which there's usually no closed form solution (Bayesian inference), where even the best approximation algorithm we can usually use (MCMC) isn't always enough for valid inference without very careful validation and tinkering. Then we decided our approximation could do with being more approximate.
 
@@ -49,7 +49,7 @@ That was perhaps an overly bleak description, but it should give some intuition 
 
 ## Introducing MRP
 
-While I'm mostly focused on the way we choose to actually fit a given model with this series, here's a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec's [MRP Primer](https://scholar.princeton.edu/jkastellec/publications) is a great starting point.
+While I'm mostly focused on the way we choose to actually fit a given model with this series, here's a super quick review of the intuition in building a MRP model. If you want a more complete introduction, Kastellec's [MRP Primer](https://scholar.princeton.edu/jkastellec/publications) is a great starting point, as are the case studies I link a bit later.
 
 MRP casts estimation of a population quantity of interest $\theta$ as a prediction problem. That is, instead of the more traditional approach of building [simple raked weights](https://www.pewresearch.org/methods/2018/01/26/how-different-weighting-methods-work/#raking) and using weighted estimators, MRP leans more heavily on modeling and then poststratification to make the estimates representative.
 
@@ -71,7 +71,7 @@ Rather than reinvent the wheel, I'll follow the lead of the excellent [Multileve
 
 > Allow employers to decline coverage of abortions in insurance plans (Support / Oppose)
 
-From the CCES, we get information on each participant's state, age, gender, ethnicity, education level. Supplementing this individual level data, we also include region flags for each state, and Republican vote share in the 2016 election- these state level predictors have been shown to be critical for getting strong MRP estimates by [Lax and Philips (2009)](http://www.columbia.edu/~jhp2121/publications/HowShouldWeEstimateOpinion.pdf) and others. and If you'd like deeper detail on the dataset itself, I'd refer you to [this part](https://bookdown.org/jl5522/MRP-case-studies/introduction-to-mister-p.html#ref-2018CCES) MRP case study.
+From the CCES, we get information on each participant's state, age, gender, ethnicity, and education level. Supplementing this individual level data, we also include region flags for each state, and Republican vote share in the 2016 election- these state level predictors have been shown to be critical for getting strong MRP estimates by [Lax and Philips (2009)](http://www.columbia.edu/~jhp2121/publications/HowShouldWeEstimateOpinion.pdf) and others. and If you'd like deeper detail on the dataset itself, I'd refer you to [this part](https://bookdown.org/jl5522/MRP-case-studies/introduction-to-mister-p.html#ref-2018CCES) MRP case study.
 
 Using these, we setup the model for $Pr(y_i = 1)$ the probability of supporting allowing employers to decline coverage of abortions in insurance plans as:
 
@@ -110,7 +110,7 @@ Where we incorporate pretty much all of our predictors as varying intercepts to 
 
 -   $\gamma^{\rm south}, \gamma^{\rm northcentral}, \gamma^{\rm west},\gamma^{\rm repvote}$: are the state level predictors which are not represented as varying intercepts. Following the case study, I use $\gamma$'s for the state level coefficients, keeping $\beta$'s for individual coefficients. Note that Northeast is the base region of the region factor here, so it doesn't get it's own coefficient.
 
-[^3]: Insert snark about CCES folks doing a poor job at gender exclusivity despite 80+ researchers working on it here.
+[^3]: Insert snark about CCES folks doing a poor job at gender inclusivity despite 80+ researchers working on it here.
 
 Stepping back for a second, let's describe the complexity of this model in more general terms. This certainly isn't state of the art for MRP, and you could definitely add in things like a lot more interactions, some varying slopes, non-univariate prior and/or pooling structure, or other elements to make this a more interesting model. That said, this is already clearly enough of a model to improve on simple raking in many cases, and it produces a nuanced enough posterior that we can feasibly imagine a bad approximation going all spherical cow shaped on us.
 
@@ -136,7 +136,7 @@ fit <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) + male +
 
 Since it isn't relevant for the rest of my discussion here, I'll summarize the model diagnostics here and say that this seems to be a pretty reasonable fit- no issues with divergences, and no issues with poor $\hat{r}$'s. Worth quickly pointing out that we did have to tune `adapt_delta` a bit to get no divergences though- even before getting to fitting this with VI, a model like this requires some adjustments to fit correctly.
 
-With a model like this, we can produce state level predictions that have clearly benefited from being fit with a Bayesian multilevel model: 
+With a model like this on just a 5k sample, we can produce pretty solid state level predictions that have clearly benefited from being fit with a Bayesian multilevel model: 
 
 ![](5k_sample_full_results.png) 
 
@@ -154,7 +154,7 @@ Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. 
 
 As the table above should illustrate, if you're fitting a decently complex Bayesian model on even somewhat large N sizes, you're pretty quickly going to cap out what you can reasonably fit in a acceptable amount of time. If you're scaling N past the above example, or deepening the modeling complexity, you'll pretty quickly feel effectively locked out of using these models in fast-paced environments.
 
-Hopefully fitting my running example has helped for building intuition here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on model quality faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
+Hopefully fitting my running example has helped for building intuition here. Even a reasonably complex Bayesian model can have some pretty desirable estimation properties. To make iterating on modelling choices faster, to scale our N or model complexity higher, or just to use a model like this day to day when time matters, we'd really like to scale these fitting times back. Can Variational Inference help?
 
 # Introducing Variational Inference
 
@@ -166,19 +166,19 @@ Following [Blei et al. (2018)](https://arxiv.org/abs/1601.00670)'s notation, let
 
 $$p(z|x) = \frac{p(z,x)}{p(x)}$$
 
-If you're reading this post series, it's likely you recognize that the denominator here (often called the "evidence") is the sticking point; the integral $p(x) = \int{p(z,x)dz}$ won't have a closed form solution.
+If you're reading this post series, it's likely you recognize that the denominator on the right here (often called the "evidence") is the sticking point; the integral $p(x) = \int{p(z,x)dz}$ won't have a closed form solution.
 
-When we use Markov Chain Monte Carlo as we did above to estimate the model, we're defining a Markov Chain on $z$, whose stationary distribution if we've done everything right is $p(z|x)$. There are better and worse ways to do this certainly- the development of the [Stan](https://mc-stan.org/) language, with associated [Hamiltonian Monte Carlo](https://mc-stan.org/docs/2_19/reference-manual/hamiltonian-monte-carlo.html) with [NUTS](https://arxiv.org/abs/1111.4246) sampler has massively expanded what was possible to fit in recent years. However, while actively improving the speed and scalability of sampling is an active area of research (for example, by using [GPU compute](https://mc-stan.org/cmdstanr/articles/opencl.html) where possible), some of the speed challenges just seem a bit baked into the approach. For example, the sequential nature of markov chains makes parallelization quite a difficult task approach.
+When we use Markov Chain Monte Carlo as we did above to estimate the model, we're defining a Markov Chain on $z$, whose stationary distribution if we've done everything right is $p(z|x)$. There are better and worse ways to do this certainly- the development of the [Stan](https://mc-stan.org/) language, with associated [Hamiltonian Monte Carlo](https://mc-stan.org/docs/2_19/reference-manual/hamiltonian-monte-carlo.html) with [NUTS](https://arxiv.org/abs/1111.4246) sampler has massively expanded what was possible to fit in recent years. However, while actively improving the speed and scalability of sampling is an active area of research (for example, by using [GPU compute](https://mc-stan.org/cmdstanr/articles/opencl.html) where possible), some of the speed challenges just seem a bit baked into the approach. For example, the sequential nature of markov chains makes parallelization within chains seem out of reach absent some as-yet unknown clever tricks.
 
-Instead of sampling, variational inference asks what we'd need to figure out to treat the Bayesian inference problem as an optimization problem, where we could bring to bear all the tools for efficient, scalable, and parallelizable optimization we have developed.
+Instead of sampling, variational inference asks what we'd need to figure out to treat the Bayesian inference problem as an **optimization problem**, where we could bring to bear all the tools for efficient, scalable, and parallelizable optimization we have developed.
 
 Let's start with the idea of a family of approximate densities $\mathscr{Q}$ over our latent variables[^5].
 
-Within that $\mathscr{Q}$, we want to try the best $q(z)$, call it $q^*(z)$ that minimizes the Kullback-Leibler divergence to the true posterior:
+Within that $\mathscr{Q}$, we want to try the best $q(z)$, call it $q^*(z)$, that minimizes the Kullback-Leibler divergence to the true posterior:
 
 $$q^*(z) = argmin_{q(z) \in \mathscr{Q}}(q(z)||p(z|x))$$
 
-If we choose a good $\mathscr{Q}$, managing the complexity so that it includes a density close to $p(z|x$, without becoming too slow or impossible to optimize, this approach may provide a significant speed boost.
+If we choose a good $\mathscr{Q}$, managing the complexity so that it includes a density close to $p(z|x)$, without becoming too slow or impossible to optimize, this approach may provide a significant speed boost.
 
 To start working with this approach though, there's one major remaining problem. Do you see it in the equation above?
 
@@ -189,13 +189,13 @@ To start working with this approach though, there's one major remaining problem.
 If you haven't seen it yet, this quick substitution should clarify a potential issue with VI as I've described it so far:
 
 $$q^*(z) = argmin_{q(z) \in \mathscr{Q}}(q(z)||\frac{p(z,x)}{\bf p(x)}) = \mathbb{E}[logq(z)] - \mathbb{E}[logp(z,x)] + {\bf logp(x)}$$
-Without some new trick, all I've said so far is to approximate a thing I can't analytically calculate (the posterior, specially having an issue evidence piece of it), I'm going to calculate the distance between my approximation and... the thing I said has a component can't calculate?
+Without some new trick, all I've said so far is to approximate a thing I can't analytically calculate (the posterior, specially the issue evidence piece of it), I'm going to calculate the distance between my approximation and... the thing I said has a component can't calculate?
 
 Fortunately, a clever solution exists here that makes this strategy possible. Instead of trying to minimize the above KL divergence, we can optimize the alternative objective:
 
 $$\mathbb{E}[logp(z,x)] - \mathbb{E}[logq(z)]$$
 
-This is just the negative of the first two terms above, leaving aside the $logp(x)$. Why can we treat maximizing this as minimizing the KL divergence? The $logp(x)$ term is just a constant (wrt to q), so regardless of how we vary q, this will still be a valid alternative objective. We call this the Evidence Lower Bound (ELBO)[^6].
+This is just the negative of the first two terms above, leaving aside the $logp(x)$. Why can we treat maximizing this as minimizing the KL divergence? The $logp(x)$ term is just a constant (with respect to q), so regardless of how we vary q, this will still be a valid alternative objective. We call this the Evidence Lower Bound (ELBO)[^6].
 
 [^6]: Why is this a lower bound? Notice that we could write the evidence from above equations as $logp(x) = KL(q(z)||p(z|x)) + ELBO(q)$. Since the KL divergence is non-negative (it's zero when distributions $p$ and $q$ are identical), the ELBO is a lower bound of the evidence. 
 
@@ -242,3 +242,5 @@ toc()
 This finishes in a blazing **144.03 seconds**. Is this a good fit, or have we created a ridiculous spherical cow?
 
 You'll have to find out in the next post. Thanks for reading!
+
+*Typically, I'll include links to code at the end of these posts, but since the only thing going on in this notebook is mentioning some runtimes of the models displayed inline at various sample sizes, I'm skipping that for now.*
