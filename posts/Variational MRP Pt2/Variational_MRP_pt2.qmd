@@ -1,0 +1,25 @@
+---
+layout: post
+title: Variational Inference for MRP with Reliable Posterior Distributions
+subtitle: Part 2
+date: 2022-10-28
+draft: True
+categories:
+- MRP
+- BART
+- Variational Inference
+---
+
+# Toplines
+
+# State Level Estimates
+
+# More Subtle Interactions
+
+# Do 'Minor' corrections solve anything?
+
+## Lowering the tolerance
+
+## What if we evaluate Holdout ELBO
+
+# Where to from here? (Why is it like this!?)
