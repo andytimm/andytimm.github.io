@@ -20,7 +20,7 @@
 
 
 
-<p>This post introduces a series I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">MRP</a> while aiming to keep approximation error from completely ruining the model.</p>
+<p>This post introduces a series I intend to write, exploring using <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">Variational Inference</a> to massively speed up running complex survey estimation models like variants of <a href="https://en.wikipedia.org/wiki/Multilevel_regression_with_poststratification">Multilevel Regression and Poststratification</a> while aiming to keep approximation error from completely ruining the model.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
 <li><strong>(This post)</strong> Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>

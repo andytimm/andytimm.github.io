@@ -263,7 +263,7 @@
     "href": "posts/Variational MRP Pt1/variational_mrp_pt1.html",
     "title": "Variational Inference for MRP with Reliable Posterior Distributions",
     "section": "",
-    "text": "This post introduces a series I intend to write, exploring using Variational Inference to massively speed up running complex survey estimation models like variants of MRP while aiming to keep approximation error from completely ruining the model.\nThe rough plan for the series is as follows:"
+    "text": "This post introduces a series I intend to write, exploring using Variational Inference to massively speed up running complex survey estimation models like variants of Multilevel Regression and Poststratification while aiming to keep approximation error from completely ruining the model.\nThe rough plan for the series is as follows:"
   },
   {
     "objectID": "posts/Variational MRP Pt1/variational_mrp_pt1.html#introducing-mrp",
