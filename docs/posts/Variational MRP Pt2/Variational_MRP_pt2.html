@@ -170,6 +170,15 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+<p>This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian like multilevel regression and Poststratification models without the approximation being of disastrously poor quality. In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find such high quality approximations. I then introduced our running example (predicting national/sub-national opinion on an abortion question form the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.</p>
+<p>In this post, we’ll explore the shortcomings of this initial approximation, and take a first pass at trying to better with a more complex (full rank) variational approximation.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li><a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt1/variational_mrp_pt1.html">Introducing the Problem- Why is VI useful, why VI can produce spherical cows</a></li>
+<li><strong>(This post)</strong> How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Some theory on why posterior approximation with VI can be so poor</li>
+<li>Seeing if some more sophisticated techniques like normalizing flows help</li>
+</ol>
 <section id="the-disclaimer" class="level1">
 <h1>The disclaimer</h1>
 </section>
