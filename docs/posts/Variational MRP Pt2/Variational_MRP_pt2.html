@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.126">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,6 +22,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -71,6 +134,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta name="twitter:description" content="Part 2">
 <meta name="twitter:creator" content="@andy_timm">
+<meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
@@ -91,16 +155,20 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html">About</a>
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../projects.html">Personal Projects</a>
+    <a class="nav-link" href="../../projects.html">
+ <span class="menu-text">Personal Projects</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../software.html">Software</a>
+    <a class="nav-link" href="../../software.html">
+ <span class="menu-text">Software</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../blog.html">Rarely Updated Blog</a>
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Rarely Updated Blog</span></a>
   </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
@@ -126,7 +194,7 @@ ul.task-list li input[type="checkbox"] {
   <div class="quarto-title-meta">
 
       <div>
-      <div class="quarto-title-meta-heading">Authors</div>
+      <div class="quarto-title-meta-heading">Author</div>
       <div class="quarto-title-meta-contents">
                <p>Andy Timm </p>
             </div>
@@ -138,6 +206,7 @@ ul.task-list li input[type="checkbox"] {
         <p class="date">October 28, 2022</p>
       </div>
     </div>
+    
       
     </div>
     
@@ -150,8 +219,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#the-disclaimer" id="toc-the-disclaimer" class="nav-link active" data-scroll-target="#the-disclaimer">The disclaimer</a></li>
-  <li><a href="#the-dumbest-possible-test" id="toc-the-dumbest-possible-test" class="nav-link" data-scroll-target="#the-dumbest-possible-test">The dumbest possible test</a></li>
+  <li><a href="#first-compare-the-means-and-sds" id="toc-first-compare-the-means-and-sds" class="nav-link active" data-scroll-target="#first-compare-the-means-and-sds">First, compare the Means and SDs</a></li>
+  <li><a href="#the-disclaimer" id="toc-the-disclaimer" class="nav-link" data-scroll-target="#the-disclaimer">The disclaimer</a></li>
   <li><a href="#toplines" id="toc-toplines" class="nav-link" data-scroll-target="#toplines">Toplines</a></li>
   <li><a href="#state-level-estimates" id="toc-state-level-estimates" class="nav-link" data-scroll-target="#state-level-estimates">State Level Estimates</a></li>
   <li><a href="#more-subtle-interactions" id="toc-more-subtle-interactions" class="nav-link" data-scroll-target="#more-subtle-interactions">More Subtle Interactions</a></li>
@@ -179,17 +248,50 @@ ul.task-list li input[type="checkbox"] {
 <li>Some theory on why posterior approximation with VI can be so poor</li>
 <li>Seeing if some more sophisticated techniques like normalizing flows help</li>
 </ol>
+<div class="cell">
+
+</div>
+<section id="first-compare-the-means-and-sds" class="level1">
+<h1>First, compare the Means and SDs</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>meanfield_60k <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"fit_60k_meanfield.rds"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mcmc_60k <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"fit_60k_mcmc.rds"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Meanfield </span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>epred_mat_mf <span class="ot">&lt;-</span> <span class="fu">posterior_epred</span>(meanfield_60k, <span class="at">newdata =</span> poststrat_df_60k, <span class="at">draws =</span> <span class="dv">1000</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>mrp_estimates_vector_mf <span class="ot">&lt;-</span> epred_mat_mf <span class="sc">%*%</span> poststrat_df_60k<span class="sc">$</span>n <span class="sc">/</span> <span class="fu">sum</span>(poststrat_df_60k<span class="sc">$</span>n)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>mrp_estimate_mf <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(mrp_estimates_vector_mf),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">sd =</span> <span class="fu">sd</span>(mrp_estimates_vector_mf))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># MCMC </span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>epred_mat_mcmc <span class="ot">&lt;-</span> <span class="fu">posterior_epred</span>(mcmc_60k, <span class="at">newdata =</span> poststrat_df_60k, <span class="at">draws =</span> <span class="dv">1000</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>mrp_estimates_vector_mcmc <span class="ot">&lt;-</span> epred_mat_mcmc <span class="sc">%*%</span> poststrat_df_60k<span class="sc">$</span>n <span class="sc">/</span> <span class="fu">sum</span>(poststrat_df_60k<span class="sc">$</span>n)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>mrp_estimate_mcmc <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(mrp_estimates_vector_mcmc),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                       <span class="at">sd =</span> <span class="fu">sd</span>(mrp_estimates_vector_mcmc))</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Meanfield MRP estimate mean, sd: "</span>, <span class="fu">round</span>(mrp_estimate_mf, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Meanfield MRP estimate mean, sd:  0.437 0.002</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"MCMC MRP estimate mean, sd: "</span>, <span class="fu">round</span>(mrp_estimate_mcmc, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>MCMC MRP estimate mean, sd:  0.439 0.002</code></pre>
+</div>
+</div>
+<div class="cell">
+
+</div>
+</section>
 <section id="the-disclaimer" class="level1">
 <h1>The disclaimer</h1>
 One sort of obvious objections to how I’ve set up this series is “Why not talk about theory on why VI approximations can be poor before trying stuff?”. While in practice I did read a lot of the papers for the next post before writing this one, I think there’s a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.
 <example or="" two="" to="" tease="" this="" once="" i="" have="" them="">
 <p>.</p>
 </example></section>
-<section id="the-dumbest-possible-test" class="level1">
-<h1>The dumbest possible test</h1>
-</section>
 <section id="toplines" class="level1">
 <h1>Toplines</h1>
+<p>Starting with basics</p>
 </section>
 <section id="state-level-estimates" class="level1">
 <h1>State Level Estimates</h1>
@@ -214,7 +316,6 @@ One sort of obvious objections to how I’ve set up this series is “Why not ta
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
-  editor = {},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2022-10-28},
@@ -266,7 +367,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
     setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -302,24 +420,42 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
-    tippyHover(ref, function() {
-      var popup = window.document.createElement('div');
-      cites.forEach(function(cite) {
-        var citeDiv = window.document.createElement('div');
-        citeDiv.classList.add('hanging-indent');
-        citeDiv.classList.add('csl-entry');
-        var biblioDiv = window.document.getElementById('ref-' + cite);
-        if (biblioDiv) {
-          citeDiv.innerHTML = biblioDiv.innerHTML;
-        }
-        popup.appendChild(citeDiv);
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
       });
-      return popup.innerHTML;
-    });
+    }
   }
 });
 </script>
