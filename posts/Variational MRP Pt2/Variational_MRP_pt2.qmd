@@ -24,6 +24,12 @@ The rough plan for the series is as follows:
 ```{r, echo= FALSE, warning=FALSE, output = FALSE}
 library(tidyverse)
 library(rstanarm)
+library(tidybayes)
+
+# As noted in the text of the first post, I'm starting from and working off of
+# the wonderful example developed in MRP Case Studies book
+# (https://bookdown.org/jl5522/MRP-case-studies/introduction-to-mrp.html)
+
 
 set.seed(605)
 
@@ -99,7 +105,7 @@ One sort of obvious objections to how I've set up this series is "Why not talk a
 
 # Toplines
 
-```{r, eval = F}
+```{r, output = F}
 meanfield_60k <- readRDS("fit_60k_meanfield.rds")
 mcmc_60k <- readRDS("fit_60k_mcmc.rds")
 
@@ -132,7 +138,15 @@ often end up having matching means to 3 decimals.
 
 # State Level Estimates
 
+What happens if we produce state level estimates, similar to the plot last post
+comparing MRP to a simple weighted estimate? Note that I'll steer away from
+the MRP Case Study example here in a few ways. I'll use `tidybayes` for
+working with the draws (more elegant than their loop based approach),
+and I'll use more draws (helps with simulation error in smaller states).
 
+```{r}
+mcmc_state_level <- poststrat_df_60k %>% add_epred_draws(mcmc_60k)
+```
 
 # More Subtle Interactions
 
