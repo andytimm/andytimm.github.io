@@ -99,20 +99,22 @@ One sort of obvious objections to how I've set up this series is "Why not talk a
 
 # Toplines
 
-```{r}
+```{r, eval = F}
 meanfield_60k <- readRDS("fit_60k_meanfield.rds")
 mcmc_60k <- readRDS("fit_60k_mcmc.rds")
 
 # Meanfield 
 epred_mat_mf <- posterior_epred(meanfield_60k, newdata = poststrat_df_60k, draws = 1000)
-mrp_estimates_vector_mf <- epred_mat_mf %*% poststrat_df_60k$n / sum(poststrat_df_60k$n)
+mrp_estimates_vector_mf <- epred_mat_mf %*% poststrat_df_60k$n / 
+                                              sum(poststrat_df_60k$n)
 mrp_estimate_mf <- c(mean = mean(mrp_estimates_vector_mf),
                      sd = sd(mrp_estimates_vector_mf))
 
 
 # MCMC 
 epred_mat_mcmc <- posterior_epred(mcmc_60k, newdata = poststrat_df_60k, draws = 1000)
-mrp_estimates_vector_mcmc <- epred_mat_mcmc %*% poststrat_df_60k$n / sum(poststrat_df_60k$n)
+mrp_estimates_vector_mcmc <- epred_mat_mcmc %*% poststrat_df_60k$n /
+                                                  sum(poststrat_df_60k$n)
 mrp_estimate_mcmc <- c(mean = mean(mrp_estimates_vector_mcmc),
                        sd = sd(mrp_estimates_vector_mcmc))
 
@@ -120,9 +122,17 @@ cat("Meanfield MRP estimate mean, sd: ", round(mrp_estimate_mf, 3))
 cat("MCMC MRP estimate mean, sd: ", round(mrp_estimate_mcmc, 3))
 ```
 
-Starting with basics, the toplines are pretty much identical, as you'd expect from any reasonable 
+|   | Mean  | SD  |
+|---|---|---|
+| MCMC  | 43.9%  |  .2% |
+| mean-field VI  |  43.7% | .2%  |
+
+Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily be simulation error- from a few quick re-runs these
+often end up having matching means to 3 decimals.
 
 # State Level Estimates
+
+
 
 # More Subtle Interactions
 

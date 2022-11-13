@@ -219,8 +219,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#first-compare-the-means-and-sds" id="toc-first-compare-the-means-and-sds" class="nav-link active" data-scroll-target="#first-compare-the-means-and-sds">First, compare the Means and SDs</a></li>
-  <li><a href="#the-disclaimer" id="toc-the-disclaimer" class="nav-link" data-scroll-target="#the-disclaimer">The disclaimer</a></li>
+  <li><a href="#the-disclaimer" id="toc-the-disclaimer" class="nav-link active" data-scroll-target="#the-disclaimer">The disclaimer</a></li>
   <li><a href="#toplines" id="toc-toplines" class="nav-link" data-scroll-target="#toplines">Toplines</a></li>
   <li><a href="#state-level-estimates" id="toc-state-level-estimates" class="nav-link" data-scroll-target="#state-level-estimates">State Level Estimates</a></li>
   <li><a href="#more-subtle-interactions" id="toc-more-subtle-interactions" class="nav-link" data-scroll-target="#more-subtle-interactions">More Subtle Interactions</a></li>
@@ -251,38 +250,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell">
 
 </div>
-<section id="first-compare-the-means-and-sds" class="level1">
-<h1>First, compare the Means and SDs</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>meanfield_60k <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"fit_60k_meanfield.rds"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mcmc_60k <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"fit_60k_mcmc.rds"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Meanfield </span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>epred_mat_mf <span class="ot">&lt;-</span> <span class="fu">posterior_epred</span>(meanfield_60k, <span class="at">newdata =</span> poststrat_df_60k, <span class="at">draws =</span> <span class="dv">1000</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>mrp_estimates_vector_mf <span class="ot">&lt;-</span> epred_mat_mf <span class="sc">%*%</span> poststrat_df_60k<span class="sc">$</span>n <span class="sc">/</span> <span class="fu">sum</span>(poststrat_df_60k<span class="sc">$</span>n)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>mrp_estimate_mf <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(mrp_estimates_vector_mf),</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">sd =</span> <span class="fu">sd</span>(mrp_estimates_vector_mf))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># MCMC </span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>epred_mat_mcmc <span class="ot">&lt;-</span> <span class="fu">posterior_epred</span>(mcmc_60k, <span class="at">newdata =</span> poststrat_df_60k, <span class="at">draws =</span> <span class="dv">1000</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>mrp_estimates_vector_mcmc <span class="ot">&lt;-</span> epred_mat_mcmc <span class="sc">%*%</span> poststrat_df_60k<span class="sc">$</span>n <span class="sc">/</span> <span class="fu">sum</span>(poststrat_df_60k<span class="sc">$</span>n)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>mrp_estimate_mcmc <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(mrp_estimates_vector_mcmc),</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                       <span class="at">sd =</span> <span class="fu">sd</span>(mrp_estimates_vector_mcmc))</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Meanfield MRP estimate mean, sd: "</span>, <span class="fu">round</span>(mrp_estimate_mf, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Meanfield MRP estimate mean, sd:  0.437 0.002</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"MCMC MRP estimate mean, sd: "</span>, <span class="fu">round</span>(mrp_estimate_mcmc, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>MCMC MRP estimate mean, sd:  0.439 0.002</code></pre>
-</div>
-</div>
-<div class="cell">
-
-</div>
-</section>
 <section id="the-disclaimer" class="level1">
 <h1>The disclaimer</h1>
 One sort of obvious objections to how I’ve set up this series is “Why not talk about theory on why VI approximations can be poor before trying stuff?”. While in practice I did read a lot of the papers for the next post before writing this one, I think there’s a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.
@@ -291,7 +258,50 @@ One sort of obvious objections to how I’ve set up this series is “Why not ta
 </example></section>
 <section id="toplines" class="level1">
 <h1>Toplines</h1>
-<p>Starting with basics</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>meanfield_60k <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"fit_60k_meanfield.rds"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mcmc_60k <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"fit_60k_mcmc.rds"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Meanfield </span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>epred_mat_mf <span class="ot">&lt;-</span> <span class="fu">posterior_epred</span>(meanfield_60k, <span class="at">newdata =</span> poststrat_df_60k, <span class="at">draws =</span> <span class="dv">1000</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>mrp_estimates_vector_mf <span class="ot">&lt;-</span> epred_mat_mf <span class="sc">%*%</span> poststrat_df_60k<span class="sc">$</span>n <span class="sc">/</span> </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                                              <span class="fu">sum</span>(poststrat_df_60k<span class="sc">$</span>n)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>mrp_estimate_mf <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(mrp_estimates_vector_mf),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">sd =</span> <span class="fu">sd</span>(mrp_estimates_vector_mf))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># MCMC </span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>epred_mat_mcmc <span class="ot">&lt;-</span> <span class="fu">posterior_epred</span>(mcmc_60k, <span class="at">newdata =</span> poststrat_df_60k, <span class="at">draws =</span> <span class="dv">1000</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>mrp_estimates_vector_mcmc <span class="ot">&lt;-</span> epred_mat_mcmc <span class="sc">%*%</span> poststrat_df_60k<span class="sc">$</span>n <span class="sc">/</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                                                  <span class="fu">sum</span>(poststrat_df_60k<span class="sc">$</span>n)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>mrp_estimate_mcmc <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(mrp_estimates_vector_mcmc),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                       <span class="at">sd =</span> <span class="fu">sd</span>(mrp_estimates_vector_mcmc))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Meanfield MRP estimate mean, sd: "</span>, <span class="fu">round</span>(mrp_estimate_mf, <span class="dv">3</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"MCMC MRP estimate mean, sd: "</span>, <span class="fu">round</span>(mrp_estimate_mcmc, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Mean</th>
+<th>SD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MCMC</td>
+<td>43.9%</td>
+<td>.2%</td>
+</tr>
+<tr class="even">
+<td>mean-field VI</td>
+<td>43.7%</td>
+<td>.2%</td>
+</tr>
+</tbody>
+</table>
+<p>Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily be simulation error- from a few quick re-runs these often end up having matching means to 3 decimals.</p>
 </section>
 <section id="state-level-estimates" class="level1">
 <h1>State Level Estimates</h1>
