@@ -96,7 +96,9 @@ poststrat_df <- read_csv("data/poststrat_df.csv")
 
 statelevel_predictors_df <- read_csv('data/statelevel_predictors.csv')
 
-poststrat_df_60k <- left_join(poststrat_df, statelevel_predictors_df, by = "state")
+poststrat_df_60k <- left_join(poststrat_df, statelevel_predictors_df, by = "state") %>%
+                        # Later, we will want to poststratify at the state/other level
+                        group_by(state) %>% mutate(state_proportion = n/sum(n))
 ```
 
 # The disclaimer
@@ -146,7 +148,18 @@ and I'll use more draws (helps with simulation error in smaller states).
 
 ```{r}
 mcmc_state_level <- poststrat_df_60k %>% add_epred_draws(mcmc_60k)
+mfvi_state_level <- poststrat_df_60k %>% add_epred_draws(meanfield_60k)
+
+mcmc_state_level %>% glimpse()
 ```
+
+If you haven't worked with `tidybayes` before, the glimpse above should help
+give some intuition about the new shape of the data- we've take the 12,000 row
+`poststrat_df_60k`, and added a row per observation per draw, with the prediction
+(.epred) and related metadata. This gives
+12,000 x 4,000 = 48,000,000 million rows. This really isn't the most space
+efficient storage, but it allows for very elegant `dplyr` style manipulation of
+results and quick exploration.
 
 # More Subtle Interactions
 
