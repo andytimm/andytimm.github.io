@@ -161,6 +161,70 @@ give some intuition about the new shape of the data- we've take the 12,000 row
 efficient storage, but it allows for very elegant `dplyr` style manipulation of
 results and quick exploration.
 
+Let's now plot and compare the 50 and 95% credible intervals by state between
+the two models.
+
+```{r, fig.width=8,fig.height=10}
+
+mcmc_state_summary <- mcmc_state_level %>% 
+                        # multiply each draw by it's cell's proportion of state N
+                        # this is the P in MRP
+                        group_by(state,.draw) %>%
+                        mutate(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        group_by(state) %>%
+                        median_qi(postrat_draw, .width = c(.5,.95)) %>%
+                        mutate(model = "mcmc")
+mfvi_state_summary <- mfvi_state_level %>% 
+                        group_by(state,.draw) %>%
+                        mutate(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        group_by(state) %>%
+                        median_qi(postrat_draw, .width = c(.5,.95)) %>%
+                        mutate(model = "MF-VI")
+
+combined_summary <- bind_rows(mcmc_state_summary,mfvi_state_summary)
+
+combined_summary %>%
+  mutate(ordered_state = fct_reorder(combined_summary$state,
+                                     combined_summary$postrat_draw)) %>%
+  ggplot(aes(y = ordered_state,
+             x = postrat_draw,
+             xmin = .lower,
+             xmax = .upper,
+             color = model)) +
+  geom_pointinterval(position = position_dodge(1)) +
+  xlim(.25,.75) +
+  theme(legend.position="top")
+```
+
+```{r, fig.width=8,fig.height=10}
+mcmc_state_points <- mcmc_state_level %>% 
+                        # multiply each draw by it's cell's proportion of state N
+                        # this is the P in MRP
+                        group_by(state,.draw) %>%
+                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        mutate(model = "mcmc")
+mfvi_state_points <- mfvi_state_level %>% 
+                        group_by(state,.draw) %>%
+                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        mutate(model = "MF-VI")
+
+combined_points <- mcmc_state_points %>%
+                      bind_rows(mfvi_state_points) %>%
+                      ungroup()
+
+combined_points %>%
+  mutate(ordered_state = fct_reorder(combined_points$state,
+                                     combined_points$postrat_draw)) %>%
+  ggplot(aes(y = ordered_state,
+             x = postrat_draw,
+             color = model)) +
+     stat_dots(quantiles = 100) +
+     facet_wrap(~model) +
+     theme(legend.position="none")
+
+```
+
+
 # More Subtle Interactions
 
 # Do 'Minor' corrections solve anything?
