@@ -195,7 +195,39 @@ combined_summary %>%
   xlim(.25,.75) +
   theme(legend.position="top")
 ```
-The MCMC plots look about how you'd expect draws based 
+... That looks concerning. What's happened here? The MCMC based estimates
+look comparatively unremarkable.
+
+What might you get wrong if you used the VI approximation for inference here? If you
+only cared about the median estimate primarily, you might be ok with this effort.
+If you care about uncertainty though, here's a non-exaustive list of concerns here:
+1. Whatever's gone wrong has taken what I'd imagine are probably unimodal, smooth
+posterior distributions from MCMC off-course to the point where the
+Median/50/95% plot no longer seems up to expressing the posterior shape
+(more on this in a second).
+2. The MF-VI posteriors are often narrower in 50% or 95% CI- we'd on average
+underestimate various types of uncertainty here.
+3. Worse[^1], the MF-VI posterior's CIs aren't **consistently** narrower, either in
+the sense they are always narrower, or that they tend to consistently distort the
+same way. Sometimes both the 50% and 95% are just a small amount narrower than
+MCMC- the Michigan posterior attempt looks passable. Sometimes things are worse,
+with 50% MFVI CIs almost as wide as the MCMC 95% interval- Wyoming shows such a 
+distortion. Sometimes the probability mass between 50% and 95% is confined
+to such a minuscule range it looks like I forgot to plot it. 
+
+That last point is
+particularly important because it suggests there's no easy rule of thumb for
+mechanically correcting these intervals, or deciding which could be plausible
+approximations without the MCMC plot alongside to guide that process. We can't
+use VI to save a ton of time, infer the intervals consistently need to be wider,
+and call it a day- we need to reckon more precisely with why they're distorted.
+
+Let's return now to the point about how the shape has gone wrong. Below is
+a dot plot ([Kay et al., 2016](https://dl.acm.org/doi/10.1145/2858036.2858558))- each
+point here represents about 1% of the probability mass. I enjoy this approach
+to posterior visualization when things are getting weird, as this clarifies a
+lot about the full shape of the posterior
+distribution, making fewer smoothing assumptions like a density or eye plot might.
 
 
 ```{r, fig.width=8,fig.height=10, warning=FALSE}
@@ -225,7 +257,16 @@ combined_points %>%
      theme(legend.position="none")
 
 ```
+Eek. The closer to the individual draws we get, the less these two models seem to be
+producing comparable estimates. This isn't me expressing an aesthetic preference
+for smooth, unimodal distributions- the MFVI plots in this view imply beliefs
+like "support for this policy in Wyoming is overwhelmingly likely to fall in 1 of
+3 narrow ranges, all other values are unlikely"[^2]. Other similar humorous claims
+are easy to find.
 
+Stepping back for a second, if our use-case for this model takes pretty
+much any form of interest in quantifying uncertainty accurately, this is not
+an acceptable approximation.
 
 # More Subtle Interactions
 
@@ -236,3 +277,12 @@ combined_points %>%
 ## What if we evaluate Holdout ELBO
 
 # Where to from here? (Why is it like this!?)
+
+[^1]: Really, the worst type of wrong, completely unpredictable wrong. If you spend
+time staring to try to infer a causal pattern of which states we can't estimate well,
+you're likely just going to end up confused.
+[^2]: Some of these MFVI distributions are bad enough that you might reasonably
+wonder if some of the badness is just plotting weirdness. That was my intuition at
+first. Of course though, this is sufficient granularity to make the MCMC results
+look reasonable. But even if you zoom in on 1 or two states and add way more
+points, the improbably sharp spikes remain.

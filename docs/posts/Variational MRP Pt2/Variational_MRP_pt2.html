@@ -366,7 +366,10 @@ $ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.541
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
-<p>The MCMC plots look about how you’d expect draws based</p>
+<p>… That looks concerning. What’s happened here? The MCMC based estimates look comparatively unremarkable.</p>
+<p>What might you get wrong if you used the VI approximation for inference here? If you only cared about the median estimate primarily, you might be ok with this effort. If you care about uncertainty though, here’s a non-exaustive list of concerns here: 1. Whatever’s gone wrong has taken what I’d imagine are probably unimodal, smooth posterior distributions from MCMC off-course to the point where the Median/50/95% plot no longer seems up to expressing the posterior shape (more on this in a second). 2. The MF-VI posteriors are often narrower in 50% or 95% CI- we’d on average underestimate various types of uncertainty here. 3. Worse<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, the MF-VI posterior’s CIs aren’t <strong>consistently</strong> narrower, either in the sense they are always narrower, or that they tend to consistently distort the same way. Sometimes both the 50% and 95% are just a small amount narrower than MCMC- the Michigan posterior attempt looks passable. Sometimes things are worse, with 50% MFVI CIs almost as wide as the MCMC 95% interval- Wyoming shows such a distortion. Sometimes the probability mass between 50% and 95% is confined to such a minuscule range it looks like I forgot to plot it.</p>
+<p>That last point is particularly important because it suggests there’s no easy rule of thumb for mechanically correcting these intervals, or deciding which could be plausible approximations without the MCMC plot alongside to guide that process. We can’t use VI to save a ton of time, infer the intervals consistently need to be wider, and call it a day- we need to reckon more precisely with why they’re distorted.</p>
+<p>Let’s return now to the point about how the shape has gone wrong. Below is a dot plot (<a href="https://dl.acm.org/doi/10.1145/2858036.2858558">Kay et al., 2016</a>)- each point here represents about 1% of the probability mass. I enjoy this approach to posterior visualization when things are getting weird, as this clarifies a lot about the full shape of the posterior distribution, making fewer smoothing assumptions like a density or eye plot might.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mcmc_state_points <span class="ot">&lt;-</span> mcmc_state_level <span class="sc">%&gt;%</span> </span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># multiply each draw by it's cell's proportion of state N</span></span>
@@ -403,6 +406,8 @@ $ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.541
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
+<p>Eek. The closer to the individual draws we get, the less these two models seem to be producing comparable estimates. This isn’t me expressing an aesthetic preference for smooth, unimodal distributions- the MFVI plots in this view imply beliefs like “support for this policy in Wyoming is overwhelmingly likely to fall in 1 of 3 narrow ranges, all other values are unlikely”<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Other similar humorous claims are easy to find.</p>
+<p>Stepping back for a second, if our use-case for this model takes pretty much any form of interest in quantifying uncertainty accurately, this is not an acceptable approximation.</p>
 </section>
 <section id="more-subtle-interactions" class="level1">
 <h1>More Subtle Interactions</h1>
@@ -422,7 +427,14 @@ $ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.541
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Really, the worst type of wrong, completely unpredictable wrong. If you spend time staring to try to infer a causal pattern of which states we can’t estimate well, you’re likely just going to end up confused.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Some of these MFVI distributions are bad enough that you might reasonably wonder if some of the badness is just plotting weirdness. That was my intuition at first. Of course though, this is sufficient granularity to make the MCMC results look reasonable. But even if you zoom in on 1 or two states and add way more points, the improbably sharp spikes remain.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
