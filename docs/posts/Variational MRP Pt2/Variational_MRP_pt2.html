@@ -307,12 +307,12 @@ One sort of obvious objections to how I’ve set up this series is “Why not ta
 <h1>State Level Estimates</h1>
 <p>What happens if we produce state level estimates, similar to the plot last post comparing MRP to a simple weighted estimate? Note that I’ll steer away from the MRP Case Study example here in a few ways. I’ll use <code>tidybayes</code> for working with the draws (more elegant than their loop based approach), and I’ll use more draws (helps with simulation error in smaller states).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mcmc_state_level <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(mcmc_60k)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mfvi_state_level <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(meanfield_60k)</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mcmc_state_level <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(mcmc_60k, <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mfvi_state_level <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(meanfield_60k, <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mcmc_state_level <span class="sc">%&gt;%</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Rows: 48,000,000
+<pre><code>Rows: 12,000,000
 Columns: 14
 Groups: state, eth, male, age, educ, n, repvote, region, state_proportion, .row [12,000]
 $ state            &lt;chr&gt; "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL",…
@@ -328,7 +328,7 @@ $ .row             &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 $ .chain           &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
 $ .iteration       &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
 $ .draw            &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16…
-$ .epred           &lt;dbl&gt; 0.5336533, 0.5153217, 0.5350318, 0.4859690, 0.5187578…</code></pre>
+$ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602…</code></pre>
 </div>
 </div>
 <p>If you haven’t worked with <code>tidybayes</code> before, the glimpse above should help give some intuition about the new shape of the data- we’ve take the 12,000 row <code>poststrat_df_60k</code>, and added a row per observation per draw, with the prediction (.epred) and related metadata. This gives 12,000 x 4,000 = 48,000,000 million rows. This really isn’t the most space efficient storage, but it allows for very elegant <code>dplyr</code> style manipulation of results and quick exploration.</p>
@@ -366,6 +366,7 @@ $ .epred           &lt;dbl&gt; 0.5336533, 0.5153217, 0.5350318, 0.4859690, 0.518
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
+<p>The MCMC plots look about how you’d expect draws based</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mcmc_state_points <span class="ot">&lt;-</span> mcmc_state_level <span class="sc">%&gt;%</span> </span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># multiply each draw by it's cell's proportion of state N</span></span>

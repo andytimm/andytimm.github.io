@@ -147,8 +147,8 @@ working with the draws (more elegant than their loop based approach),
 and I'll use more draws (helps with simulation error in smaller states).
 
 ```{r}
-mcmc_state_level <- poststrat_df_60k %>% add_epred_draws(mcmc_60k)
-mfvi_state_level <- poststrat_df_60k %>% add_epred_draws(meanfield_60k)
+mcmc_state_level <- poststrat_df_60k %>% add_epred_draws(mcmc_60k, ndraws = 1000)
+mfvi_state_level <- poststrat_df_60k %>% add_epred_draws(meanfield_60k, ndraws = 1000)
 
 mcmc_state_level %>% glimpse()
 ```
@@ -195,8 +195,10 @@ combined_summary %>%
   xlim(.25,.75) +
   theme(legend.position="top")
 ```
+The MCMC plots look about how you'd expect draws based 
 
-```{r, fig.width=8,fig.height=10}
+
+```{r, fig.width=8,fig.height=10, warning=FALSE}
 mcmc_state_points <- mcmc_state_level %>% 
                         # multiply each draw by it's cell's proportion of state N
                         # this is the P in MRP
