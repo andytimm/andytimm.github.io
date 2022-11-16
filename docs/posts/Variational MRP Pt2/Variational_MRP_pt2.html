@@ -223,7 +223,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#toplines" id="toc-toplines" class="nav-link" data-scroll-target="#toplines">Toplines</a></li>
   <li><a href="#state-level-estimates" id="toc-state-level-estimates" class="nav-link" data-scroll-target="#state-level-estimates">State Level Estimates</a></li>
   <li><a href="#more-subtle-interactions" id="toc-more-subtle-interactions" class="nav-link" data-scroll-target="#more-subtle-interactions">More Subtle Interactions</a></li>
-  <li><a href="#do-minor-corrections-solve-anything" id="toc-do-minor-corrections-solve-anything" class="nav-link" data-scroll-target="#do-minor-corrections-solve-anything">Do ‘Minor’ corrections solve anything?</a>
+  <li><a href="#d-o-minor-corrections-solve-anything" id="toc-d-o-minor-corrections-solve-anything" class="nav-link" data-scroll-target="#d-o-minor-corrections-solve-anything">D o ‘Minor’ corrections solve anything?</a>
   <ul>
   <li><a href="#lowering-the-tolerance" id="toc-lowering-the-tolerance" class="nav-link" data-scroll-target="#lowering-the-tolerance">Lowering the tolerance</a></li>
   <li><a href="#what-if-we-evaluate-holdout-elbo" id="toc-what-if-we-evaluate-holdout-elbo" class="nav-link" data-scroll-target="#what-if-we-evaluate-holdout-elbo">What if we evaluate Holdout ELBO</a></li>
@@ -313,22 +313,21 @@ One sort of obvious objections to how I’ve set up this series is “Why not ta
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mcmc_state_level <span class="sc">%&gt;%</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 12,000,000
-Columns: 14
-Groups: state, eth, male, age, educ, n, repvote, region, state_proportion, .row [12,000]
-$ state            &lt;chr&gt; "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL",…
-$ eth              &lt;chr&gt; "White", "White", "White", "White", "White", "White",…
-$ male             &lt;dbl&gt; -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,…
-$ age              &lt;chr&gt; "18-29", "18-29", "18-29", "18-29", "18-29", "18-29",…
-$ educ             &lt;chr&gt; "No HS", "No HS", "No HS", "No HS", "No HS", "No HS",…
-$ n                &lt;dbl&gt; 23948, 23948, 23948, 23948, 23948, 23948, 23948, 2394…
-$ repvote          &lt;dbl&gt; 0.6437414, 0.6437414, 0.6437414, 0.6437414, 0.6437414…
-$ region           &lt;chr&gt; "South", "South", "South", "South", "South", "South",…
-$ state_proportion &lt;dbl&gt; 0.00652231, 0.00652231, 0.00652231, 0.00652231, 0.006…
-$ .row             &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
-$ .chain           &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-$ .iteration       &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
-$ .draw            &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16…
-$ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602…</code></pre>
+Columns: 13
+Groups: state, eth, male, age, educ, n, repvote, region, .row [12,000]
+$ state      &lt;chr&gt; "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL",…
+$ eth        &lt;chr&gt; "White", "White", "White", "White", "White", "White", "Whit…
+$ male       &lt;dbl&gt; -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,…
+$ age        &lt;chr&gt; "18-29", "18-29", "18-29", "18-29", "18-29", "18-29", "18-2…
+$ educ       &lt;chr&gt; "No HS", "No HS", "No HS", "No HS", "No HS", "No HS", "No H…
+$ n          &lt;dbl&gt; 23948, 23948, 23948, 23948, 23948, 23948, 23948, 23948, 239…
+$ repvote    &lt;dbl&gt; 0.6437414, 0.6437414, 0.6437414, 0.6437414, 0.6437414, 0.64…
+$ region     &lt;chr&gt; "South", "South", "South", "South", "South", "South", "Sout…
+$ .row       &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ .chain     &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ .iteration &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ .draw      &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, …
+$ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 0.55…</code></pre>
 </div>
 </div>
 <p>If you haven’t worked with <code>tidybayes</code> before, the glimpse above should help give some intuition about the new shape of the data- we’ve take the 12,000 row <code>poststrat_df_60k</code>, and added a row per observation per draw, with the prediction (.epred) and related metadata. This gives 12,000 x 1,000 = 12,000,000 million rows. This really isn’t the most space efficient storage, but it allows for very elegant <code>dplyr</code> style manipulation of results and quick exploration.</p>
@@ -381,32 +380,25 @@ $ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.541
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># this is the P in MRP</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"mcmc"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'state'. You can override using the
-`.groups` argument.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mfvi_state_points <span class="ot">&lt;-</span> mfvi_state_level <span class="sc">%&gt;%</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MF-VI"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'state'. You can override using the
-`.groups` argument.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>combined_points <span class="ot">&lt;-</span> mcmc_state_points <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">bind_rows</span>(mfvi_state_points) <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>()</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>combined_points <span class="sc">%&gt;%</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_points<span class="sc">$</span>state,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                                     combined_points<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"mcmc"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>mfvi_state_points <span class="ot">&lt;-</span> mfvi_state_level <span class="sc">%&gt;%</span> </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MF-VI"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>combined_points <span class="ot">&lt;-</span> mcmc_state_points <span class="sc">%&gt;%</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">bind_rows</span>(mfvi_state_points) <span class="sc">%&gt;%</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>combined_points <span class="sc">%&gt;%</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_points<span class="sc">$</span>state,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                                     combined_points<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
 </div>
@@ -417,9 +409,12 @@ $ .epred           &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.541
 <section id="more-subtle-interactions" class="level1">
 <h1>More Subtle Interactions</h1>
 <p>While the above is already pretty strange, I wanted to pull out another issue with this approximation as well.</p>
+<div class="cell">
+
+</div>
 </section>
-<section id="do-minor-corrections-solve-anything" class="level1">
-<h1>Do ‘Minor’ corrections solve anything?</h1>
+<section id="d-o-minor-corrections-solve-anything" class="level1">
+<h1>D o ‘Minor’ corrections solve anything?</h1>
 <section id="lowering-the-tolerance" class="level2">
 <h2 class="anchored" data-anchor-id="lowering-the-tolerance">Lowering the tolerance</h2>
 </section>

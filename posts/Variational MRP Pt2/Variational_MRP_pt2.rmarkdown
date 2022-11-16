@@ -284,6 +284,42 @@ an acceptable approximation.
 While the above is already pretty strange, I wanted to pull out another issue
 with this approximation as well. 
 
+
+```{r}
+mcmc_white_low_ed <- mcmc_state_level %>%
+                        #
+                        filter(eth == "White", educ %in% c("HS", "No HS")) %>%
+                        # multiply each draw by it's cell's proportion of state N
+                        # this is the P in MRP
+                        group_by(state,.draw) %>%
+                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        mutate(model = "mcmc")
+mfvi_white_low_ed <- mfvi_state_level %>% 
+                        filter(eth == "White", educ %in% c("HS", "No HS")) %>%
+                        # multiply each draw by it's cell's proportion of state N
+                        # this is the P in MRP
+                        group_by(state,.draw) %>%
+                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        mutate(model = "MF-VI")
+
+
+combined_points_white_low_ed <- mcmc_white_low_ed %>%
+                      bind_rows(mfvi_white_low_ed) %>%
+                      ungroup()
+
+combined_points_white_low_ed %>%
+  mutate(ordered_state = fct_reorder(combined_points_white_low_ed$state,
+                                     combined_points_white_low_ed$postrat_draw)) %>%
+  ggplot(aes(y = ordered_state,
+             x = postrat_draw,
+             color = model)) +
+     stat_dots(quantiles = 100) +
+     facet_wrap(~model) +
+     theme(legend.position="none")
+                        
+```
+
+
 # Do 'Minor' corrections solve anything?
 
 ## Lowering the tolerance
