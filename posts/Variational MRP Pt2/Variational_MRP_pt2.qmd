@@ -10,7 +10,7 @@ categories:
 - Variational Inference
 ---
 
-This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian like Multilevel Regression and Poststratification models without the approximation being of disastrously poor quality. In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question form the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.
+This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian like Multilevel Regression and Poststratification models without the approximation being of disastrously poor quality. In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.
 
 In this post, we'll explore the shortcomings of this initial approximation, and take a first pass at trying to better with a more complex (full rank) variational approximation. The goal is to get a better feel for what failing models could look like, at least in this relatively simple case.
 
@@ -25,6 +25,8 @@ The rough plan for the series is as follows:
 library(tidyverse)
 library(rstanarm)
 library(tidybayes)
+
+options(dplyr.summarise.inform = FALSE)
 
 # As noted in the text of the first post, I'm starting from and working off of
 # the wonderful example developed in MRP Case Studies book
@@ -96,9 +98,7 @@ poststrat_df <- read_csv("data/poststrat_df.csv")
 
 statelevel_predictors_df <- read_csv('data/statelevel_predictors.csv')
 
-poststrat_df_60k <- left_join(poststrat_df, statelevel_predictors_df, by = "state") %>%
-                        # Later, we will want to poststratify at the state/other level
-                        group_by(state) %>% mutate(state_proportion = n/sum(n))
+poststrat_df_60k <- left_join(poststrat_df, statelevel_predictors_df, by = "state")
 ```
 
 # The disclaimer
@@ -157,7 +157,7 @@ If you haven't worked with `tidybayes` before, the glimpse above should help
 give some intuition about the new shape of the data- we've take the 12,000 row
 `poststrat_df_60k`, and added a row per observation per draw, with the prediction
 (.epred) and related metadata. This gives
-12,000 x 4,000 = 48,000,000 million rows. This really isn't the most space
+12,000 x 1,000 = 12,000,000 million rows. This really isn't the most space
 efficient storage, but it allows for very elegant `dplyr` style manipulation of
 results and quick exploration.
 
@@ -195,19 +195,19 @@ combined_summary %>%
   xlim(.25,.75) +
   theme(legend.position="top")
 ```
-... That looks concerning. What's happened here? The MCMC based estimates
-look comparatively unremarkable.
+... That looks concerning. What's happened here?
 
 What might you get wrong if you used the VI approximation for inference here? If you
 only cared about the median estimate primarily, you might be ok with this effort.
 If you care about uncertainty though, here's a non-exaustive list of concerns here:
-1. Whatever's gone wrong has taken what I'd imagine are probably unimodal, smooth
-posterior distributions from MCMC off-course to the point where the
-Median/50/95% plot no longer seems up to expressing the posterior shape
+
+1.  Probably unimodal, smooth
+posterior distributions from MCMC have gone off-course to the point where the
+Median/50/95% presentation no longer seems up to expressing the posterior shape
 (more on this in a second).
-2. The MF-VI posteriors are often narrower in 50% or 95% CI- we'd on average
+2.   The MF-VI posteriors are often narrower in 50% or 95% CI- we'd on average
 underestimate various types of uncertainty here.
-3. Worse[^1], the MF-VI posterior's CIs aren't **consistently** narrower, either in
+3.   Worse[^1], the MF-VI posterior's CIs aren't **consistently** narrower, either in
 the sense they are always narrower, or that they tend to consistently distort the
 same way. Sometimes both the 50% and 95% are just a small amount narrower than
 MCMC- the Michigan posterior attempt looks passable. Sometimes things are worse,
@@ -219,7 +219,7 @@ That last point is
 particularly important because it suggests there's no easy rule of thumb for
 mechanically correcting these intervals, or deciding which could be plausible
 approximations without the MCMC plot alongside to guide that process. We can't
-use VI to save a ton of time, infer the intervals consistently need to be wider,
+use VI to save a ton of time, infer the intervals consistently need to x% be wider,
 and call it a day- we need to reckon more precisely with why they're distorted.
 
 Let's return now to the point about how the shape has gone wrong. Below is
@@ -269,6 +269,9 @@ much any form of interest in quantifying uncertainty accurately, this is not
 an acceptable approximation.
 
 # More Subtle Interactions
+
+While the above is already pretty strange, I wanted to pull out another issue
+with this approximation as well. 
 
 # Do 'Minor' corrections solve anything?
 
