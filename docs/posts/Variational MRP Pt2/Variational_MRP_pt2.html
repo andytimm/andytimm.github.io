@@ -222,11 +222,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#the-disclaimer" id="toc-the-disclaimer" class="nav-link active" data-scroll-target="#the-disclaimer">The disclaimer</a></li>
   <li><a href="#toplines" id="toc-toplines" class="nav-link" data-scroll-target="#toplines">Toplines</a></li>
   <li><a href="#state-level-estimates" id="toc-state-level-estimates" class="nav-link" data-scroll-target="#state-level-estimates">State Level Estimates</a></li>
-  <li><a href="#more-subtle-interactions" id="toc-more-subtle-interactions" class="nav-link" data-scroll-target="#more-subtle-interactions">More Subtle Interactions</a></li>
-  <li><a href="#d-o-minor-corrections-solve-anything" id="toc-d-o-minor-corrections-solve-anything" class="nav-link" data-scroll-target="#d-o-minor-corrections-solve-anything">D o ‘Minor’ corrections solve anything?</a>
+  <li><a href="#do-more-basic-fixes-solve-anything" id="toc-do-more-basic-fixes-solve-anything" class="nav-link" data-scroll-target="#do-more-basic-fixes-solve-anything">Do more basic fixes solve anything?</a>
   <ul>
   <li><a href="#lowering-the-tolerance" id="toc-lowering-the-tolerance" class="nav-link" data-scroll-target="#lowering-the-tolerance">Lowering the tolerance</a></li>
-  <li><a href="#what-if-we-evaluate-holdout-elbo" id="toc-what-if-we-evaluate-holdout-elbo" class="nav-link" data-scroll-target="#what-if-we-evaluate-holdout-elbo">What if we evaluate Holdout ELBO</a></li>
+  <li><a href="#full-rank-approximation" id="toc-full-rank-approximation" class="nav-link" data-scroll-target="#full-rank-approximation">Full-Rank Approximation</a></li>
   </ul></li>
   <li><a href="#where-to-from-here-why-is-it-like-this" id="toc-where-to-from-here-why-is-it-like-this" class="nav-link" data-scroll-target="#where-to-from-here-why-is-it-like-this">Where to from here? (Why is it like this!?)</a></li>
   </ul>
@@ -404,22 +403,16 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 </div>
 </div>
 <p>Eek. The closer to the individual draws we get, the less these two models seem to be producing comparable estimates. This isn’t me expressing an aesthetic preference for smooth, unimodal distributions- the MFVI plots in this view imply beliefs like “support for this policy in Wyoming is overwhelmingly likely to fall in 1 of 3 narrow ranges, all other values are unlikely”<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Other similar humorous claims are easy to find.</p>
-<p>Stepping back for a second, if our use-case for this model takes pretty much any form of interest in quantifying uncertainty accurately, this is not an acceptable approximation.</p>
+<p>Stepping back for a second, if our use-case for this model takes pretty much any form of interest in quantifying uncertainty accurately, this is not an acceptable approximation. I could poke more holes, but I can more profitably do that after I’ve explored some theory of why VI models struggle, and brought in some more sophisticated diagnostic tools than looking with our eyeballs<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
 </section>
-<section id="more-subtle-interactions" class="level1">
-<h1>More Subtle Interactions</h1>
-<p>While the above is already pretty strange, I wanted to pull out another issue with this approximation as well.</p>
-<div class="cell">
-
-</div>
-</section>
-<section id="d-o-minor-corrections-solve-anything" class="level1">
-<h1>D o ‘Minor’ corrections solve anything?</h1>
+<section id="do-more-basic-fixes-solve-anything" class="level1">
+<h1>Do more basic fixes solve anything?</h1>
+<p>So I’ve been billing this simple mean-field model as a first pass- I fit it on more or less default <code>rstanarm</code> parameters, and</p>
 <section id="lowering-the-tolerance" class="level2">
 <h2 class="anchored" data-anchor-id="lowering-the-tolerance">Lowering the tolerance</h2>
 </section>
-<section id="what-if-we-evaluate-holdout-elbo" class="level2">
-<h2 class="anchored" data-anchor-id="what-if-we-evaluate-holdout-elbo">What if we evaluate Holdout ELBO</h2>
+<section id="full-rank-approximation" class="level2">
+<h2 class="anchored" data-anchor-id="full-rank-approximation">Full-Rank Approximation</h2>
 </section>
 </section>
 <section id="where-to-from-here-why-is-it-like-this" class="level1">
@@ -434,6 +427,7 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <ol>
 <li id="fn1"><p>Really, the worst type of wrong, completely unpredictable wrong. If you spend time staring to try to infer a causal pattern of which states we can’t estimate well, you’re likely just going to end up confused.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Some of these MFVI distributions are bad enough that you might reasonably wonder if some of the badness is just plotting weirdness. That was my intuition at first. Of course though, this is sufficient granularity to make the MCMC results look reasonable. But even if you zoom in on 1 or two states and add way more points, the improbably sharp spikes remain.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Phrase due to Richard McElreath.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},

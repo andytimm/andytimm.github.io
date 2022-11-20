@@ -266,52 +266,23 @@ are easy to find.
 
 Stepping back for a second, if our use-case for this model takes pretty
 much any form of interest in quantifying uncertainty accurately, this is not
-an acceptable approximation.
+an acceptable approximation. I could poke more holes, but I can more profitably
+do that after I've explored some theory of why VI models struggle, and brought
+in some more sophisticated diagnostic tools than looking with our eyeballs[^3];
+so let's hold off on that.
 
-# More Subtle Interactions
+# Do more basic fixes solve anything?
 
-While the above is already pretty strange, I wanted to pull out another issue
-with this approximation as well. 
+So I've been billing this simple mean-field model as a first pass- I fit it on
+more or less default `rstanarm` parameters. I think it's worth taking a moment
+to show that getting this approximation problem right isn't going to be solved
 
-```{r}
-mcmc_white_low_ed <- mcmc_state_level %>%
-                        #
-                        filter(eth == "White", educ %in% c("HS", "No HS")) %>%
-                        # multiply each draw by it's cell's proportion of state N
-                        # this is the P in MRP
-                        group_by(state,.draw) %>%
-                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
-                        mutate(model = "mcmc")
-mfvi_white_low_ed <- mfvi_state_level %>% 
-                        filter(eth == "White", educ %in% c("HS", "No HS")) %>%
-                        # multiply each draw by it's cell's proportion of state N
-                        # this is the P in MRP
-                        group_by(state,.draw) %>%
-                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
-                        mutate(model = "MF-VI")
-
-
-combined_points_white_low_ed <- mcmc_white_low_ed %>%
-                      bind_rows(mfvi_white_low_ed) %>%
-                      ungroup()
-
-combined_points_white_low_ed %>%
-  mutate(ordered_state = fct_reorder(combined_points_white_low_ed$state,
-                                     combined_points_white_low_ed$postrat_draw)) %>%
-  ggplot(aes(y = ordered_state,
-             x = postrat_draw,
-             color = model)) +
-     stat_dots(quantiles = 100) +
-     facet_wrap(~model) +
-     theme(legend.position="none")
-                        
-```
-
-# Do 'Minor' corrections solve anything?
 
 ## Lowering the tolerance
 
-## What if we evaluate Holdout ELBO
+
+
+## Full-Rank Approximation
 
 # Where to from here? (Why is it like this!?)
 
@@ -323,3 +294,4 @@ wonder if some of the badness is just plotting weirdness. That was my intuition 
 first. Of course though, this is sufficient granularity to make the MCMC results
 look reasonable. But even if you zoom in on 1 or two states and add way more
 points, the improbably sharp spikes remain.
+[^3]: Phrase due to Richard McElreath.
