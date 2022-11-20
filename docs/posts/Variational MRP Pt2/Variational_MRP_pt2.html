@@ -126,6 +126,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
@@ -403,16 +419,123 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 </div>
 </div>
 <p>Eek. The closer to the individual draws we get, the less these two models seem to be producing comparable estimates. This isn’t me expressing an aesthetic preference for smooth, unimodal distributions- the MFVI plots in this view imply beliefs like “support for this policy in Wyoming is overwhelmingly likely to fall in 1 of 3 narrow ranges, all other values are unlikely”<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Other similar humorous claims are easy to find.</p>
-<p>Stepping back for a second, if our use-case for this model takes pretty much any form of interest in quantifying uncertainty accurately, this is not an acceptable approximation. I could poke more holes, but I can more profitably do that after I’ve explored some theory of why VI models struggle, and brought in some more sophisticated diagnostic tools than looking with our eyeballs<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>Stepping back for a second, if our use-case for this model takes pretty much any form of interest in quantifying uncertainty accurately, this is not an acceptable approximation. I could poke more holes, but I can more profitably do that after I’ve explored some theory of why VI models struggle, and brought in some more sophisticated diagnostic tools than looking with our eyeballs<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>; so let’s hold off on that.</p>
 </section>
 <section id="do-more-basic-fixes-solve-anything" class="level1">
 <h1>Do more basic fixes solve anything?</h1>
-<p>So I’ve been billing this simple mean-field model as a first pass- I fit it on more or less default <code>rstanarm</code> parameters, and</p>
+<p>So I’ve been billing this simple mean-field model as a first pass- I fit it on more or less default <code>rstanarm</code> parameters. I think it’s worth taking a moment to show that getting this approximation problem right isn’t going to be solved with low hanging fruit ideas, since that will motivate our need for better diagnostics and more expressive approximations.</p>
 <section id="lowering-the-tolerance" class="level2">
 <h2 class="anchored" data-anchor-id="lowering-the-tolerance">Lowering the tolerance</h2>
+<p>So we managed to structure our Bayesian inference problem as an optimization problem. Can’t we just optimize better? Maybe with more training the result will be less bad?</p>
+<p>the <code>tol_rel_obj</code> parameter control’s the convergence tolerance on the relative norm of the objective. In other words, it controls what Evidence Lower Bound value we consider accurate enough to stop at. The default is 0.01, which feels a bit opaque, but let’s try setting it way down to 1e-8 (1Mx lower). Then we can plot it alongside the MCMC estimates and original MF-VI attempt.</p>
+<div class="cell" data-warnings="false">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit_60k_1e8 <span class="ot">&lt;-</span> <span class="fu">stan_glmer</span>(abortion <span class="sc">~</span> (<span class="dv">1</span> <span class="sc">|</span> state) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                                      male <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> male<span class="sc">:</span>eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ<span class="sc">:</span>age) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                                      (<span class="dv">1</span> <span class="sc">|</span> educ<span class="sc">:</span>eth) <span class="sc">+</span> repvote <span class="sc">+</span> <span class="fu">factor</span>(region),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cces_all_df,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">autoscale =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior_covariance =</span> <span class="fu">decov</span>(<span class="at">scale =</span> <span class="fl">0.50</span>),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">adapt_delta =</span> <span class="fl">0.99</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">tol_rel_obj =</span> <span class="fl">1e-8</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">"meanfield"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">605</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Pareto k diagnostic value is 2.05. Resampling is disabled. Decreasing
+tol_rel_obj may help if variational algorithm has terminated prematurely.
+Otherwise consider using sampling instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting 'QR' to TRUE can often be helpful when using one of the variational inference algorithms. See the documentation for the 'QR' argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>332.94 sec elapsed</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lower_tol_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_1e8, <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>mfvi_lower_tol_points <span class="ot">&lt;-</span> lower_tol_draws <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MF-VI 1e-8"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>combined_points_w_lower_tol <span class="ot">&lt;-</span> combined_points <span class="sc">%&gt;%</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">bind_rows</span>(mfvi_lower_tol_points) <span class="sc">%&gt;%</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>()</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>combined_points_w_lower_tol <span class="sc">%&gt;%</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_points_w_lower_tol<span class="sc">$</span>state,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                                     combined_points_w_lower_tol<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>… That certainly looks different, but I don’t really think I’d say it looks meaningfully better. It doesn’t seem like further optimization is remaining coupled with better looking estimates.</p>
 </section>
 <section id="full-rank-approximation" class="level2">
 <h2 class="anchored" data-anchor-id="full-rank-approximation">Full-Rank Approximation</h2>
+<p>So if we can lower our ELBO, but improvements don’t result, maybe the next option is ask whether we need something more sophisticated than a mean-field approximation. Instead of</p>
+<p><span class="math display">q(z) = \prod_{j=1}^{m} q_j(z_j)</span></p>
+<p>let’s now try the full-rank approximation. Gather than each <span class="math inline">z_j</span> getting it’s own independent Gaussian, this uses a single multivariate normal distribution- so we can now (roughly) learn correlation structure, fancy.</p>
+<p><span class="math display">q(z) = \mathcal{N}(z|\mu,\Sigma)</span></p>
+<div class="cell" data-warnings="false">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fit_60k_fullrank <span class="ot">&lt;-</span> <span class="fu">stan_glmer</span>(abortion <span class="sc">~</span> (<span class="dv">1</span> <span class="sc">|</span> state) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                      male <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> male<span class="sc">:</span>eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ<span class="sc">:</span>age) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                      (<span class="dv">1</span> <span class="sc">|</span> educ<span class="sc">:</span>eth) <span class="sc">+</span> repvote <span class="sc">+</span> <span class="fu">factor</span>(region),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cces_all_df,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">autoscale =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior_covariance =</span> <span class="fu">decov</span>(<span class="at">scale =</span> <span class="fl">0.50</span>),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">adapt_delta =</span> <span class="fl">0.99</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#tol_rel_obj = 1e-4,</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">init =</span> <span class="dv">0</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">"fullrank"</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">605</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Pareto k diagnostic value is 44.16. Resampling is disabled. Decreasing
+tol_rel_obj may help if variational algorithm has terminated prematurely.
+Otherwise consider using sampling instead.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>302.17 sec elapsed</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>full_rank_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_fullrank,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                                                        <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>frvi_points <span class="ot">&lt;-</span> full_rank_draws <span class="sc">%&gt;%</span> </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"FR-VI"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>combined_points_w_frvi <span class="ot">&lt;-</span> combined_points_w_lower_tol <span class="sc">%&gt;%</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">bind_rows</span>(frvi_points) <span class="sc">%&gt;%</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>()</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>combined_points_w_frvi <span class="sc">%&gt;%</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_points_w_frvi<span class="sc">$</span>state,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                                     combined_points_w_frvi<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>The first thing to note here is that unlike the mean-field approximation, fitting this model wasn’t as simple as</p>
 </section>
 </section>
 <section id="where-to-from-here-why-is-it-like-this" class="level1">
@@ -427,7 +550,7 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <ol>
 <li id="fn1"><p>Really, the worst type of wrong, completely unpredictable wrong. If you spend time staring to try to infer a causal pattern of which states we can’t estimate well, you’re likely just going to end up confused.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Some of these MFVI distributions are bad enough that you might reasonably wonder if some of the badness is just plotting weirdness. That was my intuition at first. Of course though, this is sufficient granularity to make the MCMC results look reasonable. But even if you zoom in on 1 or two states and add way more points, the improbably sharp spikes remain.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Phrase due to Richard McElreath.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et Al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, I don’t believe that”.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},

@@ -361,8 +361,9 @@ fit_60k_fullrank <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
   adapt_delta = 0.99,
   refresh = 0,
   #tol_rel_obj = 1e-4,
-  init = 0,
+  #init = 0,
   algorithm = "fullrank",
+  QR = TRUE,
   seed = 605)
 toc()
 

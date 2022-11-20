@@ -189,7 +189,7 @@
 <h1>A first try at VI on this dataset</h1>
 <p>Ok, so we have an objective to optimize that should actually work. What’s a good <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D">? The choice has been shown to matter a lot, but for purposes of a first swing here, let’s try one of the simpler ideas people have explored, the mean-field family. These latent variables will be assumed mutually independent<sup>7</sup> and each get it’s own distinct factor in the variational density. A member of this would look something like:</p>
 <p><img src="https://latex.codecogs.com/png.latex?q(z)%20=%20%5Cprod_%7Bj=1%7D%5E%7Bm%7D%20q_j(z_j)"></p>
-<p>Each latent <img src="https://latex.codecogs.com/png.latex?z_j"> get it’s own variational factor with density <img src="https://latex.codecogs.com/png.latex?q_j(z_j)">, whose knobs we play with to maximize the ELBO.</p>
+<p>Each latent <img src="https://latex.codecogs.com/png.latex?z_j"> get it’s own variational factor with density <img src="https://latex.codecogs.com/png.latex?q_j(z_j)">, whose knobs we play with to maximize the ELBO. In the particular implementation below normal distributions are used, plenty of other options like t distributions are common too.</p>
 <p>Probably not the best we can do, but let’s give it a roll. Since we’ve been told this will scale really well too supposedly, let’s use all 60k of the observations just to get a sense how it’ll compare to our 8+ hours in that case.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;">tic</span>()</span>
