@@ -25,6 +25,7 @@ The rough plan for the series is as follows:
 library(tidyverse)
 library(rstanarm)
 library(tidybayes)
+library(tictoc)
 
 options(dplyr.summarise.inform = FALSE)
 
@@ -99,6 +100,8 @@ poststrat_df <- read_csv("data/poststrat_df.csv")
 statelevel_predictors_df <- read_csv('data/statelevel_predictors.csv')
 
 poststrat_df_60k <- left_join(poststrat_df, statelevel_predictors_df, by = "state")
+
+cces_all_df <- left_join(cces_all_df_cleaned, statelevel_predictors_df, by = "state")
 ```
 
 # The disclaimer
@@ -276,13 +279,117 @@ so let's hold off on that.
 So I've been billing this simple mean-field model as a first pass- I fit it on
 more or less default `rstanarm` parameters. I think it's worth taking a moment
 to show that getting this approximation problem right isn't going to be solved
+with low hanging fruit ideas, since that will motivate our need for better
+diagnostics and more expressive approximations.
 
 
 ## Lowering the tolerance
 
+So we managed to structure our Bayesian inference problem as an optimization
+problem. Can't we just optimize better? Maybe with more training the result
+will be less bad?
 
+the `tol_rel_obj` parameter control's the convergence tolerance on the relative
+norm of the objective. In other words, it controls what Evidence Lower Bound
+value we consider accurate enough to stop at. The default is 0.01, which feels
+a bit opaque, but let's try setting it way down to 1e-8 (1Mx lower). Then we can
+plot it alongside the MCMC estimates and original MF-VI attempt.
+
+```{r, warnings = FALSE, fig.width=8,fig.height=10}
+tic()
+fit_60k_1e8 <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
+                                      male + (1 | male:eth) + (1 | educ:age) +
+                                      (1 | educ:eth) + repvote + factor(region),
+  family = binomial(link = "logit"),
+  data = cces_all_df,
+  prior = normal(0, 1, autoscale = TRUE),
+  prior_covariance = decov(scale = 0.50),
+  adapt_delta = 0.99,
+  refresh = 0,
+  tol_rel_obj = 1e-8,
+  algorithm = "meanfield",
+  seed = 605)
+toc()
+
+lower_tol_draws <- poststrat_df_60k %>% add_epred_draws(fit_60k_1e8, ndraws = 1000)
+
+mfvi_lower_tol_points <- lower_tol_draws %>% 
+                        group_by(state,.draw) %>%
+                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        mutate(model = "MF-VI 1e-8")
+
+combined_points_w_lower_tol <- combined_points %>%
+                      bind_rows(mfvi_lower_tol_points) %>%
+                      ungroup()
+
+combined_points_w_lower_tol %>%
+  mutate(ordered_state = fct_reorder(combined_points_w_lower_tol$state,
+                                     combined_points_w_lower_tol$postrat_draw)) %>%
+  ggplot(aes(y = ordered_state,
+             x = postrat_draw,
+             color = model)) +
+     stat_dots(quantiles = 100) +
+     facet_wrap(~model) +
+     theme(legend.position="none")
+```
+... That certainly looks different, but I don't really think I'd say it looks
+meaningfully better. It doesn't seem like further optimization is remaining
+coupled with better looking estimates. 
 
 ## Full-Rank Approximation
+
+So if we can lower our ELBO, but improvements don't result, maybe the next
+option is ask whether we need something more sophisticated than a mean-field
+approximation. Instead of 
+
+$$q(z) = \prod_{j=1}^{m} q_j(z_j)$$
+
+let's now try the full-rank approximation. Gather than each $z_j$ getting it's own
+independent Gaussian, this uses a single multivariate normal distribution-
+so we can now (roughly) learn correlation structure, fancy.
+
+$$q(z) = \mathcal{N}(z|\mu,\Sigma)$$
+```{r, warnings = FALSE, message=FALSE, fig.width=8,fig.height=10}
+tic()
+fit_60k_fullrank <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
+                                      male + (1 | male:eth) + (1 | educ:age) +
+                                      (1 | educ:eth) + repvote + factor(region),
+  family = binomial(link = "logit"),
+  data = cces_all_df,
+  prior = normal(0, 1, autoscale = TRUE),
+  prior_covariance = decov(scale = 0.50),
+  adapt_delta = 0.99,
+  refresh = 0,
+  #tol_rel_obj = 1e-4,
+  init = 0,
+  algorithm = "fullrank",
+  seed = 605)
+toc()
+
+full_rank_draws <- poststrat_df_60k %>% add_epred_draws(fit_60k_fullrank,
+                                                        ndraws = 1000)
+
+frvi_points <- full_rank_draws %>% 
+                        group_by(state,.draw) %>%
+                        summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
+                        mutate(model = "FR-VI")
+
+combined_points_w_frvi <- combined_points_w_lower_tol %>%
+                      bind_rows(frvi_points) %>%
+                      ungroup()
+
+combined_points_w_frvi %>%
+  mutate(ordered_state = fct_reorder(combined_points_w_frvi$state,
+                                     combined_points_w_frvi$postrat_draw)) %>%
+  ggplot(aes(y = ordered_state,
+             x = postrat_draw,
+             color = model)) +
+     stat_dots(quantiles = 100) +
+     facet_wrap(~model) +
+     theme(legend.position="none")
+```
+The first thing to note here is that unlike the mean-field approximation, fitting
+this model wasn't as simple as 
 
 # Where to from here? (Why is it like this!?)
 
@@ -294,4 +401,6 @@ wonder if some of the badness is just plotting weirdness. That was my intuition 
 first. Of course though, this is sufficient granularity to make the MCMC results
 look reasonable. But even if you zoom in on 1 or two states and add way more
 points, the improbably sharp spikes remain.
-[^3]: Phrase due to Richard McElreath.
+[^3]: Phrase due to Richard McElreath. The magic of good visualizations like
+Kay et Al.'s is that makes it trivial to let pattern recognition go to work,
+and be able to go "oh, I don't believe that".

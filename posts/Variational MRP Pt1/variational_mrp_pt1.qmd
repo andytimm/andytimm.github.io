@@ -219,7 +219,8 @@ Ok, so we have an objective to optimize that should actually work. What's a good
 
 $$q(z) = \prod_{j=1}^{m} q_j(z_j)$$
 
-Each latent $z_j$ get it's own variational factor with density $q_j(z_j)$, whose knobs we play with to maximize the ELBO.
+Each latent $z_j$ get it's own variational factor with density $q_j(z_j)$, whose knobs we play with to maximize the ELBO. In the particular implementation below normal distributions are
+used, plenty of other options like t distributions are common too.
 
 Probably not the best we can do, but let's give it a roll. Since we've been told this will scale really well too supposedly, let's use all 60k of the observations just to get a sense how it'll compare to our 8+ hours in that case.
 

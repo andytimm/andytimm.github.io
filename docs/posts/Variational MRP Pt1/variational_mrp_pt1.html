@@ -448,7 +448,7 @@ Pr(y_i = 1) =&amp; logit^{-1}(
 <h1>A first try at VI on this dataset</h1>
 <p>Ok, so we have an objective to optimize that should actually work. What’s a good <span class="math inline">\mathscr{Q}</span>? The choice has been shown to matter a lot, but for purposes of a first swing here, let’s try one of the simpler ideas people have explored, the mean-field family. These latent variables will be assumed mutually independent<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> and each get it’s own distinct factor in the variational density. A member of this would look something like:</p>
 <p><span class="math display">q(z) = \prod_{j=1}^{m} q_j(z_j)</span></p>
-<p>Each latent <span class="math inline">z_j</span> get it’s own variational factor with density <span class="math inline">q_j(z_j)</span>, whose knobs we play with to maximize the ELBO.</p>
+<p>Each latent <span class="math inline">z_j</span> get it’s own variational factor with density <span class="math inline">q_j(z_j)</span>, whose knobs we play with to maximize the ELBO. In the particular implementation below normal distributions are used, plenty of other options like t distributions are common too.</p>
 <p>Probably not the best we can do, but let’s give it a roll. Since we’ve been told this will scale really well too supposedly, let’s use all 60k of the observations just to get a sense how it’ll compare to our 8+ hours in that case.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
