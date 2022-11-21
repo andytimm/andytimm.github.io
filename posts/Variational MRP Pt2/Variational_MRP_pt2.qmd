@@ -292,7 +292,8 @@ will be less bad?
 the `tol_rel_obj` parameter control's the convergence tolerance on the relative
 norm of the objective. In other words, it controls what Evidence Lower Bound
 value we consider accurate enough to stop at. The default is 0.01, which feels
-a bit opaque, but let's try setting it way down to 1e-8 (1Mx lower). Then we can
+a bit opaque, but let's try setting it way down to 1e-8 (1Mx lower), and
+further, let's increase the max iterations 10x. Then we can
 plot it alongside the MCMC estimates and original MF-VI attempt.
 
 ```{r, warnings = FALSE, fig.width=8,fig.height=10}
@@ -305,7 +306,8 @@ fit_60k_1e8 <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
   prior = normal(0, 1, autoscale = TRUE),
   prior_covariance = decov(scale = 0.50),
   adapt_delta = 0.99,
-  refresh = 0,
+  # Printing the ELBO every 1k draws
+  refresh = 1000,
   tol_rel_obj = 1e-8,
   algorithm = "meanfield",
   seed = 605)
@@ -333,12 +335,15 @@ combined_points_w_lower_tol %>%
      theme(legend.position="none")
 ```
 ... That certainly looks different, but I don't really think I'd say it looks
-meaningfully better. It doesn't seem like further optimization is remaining
-coupled with better looking estimates. 
+meaningfully better.
+
+Looking at the printed out ELBO, it's pretty clear that there was no traction
+after the first ~1000 samples. A variational family this simple isn't going
+to get much better, no matter how much time you give it.
 
 ## Full-Rank Approximation
 
-So if we can lower our ELBO, but improvements don't result, maybe the next
+So if extend training time, but improvements don't result, maybe the next
 option is ask whether we need something more sophisticated than a mean-field
 approximation. Instead of 
 
@@ -349,7 +354,7 @@ independent Gaussian, this uses a single multivariate normal distribution-
 so we can now (roughly) learn correlation structure, fancy.
 
 $$q(z) = \mathcal{N}(z|\mu,\Sigma)$$
-```{r, warnings = FALSE, message=FALSE, fig.width=8,fig.height=10}
+```{r, warnings = FALSE, fig.width=8,fig.height=10}
 tic()
 fit_60k_fullrank <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
                                       male + (1 | male:eth) + (1 | educ:age) +
@@ -360,8 +365,9 @@ fit_60k_fullrank <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
   prior_covariance = decov(scale = 0.50),
   adapt_delta = 0.99,
   refresh = 0,
-  #tol_rel_obj = 1e-4,
-  #init = 0,
+  tol_rel_obj = 1e-8,
+  # Printing the ELBO every 1k draws
+  refresh = 1000,
   algorithm = "fullrank",
   QR = TRUE,
   seed = 605)
@@ -390,7 +396,13 @@ combined_points_w_frvi %>%
      theme(legend.position="none")
 ```
 The first thing to note here is that unlike the mean-field approximation, fitting
-this model wasn't as simple as 
+this model required some tinkering to get it to fit. I ended up needing to set
+`QR = TRUE` (ie, use a QR decomposition) to get this to fit at all (unless
+I set the initialization to 0, at which point the posterior collapsed to nearly)
+a single point. 
+
+Unfortunately, this version has a similar spiky posterior distribution. It might
+even be worse than the mean-field try. Again, it looks like 
 
 # Where to from here? (Why is it like this!?)
 
