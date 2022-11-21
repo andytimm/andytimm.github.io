@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
-<meta name="dcterms.date" content="2022-10-28">
+<meta name="dcterms.date" content="2022-11-20">
 
 <title>Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions</title>
 <style>
@@ -146,12 +146,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta property="og:description" content="Part 2- The errors of our ways">
+<meta property="og:image" content="https://andytimm.github.io/posts\Variational MRP Pt2\images\cover_photo.png">
 <meta property="og:site-name" content="Andy Timm">
+<meta property="og:image:height" content="1920">
+<meta property="og:image:width" content="1536">
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta name="twitter:description" content="Part 2- The errors of our ways">
+<meta name="twitter:image" content="https://andytimm.github.io/posts\Variational MRP Pt2\images\cover_photo.png">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="1920">
+<meta name="twitter:image-width" content="1536">
 </head>
 
 <body class="nav-fixed">
@@ -200,7 +206,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <p class="subtitle lead">Part 2- The errors of our ways</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">MRP</div>
-                <div class="quarto-category">BART</div>
                 <div class="quarto-category">Variational Inference</div>
               </div>
                   </div>
@@ -219,7 +224,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">October 28, 2022</p>
+        <p class="date">November 20, 2022</p>
       </div>
     </div>
     
@@ -253,7 +258,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<p>This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian like Multilevel Regression and Poststratification models without the approximation being of disastrously poor quality. In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.</p>
+<p>This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
+<p>In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.</p>
 <p>In this post, we’ll explore the shortcomings of this initial approximation, and take a first pass at trying to better with a more complex (full rank) variational approximation. The goal is to get a better feel for what failing models could look like, at least in this relatively simple case.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
@@ -267,10 +273,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="the-disclaimer" class="level1">
 <h1>The disclaimer</h1>
-One sort of obvious objections to how I’ve set up this series is “Why not talk about theory on why VI approximations can be poor before trying stuff?”. While in practice I did read a lot of the papers for the next post before writing this one, I think there’s a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.
-<example or="" two="" to="" tease="" this="" once="" i="" have="" them="">
-<p>.</p>
-</example></section>
+<p>One sort of obvious objections to how I’ve set up this series is “Why not talk about theory on why VI approximations can be poor before trying stuff?”. While in practice I did read a lot of the papers for the next post before writing this one, I think there’s a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.</p>
+</section>
 <section id="toplines" class="level1">
 <h1>Toplines</h1>
 <div class="cell">
@@ -316,7 +320,7 @@ One sort of obvious objections to how I’ve set up this series is “Why not ta
 </tr>
 </tbody>
 </table>
-<p>Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily be simulation error- from a few quick re-runs these often end up having matching means to 3 decimals.</p>
+<p>Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily reverse on a different seed- from a few quick re-runs these often end up having matching means to 3 decimals.</p>
 </section>
 <section id="state-level-estimates" class="level1">
 <h1>State Level Estimates</h1>
@@ -345,7 +349,7 @@ $ .draw      &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
 $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 0.55…</code></pre>
 </div>
 </div>
-<p>If you haven’t worked with <code>tidybayes</code> before, the glimpse above should help give some intuition about the new shape of the data- we’ve take the 12,000 row <code>poststrat_df_60k</code>, and added a row per observation per draw, with the prediction (.epred) and related metadata. This gives 12,000 x 1,000 = 12,000,000 million rows. This really isn’t the most space efficient storage, but it allows for very elegant <code>dplyr</code> style manipulation of results and quick exploration.</p>
+<p>If you haven’t worked with <code>tidybayes</code> before, the glimpse above should help give some intuition about the new shape of the data- we’ve take the 12,000 row <code>poststrat_df_60k</code>, and added a row per observation per draw, with the prediction (.epred) and related metadata. This gives 12,000 x 1,000 = 12 million rows. This really isn’t the most space efficient storage, but it allows for very elegant <code>dplyr</code> style manipulation of results and quick exploration.</p>
 <p>Let’s now plot and compare the 50 and 95% credible intervals by state between the two models.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mcmc_state_summary <span class="ot">&lt;-</span> mcmc_state_level <span class="sc">%&gt;%</span> </span>
@@ -355,33 +359,36 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state) <span class="sc">%&gt;%</span></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">median_qi</span>(postrat_draw, <span class="at">.width =</span> <span class="fu">c</span>(.<span class="dv">5</span>,.<span class="dv">95</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"mcmc"</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>mfvi_state_summary <span class="ot">&lt;-</span> mfvi_state_level <span class="sc">%&gt;%</span> </span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state) <span class="sc">%&gt;%</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">median_qi</span>(postrat_draw, <span class="at">.width =</span> <span class="fu">c</span>(.<span class="dv">5</span>,.<span class="dv">95</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MF-VI"</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>combined_summary <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(mcmc_state_summary,mfvi_state_summary)</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>combined_summary <span class="sc">%&gt;%</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_summary<span class="sc">$</span>state,</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                                     combined_summary<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>             <span class="at">xmin =</span> .lower,</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>             <span class="at">xmax =</span> .upper,</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_pointinterval</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(.<span class="dv">25</span>,.<span class="dv">75</span>) <span class="sc">+</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MCMC"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>mfvi_state_summary <span class="ot">&lt;-</span> mfvi_state_level <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state) <span class="sc">%&gt;%</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">median_qi</span>(postrat_draw, <span class="at">.width =</span> <span class="fu">c</span>(.<span class="dv">5</span>,.<span class="dv">95</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MF-VI"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>combined_summary <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(mcmc_state_summary,mfvi_state_summary)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>combined_summary <span class="sc">%&gt;%</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_summary<span class="sc">$</span>state,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                                     combined_summary<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>             <span class="at">xmin =</span> .lower,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">xmax =</span> .upper,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_pointinterval</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(.<span class="dv">25</span>,.<span class="dv">75</span>) <span class="sc">+</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"top"</span>) <span class="sc">+</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc">+</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"State"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
-<p>… That looks concerning. What’s happened here?</p>
-<p>What might you get wrong if you used the VI approximation for inference here? If you only cared about the median estimate primarily, you might be ok with this effort. If you care about uncertainty though, here’s a non-exaustive list of concerns here:</p>
+<p>… That looks concerning.</p>
+<p>What might you get wrong if you used the VI approximation for inference here? If you only cared about the median estimate primarily, you might be ok with this effort. If you care about uncertainty though, here’s a non-exhaustive list of concerns here:</p>
 <ol type="1">
 <li>Probably unimodal, smooth posterior distributions from MCMC have gone off-course to the point where the Median/50/95% presentation no longer seems up to expressing the posterior shape (more on this in a second).</li>
 <li>The MF-VI posteriors are often narrower in 50% or 95% CI- we’d on average underestimate various types of uncertainty here.</li>
@@ -413,7 +420,9 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
 <span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc">+</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"State"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
 </div>
@@ -427,7 +436,7 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <section id="lowering-the-tolerance" class="level2">
 <h2 class="anchored" data-anchor-id="lowering-the-tolerance">Lowering the tolerance</h2>
 <p>So we managed to structure our Bayesian inference problem as an optimization problem. Can’t we just optimize better? Maybe with more training the result will be less bad?</p>
-<p>the <code>tol_rel_obj</code> parameter control’s the convergence tolerance on the relative norm of the objective. In other words, it controls what Evidence Lower Bound value we consider accurate enough to stop at. The default is 0.01, which feels a bit opaque, but let’s try setting it way down to 1e-8 (1Mx lower), and further, let’s increase the max iterations 10x. Then we can plot it alongside the MCMC estimates and original MF-VI attempt.</p>
+<p>the <code>tol_rel_obj</code> parameter control’s the convergence tolerance on the relative norm of the objective. In other words, it controls what (change in the) Evidence Lower Bound value we consider accurate enough to stop at. The default is 0.01, which feels a bit opaque, but let’s try setting it way down to 1e-8 (1Mx lower). Then we can plot it alongside the MCMC estimates and original MF-VI attempt.</p>
 <div class="cell" data-warnings="false">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit_60k_1e8 <span class="ot">&lt;-</span> <span class="fu">stan_glmer</span>(abortion <span class="sc">~</span> (<span class="dv">1</span> <span class="sc">|</span> state) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> eth) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> educ) <span class="sc">+</span></span>
@@ -452,8 +461,8 @@ Chain 1: ------------------------------------------------------------
 Chain 1: 
 Chain 1: 
 Chain 1: 
-Chain 1: Gradient evaluation took 0.025 seconds
-Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 250 seconds.
+Chain 1: Gradient evaluation took 0.031 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 310 seconds.
 Chain 1: Adjust your expectations accordingly!
 Chain 1: 
 Chain 1: 
@@ -583,7 +592,7 @@ Otherwise consider using sampling instead.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>299.02 sec elapsed</code></pre>
+<pre><code>283.46 sec elapsed</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>lower_tol_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_1e8, <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -604,12 +613,14 @@ Otherwise consider using sampling instead.</code></pre>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc">+</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"State"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
-<p>… That certainly looks different, but I don’t really think I’d say it looks meaningfully better.</p>
+<p>… That certainly looks different, but I don’t really think I’d say it looks meaningfully better<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
 <p>Looking at the printed out ELBO, it’s pretty clear that there was no traction after the first ~1000 samples. A variational family this simple isn’t going to get much better, no matter how much time you give it.</p>
 </section>
 <section id="full-rank-approximation" class="level2">
@@ -772,7 +783,7 @@ Otherwise consider using sampling instead.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>318.86 sec elapsed</code></pre>
+<pre><code>287.15 sec elapsed</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>full_rank_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_fullrank,</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                                        <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
@@ -794,12 +805,14 @@ Otherwise consider using sampling instead.</code></pre>
 <span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
 <span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
 <span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc">+</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"State"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
-<p>The first thing to note here is that unlike the mean-field approximation, fitting this model required some tinkering to get it to fit. I ended up needing to set <code>QR = TRUE</code> (ie, use a QR decomposition) to get this to fit at all (unless I set the initialization to 0, at which point the posterior collapsed to nearly) a single point.</p>
+<p>The first thing to note here is that unlike the mean-field approximation, fitting this model required some tinkering to get it to fit. I ended up needing to set <code>QR = TRUE</code> (ie, use a QR decomposition) to get this to fit at all (unless I set the initialization to 0, at which point the posterior collapsed to nearly a single point).</p>
 <p>Unfortunately, this version has a similar spiky posterior distribution. In terms of uncertainty, it’s clearly worse than the mean-field implementation . The ELBO starts from higher, spends some time actually improving, but also quickly reaches a plateau. It doesn’t seem like this is a way out either.</p>
 </section>
 </section>
@@ -819,19 +832,20 @@ Otherwise consider using sampling instead.</code></pre>
 <ol>
 <li id="fn1"><p>Really, the worst type of wrong, completely unpredictable wrong. If you spend time staring to try to infer a causal pattern of which states we can’t estimate well, you’re likely just going to end up confused.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Some of these MFVI distributions are bad enough that you might reasonably wonder if some of the badness is just plotting weirdness. That was my intuition at first. Of course though, this is sufficient granularity to make the MCMC results look reasonable. But even if you zoom in on 1 or two states and add way more points, the improbably sharp spikes remain.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et Al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, that looks wrong”.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, that looks wrong”.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Also, apologies for showing every 100 iterations; the rstanarm parameter to set this, <code>refresh</code> doesn’t appear to work properly with non-MCMC models, so I can either not show the ELBO or blow up the post with this.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
-  date = {2022-10-28},
+  date = {2022-11-20},
   url = {https://andytimm.github.io/Variational_MRP_pt2.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
 Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> October 28, 2022. <a href="https://andytimm.github.io/Variational_MRP_pt2.html">https://andytimm.github.io/Variational_MRP_pt2.html</a>.
+Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.github.io/Variational_MRP_pt2.html">https://andytimm.github.io/Variational_MRP_pt2.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {

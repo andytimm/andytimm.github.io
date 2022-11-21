@@ -2,14 +2,16 @@
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 2- The errors of our ways
-date: 2022-10-28
-draft: True
+date: 2022-11-20
+image: images/cover_photo.png
 categories:
 - MRP
 - Variational Inference
 ---
 
-This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian like Multilevel Regression and Poststratification models without the approximation being of disastrously poor quality. In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.
+This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
+
+In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.
 
 In this post, we'll explore the shortcomings of this initial approximation, and take a first pass at trying to better with a more complex (full rank) variational approximation. The goal is to get a better feel for what failing models could look like, at least in this relatively simple case.
 
@@ -25,7 +27,6 @@ library(tidyverse)
 library(rstanarm)
 library(tidybayes)
 library(tictoc)
-theme_set(theme_tidybayes())
 
 options(dplyr.summarise.inform = FALSE)
 
@@ -104,7 +105,7 @@ cces_all_df <- left_join(cces_all_df_cleaned, statelevel_predictors_df, by = "st
 
 # The disclaimer
 
-One sort of obvious objections to how I've set up this series is "Why not talk about theory on why VI approximations can be poor before trying stuff?". While in practice I did read a lot of the papers for the next post before writing this one, I think there's a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right. <Example or two to tease this once I have them>.
+One sort of obvious objections to how I've set up this series is "Why not talk about theory on why VI approximations can be poor before trying stuff?". While in practice I did read a lot of the papers for the next post before writing this one, I think there's a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.
 
 # Toplines
 
@@ -136,7 +137,7 @@ cat("MCMC MRP estimate mean, sd: ", round(mrp_estimate_mcmc, 3))
 | MCMC  | 43.9%  |  .2% |
 | mean-field VI  |  43.7% | .2%  |
 
-Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily be simulation error- from a few quick re-runs these
+Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily reverse on a different seed- from a few quick re-runs these
 often end up having matching means to 3 decimals.
 
 # State Level Estimates
@@ -158,7 +159,7 @@ If you haven't worked with `tidybayes` before, the glimpse above should help
 give some intuition about the new shape of the data- we've take the 12,000 row
 `poststrat_df_60k`, and added a row per observation per draw, with the prediction
 (.epred) and related metadata. This gives
-12,000 x 1,000 = 12,000,000 million rows. This really isn't the most space
+12,000 x 1,000 = 12 million rows. This really isn't the most space
 efficient storage, but it allows for very elegant `dplyr` style manipulation of
 results and quick exploration.
 
@@ -174,7 +175,7 @@ mcmc_state_summary <- mcmc_state_level %>%
                         mutate(postrat_draw = sum(.epred*(n/sum(n)))) %>%
                         group_by(state) %>%
                         median_qi(postrat_draw, .width = c(.5,.95)) %>%
-                        mutate(model = "mcmc")
+                        mutate(model = "MCMC")
 
 mfvi_state_summary <- mfvi_state_level %>% 
                         group_by(state,.draw) %>%
@@ -195,13 +196,15 @@ combined_summary %>%
              color = model)) +
   geom_pointinterval(position = position_dodge(1)) +
   xlim(.25,.75) +
-  theme(legend.position="top")
+  theme(legend.position="top") +
+  xlab("Should employers be allowed to deny their employees abortion care?") +
+  ylab("State")
 ```
-... That looks concerning. What's happened here?
+... That looks concerning.
 
 What might you get wrong if you used the VI approximation for inference here? If you
 only cared about the median estimate primarily, you might be ok with this effort.
-If you care about uncertainty though, here's a non-exaustive list of concerns here:
+If you care about uncertainty though, here's a non-exhaustive list of concerns here:
 
 1.  Probably unimodal, smooth
 posterior distributions from MCMC have gone off-course to the point where the
@@ -256,7 +259,9 @@ combined_points %>%
              color = model)) +
      stat_dots(quantiles = 100) +
      facet_wrap(~model) +
-     theme(legend.position="none")
+     theme(legend.position="none") +
+  xlab("Should employers be allowed to deny their employees abortion care?") +
+  ylab("State")
 
 ```
 Eek. The closer to the individual draws we get, the less these two models seem to be
@@ -289,10 +294,10 @@ problem. Can't we just optimize better? Maybe with more training the result
 will be less bad?
 
 the `tol_rel_obj` parameter control's the convergence tolerance on the relative
-norm of the objective. In other words, it controls what Evidence Lower Bound
+norm of the objective. In other words, it controls what (change in the)
+Evidence Lower Bound
 value we consider accurate enough to stop at. The default is 0.01, which feels
-a bit opaque, but let's try setting it way down to 1e-8 (1Mx lower), and
-further, let's increase the max iterations 10x. Then we can
+a bit opaque, but let's try setting it way down to 1e-8 (1Mx lower). Then we can
 plot it alongside the MCMC estimates and original MF-VI attempt.
 
 ```{r, warnings = FALSE, fig.width=8,fig.height=10}
@@ -331,10 +336,12 @@ combined_points_w_lower_tol %>%
              color = model)) +
      stat_dots(quantiles = 100) +
      facet_wrap(~model) +
-     theme(legend.position="none")
+     theme(legend.position="none") +
+  xlab("Should employers be allowed to deny their employees abortion care?") +
+  ylab("State")
 ```
 ... That certainly looks different, but I don't really think I'd say it looks
-meaningfully better.
+meaningfully better[^4].
 
 Looking at the printed out ELBO, it's pretty clear that there was no traction
 after the first ~1000 samples. A variational family this simple isn't going
@@ -391,13 +398,15 @@ combined_points_w_frvi %>%
              color = model)) +
      stat_dots(quantiles = 100) +
      facet_wrap(~model) +
-     theme(legend.position="none")
+     theme(legend.position="none") +
+  xlab("Should employers be allowed to deny their employees abortion care?") +
+  ylab("State")
 ```
 The first thing to note here is that unlike the mean-field approximation, fitting
 this model required some tinkering to get it to fit. I ended up needing to set
 `QR = TRUE` (ie, use a QR decomposition) to get this to fit at all (unless
-I set the initialization to 0, at which point the posterior collapsed to nearly)
-a single point. 
+I set the initialization to 0, at which point the posterior collapsed to nearly
+a single point). 
 
 Unfortunately, this version has a similar spiky posterior distribution. In terms
 of uncertainty, it's clearly worse than the mean-field implementation
@@ -435,5 +444,8 @@ first. Of course though, this is sufficient granularity to make the MCMC results
 look reasonable. But even if you zoom in on 1 or two states and add way more
 points, the improbably sharp spikes remain.
 [^3]: Phrase due to Richard McElreath. The magic of good visualizations like
-Kay et Al.'s is that makes it trivial to let pattern recognition go to work,
+Kay et al.'s is that makes it trivial to let pattern recognition go to work,
 and be able to go "oh, that looks wrong".
+[^4]: Also, apologies for showing every 100 iterations; the rstanarm parameter to
+set this, `refresh` doesn't appear to work properly with non-MCMC models, so I
+can either not show the ELBO or blow up the post with this.

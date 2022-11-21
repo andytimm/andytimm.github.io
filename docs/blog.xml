@@ -10,7 +10,611 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Mon, 10 Oct 2022 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 20 Nov 2022 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
+<p>In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.</p>
+<p>In this post, we’ll explore the shortcomings of this initial approximation, and take a first pass at trying to better with a more complex (full rank) variational approximation. The goal is to get a better feel for what failing models could look like, at least in this relatively simple case.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li><a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt1/variational_mrp_pt1.html">Introducing the Problem- Why is VI useful, why VI can produce spherical cows</a></li>
+<li><strong>(This post)</strong> How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Some theory on why posterior approximation with VI can be so poor</li>
+<li>Seeing if some more sophisticated techniques like normalizing flows help</li>
+</ol>
+<div class="cell">
+
+</div>
+<section id="the-disclaimer" class="level1">
+<h1>The disclaimer</h1>
+<p>One sort of obvious objections to how I’ve set up this series is “Why not talk about theory on why VI approximations can be poor before trying stuff?”. While in practice I did read a lot of the papers for the next post before writing this one, I think there’s a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.</p>
+</section>
+<section id="toplines" class="level1">
+<h1>Toplines</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">meanfield_60k <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">readRDS</span>(<span class="st" style="color: #20794D;">"fit_60k_meanfield.rds"</span>)</span>
+<span id="cb1-2">mcmc_60k <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">readRDS</span>(<span class="st" style="color: #20794D;">"fit_60k_mcmc.rds"</span>)</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="co" style="color: #5E5E5E;"># Meanfield </span></span>
+<span id="cb1-5">epred_mat_mf <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">posterior_epred</span>(meanfield_60k, <span class="at" style="color: #657422;">newdata =</span> poststrat_df_60k, <span class="at" style="color: #657422;">draws =</span> <span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb1-6">mrp_estimates_vector_mf <span class="ot" style="color: #003B4F;">&lt;-</span> epred_mat_mf <span class="sc" style="color: #5E5E5E;">%*%</span> poststrat_df_60k<span class="sc" style="color: #5E5E5E;">$</span>n <span class="sc" style="color: #5E5E5E;">/</span> </span>
+<span id="cb1-7">                                              <span class="fu" style="color: #4758AB;">sum</span>(poststrat_df_60k<span class="sc" style="color: #5E5E5E;">$</span>n)</span>
+<span id="cb1-8">mrp_estimate_mf <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="at" style="color: #657422;">mean =</span> <span class="fu" style="color: #4758AB;">mean</span>(mrp_estimates_vector_mf),</span>
+<span id="cb1-9">                     <span class="at" style="color: #657422;">sd =</span> <span class="fu" style="color: #4758AB;">sd</span>(mrp_estimates_vector_mf))</span>
+<span id="cb1-10"></span>
+<span id="cb1-11"></span>
+<span id="cb1-12"><span class="co" style="color: #5E5E5E;"># MCMC </span></span>
+<span id="cb1-13">epred_mat_mcmc <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">posterior_epred</span>(mcmc_60k, <span class="at" style="color: #657422;">newdata =</span> poststrat_df_60k, <span class="at" style="color: #657422;">draws =</span> <span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb1-14">mrp_estimates_vector_mcmc <span class="ot" style="color: #003B4F;">&lt;-</span> epred_mat_mcmc <span class="sc" style="color: #5E5E5E;">%*%</span> poststrat_df_60k<span class="sc" style="color: #5E5E5E;">$</span>n <span class="sc" style="color: #5E5E5E;">/</span></span>
+<span id="cb1-15">                                                  <span class="fu" style="color: #4758AB;">sum</span>(poststrat_df_60k<span class="sc" style="color: #5E5E5E;">$</span>n)</span>
+<span id="cb1-16">mrp_estimate_mcmc <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="at" style="color: #657422;">mean =</span> <span class="fu" style="color: #4758AB;">mean</span>(mrp_estimates_vector_mcmc),</span>
+<span id="cb1-17">                       <span class="at" style="color: #657422;">sd =</span> <span class="fu" style="color: #4758AB;">sd</span>(mrp_estimates_vector_mcmc))</span>
+<span id="cb1-18"></span>
+<span id="cb1-19"><span class="fu" style="color: #4758AB;">cat</span>(<span class="st" style="color: #20794D;">"Meanfield MRP estimate mean, sd: "</span>, <span class="fu" style="color: #4758AB;">round</span>(mrp_estimate_mf, <span class="dv" style="color: #AD0000;">3</span>))</span>
+<span id="cb1-20"><span class="fu" style="color: #4758AB;">cat</span>(<span class="st" style="color: #20794D;">"MCMC MRP estimate mean, sd: "</span>, <span class="fu" style="color: #4758AB;">round</span>(mrp_estimate_mcmc, <span class="dv" style="color: #AD0000;">3</span>))</span></code></pre></div>
+</div>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Mean</th>
+<th>SD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MCMC</td>
+<td>43.9%</td>
+<td>.2%</td>
+</tr>
+<tr class="even">
+<td>mean-field VI</td>
+<td>43.7%</td>
+<td>.2%</td>
+</tr>
+</tbody>
+</table>
+<p>Starting with basics, the toplines are pretty much identical, which is a good start. The minor difference here could easily reverse on a different seed- from a few quick re-runs these often end up having matching means to 3 decimals.</p>
+</section>
+<section id="state-level-estimates" class="level1">
+<h1>State Level Estimates</h1>
+<p>What happens if we produce state level estimates, similar to the plot last post comparing MRP to a simple weighted estimate? Note that I’ll steer away from the MRP Case Study example here in a few ways. I’ll use <code>tidybayes</code> for working with the draws (more elegant than their loop based approach), and I’ll use more draws (helps with simulation error in smaller states).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">mcmc_state_level <span class="ot" style="color: #003B4F;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">add_epred_draws</span>(mcmc_60k, <span class="at" style="color: #657422;">ndraws =</span> <span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb2-2">mfvi_state_level <span class="ot" style="color: #003B4F;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">add_epred_draws</span>(meanfield_60k, <span class="at" style="color: #657422;">ndraws =</span> <span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb2-3"></span>
+<span id="cb2-4">mcmc_state_level <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">glimpse</span>()</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 12,000,000
+Columns: 13
+Groups: state, eth, male, age, educ, n, repvote, region, .row [12,000]
+$ state      &lt;chr&gt; "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL", "AL",…
+$ eth        &lt;chr&gt; "White", "White", "White", "White", "White", "White", "Whit…
+$ male       &lt;dbl&gt; -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,…
+$ age        &lt;chr&gt; "18-29", "18-29", "18-29", "18-29", "18-29", "18-29", "18-2…
+$ educ       &lt;chr&gt; "No HS", "No HS", "No HS", "No HS", "No HS", "No HS", "No H…
+$ n          &lt;dbl&gt; 23948, 23948, 23948, 23948, 23948, 23948, 23948, 23948, 239…
+$ repvote    &lt;dbl&gt; 0.6437414, 0.6437414, 0.6437414, 0.6437414, 0.6437414, 0.64…
+$ region     &lt;chr&gt; "South", "South", "South", "South", "South", "South", "Sout…
+$ .row       &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ .chain     &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ .iteration &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ .draw      &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, …
+$ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 0.55…</code></pre>
+</div>
+</div>
+<p>If you haven’t worked with <code>tidybayes</code> before, the glimpse above should help give some intuition about the new shape of the data- we’ve take the 12,000 row <code>poststrat_df_60k</code>, and added a row per observation per draw, with the prediction (.epred) and related metadata. This gives 12,000 x 1,000 = 12 million rows. This really isn’t the most space efficient storage, but it allows for very elegant <code>dplyr</code> style manipulation of results and quick exploration.</p>
+<p>Let’s now plot and compare the 50 and 95% credible intervals by state between the two models.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">mcmc_state_summary <span class="ot" style="color: #003B4F;">&lt;-</span> mcmc_state_level <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb4-2">                        <span class="co" style="color: #5E5E5E;"># multiply each draw by it's cell's proportion of state N</span></span>
+<span id="cb4-3">                        <span class="co" style="color: #5E5E5E;"># this is the P in MRP</span></span>
+<span id="cb4-4">                        <span class="fu" style="color: #4758AB;">group_by</span>(state,.draw) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-5">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">postrat_draw =</span> <span class="fu" style="color: #4758AB;">sum</span>(.epred<span class="sc" style="color: #5E5E5E;">*</span>(n<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(n)))) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-6">                        <span class="fu" style="color: #4758AB;">group_by</span>(state) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-7">                        <span class="fu" style="color: #4758AB;">median_qi</span>(postrat_draw, <span class="at" style="color: #657422;">.width =</span> <span class="fu" style="color: #4758AB;">c</span>(.<span class="dv" style="color: #AD0000;">5</span>,.<span class="dv" style="color: #AD0000;">95</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-8">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">model =</span> <span class="st" style="color: #20794D;">"MCMC"</span>)</span>
+<span id="cb4-9"></span>
+<span id="cb4-10">mfvi_state_summary <span class="ot" style="color: #003B4F;">&lt;-</span> mfvi_state_level <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb4-11">                        <span class="fu" style="color: #4758AB;">group_by</span>(state,.draw) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-12">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">postrat_draw =</span> <span class="fu" style="color: #4758AB;">sum</span>(.epred<span class="sc" style="color: #5E5E5E;">*</span>(n<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(n)))) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-13">                        <span class="fu" style="color: #4758AB;">group_by</span>(state) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-14">                        <span class="fu" style="color: #4758AB;">median_qi</span>(postrat_draw, <span class="at" style="color: #657422;">.width =</span> <span class="fu" style="color: #4758AB;">c</span>(.<span class="dv" style="color: #AD0000;">5</span>,.<span class="dv" style="color: #AD0000;">95</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-15">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">model =</span> <span class="st" style="color: #20794D;">"MF-VI"</span>)</span>
+<span id="cb4-16"></span>
+<span id="cb4-17">combined_summary <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">bind_rows</span>(mcmc_state_summary,mfvi_state_summary)</span>
+<span id="cb4-18"></span>
+<span id="cb4-19">combined_summary <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-20">  <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">ordered_state =</span> <span class="fu" style="color: #4758AB;">fct_reorder</span>(combined_summary<span class="sc" style="color: #5E5E5E;">$</span>state,</span>
+<span id="cb4-21">                                     combined_summary<span class="sc" style="color: #5E5E5E;">$</span>postrat_draw)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-22">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> ordered_state,</span>
+<span id="cb4-23">             <span class="at" style="color: #657422;">x =</span> postrat_draw,</span>
+<span id="cb4-24">             <span class="at" style="color: #657422;">xmin =</span> .lower,</span>
+<span id="cb4-25">             <span class="at" style="color: #657422;">xmax =</span> .upper,</span>
+<span id="cb4-26">             <span class="at" style="color: #657422;">color =</span> model)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-27">  <span class="fu" style="color: #4758AB;">geom_pointinterval</span>(<span class="at" style="color: #657422;">position =</span> <span class="fu" style="color: #4758AB;">position_dodge</span>(<span class="dv" style="color: #AD0000;">1</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-28">  <span class="fu" style="color: #4758AB;">xlim</span>(.<span class="dv" style="color: #AD0000;">25</span>,.<span class="dv" style="color: #AD0000;">75</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-29">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">legend.position=</span><span class="st" style="color: #20794D;">"top"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-30">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-31">  <span class="fu" style="color: #4758AB;">ylab</span>(<span class="st" style="color: #20794D;">"State"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>… That looks concerning.</p>
+<p>What might you get wrong if you used the VI approximation for inference here? If you only cared about the median estimate primarily, you might be ok with this effort. If you care about uncertainty though, here’s a non-exhaustive list of concerns here:</p>
+<ol type="1">
+<li>Probably unimodal, smooth posterior distributions from MCMC have gone off-course to the point where the Median/50/95% presentation no longer seems up to expressing the posterior shape (more on this in a second).</li>
+<li>The MF-VI posteriors are often narrower in 50% or 95% CI- we’d on average underestimate various types of uncertainty here.</li>
+<li>Worse<sup>1</sup>, the MF-VI posterior’s CIs aren’t <strong>consistently</strong> narrower, either in the sense they are always narrower, or that they tend to consistently distort the same way. Sometimes both the 50% and 95% are just a small amount narrower than MCMC- the Michigan posterior attempt looks passable. Sometimes things are worse, with 50% MFVI CIs almost as wide as the MCMC 95% interval- Wyoming shows such a distortion. Sometimes the probability mass between 50% and 95% is confined to such a minuscule range it looks like I forgot to plot it.</li>
+</ol>
+<p>That last point is particularly important because it suggests there’s no easy rule of thumb for mechanically correcting these intervals, or deciding which could be plausible approximations without the MCMC plot alongside to guide that process. We can’t use VI to save a ton of time, infer the intervals consistently need to x% be wider, and call it a day- we need to reckon more precisely with why they’re distorted.</p>
+<p>Let’s return now to the point about how the shape has gone wrong. Below is a dot plot (<a href="https://dl.acm.org/doi/10.1145/2858036.2858558">Kay et al., 2016</a>)- each point here represents about 1% of the probability mass. I enjoy this approach to posterior visualization when things are getting weird, as this clarifies a lot about the full shape of the posterior distribution, making fewer smoothing assumptions like a density or eye plot might.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">mcmc_state_points <span class="ot" style="color: #003B4F;">&lt;-</span> mcmc_state_level <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-2">                        <span class="co" style="color: #5E5E5E;"># multiply each draw by it's cell's proportion of state N</span></span>
+<span id="cb5-3">                        <span class="co" style="color: #5E5E5E;"># this is the P in MRP</span></span>
+<span id="cb5-4">                        <span class="fu" style="color: #4758AB;">group_by</span>(state,.draw) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-5">                        <span class="fu" style="color: #4758AB;">summarize</span>(<span class="at" style="color: #657422;">postrat_draw =</span> <span class="fu" style="color: #4758AB;">sum</span>(.epred<span class="sc" style="color: #5E5E5E;">*</span>(n<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(n)))) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-6">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">model =</span> <span class="st" style="color: #20794D;">"MCMC"</span>)</span>
+<span id="cb5-7">mfvi_state_points <span class="ot" style="color: #003B4F;">&lt;-</span> mfvi_state_level <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-8">                        <span class="fu" style="color: #4758AB;">group_by</span>(state,.draw) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-9">                        <span class="fu" style="color: #4758AB;">summarize</span>(<span class="at" style="color: #657422;">postrat_draw =</span> <span class="fu" style="color: #4758AB;">sum</span>(.epred<span class="sc" style="color: #5E5E5E;">*</span>(n<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(n)))) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-10">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">model =</span> <span class="st" style="color: #20794D;">"MF-VI"</span>)</span>
+<span id="cb5-11"></span>
+<span id="cb5-12">combined_points <span class="ot" style="color: #003B4F;">&lt;-</span> mcmc_state_points <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-13">                      <span class="fu" style="color: #4758AB;">bind_rows</span>(mfvi_state_points) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-14">                      <span class="fu" style="color: #4758AB;">ungroup</span>()</span>
+<span id="cb5-15"></span>
+<span id="cb5-16">combined_points <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-17">  <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">ordered_state =</span> <span class="fu" style="color: #4758AB;">fct_reorder</span>(combined_points<span class="sc" style="color: #5E5E5E;">$</span>state,</span>
+<span id="cb5-18">                                     combined_points<span class="sc" style="color: #5E5E5E;">$</span>postrat_draw)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb5-19">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> ordered_state,</span>
+<span id="cb5-20">             <span class="at" style="color: #657422;">x =</span> postrat_draw,</span>
+<span id="cb5-21">             <span class="at" style="color: #657422;">color =</span> model)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-22">     <span class="fu" style="color: #4758AB;">stat_dots</span>(<span class="at" style="color: #657422;">quantiles =</span> <span class="dv" style="color: #AD0000;">100</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-23">     <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>model) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-24">     <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">legend.position=</span><span class="st" style="color: #20794D;">"none"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-25">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-26">  <span class="fu" style="color: #4758AB;">ylab</span>(<span class="st" style="color: #20794D;">"State"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>Eek. The closer to the individual draws we get, the less these two models seem to be producing comparable estimates. This isn’t me expressing an aesthetic preference for smooth, unimodal distributions- the MFVI plots in this view imply beliefs like “support for this policy in Wyoming is overwhelmingly likely to fall in 1 of 3 narrow ranges, all other values are unlikely”<sup>2</sup>. Other similar humorous claims are easy to find.</p>
+<p>Stepping back for a second, if our use-case for this model takes pretty much any form of interest in quantifying uncertainty accurately, this is not an acceptable approximation. I could poke more holes, but I can more profitably do that after I’ve explored some theory of why VI models struggle, and brought in some more sophisticated diagnostic tools than looking with our eyeballs<sup>3</sup>; so let’s hold off on that.</p>
+</section>
+<section id="do-more-basic-fixes-solve-anything" class="level1">
+<h1>Do more basic fixes solve anything?</h1>
+<p>So I’ve been billing this simple mean-field model as a first pass- I fit it on more or less default <code>rstanarm</code> parameters. I think it’s worth taking a moment to show that getting this approximation problem right isn’t going to be solved with low hanging fruit ideas, since that will motivate our need for better diagnostics and more expressive approximations.</p>
+<section id="lowering-the-tolerance" class="level2">
+<h2 class="anchored" data-anchor-id="lowering-the-tolerance">Lowering the tolerance</h2>
+<p>So we managed to structure our Bayesian inference problem as an optimization problem. Can’t we just optimize better? Maybe with more training the result will be less bad?</p>
+<p>the <code>tol_rel_obj</code> parameter control’s the convergence tolerance on the relative norm of the objective. In other words, it controls what (change in the) Evidence Lower Bound value we consider accurate enough to stop at. The default is 0.01, which feels a bit opaque, but let’s try setting it way down to 1e-8 (1Mx lower). Then we can plot it alongside the MCMC estimates and original MF-VI attempt.</p>
+<div class="cell" data-warnings="false">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;">tic</span>()</span>
+<span id="cb6-2">fit_60k_1e8 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">stan_glmer</span>(abortion <span class="sc" style="color: #5E5E5E;">~</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> state) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb6-3">                                      male <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> male<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>age) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb6-4">                                      (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span> repvote <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">factor</span>(region),</span>
+<span id="cb6-5">  <span class="at" style="color: #657422;">family =</span> <span class="fu" style="color: #4758AB;">binomial</span>(<span class="at" style="color: #657422;">link =</span> <span class="st" style="color: #20794D;">"logit"</span>),</span>
+<span id="cb6-6">  <span class="at" style="color: #657422;">data =</span> cces_all_df,</span>
+<span id="cb6-7">  <span class="at" style="color: #657422;">prior =</span> <span class="fu" style="color: #4758AB;">normal</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">autoscale =</span> <span class="cn" style="color: #8f5902;">TRUE</span>),</span>
+<span id="cb6-8">  <span class="at" style="color: #657422;">prior_covariance =</span> <span class="fu" style="color: #4758AB;">decov</span>(<span class="at" style="color: #657422;">scale =</span> <span class="fl" style="color: #AD0000;">0.50</span>),</span>
+<span id="cb6-9">  <span class="at" style="color: #657422;">adapt_delta =</span> <span class="fl" style="color: #AD0000;">0.99</span>,</span>
+<span id="cb6-10">  <span class="co" style="color: #5E5E5E;"># Printing the ELBO every 1k draws</span></span>
+<span id="cb6-11">  <span class="at" style="color: #657422;">refresh =</span> <span class="dv" style="color: #AD0000;">1000</span>,</span>
+<span id="cb6-12">  <span class="at" style="color: #657422;">tol_rel_obj =</span> <span class="fl" style="color: #AD0000;">1e-8</span>,</span>
+<span id="cb6-13">  <span class="at" style="color: #657422;">algorithm =</span> <span class="st" style="color: #20794D;">"meanfield"</span>,</span>
+<span id="cb6-14">  <span class="at" style="color: #657422;">seed =</span> <span class="dv" style="color: #AD0000;">605</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1: ------------------------------------------------------------
+Chain 1: EXPERIMENTAL ALGORITHM:
+Chain 1:   This procedure has not been thoroughly tested and may be unstable
+Chain 1:   or buggy. The interface is subject to change.
+Chain 1: ------------------------------------------------------------
+Chain 1: 
+Chain 1: 
+Chain 1: 
+Chain 1: Gradient evaluation took 0.031 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 310 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 1: Begin eta adaptation.
+Chain 1: Iteration:   1 / 250 [  0%]  (Adaptation)
+Chain 1: Iteration:  50 / 250 [ 20%]  (Adaptation)
+Chain 1: Iteration: 100 / 250 [ 40%]  (Adaptation)
+Chain 1: Iteration: 150 / 250 [ 60%]  (Adaptation)
+Chain 1: Iteration: 200 / 250 [ 80%]  (Adaptation)
+Chain 1: Success! Found best value [eta = 1] earlier than expected.
+Chain 1: 
+Chain 1: Begin stochastic gradient ascent.
+Chain 1:   iter             ELBO   delta_ELBO_mean   delta_ELBO_med   notes 
+Chain 1:    100       -40291.889             1.000            1.000
+Chain 1:    200       -39947.669             0.504            1.000
+Chain 1:    300       -39802.182             0.337            0.009
+Chain 1:    400       -39776.283             0.253            0.009
+Chain 1:    500       -39733.863             0.203            0.004
+Chain 1:    600       -39733.198             0.169            0.004
+Chain 1:    700       -39728.255             0.145            0.001
+Chain 1:    800       -39784.557             0.127            0.001
+Chain 1:    900       -39724.366             0.113            0.001
+Chain 1:   1000       -39732.042             0.102            0.001
+Chain 1:   1100       -39731.525             0.002            0.001
+Chain 1:   1200       -39732.049             0.001            0.001
+Chain 1:   1300       -39728.119             0.001            0.000
+Chain 1:   1400       -39740.928             0.000            0.000
+Chain 1:   1500       -39726.114             0.000            0.000
+Chain 1:   1600       -39734.740             0.000            0.000
+Chain 1:   1700       -39734.129             0.000            0.000
+Chain 1:   1800       -39740.719             0.000            0.000
+Chain 1:   1900       -39743.591             0.000            0.000
+Chain 1:   2000       -39737.155             0.000            0.000
+Chain 1:   2100       -39720.432             0.000            0.000
+Chain 1:   2200       -39738.138             0.000            0.000
+Chain 1:   2300       -39731.045             0.000            0.000
+Chain 1:   2400       -39716.393             0.000            0.000
+Chain 1:   2500       -39729.189             0.000            0.000
+Chain 1:   2600       -39722.239             0.000            0.000
+Chain 1:   2700       -39719.508             0.000            0.000
+Chain 1:   2800       -39718.709             0.000            0.000
+Chain 1:   2900       -39735.110             0.000            0.000
+Chain 1:   3000       -39725.900             0.000            0.000
+Chain 1:   3100       -39726.123             0.000            0.000
+Chain 1:   3200       -39718.736             0.000            0.000
+Chain 1:   3300       -39718.141             0.000            0.000
+Chain 1:   3400       -39717.147             0.000            0.000
+Chain 1:   3500       -39725.738             0.000            0.000
+Chain 1:   3600       -39732.190             0.000            0.000
+Chain 1:   3700       -39723.666             0.000            0.000
+Chain 1:   3800       -39725.470             0.000            0.000
+Chain 1:   3900       -39741.504             0.000            0.000
+Chain 1:   4000       -39722.951             0.000            0.000
+Chain 1:   4100       -39721.852             0.000            0.000
+Chain 1:   4200       -39717.894             0.000            0.000
+Chain 1:   4300       -39717.474             0.000            0.000
+Chain 1:   4400       -39716.244             0.000            0.000
+Chain 1:   4500       -39727.542             0.000            0.000
+Chain 1:   4600       -39716.670             0.000            0.000
+Chain 1:   4700       -39723.714             0.000            0.000
+Chain 1:   4800       -39727.123             0.000            0.000
+Chain 1:   4900       -39722.517             0.000            0.000
+Chain 1:   5000       -39722.485             0.000            0.000
+Chain 1:   5100       -39719.107             0.000            0.000
+Chain 1:   5200       -39722.873             0.000            0.000
+Chain 1:   5300       -39720.153             0.000            0.000
+Chain 1:   5400       -39718.807             0.000            0.000
+Chain 1:   5500       -39719.687             0.000            0.000
+Chain 1:   5600       -39730.850             0.000            0.000
+Chain 1:   5700       -39719.315             0.000            0.000
+Chain 1:   5800       -39717.985             0.000            0.000
+Chain 1:   5900       -39715.943             0.000            0.000
+Chain 1:   6000       -39721.574             0.000            0.000
+Chain 1:   6100       -39716.072             0.000            0.000
+Chain 1:   6200       -39715.947             0.000            0.000
+Chain 1:   6300       -39716.325             0.000            0.000
+Chain 1:   6400       -39716.206             0.000            0.000
+Chain 1:   6500       -39720.508             0.000            0.000
+Chain 1:   6600       -39717.566             0.000            0.000
+Chain 1:   6700       -39718.903             0.000            0.000
+Chain 1:   6800       -39716.766             0.000            0.000
+Chain 1:   6900       -39724.482             0.000            0.000
+Chain 1:   7000       -39717.376             0.000            0.000
+Chain 1:   7100       -39721.566             0.000            0.000
+Chain 1:   7200       -39725.641             0.000            0.000
+Chain 1:   7300       -39717.909             0.000            0.000
+Chain 1:   7400       -39720.096             0.000            0.000
+Chain 1:   7500       -39716.243             0.000            0.000
+Chain 1:   7600       -39738.451             0.000            0.000
+Chain 1:   7700       -39715.841             0.000            0.000
+Chain 1:   7800       -39716.561             0.000            0.000
+Chain 1:   7900       -39716.865             0.000            0.000
+Chain 1:   8000       -39721.972             0.000            0.000
+Chain 1:   8100       -39723.864             0.000            0.000
+Chain 1:   8200       -39716.157             0.000            0.000
+Chain 1:   8300       -39720.235             0.000            0.000
+Chain 1:   8400       -39718.693             0.000            0.000
+Chain 1:   8500       -39727.325             0.000            0.000
+Chain 1:   8600       -39716.809             0.000            0.000
+Chain 1:   8700       -39716.760             0.000            0.000
+Chain 1:   8800       -39721.577             0.000            0.000
+Chain 1:   8900       -39716.910             0.000            0.000
+Chain 1:   9000       -39721.631             0.000            0.000
+Chain 1:   9100       -39721.102             0.000            0.000
+Chain 1:   9200       -39718.303             0.000            0.000
+Chain 1:   9300       -39715.759             0.000            0.000
+Chain 1:   9400       -39719.769             0.000            0.000
+Chain 1:   9500       -39719.046             0.000            0.000
+Chain 1:   9600       -39720.854             0.000            0.000
+Chain 1:   9700       -39717.968             0.000            0.000
+Chain 1:   9800       -39721.396             0.000            0.000
+Chain 1:   9900       -39728.139             0.000            0.000
+Chain 1:   10000       -39715.367             0.000            0.000
+Chain 1: Informational Message: The maximum number of iterations is reached! The algorithm may not have converged.
+Chain 1: This variational approximation is not guaranteed to be meaningful.
+Chain 1: 
+Chain 1: Drawing a sample of size 1000 from the approximate posterior... 
+Chain 1: COMPLETED.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Pareto k diagnostic value is 2.05. Resampling is disabled. Decreasing
+tol_rel_obj may help if variational algorithm has terminated prematurely.
+Otherwise consider using sampling instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting 'QR' to TRUE can often be helpful when using one of the variational inference algorithms. See the documentation for the 'QR' argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;">toc</span>()</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>283.46 sec elapsed</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">lower_tol_draws <span class="ot" style="color: #003B4F;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">add_epred_draws</span>(fit_60k_1e8, <span class="at" style="color: #657422;">ndraws =</span> <span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb12-2"></span>
+<span id="cb12-3">mfvi_lower_tol_points <span class="ot" style="color: #003B4F;">&lt;-</span> lower_tol_draws <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb12-4">                        <span class="fu" style="color: #4758AB;">group_by</span>(state,.draw) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb12-5">                        <span class="fu" style="color: #4758AB;">summarize</span>(<span class="at" style="color: #657422;">postrat_draw =</span> <span class="fu" style="color: #4758AB;">sum</span>(.epred<span class="sc" style="color: #5E5E5E;">*</span>(n<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(n)))) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb12-6">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">model =</span> <span class="st" style="color: #20794D;">"MF-VI 1e-8"</span>)</span>
+<span id="cb12-7"></span>
+<span id="cb12-8">combined_points_w_lower_tol <span class="ot" style="color: #003B4F;">&lt;-</span> combined_points <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb12-9">                      <span class="fu" style="color: #4758AB;">bind_rows</span>(mfvi_lower_tol_points) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb12-10">                      <span class="fu" style="color: #4758AB;">ungroup</span>()</span>
+<span id="cb12-11"></span>
+<span id="cb12-12">combined_points_w_lower_tol <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb12-13">  <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">ordered_state =</span> <span class="fu" style="color: #4758AB;">fct_reorder</span>(combined_points_w_lower_tol<span class="sc" style="color: #5E5E5E;">$</span>state,</span>
+<span id="cb12-14">                                     combined_points_w_lower_tol<span class="sc" style="color: #5E5E5E;">$</span>postrat_draw)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb12-15">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> ordered_state,</span>
+<span id="cb12-16">             <span class="at" style="color: #657422;">x =</span> postrat_draw,</span>
+<span id="cb12-17">             <span class="at" style="color: #657422;">color =</span> model)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb12-18">     <span class="fu" style="color: #4758AB;">stat_dots</span>(<span class="at" style="color: #657422;">quantiles =</span> <span class="dv" style="color: #AD0000;">100</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb12-19">     <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>model) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb12-20">     <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">legend.position=</span><span class="st" style="color: #20794D;">"none"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb12-21">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb12-22">  <span class="fu" style="color: #4758AB;">ylab</span>(<span class="st" style="color: #20794D;">"State"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>… That certainly looks different, but I don’t really think I’d say it looks meaningfully better<sup>4</sup>.</p>
+<p>Looking at the printed out ELBO, it’s pretty clear that there was no traction after the first ~1000 samples. A variational family this simple isn’t going to get much better, no matter how much time you give it.</p>
+</section>
+<section id="full-rank-approximation" class="level2">
+<h2 class="anchored" data-anchor-id="full-rank-approximation">Full-Rank Approximation</h2>
+<p>So if extend training time, but improvements don’t result, maybe the next option is ask whether we need something more sophisticated than a mean-field approximation. Instead of</p>
+<p><img src="https://latex.codecogs.com/png.latex?q(z)%20=%20%5Cprod_%7Bj=1%7D%5E%7Bm%7D%20q_j(z_j)"></p>
+<p>let’s now try the full-rank approximation. Gather than each <img src="https://latex.codecogs.com/png.latex?z_j"> getting it’s own independent Gaussian, this uses a single multivariate normal distribution- so we can now (roughly) learn correlation structure, fancy.</p>
+<p><img src="https://latex.codecogs.com/png.latex?q(z)%20=%20%5Cmathcal%7BN%7D(z%7C%5Cmu,%5CSigma)"></p>
+<div class="cell" data-warnings="false">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;">tic</span>()</span>
+<span id="cb13-2">fit_60k_fullrank <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">stan_glmer</span>(abortion <span class="sc" style="color: #5E5E5E;">~</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> state) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb13-3">                                      male <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> male<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>age) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb13-4">                                      (<span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">|</span> educ<span class="sc" style="color: #5E5E5E;">:</span>eth) <span class="sc" style="color: #5E5E5E;">+</span> repvote <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">factor</span>(region),</span>
+<span id="cb13-5">  <span class="at" style="color: #657422;">family =</span> <span class="fu" style="color: #4758AB;">binomial</span>(<span class="at" style="color: #657422;">link =</span> <span class="st" style="color: #20794D;">"logit"</span>),</span>
+<span id="cb13-6">  <span class="at" style="color: #657422;">data =</span> cces_all_df,</span>
+<span id="cb13-7">  <span class="at" style="color: #657422;">prior =</span> <span class="fu" style="color: #4758AB;">normal</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">autoscale =</span> <span class="cn" style="color: #8f5902;">TRUE</span>),</span>
+<span id="cb13-8">  <span class="at" style="color: #657422;">prior_covariance =</span> <span class="fu" style="color: #4758AB;">decov</span>(<span class="at" style="color: #657422;">scale =</span> <span class="fl" style="color: #AD0000;">0.50</span>),</span>
+<span id="cb13-9">  <span class="at" style="color: #657422;">adapt_delta =</span> <span class="fl" style="color: #AD0000;">0.99</span>,</span>
+<span id="cb13-10">  <span class="at" style="color: #657422;">tol_rel_obj =</span> <span class="fl" style="color: #AD0000;">1e-8</span>,</span>
+<span id="cb13-11">  <span class="co" style="color: #5E5E5E;"># Printing the ELBO every 1k draws</span></span>
+<span id="cb13-12">  <span class="at" style="color: #657422;">refresh =</span> <span class="dv" style="color: #AD0000;">1000</span>,</span>
+<span id="cb13-13">  <span class="at" style="color: #657422;">algorithm =</span> <span class="st" style="color: #20794D;">"fullrank"</span>,</span>
+<span id="cb13-14">  <span class="at" style="color: #657422;">QR =</span> <span class="cn" style="color: #8f5902;">TRUE</span>,</span>
+<span id="cb13-15">  <span class="at" style="color: #657422;">seed =</span> <span class="dv" style="color: #AD0000;">605</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1: ------------------------------------------------------------
+Chain 1: EXPERIMENTAL ALGORITHM:
+Chain 1:   This procedure has not been thoroughly tested and may be unstable
+Chain 1:   or buggy. The interface is subject to change.
+Chain 1: ------------------------------------------------------------
+Chain 1: 
+Chain 1: 
+Chain 1: 
+Chain 1: Gradient evaluation took 0.018 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 180 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 1: Begin eta adaptation.
+Chain 1: Iteration:   1 / 250 [  0%]  (Adaptation)
+Chain 1: Iteration:  50 / 250 [ 20%]  (Adaptation)
+Chain 1: Iteration: 100 / 250 [ 40%]  (Adaptation)
+Chain 1: Iteration: 150 / 250 [ 60%]  (Adaptation)
+Chain 1: Iteration: 200 / 250 [ 80%]  (Adaptation)
+Chain 1: Iteration: 250 / 250 [100%]  (Adaptation)
+Chain 1: Success! Found best value [eta = 0.1].
+Chain 1: 
+Chain 1: Begin stochastic gradient ascent.
+Chain 1:   iter             ELBO   delta_ELBO_mean   delta_ELBO_med   notes 
+Chain 1:    100      -248586.032             1.000            1.000
+Chain 1:    200      -180460.369             0.689            1.000
+Chain 1:    300      -121675.221             0.620            0.483
+Chain 1:    400       -87431.017             0.563            0.483
+Chain 1:    500      -120999.829             0.506            0.392
+Chain 1:    600       -96768.296             0.463            0.392
+Chain 1:    700       -93851.607             0.402            0.378
+Chain 1:    800       -92494.273             0.353            0.378
+Chain 1:    900       -74378.556             0.341            0.277
+Chain 1:   1000       -77681.560             0.311            0.277
+Chain 1:   1100       -77465.866             0.211            0.250
+Chain 1:   1200       -68692.287             0.186            0.244
+Chain 1:   1300       -75140.633             0.147            0.128
+Chain 1:   1400       -49430.772             0.160            0.128
+Chain 1:   1500       -59011.994             0.148            0.128
+Chain 1:   1600       -57033.572             0.127            0.086
+Chain 1:   1700       -56133.855             0.125            0.086
+Chain 1:   1800       -46605.149             0.144            0.128
+Chain 1:   1900       -47895.964             0.122            0.086
+Chain 1:   2000       -44745.890             0.125            0.086
+Chain 1:   2100       -43472.467             0.128            0.086
+Chain 1:   2200       -43454.384             0.115            0.070
+Chain 1:   2300       -41781.249             0.110            0.040
+Chain 1:   2400       -42045.221             0.059            0.035
+Chain 1:   2500       -41381.652             0.044            0.029
+Chain 1:   2600       -40754.440             0.043            0.027
+Chain 1:   2700       -41108.136             0.042            0.027
+Chain 1:   2800       -40450.439             0.023            0.016
+Chain 1:   2900       -40423.015             0.020            0.016
+Chain 1:   3000       -40375.121             0.013            0.015
+Chain 1:   3100       -40227.022             0.011            0.009
+Chain 1:   3200       -40302.411             0.011            0.009
+Chain 1:   3300       -40352.339             0.007            0.006
+Chain 1:   3400       -40174.196             0.007            0.004
+Chain 1:   3500       -40089.973             0.006            0.004
+Chain 1:   3600       -40143.009             0.004            0.002
+Chain 1:   3700       -40123.486             0.003            0.002
+Chain 1:   3800       -40044.004             0.002            0.002
+Chain 1:   3900       -39955.515             0.002            0.002
+Chain 1:   4000       -40003.851             0.002            0.002
+Chain 1:   4100       -39948.544             0.002            0.002
+Chain 1:   4200       -40028.027             0.002            0.002
+Chain 1:   4300       -39907.006             0.002            0.002
+Chain 1:   4400       -39868.266             0.002            0.002
+Chain 1:   4500       -39938.386             0.002            0.002
+Chain 1:   4600       -39837.339             0.002            0.002
+Chain 1:   4700       -39852.349             0.002            0.002
+Chain 1:   4800       -39823.670             0.002            0.002
+Chain 1:   4900       -39809.797             0.001            0.001
+Chain 1:   5000       -39807.261             0.001            0.001
+Chain 1:   5100       -39806.402             0.001            0.001
+Chain 1:   5200       -39818.805             0.001            0.001
+Chain 1:   5300       -39797.428             0.001            0.001
+Chain 1:   5400       -39790.469             0.001            0.000
+Chain 1:   5500       -39785.797             0.001            0.000
+Chain 1:   5600       -39779.121             0.000            0.000
+Chain 1:   5700       -39780.314             0.000            0.000
+Chain 1:   5800       -39771.363             0.000            0.000
+Chain 1:   5900       -39770.673             0.000            0.000
+Chain 1:   6000       -39764.096             0.000            0.000
+Chain 1:   6100       -39764.173             0.000            0.000
+Chain 1:   6200       -39765.651             0.000            0.000
+Chain 1:   6300       -39756.809             0.000            0.000
+Chain 1:   6400       -39753.724             0.000            0.000
+Chain 1:   6500       -39754.753             0.000            0.000
+Chain 1:   6600       -39750.392             0.000            0.000
+Chain 1:   6700       -39753.067             0.000            0.000
+Chain 1:   6800       -39750.341             0.000            0.000
+Chain 1:   6900       -39745.696             0.000            0.000
+Chain 1:   7000       -39743.521             0.000            0.000
+Chain 1:   7100       -39739.157             0.000            0.000
+Chain 1:   7200       -39736.689             0.000            0.000
+Chain 1:   7300       -39743.472             0.000            0.000
+Chain 1:   7400       -39738.431             0.000            0.000
+Chain 1:   7500       -39740.789             0.000            0.000
+Chain 1:   7600       -39735.842             0.000            0.000
+Chain 1:   7700       -39733.493             0.000            0.000
+Chain 1:   7800       -39735.015             0.000            0.000
+Chain 1:   7900       -39736.429             0.000            0.000
+Chain 1:   8000       -39733.548             0.000            0.000
+Chain 1:   8100       -39732.722             0.000            0.000
+Chain 1:   8200       -39734.720             0.000            0.000
+Chain 1:   8300       -39732.932             0.000            0.000
+Chain 1:   8400       -39727.658             0.000            0.000
+Chain 1:   8500       -39734.522             0.000            0.000
+Chain 1:   8600       -39728.602             0.000            0.000
+Chain 1:   8700       -39724.690             0.000            0.000
+Chain 1:   8800       -39725.374             0.000            0.000
+Chain 1:   8900       -39731.450             0.000            0.000
+Chain 1:   9000       -39725.866             0.000            0.000
+Chain 1:   9100       -39728.639             0.000            0.000
+Chain 1:   9200       -39730.156             0.000            0.000
+Chain 1:   9300       -39729.036             0.000            0.000
+Chain 1:   9400       -39725.536             0.000            0.000
+Chain 1:   9500       -39727.031             0.000            0.000
+Chain 1:   9600       -39725.389             0.000            0.000
+Chain 1:   9700       -39727.947             0.000            0.000
+Chain 1:   9800       -39723.932             0.000            0.000
+Chain 1:   9900       -39723.173             0.000            0.000
+Chain 1:   10000       -39723.944             0.000            0.000
+Chain 1: Informational Message: The maximum number of iterations is reached! The algorithm may not have converged.
+Chain 1: This variational approximation is not guaranteed to be meaningful.
+Chain 1: 
+Chain 1: Drawing a sample of size 1000 from the approximate posterior... 
+Chain 1: COMPLETED.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Pareto k diagnostic value is 2.95. Resampling is disabled. Decreasing
+tol_rel_obj may help if variational algorithm has terminated prematurely.
+Otherwise consider using sampling instead.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;">toc</span>()</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>287.15 sec elapsed</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">full_rank_draws <span class="ot" style="color: #003B4F;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">add_epred_draws</span>(fit_60k_fullrank,</span>
+<span id="cb18-2">                                                        <span class="at" style="color: #657422;">ndraws =</span> <span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb18-3"></span>
+<span id="cb18-4">frvi_points <span class="ot" style="color: #003B4F;">&lt;-</span> full_rank_draws <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb18-5">                        <span class="fu" style="color: #4758AB;">group_by</span>(state,.draw) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb18-6">                        <span class="fu" style="color: #4758AB;">summarize</span>(<span class="at" style="color: #657422;">postrat_draw =</span> <span class="fu" style="color: #4758AB;">sum</span>(.epred<span class="sc" style="color: #5E5E5E;">*</span>(n<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(n)))) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb18-7">                        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">model =</span> <span class="st" style="color: #20794D;">"FR-VI"</span>)</span>
+<span id="cb18-8"></span>
+<span id="cb18-9">combined_points_w_frvi <span class="ot" style="color: #003B4F;">&lt;-</span> combined_points_w_lower_tol <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb18-10">                      <span class="fu" style="color: #4758AB;">bind_rows</span>(frvi_points) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb18-11">                      <span class="fu" style="color: #4758AB;">ungroup</span>()</span>
+<span id="cb18-12"></span>
+<span id="cb18-13">combined_points_w_frvi <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb18-14">  <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">ordered_state =</span> <span class="fu" style="color: #4758AB;">fct_reorder</span>(combined_points_w_frvi<span class="sc" style="color: #5E5E5E;">$</span>state,</span>
+<span id="cb18-15">                                     combined_points_w_frvi<span class="sc" style="color: #5E5E5E;">$</span>postrat_draw)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb18-16">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> ordered_state,</span>
+<span id="cb18-17">             <span class="at" style="color: #657422;">x =</span> postrat_draw,</span>
+<span id="cb18-18">             <span class="at" style="color: #657422;">color =</span> model)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb18-19">     <span class="fu" style="color: #4758AB;">stat_dots</span>(<span class="at" style="color: #657422;">quantiles =</span> <span class="dv" style="color: #AD0000;">100</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb18-20">     <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>model) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb18-21">     <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">legend.position=</span><span class="st" style="color: #20794D;">"none"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb18-22">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">"Should employers be allowed to deny their employees abortion care?"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb18-23">  <span class="fu" style="color: #4758AB;">ylab</span>(<span class="st" style="color: #20794D;">"State"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>The first thing to note here is that unlike the mean-field approximation, fitting this model required some tinkering to get it to fit. I ended up needing to set <code>QR = TRUE</code> (ie, use a QR decomposition) to get this to fit at all (unless I set the initialization to 0, at which point the posterior collapsed to nearly a single point).</p>
+<p>Unfortunately, this version has a similar spiky posterior distribution. In terms of uncertainty, it’s clearly worse than the mean-field implementation . The ELBO starts from higher, spends some time actually improving, but also quickly reaches a plateau. It doesn’t seem like this is a way out either.</p>
+</section>
+</section>
+<section id="where-to-from-here-why-is-it-like-this" class="level1">
+<h1>Where to from here? (Why is it like this?)</h1>
+<p>We’ve seen that simple variational families like the mean-field and full-rank can approximately mirror the central tendencies of MCMC, but things fall apart as we attempt to consider uncertainty, either through simple credible intervals, or especially once we start to visualize the unrealistic, lumpy VI posterior distributions in their entirety.</p>
+<p>This isn’t something we can solve with more training time: each of these algorithms had reached the lowest ELBO they could well before we produced final draws. If I had to guess, I think we need a fundamentally more expressive class of variational family to make progress.</p>
+<p>While trying to fit models without digging too much into the theory of why VI approximations can be poor has been fun, it’s time to bring in some theory. In the next post, I’ll explore the literature on why the uncertainty behavior of VI can be so dubious. In the following one, I’ll illustrate some better diagnostics as well.</p>
+<p>The code for this post can be found <a href="https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.qmd">here</a>. Thanks for reading.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Really, the worst type of wrong, completely unpredictable wrong. If you spend time staring to try to infer a causal pattern of which states we can’t estimate well, you’re likely just going to end up confused.↩︎</p></li>
+<li id="fn2"><p>Some of these MFVI distributions are bad enough that you might reasonably wonder if some of the badness is just plotting weirdness. That was my intuition at first. Of course though, this is sufficient granularity to make the MCMC results look reasonable. But even if you zoom in on 1 or two states and add way more points, the improbably sharp spikes remain.↩︎</p></li>
+<li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, that looks wrong”.↩︎</p></li>
+<li id="fn4"><p>Also, apologies for showing every 100 iterations; the rstanarm parameter to set this, <code>refresh</code> doesn’t appear to work properly with non-MCMC models, so I can either not show the ELBO or blow up the post with this.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+  author = {Andy Timm},
+  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
+    {Distributions}},
+  date = {2022-11-20},
+  url = {https://andytimm.github.io/Variational_MRP_pt2.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas">
+Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.github.io/Variational_MRP_pt2.html">https://andytimm.github.io/Variational_MRP_pt2.html</a>.
+</div></div></section></div> ]]></description>
+  <category>MRP</category>
+  <category>Variational Inference</category>
+  <guid>https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html</guid>
+  <pubDate>Sun, 20 Nov 2022 05:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt2/images/cover_photo.png" medium="image" type="image/png" height="180" width="144"/>
+</item>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
   <dc:creator>Andy Timm</dc:creator>
