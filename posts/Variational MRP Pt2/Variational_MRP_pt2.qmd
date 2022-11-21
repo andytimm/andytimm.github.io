@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
-subtitle: Part 2
+subtitle: Part 2: The errors of our ways
 date: 2022-10-28
 draft: True
 categories:
@@ -239,7 +239,7 @@ mcmc_state_points <- mcmc_state_level %>%
                         # this is the P in MRP
                         group_by(state,.draw) %>%
                         summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
-                        mutate(model = "mcmc")
+                        mutate(model = "MCMC")
 mfvi_state_points <- mfvi_state_level %>% 
                         group_by(state,.draw) %>%
                         summarize(postrat_draw = sum(.epred*(n/sum(n)))) %>%
@@ -364,7 +364,6 @@ fit_60k_fullrank <- stan_glmer(abortion ~ (1 | state) + (1 | eth) + (1 | educ) +
   prior = normal(0, 1, autoscale = TRUE),
   prior_covariance = decov(scale = 0.50),
   adapt_delta = 0.99,
-  refresh = 0,
   tol_rel_obj = 1e-8,
   # Printing the ELBO every 1k draws
   refresh = 1000,
@@ -401,10 +400,23 @@ this model required some tinkering to get it to fit. I ended up needing to set
 I set the initialization to 0, at which point the posterior collapsed to nearly)
 a single point. 
 
-Unfortunately, this version has a similar spiky posterior distribution. It might
-even be worse than the mean-field try. Again, it looks like 
+Unfortunately, this version has a similar spiky posterior distribution. In terms
+of uncertainty, it's clearly worse than the mean-field implementation
+. The ELBO starts from higher, spends
+some time actually improving, but also quickly reaches a plateau. It doesn't
+seem like this is a way out either.
 
-# Where to from here? (Why is it like this!?)
+# Where to from here? (Why is it like this?)
+
+We've seen that simple variational families like the mean-field and full-rank
+can approximately mirror the point estimates of MCMC, but things fall apart
+as we attempt to consider uncertainty, either through simple credible intervals,
+or especially once we start to visualize the unrealistic, lump posterior
+distributions in their entirety.
+
+This isn't something we can solve with more training time: each of these
+algorithms had reached the lowest ELBO they could well before we produced
+final draws. If I had to guess, we need a fundamentally more 
 
 [^1]: Really, the worst type of wrong, completely unpredictable wrong. If you spend
 time staring to try to infer a causal pattern of which states we can't estimate well,
@@ -416,4 +428,4 @@ look reasonable. But even if you zoom in on 1 or two states and add way more
 points, the improbably sharp spikes remain.
 [^3]: Phrase due to Richard McElreath. The magic of good visualizations like
 Kay et Al.'s is that makes it trivial to let pattern recognition go to work,
-and be able to go "oh, I don't believe that".
+and be able to go "oh, that looks wrong".
