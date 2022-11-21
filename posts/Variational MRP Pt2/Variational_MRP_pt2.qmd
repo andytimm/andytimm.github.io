@@ -409,8 +409,8 @@ I set the initialization to 0, at which point the posterior collapsed to nearly
 a single point). 
 
 Unfortunately, this version has a similar spiky posterior distribution. In terms
-of uncertainty, it's clearly worse than the mean-field implementation
-. The ELBO starts from higher, spends
+of uncertainty, it's clearly worse than the mean-field implementation.
+The ELBO starts from higher, spends
 some time actually improving, but also quickly reaches a plateau. It doesn't
 seem like this is a way out either.
 
