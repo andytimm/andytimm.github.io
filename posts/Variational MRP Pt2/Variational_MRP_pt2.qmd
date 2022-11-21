@@ -1,12 +1,11 @@
 ---
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
-subtitle: Part 2: The errors of our ways
+subtitle: Part 2- The errors of our ways
 date: 2022-10-28
 draft: True
 categories:
 - MRP
-- BART
 - Variational Inference
 ---
 
@@ -26,6 +25,7 @@ library(tidyverse)
 library(rstanarm)
 library(tidybayes)
 library(tictoc)
+theme_set(theme_tidybayes())
 
 options(dplyr.summarise.inform = FALSE)
 
@@ -93,8 +93,6 @@ clean_cces <- function(df, remove_nas = TRUE){
 
 cces_all_df_cleaned <-  clean_cces(cces_all_df, remove_nas = TRUE)
 
-# Load data frame created in the appendix. The data frame that contains the poststratification
-# table is called poststrat_df
 poststrat_df <- read_csv("data/poststrat_df.csv")
 
 statelevel_predictors_df <- read_csv('data/statelevel_predictors.csv')
@@ -177,6 +175,7 @@ mcmc_state_summary <- mcmc_state_level %>%
                         group_by(state) %>%
                         median_qi(postrat_draw, .width = c(.5,.95)) %>%
                         mutate(model = "mcmc")
+
 mfvi_state_summary <- mfvi_state_level %>% 
                         group_by(state,.draw) %>%
                         mutate(postrat_draw = sum(.epred*(n/sum(n)))) %>%
@@ -409,14 +408,23 @@ seem like this is a way out either.
 # Where to from here? (Why is it like this?)
 
 We've seen that simple variational families like the mean-field and full-rank
-can approximately mirror the point estimates of MCMC, but things fall apart
+can approximately mirror the central tendencies of MCMC, but things fall apart
 as we attempt to consider uncertainty, either through simple credible intervals,
-or especially once we start to visualize the unrealistic, lump posterior
+or especially once we start to visualize the unrealistic, lumpy VI posterior
 distributions in their entirety.
 
 This isn't something we can solve with more training time: each of these
 algorithms had reached the lowest ELBO they could well before we produced
-final draws. If I had to guess, we need a fundamentally more 
+final draws. If I had to guess, I think we need a fundamentally more expressive
+class of variational family to make progress.
+
+While trying to fit models without digging too much into the theory of why
+VI approximations can be poor has been fun, it's time to bring in some theory. In
+the next post, I'll explore the literature on why the uncertainty behavior
+of VI can be so dubious. In the following one, I'll illustrate some better
+diagnostics as well.
+
+The code for this post can be found [here](https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.qmd). Thanks for reading.
 
 [^1]: Really, the worst type of wrong, completely unpredictable wrong. If you spend
 time staring to try to infer a causal pattern of which states we can't estimate well,

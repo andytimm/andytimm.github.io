@@ -145,10 +145,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
-<meta property="og:description" content="Part 2">
+<meta property="og:description" content="Part 2- The errors of our ways">
 <meta property="og:site-name" content="Andy Timm">
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
-<meta name="twitter:description" content="Part 2">
+<meta name="twitter:description" content="Part 2- The errors of our ways">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
@@ -197,7 +197,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Variational Inference for MRP with Reliable Posterior Distributions</h1>
-            <p class="subtitle lead">Part 2</p>
+            <p class="subtitle lead">Part 2- The errors of our ways</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">MRP</div>
                 <div class="quarto-category">BART</div>
@@ -243,7 +243,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#lowering-the-tolerance" id="toc-lowering-the-tolerance" class="nav-link" data-scroll-target="#lowering-the-tolerance">Lowering the tolerance</a></li>
   <li><a href="#full-rank-approximation" id="toc-full-rank-approximation" class="nav-link" data-scroll-target="#full-rank-approximation">Full-Rank Approximation</a></li>
   </ul></li>
-  <li><a href="#where-to-from-here-why-is-it-like-this" id="toc-where-to-from-here-why-is-it-like-this" class="nav-link" data-scroll-target="#where-to-from-here-why-is-it-like-this">Where to from here? (Why is it like this!?)</a></li>
+  <li><a href="#where-to-from-here-why-is-it-like-this" id="toc-where-to-from-here-why-is-it-like-this" class="nav-link" data-scroll-target="#where-to-from-here-why-is-it-like-this">Where to from here? (Why is it like this?)</a></li>
   </ul>
 </nav>
     </div>
@@ -395,7 +395,7 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># this is the P in MRP</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"mcmc"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"MCMC"</span>)</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>mfvi_state_points <span class="ot">&lt;-</span> mfvi_state_level <span class="sc">%&gt;%</span> </span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
@@ -452,8 +452,8 @@ Chain 1: ------------------------------------------------------------
 Chain 1: 
 Chain 1: 
 Chain 1: 
-Chain 1: Gradient evaluation took 0.022 seconds
-Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 220 seconds.
+Chain 1: Gradient evaluation took 0.025 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 250 seconds.
 Chain 1: Adjust your expectations accordingly!
 Chain 1: 
 Chain 1: 
@@ -583,7 +583,7 @@ Otherwise consider using sampling instead.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>256 sec elapsed</code></pre>
+<pre><code>299.02 sec elapsed</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>lower_tol_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_1e8, <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -628,53 +628,187 @@ Otherwise consider using sampling instead.</code></pre>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">autoscale =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior_covariance =</span> <span class="fu">decov</span>(<span class="at">scale =</span> <span class="fl">0.50</span>),</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">adapt_delta =</span> <span class="fl">0.99</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span>,</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">tol_rel_obj =</span> <span class="fl">1e-8</span>,</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Printing the ELBO every 1k draws</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">1000</span>,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">"fullrank"</span>,</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">QR =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">605</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">tol_rel_obj =</span> <span class="fl">1e-8</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Printing the ELBO every 1k draws</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">1000</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">algorithm =</span> <span class="st">"fullrank"</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">QR =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">605</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1: ------------------------------------------------------------
+Chain 1: EXPERIMENTAL ALGORITHM:
+Chain 1:   This procedure has not been thoroughly tested and may be unstable
+Chain 1:   or buggy. The interface is subject to change.
+Chain 1: ------------------------------------------------------------
+Chain 1: 
+Chain 1: 
+Chain 1: 
+Chain 1: Gradient evaluation took 0.018 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 180 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 1: Begin eta adaptation.
+Chain 1: Iteration:   1 / 250 [  0%]  (Adaptation)
+Chain 1: Iteration:  50 / 250 [ 20%]  (Adaptation)
+Chain 1: Iteration: 100 / 250 [ 40%]  (Adaptation)
+Chain 1: Iteration: 150 / 250 [ 60%]  (Adaptation)
+Chain 1: Iteration: 200 / 250 [ 80%]  (Adaptation)
+Chain 1: Iteration: 250 / 250 [100%]  (Adaptation)
+Chain 1: Success! Found best value [eta = 0.1].
+Chain 1: 
+Chain 1: Begin stochastic gradient ascent.
+Chain 1:   iter             ELBO   delta_ELBO_mean   delta_ELBO_med   notes 
+Chain 1:    100      -248586.032             1.000            1.000
+Chain 1:    200      -180460.369             0.689            1.000
+Chain 1:    300      -121675.221             0.620            0.483
+Chain 1:    400       -87431.017             0.563            0.483
+Chain 1:    500      -120999.829             0.506            0.392
+Chain 1:    600       -96768.296             0.463            0.392
+Chain 1:    700       -93851.607             0.402            0.378
+Chain 1:    800       -92494.273             0.353            0.378
+Chain 1:    900       -74378.556             0.341            0.277
+Chain 1:   1000       -77681.560             0.311            0.277
+Chain 1:   1100       -77465.866             0.211            0.250
+Chain 1:   1200       -68692.287             0.186            0.244
+Chain 1:   1300       -75140.633             0.147            0.128
+Chain 1:   1400       -49430.772             0.160            0.128
+Chain 1:   1500       -59011.994             0.148            0.128
+Chain 1:   1600       -57033.572             0.127            0.086
+Chain 1:   1700       -56133.855             0.125            0.086
+Chain 1:   1800       -46605.149             0.144            0.128
+Chain 1:   1900       -47895.964             0.122            0.086
+Chain 1:   2000       -44745.890             0.125            0.086
+Chain 1:   2100       -43472.467             0.128            0.086
+Chain 1:   2200       -43454.384             0.115            0.070
+Chain 1:   2300       -41781.249             0.110            0.040
+Chain 1:   2400       -42045.221             0.059            0.035
+Chain 1:   2500       -41381.652             0.044            0.029
+Chain 1:   2600       -40754.440             0.043            0.027
+Chain 1:   2700       -41108.136             0.042            0.027
+Chain 1:   2800       -40450.439             0.023            0.016
+Chain 1:   2900       -40423.015             0.020            0.016
+Chain 1:   3000       -40375.121             0.013            0.015
+Chain 1:   3100       -40227.022             0.011            0.009
+Chain 1:   3200       -40302.411             0.011            0.009
+Chain 1:   3300       -40352.339             0.007            0.006
+Chain 1:   3400       -40174.196             0.007            0.004
+Chain 1:   3500       -40089.973             0.006            0.004
+Chain 1:   3600       -40143.009             0.004            0.002
+Chain 1:   3700       -40123.486             0.003            0.002
+Chain 1:   3800       -40044.004             0.002            0.002
+Chain 1:   3900       -39955.515             0.002            0.002
+Chain 1:   4000       -40003.851             0.002            0.002
+Chain 1:   4100       -39948.544             0.002            0.002
+Chain 1:   4200       -40028.027             0.002            0.002
+Chain 1:   4300       -39907.006             0.002            0.002
+Chain 1:   4400       -39868.266             0.002            0.002
+Chain 1:   4500       -39938.386             0.002            0.002
+Chain 1:   4600       -39837.339             0.002            0.002
+Chain 1:   4700       -39852.349             0.002            0.002
+Chain 1:   4800       -39823.670             0.002            0.002
+Chain 1:   4900       -39809.797             0.001            0.001
+Chain 1:   5000       -39807.261             0.001            0.001
+Chain 1:   5100       -39806.402             0.001            0.001
+Chain 1:   5200       -39818.805             0.001            0.001
+Chain 1:   5300       -39797.428             0.001            0.001
+Chain 1:   5400       -39790.469             0.001            0.000
+Chain 1:   5500       -39785.797             0.001            0.000
+Chain 1:   5600       -39779.121             0.000            0.000
+Chain 1:   5700       -39780.314             0.000            0.000
+Chain 1:   5800       -39771.363             0.000            0.000
+Chain 1:   5900       -39770.673             0.000            0.000
+Chain 1:   6000       -39764.096             0.000            0.000
+Chain 1:   6100       -39764.173             0.000            0.000
+Chain 1:   6200       -39765.651             0.000            0.000
+Chain 1:   6300       -39756.809             0.000            0.000
+Chain 1:   6400       -39753.724             0.000            0.000
+Chain 1:   6500       -39754.753             0.000            0.000
+Chain 1:   6600       -39750.392             0.000            0.000
+Chain 1:   6700       -39753.067             0.000            0.000
+Chain 1:   6800       -39750.341             0.000            0.000
+Chain 1:   6900       -39745.696             0.000            0.000
+Chain 1:   7000       -39743.521             0.000            0.000
+Chain 1:   7100       -39739.157             0.000            0.000
+Chain 1:   7200       -39736.689             0.000            0.000
+Chain 1:   7300       -39743.472             0.000            0.000
+Chain 1:   7400       -39738.431             0.000            0.000
+Chain 1:   7500       -39740.789             0.000            0.000
+Chain 1:   7600       -39735.842             0.000            0.000
+Chain 1:   7700       -39733.493             0.000            0.000
+Chain 1:   7800       -39735.015             0.000            0.000
+Chain 1:   7900       -39736.429             0.000            0.000
+Chain 1:   8000       -39733.548             0.000            0.000
+Chain 1:   8100       -39732.722             0.000            0.000
+Chain 1:   8200       -39734.720             0.000            0.000
+Chain 1:   8300       -39732.932             0.000            0.000
+Chain 1:   8400       -39727.658             0.000            0.000
+Chain 1:   8500       -39734.522             0.000            0.000
+Chain 1:   8600       -39728.602             0.000            0.000
+Chain 1:   8700       -39724.690             0.000            0.000
+Chain 1:   8800       -39725.374             0.000            0.000
+Chain 1:   8900       -39731.450             0.000            0.000
+Chain 1:   9000       -39725.866             0.000            0.000
+Chain 1:   9100       -39728.639             0.000            0.000
+Chain 1:   9200       -39730.156             0.000            0.000
+Chain 1:   9300       -39729.036             0.000            0.000
+Chain 1:   9400       -39725.536             0.000            0.000
+Chain 1:   9500       -39727.031             0.000            0.000
+Chain 1:   9600       -39725.389             0.000            0.000
+Chain 1:   9700       -39727.947             0.000            0.000
+Chain 1:   9800       -39723.932             0.000            0.000
+Chain 1:   9900       -39723.173             0.000            0.000
+Chain 1:   10000       -39723.944             0.000            0.000
+Chain 1: Informational Message: The maximum number of iterations is reached! The algorithm may not have converged.
+Chain 1: This variational approximation is not guaranteed to be meaningful.
+Chain 1: 
+Chain 1: Drawing a sample of size 1000 from the approximate posterior... 
+Chain 1: COMPLETED.</code></pre>
+</div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Pareto k diagnostic value is 2.95. Resampling is disabled. Decreasing
 tol_rel_obj may help if variational algorithm has terminated prematurely.
 Otherwise consider using sampling instead.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>357.28 sec elapsed</code></pre>
+<pre><code>318.86 sec elapsed</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>full_rank_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_fullrank,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                                                        <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>frvi_points <span class="ot">&lt;-</span> full_rank_draws <span class="sc">%&gt;%</span> </span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"FR-VI"</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>combined_points_w_frvi <span class="ot">&lt;-</span> combined_points_w_lower_tol <span class="sc">%&gt;%</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">bind_rows</span>(frvi_points) <span class="sc">%&gt;%</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>()</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>combined_points_w_frvi <span class="sc">%&gt;%</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_points_w_frvi<span class="sc">$</span>state,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>                                     combined_points_w_frvi<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>full_rank_draws <span class="ot">&lt;-</span> poststrat_df_60k <span class="sc">%&gt;%</span> <span class="fu">add_epred_draws</span>(fit_60k_fullrank,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                                        <span class="at">ndraws =</span> <span class="dv">1000</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>frvi_points <span class="ot">&lt;-</span> full_rank_draws <span class="sc">%&gt;%</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">group_by</span>(state,.draw) <span class="sc">%&gt;%</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">summarize</span>(<span class="at">postrat_draw =</span> <span class="fu">sum</span>(.epred<span class="sc">*</span>(n<span class="sc">/</span><span class="fu">sum</span>(n)))) <span class="sc">%&gt;%</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">"FR-VI"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>combined_points_w_frvi <span class="ot">&lt;-</span> combined_points_w_lower_tol <span class="sc">%&gt;%</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">bind_rows</span>(frvi_points) <span class="sc">%&gt;%</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">ungroup</span>()</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>combined_points_w_frvi <span class="sc">%&gt;%</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ordered_state =</span> <span class="fu">fct_reorder</span>(combined_points_w_frvi<span class="sc">$</span>state,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>                                     combined_points_w_frvi<span class="sc">$</span>postrat_draw)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> ordered_state,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">x =</span> postrat_draw,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">stat_dots</span>(<span class="at">quantiles =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>     <span class="fu">facet_wrap</span>(<span class="sc">~</span>model) <span class="sc">+</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Variational_MRP_pt2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
 </div>
 </div>
 <p>The first thing to note here is that unlike the mean-field approximation, fitting this model required some tinkering to get it to fit. I ended up needing to set <code>QR = TRUE</code> (ie, use a QR decomposition) to get this to fit at all (unless I set the initialization to 0, at which point the posterior collapsed to nearly) a single point.</p>
-<p>Unfortunately, this version has a similar spiky posterior distribution. It might even be worse than the mean-field try. Again, it looks like</p>
+<p>Unfortunately, this version has a similar spiky posterior distribution. In terms of uncertainty, it’s clearly worse than the mean-field implementation . The ELBO starts from higher, spends some time actually improving, but also quickly reaches a plateau. It doesn’t seem like this is a way out either.</p>
 </section>
 </section>
 <section id="where-to-from-here-why-is-it-like-this" class="level1">
-<h1>Where to from here? (Why is it like this!?)</h1>
+<h1>Where to from here? (Why is it like this?)</h1>
+<p>We’ve seen that simple variational families like the mean-field and full-rank can approximately mirror the central tendencies of MCMC, but things fall apart as we attempt to consider uncertainty, either through simple credible intervals, or especially once we start to visualize the unrealistic, lumpy VI posterior distributions in their entirety.</p>
+<p>This isn’t something we can solve with more training time: each of these algorithms had reached the lowest ELBO they could well before we produced final draws. If I had to guess, I think we need a fundamentally more expressive class of variational family to make progress.</p>
+<p>While trying to fit models without digging too much into the theory of why VI approximations can be poor has been fun, it’s time to bring in some theory. In the next post, I’ll explore the literature on why the uncertainty behavior of VI can be so dubious. In the following one, I’ll illustrate some better diagnostics as well.</p>
+<p>The code for this post can be found <a href="https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.qmd">here</a>. Thanks for reading.</p>
 
 
 </section>
@@ -685,7 +819,7 @@ Otherwise consider using sampling instead.</code></pre>
 <ol>
 <li id="fn1"><p>Really, the worst type of wrong, completely unpredictable wrong. If you spend time staring to try to infer a causal pattern of which states we can’t estimate well, you’re likely just going to end up confused.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Some of these MFVI distributions are bad enough that you might reasonably wonder if some of the badness is just plotting weirdness. That was my intuition at first. Of course though, this is sufficient granularity to make the MCMC results look reasonable. But even if you zoom in on 1 or two states and add way more points, the improbably sharp spikes remain.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et Al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, I don’t believe that”.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et Al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, that looks wrong”.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
