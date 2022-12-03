@@ -155,9 +155,19 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#back-to-basics" id="toc-back-to-basics" class="nav-link active" data-scroll-target="#back-to-basics">Back to Basics</a></li>
-  <li><a href="#the-structure-of-the-elbo" id="toc-the-structure-of-the-elbo" class="nav-link" data-scroll-target="#the-structure-of-the-elbo">The structure of the ELBO</a></li>
-  <li><a href="#does-lower-elbo-gaurantee-a-good-model" id="toc-does-lower-elbo-gaurantee-a-good-model" class="nav-link" data-scroll-target="#does-lower-elbo-gaurantee-a-good-model">Does lower ELBO gaurantee a good model?</a></li>
+  <li><a href="#inclusive-versus-exclusive-kl-divergence" id="toc-inclusive-versus-exclusive-kl-divergence" class="nav-link active" data-scroll-target="#inclusive-versus-exclusive-kl-divergence">Inclusive versus Exclusive KL-divergence</a>
+  <ul>
+  <li><a href="#chivi-bound-optimization" id="toc-chivi-bound-optimization" class="nav-link" data-scroll-target="#chivi-bound-optimization">CHIVI bound optimization</a></li>
+  </ul></li>
+  <li><a href="#not-all-points-are-equal" id="toc-not-all-points-are-equal" class="nav-link" data-scroll-target="#not-all-points-are-equal">Not all points are equal</a>
+  <ul>
+  <li><a href="#psis-variational-inference" id="toc-psis-variational-inference" class="nav-link" data-scroll-target="#psis-variational-inference">PSIS-Variational Inference</a></li>
+  </ul></li>
+  <li><a href="#can-we-bound-error-in-terms-of-elbo-or-chivi" id="toc-can-we-bound-error-in-terms-of-elbo-or-chivi" class="nav-link" data-scroll-target="#can-we-bound-error-in-terms-of-elbo-or-chivi">Can we bound error in terms of ELBO or CHIVI?</a>
+  <ul>
+  <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
   </ul>
 </nav>
     </div>
@@ -169,6 +179,7 @@ ul.task-list li input[type="checkbox"] {
 
 <p>This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
 <p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html">last post</a> we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we’ll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.</p>
+<p>The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
 <li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
@@ -177,14 +188,27 @@ ul.task-list li input[type="checkbox"] {
 <li>Better grounded diagnostics and workflow</li>
 <li>Seeing if some more sophisticated techniques like normalizing flows help</li>
 </ol>
-<section id="back-to-basics" class="level1">
-<h1>Back to Basics</h1>
+<p>Draft problems/solutions:</p>
+<section id="inclusive-versus-exclusive-kl-divergence" class="level1">
+<h1>Inclusive versus Exclusive KL-divergence</h1>
+<section id="chivi-bound-optimization" class="level2">
+<h2 class="anchored" data-anchor-id="chivi-bound-optimization">CHIVI bound optimization</h2>
 </section>
-<section id="the-structure-of-the-elbo" class="level1">
-<h1>The structure of the ELBO</h1>
 </section>
-<section id="does-lower-elbo-gaurantee-a-good-model" class="level1">
-<h1>Does lower ELBO gaurantee a good model?</h1>
+<section id="not-all-points-are-equal" class="level1">
+<h1>Not all points are equal</h1>
+<section id="psis-variational-inference" class="level2">
+<h2 class="anchored" data-anchor-id="psis-variational-inference">PSIS-Variational Inference</h2>
+</section>
+</section>
+<section id="can-we-bound-error-in-terms-of-elbo-or-chivi" class="level1">
+<h1>Can we bound error in terms of ELBO or CHIVI?</h1>
+<section id="wasserstein-bounds" class="level2">
+<h2 class="anchored" data-anchor-id="wasserstein-bounds">Wasserstein Bounds</h2>
+</section>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
 
 
 </section>

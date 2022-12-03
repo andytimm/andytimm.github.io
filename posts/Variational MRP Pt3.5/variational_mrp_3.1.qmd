@@ -18,6 +18,9 @@ run perhaps unsurprisingly produced dubious models, so in this post we'll bring
 in long overdue theory to understand why VI is so difficult, and what
 we can do about it.
 
+The general structure for this post will be to describe a problem with VI, and
+then describe how that problem can be fixed to some degree.
+
 The rough plan for the series is as follows:
 
 1.   Introducing the Problem- Why is VI useful, why VI can produce spherical cows
@@ -26,8 +29,18 @@ The rough plan for the series is as follows:
 4. Better grounded diagnostics and workflow
 5.  Seeing if some more sophisticated techniques like normalizing flows help
 
-# Back to Basics
+Draft problems/solutions:
 
-# The structure of the ELBO
+# Inclusive versus Exclusive KL-divergence
 
-# Does lower ELBO gaurantee a good model?
+## CHIVI bound optimization
+
+# Not all points are equal
+
+## PSIS-Variational Inference
+
+# Can we bound error in terms of ELBO or CHIVI?
+
+## Wasserstein Bounds
+
+# Conclusions
