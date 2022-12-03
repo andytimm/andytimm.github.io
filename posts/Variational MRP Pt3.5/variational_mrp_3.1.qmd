@@ -1,0 +1,33 @@
+---
+layout: post
+title: Variational Inference for MRP with Reliable Posterior Distributions
+subtitle: Part 3- Some theory on why VI is hard
+date: 2022-12-03
+draft: True
+categories:
+- MRP
+- Variational Inference
+---
+
+This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.
+
+In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html) we threw caution to the wind, and tried out some simple variational inference
+implementations, to build up some intuition about what bad VI might look like.
+Just pulling a simple variational inference implementation off the shelf and whacking
+run perhaps unsurprisingly produced dubious models, so in this post we'll bring
+in long overdue theory to understand why VI is so difficult, and what
+we can do about it.
+
+The rough plan for the series is as follows:
+
+1.   Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
+3.  **(This post)** Some theory on why posterior approximation with VI can be so poor
+4. Better grounded diagnostics and workflow
+5.  Seeing if some more sophisticated techniques like normalizing flows help
+
+# Back to Basics
+
+# The structure of the ELBO
+
+# Does lower ELBO gaurantee a good model?
