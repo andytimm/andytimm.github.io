@@ -207,11 +207,14 @@ ul.task-list li input[type="checkbox"] {
 <p>Draft problems/solutions:</p>
 <section id="inclusive-versus-exclusive-kl-divergence" class="level1">
 <h1>Inclusive versus Exclusive KL-divergence</h1>
-<p>In the first post in the series, I introduced the Evidence Lower Bound (ELBO), our optimization objective we’re working with as a tractable approximation of the Kullback-Leibler Divergence between our choice of approximating distribution <span class="math inline">q(z)</span> to our true posterior <span class="math inline">p(z)</span>. We’re returning to this now because of another quick note I made</p>
+<p>Like I mentioned in the first post in the series, the Evidence Lower Bound (ELBO), our optimization objective we’re working with is a tractable approximation of the Kullback-Leibler Divergence between our choice of approximating distribution <span class="math inline">q(z)</span> to our true posterior <span class="math inline">p(z)</span>.</p>
+<p>The KL divergence is asymmetric: in general, <span class="math inline">KL(p||q) \neq KL(q||p)</span>. Previously, we saw that this asymmetry mattered quite a bit for our ELBO idea:</p>
+<p><span class="math display">argmin_{q(z) \in \mathscr{Q}}(q(z)||\frac{p(z,x)}{\bf p(x)}) = \mathbb{E}[logq(z)] - \mathbb{E}[logp(z,x)] + {\bf logp(x)}</span> We can’t calculate the bolded term <span class="math inline">logp(x)</span>; if we could we wouldn’t be finding this inference thing so hard in the first place. The way we sidestepped that with the ELBO is to note that the term is constant with respect to <span class="math inline">q</span>; so we can go on our merry way minimizing the above without it.</p>
+<p>If we flip the divergence around though, we’ve got an issue. That term would then be a <span class="math display">logq(x)</span>… which we can’t write off in the same way. So if we’re doing this ELBO minimizing version of variational inference, we’re obligated to use this “reverse” KL divergence.</p>
 <p><span class="math display">
 \begin{align}
-a &amp; = b + c {eq1} \\
-c &amp; = d + e {eq2}
+\sum{p(x)}log[\frac{p(x)}{q(x)}]}  \\
+c &amp; = d + e
 \end{align}
 </span></p>
 <section id="chivi-bound-optimization" class="level2">
@@ -241,12 +244,12 @@ c &amp; = d + e {eq2}
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2022-12-03},
-  url = {https://andytimm.github.io/variational_mrp_3.1.html},
+  url = {https://andytimm.github.io/variational_mrp_3.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
 Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> December 3, 2022. <a href="https://andytimm.github.io/variational_mrp_3.1.html">https://andytimm.github.io/variational_mrp_3.1.html</a>.
+Posterior Distributions.”</span> December 3, 2022. <a href="https://andytimm.github.io/variational_mrp_3.html">https://andytimm.github.io/variational_mrp_3.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
