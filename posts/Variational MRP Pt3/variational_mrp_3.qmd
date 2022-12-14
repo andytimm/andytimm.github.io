@@ -138,4 +138,4 @@ have a strong intuition for why this is the best solution, but a information enc
 makes it make more sense at least: if we know the distribution of $p$,
 we can construct a code for it with average description length $H(x)$. One way to understand
 the KL divergence is as what happens when we try to use the code for a distribution $q$ to describe $p$,
-we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning?
+we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.
