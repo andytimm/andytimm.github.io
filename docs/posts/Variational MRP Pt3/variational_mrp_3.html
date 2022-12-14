@@ -22,6 +22,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -195,7 +258,7 @@ ul.task-list li input[type="checkbox"] {
 
 <p>This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
 <p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html">last post</a> we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we’ll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.</p>
-<p>The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree.</p>
+<p>The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. I also have a grab bag of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below at the end.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
 <li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
@@ -217,7 +280,44 @@ KL(p||q) = \sum_{x \in X}{p(x)}log[\frac{p(x)}{q(x)}]  \\
 KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 </span></p>
-<p>This turns out to matter</p>
+<p>Unfortunately, this choice to optimize the “reverse” KL divergence bakes in preference for a certain type of solution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>I found I built better intuition for this encoded preference after seeing it presented many different ways, so here are a few of my favorites.</p>
+<p>One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs.&nbsp;Reverse KL (2): 1. Inclusive vs.&nbsp;Exclusive (my favorite, and so what I’m using for the section header) 2. Mean Seeking vs.&nbsp;Mode Seeking 3. Zero Avoiding vs.&nbsp;Zero Forcing</p>
+<p>let’s quickly illustrate this in the case of a simple mixture of normals:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>mixture <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">normals =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>,<span class="dv">3</span>,<span class="dv">1</span>),<span class="fu">rnorm</span>(<span class="dv">1000</span>,<span class="dv">15</span>,<span class="dv">2</span>)),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">mode_seeking_kl =</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>,<span class="fl">3.5</span>,<span class="dv">2</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">mean_seeking_kl =</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>,<span class="dv">9</span>,<span class="dv">4</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>rkl_plot <span class="ot">&lt;-</span> mixture <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> normals)) <span class="sc">+</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> normals), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> mode_seeking_kl), <span class="at">color =</span> <span class="st">"green"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Exclusive KL"</span>) <span class="sc">+</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">""</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>fkl_plot <span class="ot">&lt;-</span> mixture <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> normals)) <span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> normals), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean_seeking_kl), <span class="at">color =</span> <span class="st">"green"</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"Inclusive KL"</span>) <span class="sc">+</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">""</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(rkl_plot,fkl_plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="variational_mrp_3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>To approximate the same exact red distribution <span class="math inline">p(x)</span>, Inclusive KL (1) and Exclusive KL (2) optmize the green <span class="math inline">q(p)</span> in quite different manner.</p>
+<p>To spell out the ways to describe this above: Inclusive KL will try to cover all the probability mass in <span class="math inline">p(x)</span>, even if it means a peak at a unfortunate middle ground. Exclusive KL, on the other hand, will try to concentrate it’s mass on the largest mode, even if it means missing much of the mixture of normals. Alternatively, we could describe the top graph as mode seeking, and the bottom as mean seeking. Finally, we could say the top graph shows “Zero Forcing” behavior- it will heavily favor putting zero mass on some parts of the graph to avoid any weight where <span class="math inline">p(x)</span> has no mass, even if it means missing an entire mode. Conversely, Inclusive KL will aim to cover all the mass of <span class="math inline">p(x)</span> in full even if the result is an odd solution, in order to avoid having zero mass where <span class="math inline">p(x)</span> has some.</p>
+<p>How does this follow from the form of the divergence?</p>
+<p>To start with, notice that for inclusive KL we could think of the <span class="math inline">log(\frac{p(x)}{q(x)})</span> part of the term being weighted by <span class="math inline">p(x)</span>- if in some range of <span class="math inline">x</span> <span class="math inline">p(x)</span> is 0, we don’t pay a penalty if <span class="math inline">q(x)</span> puts mass. The reverse is not true however- if our <span class="math inline">q(x)</span> is zero where there should be mass in our true distribution, our Inclusive KL divergence is infinite<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p><span class="math display">
+\begin{align}
+KL(p||q) = \sum_{x \in X}{p(x)}log[\frac{p(x)}{q(x)}]  \\
+KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
+\end{align}
+</span></p>
 <section id="chivi-bound-optimization" class="level2">
 <h2 class="anchored" data-anchor-id="chivi-bound-optimization">CHIVI bound optimization</h2>
 </section>
@@ -240,7 +340,14 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>In truth, both KL divergences encode structural preferences for the type of optimization solution they admit- neither will be the right choice for every problem and variational family combination. But as we’ll see, being able to choose will give us more options to fit models we believe.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This is the footnote for those of you that are annoyed because you tried to write out how this would happen, and got something like <span class="math inline">p(x) log \frac{p(x)}{0}</span>, which should be undefined if we’re following normal math rules. But this is information theory, and in this strange land we say <span class="math inline">p(x) log \frac{p(x)}{0} = \infty</span>. I don’t have a strong intuition for why this is the best solution, but a information encoding perspective makes it make more sense at least: if we know the distribution of <span class="math inline">p</span>, we can construct a code for it with average description length <span class="math inline">H(x)</span>. One way to understand the KL divergence is as what happens when we try to use the code for a distribution <span class="math inline">q</span> to describe <span class="math inline">p</span>, we’d need <span class="math inline">H(p) + KL(p||q)</span> bits on average to describe <span class="math inline">p</span>. In the code for <span class="math inline">q</span> has no way to represent some element of <span class="math inline">p</span>, then requiring… infinite bits feels like the right way to describe the breakdown of meaning?<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},

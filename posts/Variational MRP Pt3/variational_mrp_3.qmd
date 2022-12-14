@@ -13,7 +13,7 @@ This is section 3 in my series on using Variational Inference to speed up relati
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html) we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we'll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.
 
-The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree.
+The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. I also have a grab bag of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below at the end.
 
 The rough plan for the series is as follows:
 
@@ -52,7 +52,67 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 $$
 
-This turns out to matter 
+Unfortunately, this choice to optimize the "reverse" KL divergence bakes in preference
+for a certain type of solution[^1]. 
+
+I found I built better intuition for this encoded preference after seeing it presented many
+different ways, so here are a few of my favorites.
+
+One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs. Reverse KL (2):
+1. Inclusive vs. Exclusive (my favorite, and so what I'm using for the section header)
+2. Mean Seeking vs. Mode Seeking
+3. Zero Avoiding vs. Zero Forcing
+
+let's quickly illustrate this in the case of a simple mixture of normals:
+```{r, message=F}
+library(ggplot2)
+library(gridExtra)
+library(tidyverse)
+
+mixture <- data.frame(normals = c(rnorm(1000,3,1),rnorm(1000,15,2)),
+                      mode_seeking_kl = rnorm(2000,3.5,2),
+                      mean_seeking_kl = rnorm(2000,9,4))
+
+rkl_plot <- mixture %>% ggplot(aes(x = normals)) +
+  geom_density(aes(x = normals), color = "red") +
+  geom_density(aes(x = mode_seeking_kl), color = "green") + ggtitle("Exclusive KL") +
+  xlab("")
+
+fkl_plot <- mixture %>% ggplot(aes(x = normals)) +
+  geom_density(aes(x = normals), color = "red") +
+  geom_density(aes(x = mean_seeking_kl), color = "green") + ggtitle("Inclusive KL") +
+  xlab("")
+
+grid.arrange(rkl_plot,fkl_plot)
+```
+
+To approximate the same exact red distribution $p(x)$, Inclusive KL (1) and Exclusive KL (2)
+optmize the green $q(p)$ in quite different manner. 
+
+To spell out the ways to describe this above: Inclusive KL will try to cover all the probability mass in $p(x)$, even if it means a peak
+at a unfortunate middle ground. Exclusive KL, on the other hand, will try to concentrate
+it's mass on the largest mode, even if it means missing much of the mixture of normals. Alternatively,
+we could describe the top graph as mode seeking, and the bottom as mean seeking. Finally,
+we could say the top graph shows "Zero Forcing" behavior- it will heavily favor
+putting zero mass on some parts of the graph to avoid any weight where $p(x)$ has no
+mass, even if it means missing an entire mode. Conversely, Inclusive KL will
+aim to cover all the mass of $p(x)$ in full even if the result is an odd solution, in order
+to avoid having zero mass where $p(x)$ has some.
+
+How does this follow from the form of the divergence?
+
+To start with, notice that for inclusive KL we could think of the $log(\frac{p(x)}{q(x)})$ part of the term being weighted by $p(x)$- if in some range of $x$ $p(x)$ is 0, we don't pay a penalty if $q(x)$ puts mass. The reverse is not true however- if our $q(x)$ is zero where there should be mass
+in our true distribution, our Inclusive KL divergence is infinite[^2].
+
+$$
+\begin{align}
+KL(p||q) = \sum_{x \in X}{p(x)}log[\frac{p(x)}{q(x)}]  \\
+KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}] 
+\end{align}
+$$
+
+
+
 
 ## CHIVI bound optimization
 
@@ -65,3 +125,17 @@ This turns out to matter
 ## Wasserstein Bounds
 
 # Conclusions
+
+[^1]: In truth, both KL divergences encode structural preferences for the type
+of optimization solution they admit- neither will be the right choice for every
+problem and  variational family combination. But as we'll see, being able to
+choose will give us more options to fit models we believe.
+[^2]: This is the footnote for those of you that are annoyed because you tried
+to write out how this would happen, and got something like $p(x) log \frac{p(x)}{0}$,
+which should be undefined if we're following normal math rules. But this is information
+theory, and in this strange land we say $p(x) log \frac{p(x)}{0} = \infty$. I don't
+have a strong intuition for why this is the best solution, but a information encoding perspective
+makes it make more sense at least: if we know the distribution of $p$,
+we can construct a code for it with average description length $H(x)$. One way to understand
+the KL divergence is as what happens when we try to use the code for a distribution $q$ to describe $p$,
+we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning?
