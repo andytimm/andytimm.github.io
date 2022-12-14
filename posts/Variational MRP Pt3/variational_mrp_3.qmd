@@ -39,17 +39,20 @@ the ELBO is to note that the term is constant with respect to $q$; so we can
 go on our merry way minimizing the above without it.
 
 If we flip the divergence around though, we've got an issue. That term would
-then be a $$logq(x)$$... which we can't write off in the same way. So if we're
+then be a $logq(x)$ ... which we can't write off in the same way- it varies as we
+optimize. So if we're
 doing this ELBO minimizing version of variational inference, we're obligated to
-use this "reverse" KL divergence.
+use this "reverse" KL divergence, the second option below. 
 
 
 $$
 \begin{align}
-\sum{p(x)}log[\frac{p(x)}{q(x)}]}  \\
-c & = d + e 
+KL(p||q) = \sum_{x \in X}{p(x)}log[\frac{p(x)}{q(x)}]  \\
+KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}] 
 \end{align}
 $$
+
+This turns out to matter 
 
 ## CHIVI bound optimization
 

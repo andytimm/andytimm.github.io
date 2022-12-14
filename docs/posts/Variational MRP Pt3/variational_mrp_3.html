@@ -210,13 +210,14 @@ ul.task-list li input[type="checkbox"] {
 <p>Like I mentioned in the first post in the series, the Evidence Lower Bound (ELBO), our optimization objective we’re working with is a tractable approximation of the Kullback-Leibler Divergence between our choice of approximating distribution <span class="math inline">q(z)</span> to our true posterior <span class="math inline">p(z)</span>.</p>
 <p>The KL divergence is asymmetric: in general, <span class="math inline">KL(p||q) \neq KL(q||p)</span>. Previously, we saw that this asymmetry mattered quite a bit for our ELBO idea:</p>
 <p><span class="math display">argmin_{q(z) \in \mathscr{Q}}(q(z)||\frac{p(z,x)}{\bf p(x)}) = \mathbb{E}[logq(z)] - \mathbb{E}[logp(z,x)] + {\bf logp(x)}</span> We can’t calculate the bolded term <span class="math inline">logp(x)</span>; if we could we wouldn’t be finding this inference thing so hard in the first place. The way we sidestepped that with the ELBO is to note that the term is constant with respect to <span class="math inline">q</span>; so we can go on our merry way minimizing the above without it.</p>
-<p>If we flip the divergence around though, we’ve got an issue. That term would then be a <span class="math display">logq(x)</span>… which we can’t write off in the same way. So if we’re doing this ELBO minimizing version of variational inference, we’re obligated to use this “reverse” KL divergence.</p>
+<p>If we flip the divergence around though, we’ve got an issue. That term would then be a <span class="math inline">logq(x)</span> … which we can’t write off in the same way- it varies as we optimize. So if we’re doing this ELBO minimizing version of variational inference, we’re obligated to use this “reverse” KL divergence, the second option below.</p>
 <p><span class="math display">
 \begin{align}
-\sum{p(x)}log[\frac{p(x)}{q(x)}]}  \\
-c &amp; = d + e
+KL(p||q) = \sum_{x \in X}{p(x)}log[\frac{p(x)}{q(x)}]  \\
+KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 </span></p>
+<p>This turns out to matter</p>
 <section id="chivi-bound-optimization" class="level2">
 <h2 class="anchored" data-anchor-id="chivi-bound-optimization">CHIVI bound optimization</h2>
 </section>
