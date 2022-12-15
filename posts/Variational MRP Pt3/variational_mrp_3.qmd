@@ -59,6 +59,7 @@ I found I built better intuition for this encoded preference after seeing it pre
 different ways, so here are a few of my favorites.
 
 One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs. Reverse KL (2):
+
 1. Inclusive vs. Exclusive (my favorite, and so what I'm using for the section header)
 2. Mean Seeking vs. Mode Seeking
 3. Zero Avoiding vs. Zero Forcing
@@ -111,10 +112,27 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 $$
 
+And if we change the direction of the divergence, the opposite zeros and infinities
+show up, enforcing strong preferences for a specific type of solution.
 
+When the example is a simple mix of two gaussians approximated with a single
+gaussian, it's fairly easy to intuit how the choice of KL divergence will influence
+the optimization solution. This all gets a bit more opaque on harder problems-
+like we saw with the example last post, ELBO based VI will tend to underestimate
+the support of $p(x)$ but whether the solution is narrow but overall reasonable, or pretty much degenerate
+is hard to predict. However, this exploration of how the form of the divergence
+influences the results still gives a rough intuition for why our ELBO optimized
+posteriors might collapse.
 
+If we want to try the opposite direction of KL divergence, it isn't immediately obvious there's a
+global objective we can choose to perhaps seek out a optimization problem
+that favors overdispersed solutions. Like I mentioned above, if we try to make
+an ELBO-esque target but reverse the KL divergence, the $logp(x)$ which is constant with respect
+to the $q(x)$ we're optimizing becomes a $logq(x)$ which we can't so easily work around.
 
-## CHIVI bound optimization
+The most promising solution in the spirit of VI[^3] to the above problem requires us to pick up a new divergence, the $\chi^{2}$ divergence, and optimizes a new bound. Let's take a look at it.
+
+## $\chi^{2}$ Variational Inference (CHIVI) and the CUBO bound
 
 # Not all points are equal
 
@@ -130,6 +148,7 @@ $$
 of optimization solution they admit- neither will be the right choice for every
 problem and  variational family combination. But as we'll see, being able to
 choose will give us more options to fit models we believe.
+
 [^2]: This is the footnote for those of you that are annoyed because you tried
 to write out how this would happen, and got something like $p(x) log \frac{p(x)}{0}$,
 which should be undefined if we're following normal math rules. But this is information
@@ -139,3 +158,4 @@ makes it make more sense at least: if we know the distribution of $p$,
 we can construct a code for it with average description length $H(x)$. One way to understand
 the KL divergence is as what happens when we try to use the code for a distribution $q$ to describe $p$,
 we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.
+[^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down. 

@@ -236,7 +236,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#inclusive-versus-exclusive-kl-divergence" id="toc-inclusive-versus-exclusive-kl-divergence" class="nav-link active" data-scroll-target="#inclusive-versus-exclusive-kl-divergence">Inclusive versus Exclusive KL-divergence</a>
   <ul>
-  <li><a href="#chivi-bound-optimization" id="toc-chivi-bound-optimization" class="nav-link" data-scroll-target="#chivi-bound-optimization">CHIVI bound optimization</a></li>
+  <li><a href="#chi2-variational-inference-chivi-and-the-cubo-bound" id="toc-chi2-variational-inference-chivi-and-the-cubo-bound" class="nav-link" data-scroll-target="#chi2-variational-inference-chivi-and-the-cubo-bound"><span class="math inline">\chi^{2}</span> Variational Inference (CHIVI) and the CUBO bound</a></li>
   </ul></li>
   <li><a href="#not-all-points-are-equal" id="toc-not-all-points-are-equal" class="nav-link" data-scroll-target="#not-all-points-are-equal">Not all points are equal</a>
   <ul>
@@ -282,7 +282,12 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 </span></p>
 <p>Unfortunately, this choice to optimize the “reverse” KL divergence bakes in preference for a certain type of solution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <p>I found I built better intuition for this encoded preference after seeing it presented many different ways, so here are a few of my favorites.</p>
-<p>One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs.&nbsp;Reverse KL (2): 1. Inclusive vs.&nbsp;Exclusive (my favorite, and so what I’m using for the section header) 2. Mean Seeking vs.&nbsp;Mode Seeking 3. Zero Avoiding vs.&nbsp;Zero Forcing</p>
+<p>One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs.&nbsp;Reverse KL (2):</p>
+<ol type="1">
+<li>Inclusive vs.&nbsp;Exclusive (my favorite, and so what I’m using for the section header)</li>
+<li>Mean Seeking vs.&nbsp;Mode Seeking</li>
+<li>Zero Avoiding vs.&nbsp;Zero Forcing</li>
+</ol>
 <p>let’s quickly illustrate this in the case of a simple mixture of normals:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
@@ -318,8 +323,12 @@ KL(p||q) = \sum_{x \in X}{p(x)}log[\frac{p(x)}{q(x)}]  \\
 KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 </span></p>
-<section id="chivi-bound-optimization" class="level2">
-<h2 class="anchored" data-anchor-id="chivi-bound-optimization">CHIVI bound optimization</h2>
+<p>And if we change the direction of the divergence, the opposite zeros and infinities show up, enforcing strong preferences for a specific type of solution.</p>
+<p>When the example is a simple mix of two gaussians approximated with a single gaussian, it’s fairly easy to intuit how the choice of KL divergence will influence the optimization solution. This all gets a bit more opaque on harder problems- like we saw with the example last post, ELBO based VI will tend to underestimate the support of <span class="math inline">p(x)</span> but whether the solution is narrow but overall reasonable, or pretty much degenerate is hard to predict. However, this exploration of how the form of the divergence influences the results still gives a rough intuition for why our ELBO optimized posteriors might collapse.</p>
+<p>If we want to try the opposite direction of KL divergence, it isn’t immediately obvious there’s a global objective we can choose to perhaps seek out a optimization problem that favors overdispersed solutions. Like I mentioned above, if we try to make an ELBO-esque target but reverse the KL divergence, the <span class="math inline">logp(x)</span> which is constant with respect to the <span class="math inline">q(x)</span> we’re optimizing becomes a <span class="math inline">logq(x)</span> which we can’t so easily work around.</p>
+<p>The most promising solution in the spirit of VI<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> to the above problem requires us to pick up a new divergence, the <span class="math inline">\chi^{2}</span> divergence, and optimizes a new bound. Let’s take a look at it.</p>
+<section id="chi2-variational-inference-chivi-and-the-cubo-bound" class="level2">
+<h2 class="anchored" data-anchor-id="chi2-variational-inference-chivi-and-the-cubo-bound"><span class="math inline">\chi^{2}</span> Variational Inference (CHIVI) and the CUBO bound</h2>
 </section>
 </section>
 <section id="not-all-points-are-equal" class="level1">
@@ -346,6 +355,7 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 <ol>
 <li id="fn1"><p>In truth, both KL divergences encode structural preferences for the type of optimization solution they admit- neither will be the right choice for every problem and variational family combination. But as we’ll see, being able to choose will give us more options to fit models we believe.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>This is the footnote for those of you that are annoyed because you tried to write out how this would happen, and got something like <span class="math inline">p(x) log \frac{p(x)}{0}</span>, which should be undefined if we’re following normal math rules. But this is information theory, and in this strange land we say <span class="math inline">p(x) log \frac{p(x)}{0} = \infty</span>. I don’t have a strong intuition for why this is the best solution, but a information encoding perspective makes it make more sense at least: if we know the distribution of <span class="math inline">p</span>, we can construct a code for it with average description length <span class="math inline">H(x)</span>. One way to understand the KL divergence is as what happens when we try to use the code for a distribution <span class="math inline">q</span> to describe <span class="math inline">p</span>, we’d need <span class="math inline">H(p) + KL(p||q)</span> bits on average to describe <span class="math inline">p</span>. In the code for <span class="math inline">q</span> has no way to represent some element of <span class="math inline">p</span>, then requiring… infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>I’ll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
