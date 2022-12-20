@@ -326,9 +326,27 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 <p>And if we change the direction of the divergence, the opposite zeros and infinities show up, enforcing strong preferences for a specific type of solution.</p>
 <p>When the example is a simple mix of two gaussians approximated with a single gaussian, it’s fairly easy to intuit how the choice of KL divergence will influence the optimization solution. This all gets a bit more opaque on harder problems- like we saw with the example last post, ELBO based VI will tend to underestimate the support of <span class="math inline">p(x)</span> but whether the solution is narrow but overall reasonable, or pretty much degenerate is hard to predict. However, this exploration of how the form of the divergence influences the results still gives a rough intuition for why our ELBO optimized posteriors might collapse.</p>
 <p>If we want to try the opposite direction of KL divergence, it isn’t immediately obvious there’s a global objective we can choose to perhaps seek out a optimization problem that favors overdispersed solutions. Like I mentioned above, if we try to make an ELBO-esque target but reverse the KL divergence, the <span class="math inline">logp(x)</span> which is constant with respect to the <span class="math inline">q(x)</span> we’re optimizing becomes a <span class="math inline">logq(x)</span> which we can’t so easily work around.</p>
-<p>The most promising solution in the spirit of VI<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> to the above problem requires us to pick up a new divergence, the <span class="math inline">\chi^{2}</span> divergence, and optimizes a new bound. Let’s take a look at it.</p>
+<p>Let’s look first at a solution in the spirit of VI<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> to the above problem which requires us to pick up a new divergence, the <span class="math inline">\chi^{2}</span>-divergence, and optimizes a new bound. Let’s take a look at it.</p>
 <section id="chi2-variational-inference-chivi-and-the-cubo-bound" class="level2">
 <h2 class="anchored" data-anchor-id="chi2-variational-inference-chivi-and-the-cubo-bound"><span class="math inline">\chi^{2}</span> Variational Inference (CHIVI) and the CUBO bound</h2>
+<p>The <span class="math inline">\chi^{2}</span>-divergence has form:</p>
+<p><span class="math display">
+D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
+</span> For simplicity and comparability, I’m switching here to using Dieng et Al. (2017)’s notation here- they use <span class="math inline">q(z;\lambda)</span> to refer to the variational family we’re using, indexed by parameters <span class="math inline">\lambda</span>.</p>
+<p>Like with the ELBO, we need to show that we have a bound here independent of <span class="math inline">logp(x)</span>, and that we have a way to estimate that bound efficiently.</p>
+<p>Let’s first move around a few pieces of the first term above:</p>
+<p><span class="math display">
+\begin{align}
+\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2&amp; = 1 + D_{\chi^2}(p(z|x)|q(z;\lambda)) \\
+&amp;= p(x)^2[1 + D_{\chi^2}(p(z|x)|q(z;\lambda))]
+\end{align}
+</span> Then we can take the log of both the right hand side equations, which gives us:</p>
+<p><span class="math display">
+\frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log    
+</span> …and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and logp(x) is constant as we optimize <span class="math inline">q</span>, so we’ve found something that we’re close to able to minimize:</p>
+<p><span class="math display">
+\mathscr{L}_{\chi^2}(\lambda) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
+</span> Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus the <span class="math inline">\chi</span> upper bound (CUBO).</p>
 </section>
 </section>
 <section id="not-all-points-are-equal" class="level1">

@@ -130,9 +130,39 @@ that favors overdispersed solutions. Like I mentioned above, if we try to make
 an ELBO-esque target but reverse the KL divergence, the $logp(x)$ which is constant with respect
 to the $q(x)$ we're optimizing becomes a $logq(x)$ which we can't so easily work around.
 
-The most promising solution in the spirit of VI[^3] to the above problem requires us to pick up a new divergence, the $\chi^{2}$ divergence, and optimizes a new bound. Let's take a look at it.
+Let's look first at a solution in the spirit of VI[^3] to the above problem which requires us to pick up a new divergence, the $\chi^{2}$-divergence, and optimizes a new bound. Let's take a look at it.
 
 ## $\chi^{2}$ Variational Inference (CHIVI) and the CUBO bound
+
+The $\chi^{2}$-divergence has form:
+
+$$
+D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
+$$
+For simplicity and comparability, I'm switching here to using Dieng et Al. (2017)'s notation here- they use $q(z;\lambda)$ to refer to the variational family we're using, indexed by parameters $\lambda$.
+
+Like with the ELBO, we need to show that we have a bound here independent of $logp(x)$, and that we have a way to estimate that bound efficiently.
+
+Let's first move around a few pieces of the first term above:
+
+$$
+\begin{align}
+\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2& = 1 + D_{\chi^2}(p(z|x)|q(z;\lambda)) \\
+&= p(x)^2[1 + D_{\chi^2}(p(z|x)|q(z;\lambda))]
+\end{align}
+$$
+Then we can take the log of both the right hand side equations, which gives us:
+
+$$
+\frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log    
+$$
+...and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and logp(x) is constant as we optimize $q$, so we've found something that we're close to able to minimize:
+
+$$
+\mathscr{L}_{\chi^2}(\lambda) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
+$$
+Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus the $\chi$ upper bound (CUBO).
+
 
 # Not all points are equal
 
