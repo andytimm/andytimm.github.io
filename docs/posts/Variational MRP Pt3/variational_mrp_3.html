@@ -237,6 +237,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#inclusive-versus-exclusive-kl-divergence" id="toc-inclusive-versus-exclusive-kl-divergence" class="nav-link active" data-scroll-target="#inclusive-versus-exclusive-kl-divergence">Inclusive versus Exclusive KL-divergence</a>
   <ul>
   <li><a href="#chi2-variational-inference-chivi-and-the-cubo-bound" id="toc-chi2-variational-inference-chivi-and-the-cubo-bound" class="nav-link" data-scroll-target="#chi2-variational-inference-chivi-and-the-cubo-bound"><span class="math inline">\chi^{2}</span> Variational Inference (CHIVI) and the CUBO bound</a></li>
+  <li><a href="#but-can-we-estimate-it" id="toc-but-can-we-estimate-it" class="nav-link" data-scroll-target="#but-can-we-estimate-it">But can we estimate it?</a></li>
+  <li><a href="#but-can-we-calculate-gradients-efficiently" id="toc-but-can-we-calculate-gradients-efficiently" class="nav-link" data-scroll-target="#but-can-we-calculate-gradients-efficiently">… But can we calculate gradients efficiently?</a></li>
   </ul></li>
   <li><a href="#not-all-points-are-equal" id="toc-not-all-points-are-equal" class="nav-link" data-scroll-target="#not-all-points-are-equal">Not all points are equal</a>
   <ul>
@@ -333,6 +335,7 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 <p><span class="math display">
 D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
 </span> For simplicity and comparability, I’m switching here to using Dieng et Al. (2017)’s notation here- they use <span class="math inline">q(z;\lambda)</span> to refer to the variational family we’re using, indexed by parameters <span class="math inline">\lambda</span>.</p>
+<p>This divergence has the properties we wanted when we tried to use Inclusive KL Divergence- it tends to be mean seeking instead of mode seeking.</p>
 <p>Like with the ELBO, we need to show that we have a bound here independent of <span class="math inline">logp(x)</span>, and that we have a way to estimate that bound efficiently.</p>
 <p>Let’s first move around a few pieces of the first term above:</p>
 <p><span class="math display">
@@ -342,11 +345,28 @@ D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
 \end{align}
 </span> Then we can take the log of both the right hand side equations, which gives us:</p>
 <p><span class="math display">
-\frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log    
+\frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]  
 </span> …and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and logp(x) is constant as we optimize <span class="math inline">q</span>, so we’ve found something that we’re close to able to minimize:</p>
 <p><span class="math display">
-\mathscr{L}_{\chi^2}(\lambda) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
-</span> Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus the <span class="math inline">\chi</span> upper bound (CUBO).</p>
+CUBO_{2}(\lambda) = \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
+</span> Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus named <span class="math inline">\chi</span> upper bound (CUBO)<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+</section>
+<section id="but-can-we-estimate-it" class="level2">
+<h2 class="anchored" data-anchor-id="but-can-we-estimate-it">But can we estimate it?</h2>
+<p>One other issue here: how do we estimate this? The CUBO objective got rid of the <span class="math inline">logp(x)</span> we were worried about, but it seems like that expectation is going to be difficult to estimate in general.</p>
+<p>If you’re a good Bayesian your first idea might be to Monte Carlo (not MCMC) estimate it roughly like this:</p>
+<p><span class="math display">
+CUBO_2(\lambda) = \frac{1}{2}log\frac{1}{S}\sum_{s=1}^{S}[(\frac{p(x,z^{s})}{q(z^{s};\lambda)})^2]
+</span> Unfortunately, the <span class="math inline">log</span> transform here means our Monte Carlo estimator will be biased: we can see this by applying Jensen’s inequality to the above. To make this stably act as an upper bound, we can apply a clever transformation:</p>
+<p><span class="math display">
+\bf{L} = exp(n* CUBO_2(\lambda))
+</span></p>
+<p>Since exp is monotonic, this has the same objective as the CUBO, but we can Monte Carlo estimate it unbiasedly. Is that the last problem to solve?</p>
+</section>
+<section id="but-can-we-calculate-gradients-efficiently" class="level2">
+<h2 class="anchored" data-anchor-id="but-can-we-calculate-gradients-efficiently">… But can we calculate gradients efficiently?</h2>
+<p>…Wait, wait no. Sorry to keep saying there’s one more step here, but there’s a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of <span class="math inline">\bf{L}</span> above, <span class="math inline">\bf{\hat{L}}</span>. The issue is that we don’t have any</p>
+<p>For this, we need to pull out a trick from the variational autoencoder literature.</p>
 </section>
 </section>
 <section id="not-all-points-are-equal" class="level1">
@@ -374,6 +394,7 @@ D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
 <li id="fn1"><p>In truth, both KL divergences encode structural preferences for the type of optimization solution they admit- neither will be the right choice for every problem and variational family combination. But as we’ll see, being able to choose will give us more options to fit models we believe.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>This is the footnote for those of you that are annoyed because you tried to write out how this would happen, and got something like <span class="math inline">p(x) log \frac{p(x)}{0}</span>, which should be undefined if we’re following normal math rules. But this is information theory, and in this strange land we say <span class="math inline">p(x) log \frac{p(x)}{0} = \infty</span>. I don’t have a strong intuition for why this is the best solution, but a information encoding perspective makes it make more sense at least: if we know the distribution of <span class="math inline">p</span>, we can construct a code for it with average description length <span class="math inline">H(x)</span>. One way to understand the KL divergence is as what happens when we try to use the code for a distribution <span class="math inline">q</span> to describe <span class="math inline">p</span>, we’d need <span class="math inline">H(p) + KL(p||q)</span> bits on average to describe <span class="math inline">p</span>. In the code for <span class="math inline">q</span> has no way to represent some element of <span class="math inline">p</span>, then requiring… infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>I’ll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>This approach actually defines a family of <span class="math inline">n</span> new divergences, where you replace the <span class="math inline">\frac{1}{2}</span> with <span class="math inline">\frac{1}{n}</span> and similarly replace the square an exponent with n.&nbsp;Fully stepping through why this is neat wasn’t worth how far afield it’d take us, but the original <span class="math inline">CHIVI</span> paper has some cool derivations based on this, one of which I’ll discuss on the next section on importance sampling.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},

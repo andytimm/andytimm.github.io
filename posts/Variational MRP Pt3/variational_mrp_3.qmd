@@ -141,6 +141,8 @@ D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
 $$
 For simplicity and comparability, I'm switching here to using Dieng et Al. (2017)'s notation here- they use $q(z;\lambda)$ to refer to the variational family we're using, indexed by parameters $\lambda$.
 
+This divergence has the properties we wanted when we tried to use Inclusive KL Divergence- it tends to be mean seeking instead of mode seeking.
+
 Like with the ELBO, we need to show that we have a bound here independent of $logp(x)$, and that we have a way to estimate that bound efficiently.
 
 Let's first move around a few pieces of the first term above:
@@ -154,15 +156,37 @@ $$
 Then we can take the log of both the right hand side equations, which gives us:
 
 $$
-\frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log    
+\frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]  
 $$
 ...and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and logp(x) is constant as we optimize $q$, so we've found something that we're close to able to minimize:
 
 $$
-\mathscr{L}_{\chi^2}(\lambda) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
+CUBO_{2}(\lambda) = \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
 $$
-Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus the $\chi$ upper bound (CUBO).
+Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus named $\chi$ upper bound (CUBO)[^4].
 
+## But can we estimate it?
+
+One other issue here: how do we estimate this? The CUBO objective got rid of the $logp(x)$ we were worried about, but it seems like that expectation is going to be difficult to estimate in general. 
+
+If you're a good Bayesian your first idea might be to Monte Carlo (not MCMC) estimate it roughly like this:
+
+$$
+CUBO_2(\lambda) = \frac{1}{2}log\frac{1}{S}\sum_{s=1}^{S}[(\frac{p(x,z^{s})}{q(z^{s};\lambda)})^2]
+$$
+Unfortunately, the $log$ transform here means our Monte Carlo estimator will be biased: we can see this by applying Jensen's inequality to the above. To make this stably act as an upper bound, we can apply a clever transformation:
+
+$$
+\bf{L} = exp(n* CUBO_2(\lambda))
+$$
+
+Since exp is monotonic, this has the same objective as the CUBO, but we can Monte Carlo estimate it unbiasedly. Is that the last problem to solve?
+
+## ... But can we calculate gradients efficiently?
+
+...Wait, wait no. Sorry to keep saying there's one more step here, but there's a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of $\bf{L}$ above, $\bf{\hat{L}}$. The issue is that we don't have any 
+
+For this, we need to pull out a trick from the variational autoencoder literature.
 
 # Not all points are equal
 
@@ -188,4 +212,5 @@ makes it make more sense at least: if we know the distribution of $p$,
 we can construct a code for it with average description length $H(x)$. One way to understand
 the KL divergence is as what happens when we try to use the code for a distribution $q$ to describe $p$,
 we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.
-[^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down. 
+[^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.
+[^4]: This approach actually defines a family of $n$ new divergences, where you replace the $\frac{1}{2}$ with $\frac{1}{n}$ and similarly replace the square an exponent with n. Fully stepping through why this is neat wasn't worth how far afield it'd take us, but the original $CHIVI$ paper has some cool derivations based on this, one of which I'll discuss on the next section on importance sampling. 
