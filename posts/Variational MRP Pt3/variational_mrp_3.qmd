@@ -165,7 +165,7 @@ CUBO_{2}(\lambda) = \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\
 $$
 Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus named $\chi$ upper bound (CUBO)[^4].
 
-## But can we estimate it?
+## ... But can we estimate it?
 
 One other issue here: how do we estimate this? The CUBO objective got rid of the $logp(x)$ we were worried about, but it seems like that expectation is going to be difficult to estimate in general. 
 
@@ -184,9 +184,9 @@ Since exp is monotonic, this has the same objective as the CUBO, but we can Mont
 
 ## ... But can we calculate gradients efficiently?
 
-...Wait, wait no. Sorry to keep saying there's one more step here, but there's a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of $\bf{L}$ above, $\bf{\hat{L}}$. The issue is that we don't have any 
+Wait, wait no. Sorry to keep saying there's one more step here, but there's a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of $\bf{L}$ above, $\bf{\hat{L}}$. The issue is that we don't have any guarantee that a unbiased Monte Carlo estimator of $\bf{\hat{L}}$ gets us a Monte Carlo way to estimate $\nabla_\lambda\bf{\hat{L}}$- we can't guarantee that the gradient of the expectation is equal to the expectation of the gradient[^5].
 
-For this, we need to pull out a trick from the variational autoencoder literature.
+For this, we need to pull out a trick from the variational autoencoder literature. This is usually referred to as the "Reparameterization Trick", but the original CHIVI paper refers to them as "reparmeterization gradients". 
 
 # Not all points are equal
 
@@ -214,3 +214,4 @@ the KL divergence is as what happens when we try to use the code for a distribut
 we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.
 [^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.
 [^4]: This approach actually defines a family of $n$ new divergences, where you replace the $\frac{1}{2}$ with $\frac{1}{n}$ and similarly replace the square an exponent with n. Fully stepping through why this is neat wasn't worth how far afield it'd take us, but the original $CHIVI$ paper has some cool derivations based on this, one of which I'll discuss on the next section on importance sampling. 
+[^5]: I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you're interested in learning more about why this is important for optimization through stocastic models, I'd recommend starting with Gregory Gundersen's explanation [here](https://gregorygundersen.com/blog/2018/04/29/reparameterization/) and then move on to the original Kingma & Welling, 2013 paper. As general advice on understanding it better though, I'll echo Greg's point that some of the online explanations I've seen are a bit loose- the key is that we want to express a gradient of an expectation (can't MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our latent variables $z$ are).
