@@ -210,7 +210,7 @@ One potential downside here is that we introduced a solution that partially reli
 
 Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn't free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.
 
-# Not all points are equal 
+# Not all points are equal
 
 ## PSIS-Variational Inference
 
