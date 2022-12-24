@@ -194,6 +194,21 @@ $$
 \nabla_\lambda\bf{\hat{L}}  &= \frac{2}{B}\sum_{b=1}^B(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})^2 \nabla_\lambda log(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})
 \end{align}
 $$
+There are one or two more neat computational tricks in the paper I won't explain here (essentially: how do we extend this to work in minibatch fashion, and how do we avoid numerical underflow issues), but this is now essentially functional. The whole algorithm, which they dubbed CHIVI is below:
+
+![](images/CHIVI_algorithm.png)
+
+Stepping back, let's talk about some practical properties of the algorithm we've been stepping through. 
+
+First, and probably most exciting given what we saw in the last post, CHIVI's objective has the property that it is inclusive, unlike the ELBO we were using earlier. This won't be the right choice for all variational inference problems, but given our prior issues with very narrow posteriors this will be exciting to test[^6]. And as we'll see in the next section, this overdispersion tendency in the posterior will often have a beneficial interaction with importance sampling which can improve our estimates further.
+
+Another nice thing here is that if we were to estimate both the ELBO and CUBO for a given problem, we'd get both a upper and lower bound on the model evidence. This is theoretically convenient in that we now have a sandwich estimator, which actually obtains reasonably tight bounds. We'll even be able use the fact we have both later to get some bounds on practical bounds on quantities we tend to report in practice like means and covariances!
+
+A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it's even better when we're ensembling because we can leave more heavily on each model for the tasks it succeeds on.
+
+One potential downside here is that we introduced a solution that partially relies on a Monte Carlo estimator. That said, this is pretty cheap in practice; if we're using VI as a drop in for MCMC, this is still going to be much much faster than MCMC for any big problem. We'll need to think about a reasonable number of samples in a given case, but realistically this isn't going to be a driving factor in determining compute time.
+
+Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn't free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.
 
 # Not all points are equal 
 
@@ -222,3 +237,4 @@ we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$
 [^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.
 [^4]: This approach actually defines a family of $n$ new divergences, where you replace the $\frac{1}{2}$ with $\frac{1}{n}$ and similarly replace the square an exponent with n. Fully stepping through why this is neat wasn't worth how far afield it'd take us, but the original $CHIVI$ paper has some cool derivations based on this, one of which I'll discuss on the next section on importance sampling. 
 [^5]: I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you're interested in learning more about why this is important for optimization through stocastic models, I'd recommend starting with Gregory Gundersen's explanation [here](https://gregorygundersen.com/blog/2018/04/29/reparameterization/) and then move on to the original Kingma & Welling, 2013 paper. As general advice on understanding it better though, I'll echo Greg's point that some of the online explanations I've seen are a bit loose- the key is that we want to express a gradient of an expectation (can't MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function $g$ is differentiable). 
+[^6]: Next post, this is a theory post.
