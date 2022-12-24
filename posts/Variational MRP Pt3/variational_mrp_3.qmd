@@ -189,12 +189,13 @@ Wait, wait no. Sorry to keep saying there's one more step here, but there's a lo
 For this, we need to pull out a trick from the variational autoencoder literature. This is usually referred to as the "Reparameterization Trick", but the original CHIVI paper refers to them as "reparmeterization gradients". We will assume we can rewrite the generative process of our model as $z = g(\lambda,\epsilon)$, where $\epsilon \sim p(\epsilon)$ and g being a deterministic function. Then we have a new estimator for both $\bf{\hat{L}}$ and it's gradient:
 
 $$
-\bf{\hat{L}} = \frac{1}{B}\sum_{b=1}^B(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})^2 \\
-
-\nabla_\lambda\bf{\hat{L}} = \frac{2}{B}\sum_{b=1}^B(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})^2 \nabla_\lambda log((\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))}))
+\begin{align}
+\bf{\hat{L}} &= \frac{1}{B}\sum_{b=1}^B(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})^{2} \\ 
+\nabla_\lambda\bf{\hat{L}}  &= \frac{2}{B}\sum_{b=1}^B(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})^2 \nabla_\lambda log(\frac{p(x,g(\lambda,\epsilon^{(b)}))}{q(g(\lambda,\epsilon^{(b)};\lambda))})
+\end{align}
 $$
 
-# Not all points are equal
+# Not all points are equal 
 
 ## PSIS-Variational Inference
 
@@ -220,4 +221,4 @@ the KL divergence is as what happens when we try to use the code for a distribut
 we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$ has no way to represent some element of $p$, then requiring... infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.
 [^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.
 [^4]: This approach actually defines a family of $n$ new divergences, where you replace the $\frac{1}{2}$ with $\frac{1}{n}$ and similarly replace the square an exponent with n. Fully stepping through why this is neat wasn't worth how far afield it'd take us, but the original $CHIVI$ paper has some cool derivations based on this, one of which I'll discuss on the next section on importance sampling. 
-[^5]: I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you're interested in learning more about why this is important for optimization through stocastic models, I'd recommend starting with Gregory Gundersen's explanation [here](https://gregorygundersen.com/blog/2018/04/29/reparameterization/) and then move on to the original Kingma & Welling, 2013 paper. As general advice on understanding it better though, I'll echo Greg's point that some of the online explanations I've seen are a bit loose- the key is that we want to express a gradient of an expectation (can't MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our latent variables $z$ are).
+[^5]: I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you're interested in learning more about why this is important for optimization through stocastic models, I'd recommend starting with Gregory Gundersen's explanation [here](https://gregorygundersen.com/blog/2018/04/29/reparameterization/) and then move on to the original Kingma & Welling, 2013 paper. As general advice on understanding it better though, I'll echo Greg's point that some of the online explanations I've seen are a bit loose- the key is that we want to express a gradient of an expectation (can't MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function $g$ is differentiable). 
