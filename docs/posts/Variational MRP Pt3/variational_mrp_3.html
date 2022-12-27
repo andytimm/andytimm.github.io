@@ -240,11 +240,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#but-can-we-estimate-it" id="toc-but-can-we-estimate-it" class="nav-link" data-scroll-target="#but-can-we-estimate-it">… But can we estimate it?</a></li>
   <li><a href="#but-can-we-calculate-gradients-efficiently" id="toc-but-can-we-calculate-gradients-efficiently" class="nav-link" data-scroll-target="#but-can-we-calculate-gradients-efficiently">… But can we calculate gradients efficiently?</a></li>
   </ul></li>
-  <li><a href="#not-all-points-are-equal" id="toc-not-all-points-are-equal" class="nav-link" data-scroll-target="#not-all-points-are-equal">Not all points are equal</a>
+  <li><a href="#not-all-samples-are-equally-good" id="toc-not-all-samples-are-equally-good" class="nav-link" data-scroll-target="#not-all-samples-are-equally-good">Not all samples are equally good</a>
   <ul>
-  <li><a href="#psis-variational-inference" id="toc-psis-variational-inference" class="nav-link" data-scroll-target="#psis-variational-inference">PSIS-Variational Inference</a></li>
+  <li><a href="#importance-weighted-variational-inference" id="toc-importance-weighted-variational-inference" class="nav-link" data-scroll-target="#importance-weighted-variational-inference">Importance Weighted Variational Inference</a></li>
+  <li><a href="#diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" id="toc-diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" class="nav-link" data-scroll-target="#diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling">Diagnostics for IWVI via Pareto-Smoothed Importance Sampling</a></li>
+  <li><a href="#multiple-proposal-distributions-with-multiple-importance-sampling" id="toc-multiple-proposal-distributions-with-multiple-importance-sampling" class="nav-link" data-scroll-target="#multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</a></li>
   </ul></li>
-  <li><a href="#can-we-bound-error-in-terms-of-elbo-or-chivi" id="toc-can-we-bound-error-in-terms-of-elbo-or-chivi" class="nav-link" data-scroll-target="#can-we-bound-error-in-terms-of-elbo-or-chivi">Can we bound error in terms of ELBO or CHIVI?</a>
+  <li><a href="#can-we-bound-error-in-terms-of-elbo-or-cubo" id="toc-can-we-bound-error-in-terms-of-elbo-or-cubo" class="nav-link" data-scroll-target="#can-we-bound-error-in-terms-of-elbo-or-cubo">Can we bound error in terms of ELBO or CUBO?</a>
   <ul>
   <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a></li>
   </ul></li>
@@ -382,14 +384,27 @@ CUBO_2(\lambda) = \frac{1}{2}log\frac{1}{S}\sum_{s=1}^{S}[(\frac{p(x,z^{s})}{q(z
 <p>Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn’t free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.</p>
 </section>
 </section>
-<section id="not-all-points-are-equal" class="level1">
-<h1>Not all points are equal</h1>
-<section id="psis-variational-inference" class="level2">
-<h2 class="anchored" data-anchor-id="psis-variational-inference">PSIS-Variational Inference</h2>
+<section id="not-all-samples-are-equally-good" class="level1">
+<h1>Not all samples are equally good</h1>
+<p>So we’ve made an approximation q(x) that’s cheap to sample from, and is somewhat close to p(x), our true posterior. The way to improve the approximation we’ve focused on so far is to just go back to the start and make q(x) better; for example, through changing up the variational family, or to switching to a different optimization objective like the CUBO. That’s one solution that’s often necessary, but can we work with a particular q(x) we have and somehow make it look more like p(x)?</p>
+<p>… Phased this way, this sounds a lot like importance sampling. If you haven’t seen them before, an importance sampling estimator allows us to take draws from a (preferably) easy to sample from distribution<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> and reweight the samples to look more like our true target distribution. The weight <span class="math inline">w_i</span> for each sample <span class="math inline">i</span> take form:</p>
+<p><span class="math display">
+w_i = \frac{p(x_i)}{q(x_i)}
+</span> Before you get worried that we don’t have <span class="math inline">p(x_i)</span> because of the normalizing constant like every time we talk about having <span class="math inline">p(x)</span> in this series, there’s a clever estimator that “self-normalizes” such that this can be a reasonable strategy. Intuitively, we’re just placing more weight on samples in the support of <span class="math inline">p(x)</span>.</p>
+<p>This footenote<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some particularly important sub-problems to solve.</p>
+<p>First, our choice of the “proposal” distribution we’re reweighting to be more like <span class="math inline">p(x)</span></p>
+<section id="importance-weighted-variational-inference" class="level2">
+<h2 class="anchored" data-anchor-id="importance-weighted-variational-inference">Importance Weighted Variational Inference</h2>
+</section>
+<section id="diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling">Diagnostics for IWVI via Pareto-Smoothed Importance Sampling</h2>
+</section>
+<section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
 </section>
 </section>
-<section id="can-we-bound-error-in-terms-of-elbo-or-chivi" class="level1">
-<h1>Can we bound error in terms of ELBO or CHIVI?</h1>
+<section id="can-we-bound-error-in-terms-of-elbo-or-cubo" class="level1">
+<h1>Can we bound error in terms of ELBO or CUBO?</h1>
 <section id="wasserstein-bounds" class="level2">
 <h2 class="anchored" data-anchor-id="wasserstein-bounds">Wasserstein Bounds</h2>
 </section>
@@ -409,7 +424,9 @@ CUBO_2(\lambda) = \frac{1}{2}log\frac{1}{S}\sum_{s=1}^{S}[(\frac{p(x,z^{s})}{q(z
 <li id="fn3"><p>I’ll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>This approach actually defines a family of <span class="math inline">n</span> new divergences, where you replace the <span class="math inline">\frac{1}{2}</span> with <span class="math inline">\frac{1}{n}</span> and similarly replace the square an exponent with n.&nbsp;Fully stepping through why this is neat wasn’t worth how far afield it’d take us, but the original <span class="math inline">CHIVI</span> paper has some cool derivations based on this, one of which I’ll discuss on the next section on importance sampling.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you’re interested in learning more about why this is important for optimization through stocastic models, I’d recommend starting with Gregory Gundersen’s explanation <a href="https://gregorygundersen.com/blog/2018/04/29/reparameterization/">here</a> and then move on to the original Kingma &amp; Welling, 2013 paper. As general advice on understanding it better though, I’ll echo Greg’s point that some of the online explanations I’ve seen are a bit loose- the key is that we want to express a gradient of an expectation (can’t MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function <span class="math inline">g</span> is differentiable).<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Next post, this is a theory post.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>In a few posts, we’re theoryposting for a bit.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>we’ll call it q(x) here to make the application super clear, but often I see the “proposal” distribution called f(x) and the the distribution we want to approximate called g(x).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},

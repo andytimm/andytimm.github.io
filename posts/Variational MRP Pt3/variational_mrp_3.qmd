@@ -210,11 +210,42 @@ One potential downside here is that we introduced a solution that partially reli
 
 Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn't free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.
 
-# Not all points are equal
+# Not all samples are equally good
 
-## PSIS-Variational Inference
+So we've made an approximation q(x) that's cheap to sample from, and is somewhat
+close to p(x), our true posterior. The way to improve the approximation we've
+focused on so far is to just go back to the start and make q(x) better; for example,
+through changing up the variational family, or to switching to a different
+optimization objective like the CUBO. That's one solution that's often necessary,
+but can we work with a particular q(x) we have and somehow make it look more like
+p(x)?
 
-# Can we bound error in terms of ELBO or CHIVI?
+... Phased this way, this sounds a lot like importance sampling. If you haven't seen them before,
+an importance sampling estimator allows us to take draws from a (preferably) easy to sample
+from distribution[^7] and reweight the samples to look more like our true target
+distribution. The weight $w_i$ for each sample $i$ take form:
+
+$$
+w_i = \frac{p(x_i)}{q(x_i)}
+$$
+Before you get worried that we don't have $p(x_i)$ because of the normalizing constant like every time we talk about having $p(x)$ in this series, there's a clever estimator that
+"self-normalizes" such that this can be a reasonable strategy. Intuitively, we're
+just placing more weight on samples in the support of $p(x)$.
+
+This footenote[^8] has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some
+particularly important sub-problems to solve. 
+
+First, our choice of the "proposal" distribution we're reweighting to be more like
+$p(x)$
+
+
+## Importance Weighted Variational Inference
+
+## Diagnostics for IWVI via Pareto-Smoothed Importance Sampling
+
+## Multiple Proposal Distributions with Multiple Importance Sampling
+
+# Can we bound error in terms of ELBO or CUBO?
 
 ## Wasserstein Bounds
 
@@ -237,4 +268,8 @@ we'd need $H(p) + KL(p||q)$ bits on average to describe $p$. In the code for $q$
 [^3]: I'll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.
 [^4]: This approach actually defines a family of $n$ new divergences, where you replace the $\frac{1}{2}$ with $\frac{1}{n}$ and similarly replace the square an exponent with n. Fully stepping through why this is neat wasn't worth how far afield it'd take us, but the original $CHIVI$ paper has some cool derivations based on this, one of which I'll discuss on the next section on importance sampling. 
 [^5]: I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you're interested in learning more about why this is important for optimization through stocastic models, I'd recommend starting with Gregory Gundersen's explanation [here](https://gregorygundersen.com/blog/2018/04/29/reparameterization/) and then move on to the original Kingma & Welling, 2013 paper. As general advice on understanding it better though, I'll echo Greg's point that some of the online explanations I've seen are a bit loose- the key is that we want to express a gradient of an expectation (can't MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function $g$ is differentiable). 
-[^6]: Next post, this is a theory post.
+[^6]: In a few posts, we're theoryposting for a bit.
+[^7]: we'll call it q(x) here to make the application super clear, but often
+I see the "proposal" distribution called f(x) and the the distribution we want
+to approximate called g(x). 
+[^8]:
