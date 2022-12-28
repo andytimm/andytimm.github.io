@@ -242,7 +242,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#not-all-samples-are-equally-good" id="toc-not-all-samples-are-equally-good" class="nav-link" data-scroll-target="#not-all-samples-are-equally-good">Not all samples are equally good</a>
   <ul>
-  <li><a href="#importance-weighted-variational-inference" id="toc-importance-weighted-variational-inference" class="nav-link" data-scroll-target="#importance-weighted-variational-inference">Importance Weighted Variational Inference</a></li>
+  <li><a href="#importance-weighted-variational-inference" id="toc-importance-weighted-variational-inference" class="nav-link" data-scroll-target="#importance-weighted-variational-inference">Importance Weighted Variational Inference</a>
+  <ul class="collapse">
+  <li><a href="#how-does-iw-elbo-change-the-vi-problem-conceptually" id="toc-how-does-iw-elbo-change-the-vi-problem-conceptually" class="nav-link" data-scroll-target="#how-does-iw-elbo-change-the-vi-problem-conceptually">How does IW-ELBO change the VI problem conceptually?</a></li>
+  </ul></li>
   <li><a href="#diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" id="toc-diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" class="nav-link" data-scroll-target="#diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling">Diagnostics for IWVI via Pareto-Smoothed Importance Sampling</a></li>
   <li><a href="#multiple-proposal-distributions-with-multiple-importance-sampling" id="toc-multiple-proposal-distributions-with-multiple-importance-sampling" class="nav-link" data-scroll-target="#multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</a></li>
   </ul></li>
@@ -413,6 +416,20 @@ logp(x) = \mathbb{E}logR + \mathbb{E}log\frac{p(x)}{R}
 <p><span class="math display">
 R = \frac{p(z,x)}{q(z)}, z \sim q
 </span></p>
+<p>The reason pointing out this fairly simple generalization is helpful is that it frames how to tighten our ELBO bound on <span class="math inline">logp(x)</span> via alternative estimators <span class="math inline">R</span>.</p>
+<p>By drawing <span class="math inline">M</span> samples and averaging them as in importance sampling, we get:</p>
+<p><span class="math display">
+R_M = \frac{1}{M}\sum_{m=1}^{M}\frac{p(z_m,x)}{q(z_m)}, z_m \sim q
+</span> From there, we can derive a tighter bound on <span class="math inline">logp(x)</span>, referred to as the IW-ELBO:</p>
+<p><span class="math display">
+IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\frac{p(z_m,x)}{q(z_m)}
+</span> Where we’re using the <span class="math inline">1:M</span> as a shorthand for eg <span class="math inline">q(z_{1:M}) = q(z_1)...q(z_M)</span>.</p>
+<p>It’s worth noting that the last few lines don’t specify a particular form of importance sampling- we’re getting the tighter theoretical bounding behavior from the averaging of samples from <span class="math inline">q</span>. We’ll see a particularly good form of importance sampling with desirable practical properties in a moment.</p>
+<section id="how-does-iw-elbo-change-the-vi-problem-conceptually" class="level3">
+<h3 class="anchored" data-anchor-id="how-does-iw-elbo-change-the-vi-problem-conceptually">How does IW-ELBO change the VI problem conceptually?</h3>
+<p>Stepping back</p>
+<p>Stepping back for</p>
+</section>
 </section>
 <section id="diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling">Diagnostics for IWVI via Pareto-Smoothed Importance Sampling</h2>

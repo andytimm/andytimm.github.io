@@ -290,6 +290,33 @@ $$
 R = \frac{p(z,x)}{q(z)}, z \sim q
 $$
 
+The reason pointing out this fairly simple generalization is helpful is that it
+frames how to tighten our ELBO bound on $logp(x)$ via alternative estimators $R$.
+
+By drawing $M$ samples and averaging them as in importance sampling, we get:
+
+$$
+R_M = \frac{1}{M}\sum_{m=1}^{M}\frac{p(z_m,x)}{q(z_m)}, z_m \sim q
+$$
+From there, we can derive a tighter bound on $logp(x)$, referred to as the IW-ELBO:
+
+$$
+IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\frac{p(z_m,x)}{q(z_m)}
+$$
+Where we're using the $1:M$ as a shorthand for eg $q(z_{1:M}) = q(z_1)...q(z_M)$.
+
+
+It's worth noting that the last few lines don't specify a particular form of importance
+sampling- we're getting the tighter theoretical bounding behavior from the averaging of samples
+from $q$. We'll see a particularly good form of importance sampling with desirable
+practical properties in a moment.
+
+### How does IW-ELBO change the VI problem conceptually?
+
+Stepping back 
+
+Stepping back for 
+
 ## Diagnostics for IWVI via Pareto-Smoothed Importance Sampling
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
