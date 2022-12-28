@@ -254,12 +254,41 @@ weights, and it'll take ages for that estimator to tell us anything remotely
 reliable. 
 
 So with those points we need to address, here are the next topics in this section:
-1. What we know about Importance Weighted Variational Inference
+
+1. Importance Weighted Variational Inference
 2. Better importance sampling with built in diagnostics via PSIS
-3. Combining multiple proposal distributions via Multiple Important Sampling
+3. Combining multiple proposal distributions via Multiple Importance Sampling
 
 
 ## Importance Weighted Variational Inference
+
+The actual use of Importance Weighting for VI in it's simplest form is
+pretty intuitive (draw samples from $q(x)$, weight them...), but let's derive the
+new Importance Weighted Variational Inference (IWVI) estimator since some nice
+intuition will come with it.
+
+We'll aim to show that we can get a tighter ELBO by using importance weights. This
+type of tighter ELBO was first shown by [Burda et Al. (2015)](https://arxiv.org/abs/1509.00519)
+in the context of Variational Autoencoders after which is was fairly clear this could apply
+to variational inference, but [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034)
+fleshed out some details of that extension- I'll be explaining some of their main
+results first.
+
+To start, imagine a random variable $R$, such that $\mathbb{E}{R} = p(x)$, which
+we'll think of as a estimator of p(x). Then by Jensen's Inequality:
+
+$$
+logp(x) = \mathbb{E}logR + \mathbb{E}log\frac{p(x)}{R}
+$$
+
+The first term is the bound, which will be tighter if R is highly concentrated. 
+
+This is a more general form of the ELBO; we can make it quite familiar looking by
+having our R above be:
+
+$$
+R = \frac{p(z,x)}{q(z)}, z \sim q
+$$
 
 ## Diagnostics for IWVI via Pareto-Smoothed Importance Sampling
 
@@ -269,7 +298,7 @@ So with those points we need to address, here are the next topics in this sectio
 
 ## Wasserstein Bounds
 
-# Conclusions
+# Conclusions + Bonus Context
 
 [^1]: In truth, both KL divergences encode structural preferences for the type
 of optimization solution they admit- neither will be the right choice for every

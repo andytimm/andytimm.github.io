@@ -250,7 +250,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a></li>
   </ul></li>
-  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#conclusions-bonus-context" id="toc-conclusions-bonus-context" class="nav-link" data-scroll-target="#conclusions-bonus-context">Conclusions + Bonus Context</a></li>
   </ul>
 </nav>
     </div>
@@ -394,9 +394,25 @@ w_i = \frac{p(x_i)}{q(x_i)}
 <p>This footenote<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some particularly important sub-problems to solve, which all take the forms of managing the variance of the estimator since it’s pretty easy to see it’s unbiased.</p>
 <p>First, our choice of the “proposal” distribution we’re reweighting to be more like <span class="math inline">p(x)</span> matters for making this process practically feasible. We need the proposal distribution to be close enough to <span class="math inline">p(x)</span> that a realistic number of the draws get non-negligible weights. It might be true that we could draw proposals from a big <span class="math inline">N</span> dimensional uniform distribution for every problem, but if we want to be done sampling enough this century we need to at least get fairly close with our initial <span class="math inline">q(x)</span>.</p>
 <p>A second, but related problem is that it’s quite common for the unmodified importance sampling estimator to have some weights which are orders and orders of magnitude higher than the average weight, blowing up the variance of the estimator. Dan Simpson’s slides I linked above has an instructive example with not too weird <span class="math inline">p(x)</span> and <span class="math inline">q(x)</span>’s that has a max weight ~1.4 million (!) times the average. If that happens, our estimator will essentially ignore most samples without gigantic weights, and it’ll take ages for that estimator to tell us anything remotely reliable.</p>
-<p>So with those points we need to address, here are the next topics in this section: 1. What we know about Importance Weighted Variational Inference 2. Better importance sampling with built in diagnostics via PSIS 3. Combining multiple proposal distributions via Multiple Important Sampling</p>
+<p>So with those points we need to address, here are the next topics in this section:</p>
+<ol type="1">
+<li>Importance Weighted Variational Inference</li>
+<li>Better importance sampling with built in diagnostics via PSIS</li>
+<li>Combining multiple proposal distributions via Multiple Importance Sampling</li>
+</ol>
 <section id="importance-weighted-variational-inference" class="level2">
 <h2 class="anchored" data-anchor-id="importance-weighted-variational-inference">Importance Weighted Variational Inference</h2>
+<p>The actual use of Importance Weighting for VI in it’s simplest form is pretty intuitive (draw samples from <span class="math inline">q(x)</span>, weight them…), but let’s derive the new Importance Weighted Variational Inference (IWVI) estimator since some nice intuition will come with it.</p>
+<p>We’ll aim to show that we can get a tighter ELBO by using importance weights. This type of tighter ELBO was first shown by <a href="https://arxiv.org/abs/1509.00519">Burda et Al. (2015)</a> in the context of Variational Autoencoders after which is was fairly clear this could apply to variational inference, but <a href="https://arxiv.org/abs/1808.09034">Domke and Sheldon (2018)</a> fleshed out some details of that extension- I’ll be explaining some of their main results first.</p>
+<p>To start, imagine a random variable <span class="math inline">R</span>, such that <span class="math inline">\mathbb{E}{R} = p(x)</span>, which we’ll think of as a estimator of p(x). Then by Jensen’s Inequality:</p>
+<p><span class="math display">
+logp(x) = \mathbb{E}logR + \mathbb{E}log\frac{p(x)}{R}
+</span></p>
+<p>The first term is the bound, which will be tighter if R is highly concentrated.</p>
+<p>This is a more general form of the ELBO; we can make it quite familiar looking by having our R above be:</p>
+<p><span class="math display">
+R = \frac{p(z,x)}{q(z)}, z \sim q
+</span></p>
 </section>
 <section id="diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="diagnostics-for-iwvi-via-pareto-smoothed-importance-sampling">Diagnostics for IWVI via Pareto-Smoothed Importance Sampling</h2>
@@ -411,8 +427,8 @@ w_i = \frac{p(x_i)}{q(x_i)}
 <h2 class="anchored" data-anchor-id="wasserstein-bounds">Wasserstein Bounds</h2>
 </section>
 </section>
-<section id="conclusions" class="level1">
-<h1>Conclusions</h1>
+<section id="conclusions-bonus-context" class="level1">
+<h1>Conclusions + Bonus Context</h1>
 
 
 </section>
