@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Variational Inference for MRP with Reliable Posterior Distributions
+title: Variational
 subtitle: Part 3- Some theory on why VI is hard
 date: 2022-12-03
 draft: True
@@ -363,6 +363,13 @@ the IW-ELBO above to build intuition, there's no reason not to apply VI to the C
 
 ## Solving our IS problems with Pareto-Smoothed Importance Sampling
 
+As we've been talking about importance sampling, we've been leaving some of the
+messier details aside (how many samples to draw, how to deal with the cases when some
+of the weights get huge, how to know when our proposal distribution is "close" enough).
+
+While the Importance Sampling Literature is huge and there are a lot of possible
+variants here, I'll next introduce [Vehtari et Al. (2015)](https://arxiv.org/abs/1507.02646)'s Pareto-Smoothed Importance Sampling.  
+
 ## Multiple Proposal Distributions with Multiple Importance Sampling
 
 # Can we bound error in terms of ELBO or CUBO?
@@ -403,6 +410,6 @@ well written and paradigm shaping. Finally, Elvira et Al's (2019) Multiple Impor
 [paper](https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full) is the most thorough I know, but isn't particularly approachable. Instead, for MIS I'd recommend starting with the first few minutes of [this talk](https://www.youtube.com/watch?v=dxFSwplfdpk) (although the main topic of their talk is less relevant, the visualizations are super helpful), and the first ~8 pages of [this paper](https://arxiv.org/pdf/2102.05407.pdf), also by Elvira et Al. (2021) (I especially like
 that it spends a bit more time on notation; since multiple importance sampling comes from/comes up
 in computer graphics, the notational choices sometimes feel a bit annoying to me). Finally,
-the [original MIS paper itself](https://dl.acm.org/doi/10.1145/218380.218498), Veach & Guibas (1995) is quite readable. but requires
+the [original MIS paper itself](https://dl.acm.org/doi/10.1145/218380.218498), Veach & Guibas (1995) is quite readable,z but requires
 a bit of reading around or reading into computer graphics to grok their examples
 and notational choices.

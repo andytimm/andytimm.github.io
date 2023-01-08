@@ -9,7 +9,7 @@
 <meta name="author" content="Andy Timm">
 <meta name="dcterms.date" content="2022-12-03">
 
-<title>Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions</title>
+<title>Andy Timm - Variational</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -144,10 +144,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
+<meta property="og:title" content="Andy Timm - Variational">
 <meta property="og:description" content="Part 3- Some theory on why VI is hard">
 <meta property="og:site-name" content="Andy Timm">
-<meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
+<meta name="twitter:title" content="Andy Timm - Variational">
 <meta name="twitter:description" content="Part 3- Some theory on why VI is hard">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
@@ -196,7 +196,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Variational Inference for MRP with Reliable Posterior Distributions</h1>
+      <h1 class="title">Variational</h1>
             <p class="subtitle lead">Part 3- Some theory on why VI is hard</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">MRP</div>
@@ -451,6 +451,8 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 </section>
 <section id="solving-our-is-problems-with-pareto-smoothed-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="solving-our-is-problems-with-pareto-smoothed-importance-sampling">Solving our IS problems with Pareto-Smoothed Importance Sampling</h2>
+<p>As we’ve been talking about importance sampling, we’ve been leaving some of the messier details aside (how many samples to draw, how to deal with the cases when some of the weights get huge, how to know when our proposal distribution is “close” enough).</p>
+<p>While the Importance Sampling Literature is huge and there are a lot of possible variants here, I’ll next introduce <a href="https://arxiv.org/abs/1507.02646">Vehtari et Al. (2015)</a>’s Pareto-Smoothed Importance Sampling.</p>
 </section>
 <section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
@@ -479,19 +481,17 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <li id="fn5"><p>I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you’re interested in learning more about why this is important for optimization through stocastic models, I’d recommend starting with Gregory Gundersen’s explanation <a href="https://gregorygundersen.com/blog/2018/04/29/reparameterization/">here</a> and then move on to the original Kingma &amp; Welling, 2013 paper. As general advice on understanding it better though, I’ll echo Greg’s point that some of the online explanations I’ve seen are a bit loose- the key is that we want to express a gradient of an expectation (can’t MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function <span class="math inline">g</span> is differentiable).<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p>In a few posts, we’re theoryposting for a bit.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn7"><p>we’ll call it q(x) here to make the application super clear, but often I see the “proposal” distribution called f(x) and the the distribution we want to approximate called g(x).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>If you’re looking to learn about importance sampling for the first time, a great place to start is Ben Lambert’s video introductions to the basic idea: <a href="https://www.youtube.com/watch?v=V8f8ueBc9sY">video 1</a>, and <a href="https://www.youtube.com/watch?v=F5PdIQxMA28">video 2</a>. For building more intuition about why we need all these variance reducing modifications to general IS, Dan Simpson has some great <a href="https://dpsimpson.github.io/pages/talks/Importance_sampling_unsw_2019.pdf">slides</a> which have a side benefit of being hilarious. Those slides will mention a lot of the books/papers I find most instructive, but it’s worth calling out especially Vehtari et Al’s Pareto Smoothed Importance Sampling <a href="https://arxiv.org/abs/1507.02646">paper</a> as particularly well written and paradigm shaping. Finally, Elvira et Al’s (2019) Multiple Importance Sampling <a href="https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full">paper</a> is the most thorough I know, but isn’t particularly approachable. Instead, for MIS I’d recommend starting with the first few minutes of <a href="https://www.youtube.com/watch?v=dxFSwplfdpk">this talk</a> (although the main topic of their talk is less relevant, the visualizations are super helpful), and the first ~8 pages of <a href="https://arxiv.org/pdf/2102.05407.pdf">this paper</a>, also by Elvira et Al. (2021) (I especially like that it spends a bit more time on notation; since multiple importance sampling comes from/comes up in computer graphics, the notational choices sometimes feel a bit annoying to me). Finally, the <a href="https://dl.acm.org/doi/10.1145/218380.218498">original MIS paper itself</a>, Veach &amp; Guibas (1995) is quite readable. but requires a bit of reading around or reading into computer graphics to grok their examples and notational choices.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>If you’re looking to learn about importance sampling for the first time, a great place to start is Ben Lambert’s video introductions to the basic idea: <a href="https://www.youtube.com/watch?v=V8f8ueBc9sY">video 1</a>, and <a href="https://www.youtube.com/watch?v=F5PdIQxMA28">video 2</a>. For building more intuition about why we need all these variance reducing modifications to general IS, Dan Simpson has some great <a href="https://dpsimpson.github.io/pages/talks/Importance_sampling_unsw_2019.pdf">slides</a> which have a side benefit of being hilarious. Those slides will mention a lot of the books/papers I find most instructive, but it’s worth calling out especially Vehtari et Al’s Pareto Smoothed Importance Sampling <a href="https://arxiv.org/abs/1507.02646">paper</a> as particularly well written and paradigm shaping. Finally, Elvira et Al’s (2019) Multiple Importance Sampling <a href="https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full">paper</a> is the most thorough I know, but isn’t particularly approachable. Instead, for MIS I’d recommend starting with the first few minutes of <a href="https://www.youtube.com/watch?v=dxFSwplfdpk">this talk</a> (although the main topic of their talk is less relevant, the visualizations are super helpful), and the first ~8 pages of <a href="https://arxiv.org/pdf/2102.05407.pdf">this paper</a>, also by Elvira et Al. (2021) (I especially like that it spends a bit more time on notation; since multiple importance sampling comes from/comes up in computer graphics, the notational choices sometimes feel a bit annoying to me). Finally, the <a href="https://dl.acm.org/doi/10.1145/218380.218498">original MIS paper itself</a>, Veach &amp; Guibas (1995) is quite readable,z but requires a bit of reading around or reading into computer graphics to grok their examples and notational choices.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
   author = {Andy Timm},
-  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
-    {Distributions}},
+  title = {Variational},
   date = {2022-12-03},
   url = {https://andytimm.github.io/variational_mrp_3.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
-Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> December 3, 2022. <a href="https://andytimm.github.io/variational_mrp_3.html">https://andytimm.github.io/variational_mrp_3.html</a>.
+Andy Timm. 2022. <span>“Variational.”</span> December 3, 2022. <a href="https://andytimm.github.io/variational_mrp_3.html">https://andytimm.github.io/variational_mrp_3.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
