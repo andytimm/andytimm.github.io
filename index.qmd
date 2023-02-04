@@ -9,9 +9,9 @@ resources:
 ::: column-page-inset-left
 # About
 
-I'm currently a Manager of Data Science at [605](https://www.605.tv/), where I work on problems of observational inference and persuadability modeling, helping our corporate and political clients to better understand the impact of their advertising campaigns and optimize their targeting. Previously, I was a grad student at [NYU Gallatin](https://gallatin.nyu.edu/), where I was lucky to have the freedom to study a wide variety of topics in political science, statistics, and data science.
+I'm currently a Manager of Data Science at [605](https://www.605.tv/), where I work on problems of causal inference, forecasting, and persuadability modeling, helping our corporate and political clients to better understand the impact of their advertising campaigns and optimize their targeting. Previously, I was a grad student at [NYU Gallatin](https://gallatin.nyu.edu/), where I was lucky to have the freedom to study a wide variety of topics in political science, statistics, and computer science.
 
-Methodologically, I am passionate about quantifying uncertainty in observational inference; when we work on the many essential political and business questions that cannot be approached with experiments, how do we rigorously understand the uncertainty and limitations that come with observational methods? Some of my substantive interests include the increasing prominence of white identity in American politics, and the extent to which voting is habit forming.
+A core theme of my methodological work is how to integrate casual learnings of varying quality into larger decision making models; I share some examples of this on my projects page. Some of my substantive interests include the increasing prominence of white identity in American politics, and the extent to which voting is habit forming.
 
 Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.
 
@@ -40,6 +40,6 @@ This new website is still very much a WIP. Thanks to [Drew Dimmery](https://ddim
 :::
 
 ::: {.column-margin .column-container}
-![My Bookshelf as of September 2022. Hopefully more useful than squinting on zoom!](assets/sept-2022-bookshelf.jpg)
+![My Bookshelf as of January 2023. Hopefully more useful than squinting on zoom!](assets/jan2023-bookshelf.jpeg)
 :::
 :::
