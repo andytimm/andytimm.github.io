@@ -20,6 +20,7 @@ website:
       - href: index.qmd
         text: About
       - href: projects.qmd
+        text: Projects
       - href: software.qmd
       - href: blog.qmd
         text: Rarely Updated Blog

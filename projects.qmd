@@ -2,9 +2,9 @@
 page-layout: full
 ---
 
-I always learn a ton about people's interests by hearing about what projects they're excited about. If you're working on similar things, and want to talk about them more or learn together, I'm always excited to chat (especially if your application helps people)!
+I always learn a ton about people's interests by hearing about what projects they're excited about. If you're working on similar things, and want to talk about them more or learn together, I'm always excited to chat (especially if your application is socially beneficial)!
 
-Here are some current personal and personal projects I'm particularly excited about:
+Here are some themes of current personal and work projects I'm particularly excited about. Footnotes expand on resources I'm using to learn more:
 
 ::: columns
 ::: {.column width="50%"}
@@ -12,7 +12,7 @@ Here are some current personal and personal projects I'm particularly excited ab
 
 1.  **Scalable Bayesian Inference:** What flavors and augmentations of variational inference allow us to most flexibly and reliably scale Bayesian inference to large datasets? Are there other viable tools for scalable Bayes that are less explored? [^1].
 2.  **Modern Survey Experiment Designs:** As high quality survey completes grow ever more expensive, can tools like discrete choice models or conjoint experiments more efficiently approximate the same learnings? How can we tell when these methods will and won't produce the same findings as experiments? [^2].
-3.  **How Media Shapes Politics:** How do Social Media and TV as platforms shape US Politics? How harmful are they to society in terms of polarization, if at all?[^3].
+3.  **How Media Shapes Politics:** How do social media and TV as platforms shape US Politics? How real are posited polarization effects and other suggested harms, if at all?[^3].
 :::
 
 ::: {.column width="50%"}
@@ -23,7 +23,7 @@ Here are some current personal and personal projects I'm particularly excited ab
 3.  **Productizing HTE Estimation:** Exploring which heterogeneous treatment effect models perform best in our industry in a variety of contexts, with a fully productized solution coming online as of early 2023[^6].
 :::
 
-I also want to start building out a broader list of topics that I've spent time with or want to do a deeper dive in. For example, last winter I spent a ton of time exploring [Potential Outcome vs DAG approaches to causal inference](https://www.aeaweb.org/articles?id=10.1257/jel.20191597). In grad school I was particularly focused on the effects of educational polarization in the US, etc. As a future example, I want to do a broader dive into how social media effects culture and politics. This is both a personal thing (to track what I've been interested in over the years), and a social one (I love sharing resources and working with others to learn these topics).
+I also want to start building out a broader list of topics that I've spent time with or want to do a deeper dive in. For example, in 2021 I spent a ton of time exploring [Potential Outcome vs DAG approaches to causal inference](https://www.aeaweb.org/articles?id=10.1257/jel.20191597). In grad school I was particularly focused on the effects of educational polarization in the US, etc. This is both a personal thing (to track what I've been interested in over the years), and a social one (I love sharing resources and working with others to learn these topics).
 :::
 
 [^1]: There are lots of applications in which I'd prefer a Bayesian model, but where scaling them is simply impractical or unreliable. I started learning more here this out by working through Depth First Learning's [Variational Inference with Normalizing Flows](https://www.depthfirstlearning.com/2021/VI-with-NFs) curriculum. To explore more tools in this area, I'm writing a [blog post series](https://andytimm.github.io/posts/Variational%20MRP%20Pt1/variational_mrp_pt1.html) where I try to get reasonable variational approximations posterior distributions for a basic MRP model, exploring the literature on various flavors and augmentations of VI and diagnostic techniques along the way. I'm particularly excited about normalizing flows-based approaches based on past successes I've had in other work. I am also absolutely fascinated by work like [Hoffman and Ma (2020)](https://proceedings.mlr.press/v119/hoffman20a.html) that show Black Box VI actually follows a similar gradient flow to some forms of MCMC, with the resulting algorithmic suggestion that many short chains averaged may be another reasonable formula for scalable Bayes; in practice, I haven't seen this outperform VI, but would love to see any counter examples!
@@ -33,9 +33,9 @@ information efficiently. To learn more here, several of the chapters in [Advance
 where discrete choice modelers commonly rely on Sawtooth, I've been thinking about
 strange contradictions of how it implements MaxDiff ; Jim Savage's [notes](https://khakieconomics.github.io/2019/03/17/Logit-models-of-discrete-choice.html) and [Stan Forum comments](https://discourse.mc-stan.org/t/post-on-ranked-random-coefficients-logit/7136) here have been super helpful, and I'm working on building Stan implementations of both what Sawtooth chooses to do and the perhaps more reasonable ranked choice random coefficients implementation for the [bwsTools](https://github.com/markhwhiteii/bwsTools/issues/10) R package to get more hands on here.
 
-[^3]: The rough intuition I have here as someone working in TV is that Social Media
+[^3]: The rough intuition I have here as someone working in TV is that social media
 gets a lot of hype about how it negatively shapes politics, but if anything, TV is
-much more likely to be the impactful platform platform. Robert Putnam famously theorizes that television is and was responsible for 20% of the recent decay in American social capital; how plausible is that? To see if that intuition is supported
+much more likely to be the more negatively impactful platform. Robert Putnam famously theorizes that television is and was responsible for 20% of the recent decay in American social capital; how plausible is that? To see if that intuition is supported
 by research, I'm working through reading the papers and books mentioned in Chris Bail's [Social Media and Political Dysfunction Collaborative Review](Social Media and Political Dysfunction), and working on finding similar books and papers that ask the same questions of television.
 
 [^4]: In advertising in general, but especially TV, we can never have as many experiments as we'd like when making decisions; for example, the CPMs of addressable TV rule out an experiment at all but a handful of decision points. How then do we help clients make the most of the experiments they can run, and integrate everything from rigorously obtained causal knowledge to quasi-experimental studies to simple predictive models to make media planning decisions? Some of the most sophisticated and exciting work in this space looks like [Lyft's Causal Forecasting](https://eng.lyft.com/causal-forecasting-at-lyft-part-1-14cca6ff3d6d), but for many clients this is worlds away from current practice. Given much of the modern TV industry developed its intuitions here before the credibility revolutions in statistics and the social sciences, how do combat a strongly exaggerated sense of what should be possible to know given certain data while still meeting client needs? 
