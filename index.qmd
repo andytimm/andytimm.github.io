@@ -11,7 +11,7 @@ resources:
 
 I'm currently a Manager of Data Science at [605](https://www.605.tv/), where I work on problems of causal inference, forecasting, and persuadability modeling, helping our corporate and political clients to better understand the impact of their advertising campaigns and optimize their targeting. Previously, I was a grad student at [NYU Gallatin](https://gallatin.nyu.edu/), where I was lucky to have the freedom to study a wide variety of topics in political science, statistics, and computer science.
 
-A core theme of my methodological work is how to integrate casual learnings of varying quality into larger decision making models; I share some examples of this on my projects page. Some of my substantive interests include the increasing prominence of white identity in American politics, and the extent to which voting is habit forming.
+My methodological interests center on how to leverage modern statistical and machine learning tools to more effectively answer social science flavored questions. Some of my substantive interests include the increasing prominence of white identity in American politics, and the extent to which voting is habit forming.
 
 Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.
 
