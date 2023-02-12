@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Variational
+title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 3- Some theory on why VI is hard
 date: 2022-12-03
 draft: True
@@ -36,7 +36,7 @@ $$argmin_{q(z) \in \mathscr{Q}}(q(z)||\frac{p(z,x)}{\bf p(x)}) = \mathbb{E}[logq
 We can't calculate the bolded term $logp(x)$; if we could we wouldn't be finding
 this inference thing so hard in the first place. The way we sidestepped that with
 the ELBO is to note that the term is constant with respect to $q$; so we can
-go on our merry way minimizing the above without it.
+go on our merry way minimizing the above without it. 
 
 If we flip the divergence around though, we've got an issue. That term would
 then be a $logq(x)$ ... which we can't write off in the same way- it varies as we
@@ -184,9 +184,9 @@ Since exp is monotonic, this has the same objective as the CUBO, but we can Mont
 
 ## ... But can we calculate gradients efficiently?
 
-Wait, wait no. Sorry to keep saying there's one more step here, but there's a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of $\bf{L}$ above, $\bf{\hat{L}}$. The issue is that we don't have any guarantee that a unbiased Monte Carlo estimator of $\bf{\hat{L}}$ gets us a Monte Carlo way to estimate $\nabla_\lambda\bf{\hat{L}}$- we can't guarantee that the gradient of the expectation is equal to the expectation of the gradient[^5].
+Wait, wait no. Sorry to keep saying there's one more step here, but there's a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of $\bf{L}$ above, $\bf{\hat{L}}$. The issue is that we don't have any guarantee that a unbiased Monte Carlo estimator of $\bf{\hat{L}}$ gets us a Monte Carlo way to estimate $\nabla_\lambda\bf{\hat{L}}$- we can't guarantee that the gradient of the expectation is equal to the expectation of the gradient.
 
-For this, we need to pull out a trick from the variational autoencoder literature. This is usually referred to as the "Reparameterization Trick", but the original CHIVI paper refers to them as "reparmeterization gradients". We will assume we can rewrite the generative process of our model as $z = g(\lambda,\epsilon)$, where $\epsilon \sim p(\epsilon)$ and g being a deterministic function. Then we have a new estimator for both $\bf{\hat{L}}$ and it's gradient:
+For this, we need to pull out a trick from the variational autoencoder literature. This is usually referred to as the "Reparameterization Trick"[^5], but the original CHIVI paper refers to them as "reparmeterization gradients". We will assume we can rewrite the generative process of our model as $z = g(\lambda,\epsilon)$, where $\epsilon \sim p(\epsilon)$ and g being a deterministic function. Then we have a new estimator for both $\bf{\hat{L}}$ and it's gradient:
 
 $$
 \begin{align}
@@ -357,7 +357,7 @@ tailed distributions like t distributions makes a lot of sense. While we explore
 the IW-ELBO above to build intuition, there's no reason not to apply VI to the CUBO
  and thus CHIVI- this also naturally produces nicely overdispersed distributions which can
  be importance sampled closer to the true $p(x)$. This idea of aiming for a
- wide proposal to sample from is referred to in the importance sampling literature (eg [Owen, 2013](https://artowen.su.domains/mc/)) As "defensive sampling", with [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034) exploring the VI connection more fully. For intuition, by ensuring most of p(x) is covered by some reasonable mass makes it easier to efficiently
+ wide proposal to sample from is referred to in the importance sampling literature (eg [Owen, 2013](https://artowen.su.domains/mc/)) as "defensive sampling", with [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034) exploring the VI connection more fully. For intuition, by ensuring most of p(x) is covered by some reasonable mass makes it easier to efficiently
  get draws that can be weighted into a final posterior, even if the "unweighted"
  posterior might be too wide.
 
@@ -410,6 +410,6 @@ well written and paradigm shaping. Finally, Elvira et Al's (2019) Multiple Impor
 [paper](https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full) is the most thorough I know, but isn't particularly approachable. Instead, for MIS I'd recommend starting with the first few minutes of [this talk](https://www.youtube.com/watch?v=dxFSwplfdpk) (although the main topic of their talk is less relevant, the visualizations are super helpful), and the first ~8 pages of [this paper](https://arxiv.org/pdf/2102.05407.pdf), also by Elvira et Al. (2021) (I especially like
 that it spends a bit more time on notation; since multiple importance sampling comes from/comes up
 in computer graphics, the notational choices sometimes feel a bit annoying to me). Finally,
-the [original MIS paper itself](https://dl.acm.org/doi/10.1145/218380.218498), Veach & Guibas (1995) is quite readable,z but requires
+the [original MIS paper itself](https://dl.acm.org/doi/10.1145/218380.218498), Veach & Guibas (1995) is quite readable, but requires
 a bit of reading around or reading into computer graphics to grok their examples
 and notational choices.
