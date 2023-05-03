@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2023-05-03T02:37:52.859Z</lastmod>
+    <lastmod>2023-05-03T02:39:32.091Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
@@ -55,5 +55,9 @@
   <url>
     <loc>https://andytimm.github.io/software.html</loc>
     <lastmod>2023-04-08T19:12:51.914Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</loc>
+    <lastmod>2023-05-03T02:39:34.241Z</lastmod>
   </url>
 </urlset>
