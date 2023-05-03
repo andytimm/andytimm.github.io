@@ -145,10 +145,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
-<meta property="og:description" content="Part 3- Some theory on why VI is hard">
+<meta property="og:description" content="Part 3- Alternatives to KL Divergence">
 <meta property="og:site-name" content="Andy Timm">
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
-<meta name="twitter:description" content="Part 3- Some theory on why VI is hard">
+<meta name="twitter:description" content="Part 3- Alternatives to KL Divergence">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
@@ -197,7 +197,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Variational Inference for MRP with Reliable Posterior Distributions</h1>
-            <p class="subtitle lead">Part 3- Some theory on why VI is hard</p>
+            <p class="subtitle lead">Part 3- Alternatives to KL Divergence</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">MRP</div>
                 <div class="quarto-category">Variational Inference</div>
@@ -251,16 +251,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <p>This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
 <p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html">last post</a> we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we’ll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.</p>
-<p>The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. I also have a grab bag of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below at the end.</p>
+<p>The general structure for the next couple of posts will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in the next three posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
 <li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
 <li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
-<li><strong>(This post)</strong> Some theory on why posterior approximation with VI can be so poor</li>
+<li><strong>(This post)</strong> Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
+<li>Problem 2: Not all samples are of equal utility; can we weight them cleverly?</li>
+<li>Problem 3: How can we know when VI is wrong? Are there useful error bounds?</li>
 <li>Better grounded diagnostics and workflow</li>
-<li>Seeing if some more sophisticated techniques like normalizing flows help</li>
+<li>Seeing if some more sophisticated techniques like normalizing flows add much</li>
 </ol>
-<p>Draft problems/solutions:</p>
 <section id="inclusive-versus-exclusive-kl-divergence" class="level1">
 <h1>Inclusive versus Exclusive KL-divergence</h1>
 <p>Like I mentioned in the first post in the series, the Evidence Lower Bound (ELBO), our optimization objective we’re working with is a tractable approximation of the Kullback-Leibler Divergence between our choice of approximating distribution <span class="math inline">q(z)</span> to our true posterior <span class="math inline">p(z)</span>.</p>

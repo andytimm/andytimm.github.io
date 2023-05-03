@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
-subtitle: Part 3- Some theory on why VI is hard
+subtitle: Part 3- Alternatives to KL Divergence
 date: 2022-12-03
 draft: True
 categories:
@@ -13,17 +13,17 @@ This is section 3 in my series on using Variational Inference to speed up relati
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html) we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we'll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.
 
-The general structure for this post will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. I also have a grab bag of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below at the end.
+The general structure for the next couple of posts will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in the next three posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
 
 The rough plan for the series is as follows:
 
 1.  Introducing the Problem- Why is VI useful, why VI can produce spherical cows
 2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
-3.  **(This post)** Some theory on why posterior approximation with VI can be so poor
-4.  Better grounded diagnostics and workflow
-5.  Seeing if some more sophisticated techniques like normalizing flows help
-
-Draft problems/solutions:
+3.  **(This post)** Problem 1: KL-D prefers exclusive solutions; are there alternatives?
+4. Problem 2: Not all samples are of equal utility; can we weight them cleverly?
+5. Problem 3: How can we know when VI is wrong? Are there useful error bounds?
+5. Better grounded diagnostics and workflow
+6. Seeing if some more sophisticated techniques like normalizing flows add much
 
 # Inclusive versus Exclusive KL-divergence
 
