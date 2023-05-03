@@ -27,12 +27,12 @@ The rough plan for the series is as follows:
 
 # Not all samples are equally good
 
-So we've made an approximation q(x) that's cheap to sample from, and is somewhat
-close to p(x), our true posterior. The way to improve the approximation we've
-focused on so far is to just go back to the start and make q(x) better; for example,
+So we've made an approximation $q(x)$ that's cheap to sample from, and is somewhat
+close to $p(x)$, our true posterior. The way to improve the approximation we've
+focused on so far is to just go back to the start and make $q(x)$ better; for example,
 through changing up the variational family, or to switching to a different
 optimization objective like the CUBO. That's one solution that's often necessary,
-but can we work with a particular q(x) we have and make better use of the parts of it that are the closest to being right?
+but can we work with a particular $q(x)$ we have and make better use of the parts of it that are the closest to being right?
 
 ... Phased this way, this sounds a lot like importance sampling. If you haven't seen them before,
 an importance sampling estimator allows us to take draws from a (preferably) easy to sample
@@ -47,8 +47,7 @@ Before you get worried that we don't have $p(x_i)$ because of the normalizing co
 just placing more weight on samples in the support of $p(x)$.
 
 This footenote[^8] has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some
-particularly important sub-problems to solve, which all take the forms of managing
-the variance of the estimator since it's pretty easy to see it's unbiased. 
+particularly important sub-problems to solve in making a good importance sampling estimator, and good important sampling estimator for VI. 
 
 First, our choice of the "proposal" distribution we're reweighting to be more like
 $p(x)$ matters for making this process practically feasible. We need the proposal
@@ -67,7 +66,7 @@ If that happens, our estimator will essentially ignore most samples without giga
 weights, and it'll take ages for that estimator to tell us anything remotely
 reliable. 
 
-So with those points we need to address, here are the next topics in this section:
+So with those points we need to address, here are the next topics in this post:
 
 1. Importance Weighted Variational Inference
 2. Robust importance sampling with built in diagnostics via PSIS
@@ -85,7 +84,7 @@ We'll aim to show that we can get a tighter ELBO by using importance weights. Th
 type of tighter ELBO was first shown by [Burda et Al. (2015)](https://arxiv.org/abs/1509.00519)
 in the context of Variational Autoencoders after which is was fairly clear this could apply
 to variational inference, but [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034)
-fleshed out some details of that extension- I'll be explaining some of their main
+fleshed out some details of that extension- I'll be explaining some of the latter group's main
 results first.
 
 To start, imagine a random variable $R$, such that $\mathbb{E}{R} = p(x)$, which
@@ -129,14 +128,18 @@ practical properties in a moment.
 
 The tighter bound is nice, but importance sampling also has the side effect (done right, side benefit)
 of modifying our incentives in choosing a variational family. To see what I mean,
-we can re-use the plots above for KL Divergence, where red was the true distribution,
+we can re-use the example distributions from last post we used to build intuition for KL Divergence, where red was the true distribution,
 and green were our potential approximations. If we're not going to draw multiple samples and weight them, it makes sense to choose something like the first plot below. Every draw in the middle of the two target modes
 is expensive per our ELBO objective, so better to choose a mode.
 
-```{r,echo=F}
+```{r, echo= FALSE, warning=FALSE, output = FALSE}
 library(ggplot2)
 library(gridExtra)
 library(tidyverse)
+```
+
+
+```{r,echo=F}
 
 mixture <- data.frame(normals = c(rnorm(1000,3,1),rnorm(1000,15,2)),
                       mode_seeking_kl = rnorm(2000,3.5,2),
@@ -179,13 +182,12 @@ if our proposal distribution is somewhat close to $p(x)$.
 Another way to think about how importance sampling changes our task with variational
 inference is to think about what sorts of distributions make sense to have as
 our variational family, and even which objective might be better given IS. On choice
-of a variational family, if we're aiming for coverage, moving towards thicker-
-tailed distributions like t distributions makes a lot of sense. While we explored
+of a variational family, if we're aiming for coverage, moving towards thicker-tailed distributions like t distributions makes a lot of sense. While we explored
 the IW-ELBO above to build intuition, there's no reason not to apply VI to the CUBO
  and thus CHIVI- this also naturally produces nicely overdispersed distributions which can
  be importance sampled closer to the true $p(x)$. This idea of aiming for a
  wide proposal to sample from is referred to in the importance sampling literature (eg [Owen, 2013](https://artowen.su.domains/mc/)) as "defensive sampling", with [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034) exploring the VI connection more fully. For intuition, by ensuring most of p(x) is covered by some reasonable mass makes it easier to efficiently
- get draws that can be weighted into a final posterior, even if the "unweighted"
+ get draws that can be weighted into a final posterior, even if the unweighted
  posterior might be too wide.
 
 ## Solving our IS problems with Pareto-Smoothed Importance Sampling
