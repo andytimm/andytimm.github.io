@@ -10,7 +10,146 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Sun, 20 Nov 2022 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 02 May 2023 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
+<p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html">last post</a> we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we’ll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.</p>
+<p>The general structure for the next couple of posts will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in the next three posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
+<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li><strong>(This post)</strong> Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
+<li>Problem 2: Not all samples are of equal utility; can we weight them cleverly?</li>
+<li>Problem 3: How can we know when VI is wrong? Are there useful error bounds?</li>
+<li>Better grounded diagnostics and workflow</li>
+<li>Seeing if some more sophisticated techniques like normalizing flows add much</li>
+</ol>
+<section id="inclusive-versus-exclusive-kl-divergence" class="level1">
+<h1>Inclusive versus Exclusive KL-divergence</h1>
+<p>Like I mentioned in the first post in the series, the Evidence Lower Bound (ELBO), our optimization objective we’re working with is a tractable approximation of the Kullback-Leibler Divergence between our choice of approximating distribution <img src="https://latex.codecogs.com/png.latex?q(z)"> to our true posterior <img src="https://latex.codecogs.com/png.latex?p(z)">.</p>
+<p>The KL divergence is asymmetric: in general, <img src="https://latex.codecogs.com/png.latex?KL(p%7C%7Cq)%20%5Cneq%20KL(q%7C%7Cp)">. Previously, we saw that this asymmetry mattered quite a bit for our ELBO idea:</p>
+<p><img src="https://latex.codecogs.com/png.latex?argmin_%7Bq(z)%20%5Cin%20%5Cmathscr%7BQ%7D%7D(q(z)%7C%7C%5Cfrac%7Bp(z,x)%7D%7B%5Cbf%20p(x)%7D)%20=%20%5Cmathbb%7BE%7D%5Blogq(z)%5D%20-%20%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20+%20%7B%5Cbf%20logp(x)%7D"> We can’t calculate the bolded term <img src="https://latex.codecogs.com/png.latex?logp(x)">; if we could we wouldn’t be finding this inference thing so hard in the first place. The way we sidestepped that with the ELBO is to note that the term is constant with respect to <img src="https://latex.codecogs.com/png.latex?q">; so we can go on our merry way minimizing the above without it.</p>
+<p>If we flip the divergence around though, we’ve got an issue. That term would then be a <img src="https://latex.codecogs.com/png.latex?logq(x)"> … which we can’t write off in the same way- it varies as we optimize. So if we’re doing this ELBO minimizing version of variational inference, we’re obligated to use this “reverse” KL divergence, the second option below.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0AKL(p%7C%7Cq)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bp(x)%7Dlog%5B%5Cfrac%7Bp(x)%7D%7Bq(x)%7D%5D%20%20%5C%5C%0AKL(q%7C%7Cp)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bq(x)%7Dlog%5B%5Cfrac%7Bq(x)%7D%7Bp(x)%7D%5D%0A%5Cend%7Balign%7D%0A"></p>
+<p>Unfortunately, this choice to optimize the “reverse” KL divergence bakes in preference for a certain type of solution<sup>1</sup>.</p>
+<p>I found I built better intuition for this encoded preference after seeing it presented many different overlapping ways, so here are a few of my favorites.</p>
+<p>One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs.&nbsp;Reverse KL (2):</p>
+<ol type="1">
+<li>Inclusive vs.&nbsp;Exclusive (my favorite, and so what I’m using for the section header)</li>
+<li>Mean Seeking vs.&nbsp;Mode Seeking</li>
+<li>Zero Avoiding vs.&nbsp;Zero Forcing</li>
+</ol>
+<p>let’s quickly sketch what this might look like in the case of a simple mixture of normals with a single normal as a variational family:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(ggplot2)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;">library</span>(gridExtra)</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;">library</span>(tidyverse)</span>
+<span id="cb1-4"></span>
+<span id="cb1-5">mixture <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(<span class="at" style="color: #657422;">normals =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">1000</span>,<span class="dv" style="color: #AD0000;">3</span>,<span class="dv" style="color: #AD0000;">1</span>),<span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">1000</span>,<span class="dv" style="color: #AD0000;">15</span>,<span class="dv" style="color: #AD0000;">2</span>)),</span>
+<span id="cb1-6">                      <span class="at" style="color: #657422;">mode_seeking_kl =</span> <span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">2000</span>,<span class="fl" style="color: #AD0000;">3.5</span>,<span class="dv" style="color: #AD0000;">2</span>),</span>
+<span id="cb1-7">                      <span class="at" style="color: #657422;">mean_seeking_kl =</span> <span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">2000</span>,<span class="dv" style="color: #AD0000;">9</span>,<span class="dv" style="color: #AD0000;">4</span>))</span>
+<span id="cb1-8"></span>
+<span id="cb1-9">rkl_plot <span class="ot" style="color: #003B4F;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-10">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"red"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-11">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mode_seeking_kl), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"green"</span>) <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"Exclusive KL"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-12">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">""</span>)</span>
+<span id="cb1-13"></span>
+<span id="cb1-14">fkl_plot <span class="ot" style="color: #003B4F;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-15">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"red"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-16">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mean_seeking_kl), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"green"</span>) <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"Inclusive KL"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-17">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">""</span>)</span>
+<span id="cb1-18"></span>
+<span id="cb1-19"><span class="fu" style="color: #4758AB;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>To approximate the same exact red distribution <img src="https://latex.codecogs.com/png.latex?p(x)">, Inclusive KL (1) and Exclusive KL (2) would optimize the green <img src="https://latex.codecogs.com/png.latex?q(p)"> in quite different manner.</p>
+<p>To spell out the ways to describe this above: Inclusive KL will try to cover all the probability mass in <img src="https://latex.codecogs.com/png.latex?p(x)">, even if it means a peak at a unfortunate middle ground. Exclusive KL, on the other hand, will try to concentrate it’s mass on the largest mode, even if it means missing much of the mixture of normals. Alternatively, we could describe the top graph as mode seeking, and the bottom as mean seeking. Finally, we could say the top graph shows “Zero Forcing” behavior- it will heavily favor putting zero mass on some parts of the graph to avoid any weight where <img src="https://latex.codecogs.com/png.latex?p(x)"> has no mass, even if it means missing an entire mode. Conversely, Inclusive KL will aim to cover all the mass of <img src="https://latex.codecogs.com/png.latex?p(x)"> in full even if the result is an odd solution, in order to avoid having zero mass where <img src="https://latex.codecogs.com/png.latex?p(x)"> has some.</p>
+<p>How does this follow from the form of the divergence?</p>
+<p>To start with, notice that for inclusive KL we could think of the <img src="https://latex.codecogs.com/png.latex?log(%5Cfrac%7Bp(x)%7D%7Bq(x)%7D)"> part of the term being weighted by <img src="https://latex.codecogs.com/png.latex?p(x)">- if in some range of <img src="https://latex.codecogs.com/png.latex?x"> <img src="https://latex.codecogs.com/png.latex?p(x)"> is 0, we don’t pay a penalty if <img src="https://latex.codecogs.com/png.latex?q(x)"> puts mass. The reverse is not true however- if our <img src="https://latex.codecogs.com/png.latex?q(x)"> is zero where there should be mass in our true distribution, our Inclusive KL divergence is infinite<sup>2</sup>.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0AKL(p%7C%7Cq)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bp(x)%7Dlog%5B%5Cfrac%7Bp(x)%7D%7Bq(x)%7D%5D%20%20%5C%5C%0AKL(q%7C%7Cp)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bq(x)%7Dlog%5B%5Cfrac%7Bq(x)%7D%7Bp(x)%7D%5D%0A%5Cend%7Balign%7D%0A"></p>
+<p>And if we change the direction of the divergence, the opposite zeros and infinities show up, enforcing strong preferences for a specific type of solution.</p>
+<p>When the example is a simple mix of two gaussians approximated with a single gaussian, it’s fairly easy to intuit how the choice of KL divergence will influence the optimization solution. This all gets a bit more opaque on harder problems- like we saw with the example last post, ELBO based VI will tend to underestimate the support of <img src="https://latex.codecogs.com/png.latex?p(x)"> but whether the solution is narrow but overall reasonable, or pretty much degenerate, is hard to predict. However, this exploration of how the form of the divergence influences the results still gives a rough intuition for why our ELBO optimized posteriors might collapse.</p>
+<p>If we want to try the opposite direction of KL divergence, it isn’t immediately obvious there’s a global objective we can choose that favors overdispersed solutions. Like I mentioned above, if we try to make an ELBO-esque target but reverse the KL divergence, the <img src="https://latex.codecogs.com/png.latex?logp(x)"> which is constant with respect to the <img src="https://latex.codecogs.com/png.latex?q(x)"> we’re optimizing becomes a <img src="https://latex.codecogs.com/png.latex?logq(x)"> which we can’t so easily work around.</p>
+<p>Let’s look first at a solution in the spirit of VI<sup>3</sup> to the above problem which requires us to pick up a new divergence, the <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D">-divergence, and optimizes a new bound. Let’s take a look at it.</p>
+<section id="chi2-variational-inference-chivi-and-the-cubo-bound" class="level2">
+<h2 class="anchored" data-anchor-id="chi2-variational-inference-chivi-and-the-cubo-bound"><img src="https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D"> Variational Inference (CHIVI) and the CUBO bound</h2>
+<p>The <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D">-divergence has form:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AD_%7B%5Cchi%5E2%7D(p%7C%7Cq)%20=%20%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2%20-1%5D%0A"> For simplicity and comparability, I’m switching here to using <a href="https://arxiv.org/abs/1611.00328">Dieng et Al. (2017)</a>’s notation here- they use <img src="https://latex.codecogs.com/png.latex?q(z;%5Clambda)"> to refer to the variational family we’re using, indexed by parameters <img src="https://latex.codecogs.com/png.latex?%5Clambda">.</p>
+<p>This divergence has the properties we wanted when we tried to use Inclusive KL Divergence- it tends to be mean seeking instead of mode seeking.</p>
+<p>Like with the ELBO, we need to show that we have a bound here independent of <img src="https://latex.codecogs.com/png.latex?logp(x)">, and that we have a way to estimate that bound efficiently.</p>
+<p>Let’s first move around a few pieces of the first term above:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2&amp;%20=%201%20+%20D_%7B%5Cchi%5E2%7D(p(z%7Cx)%7Cq(z;%5Clambda))%20%5C%5C%0A&amp;=%20p(x)%5E2%5B1%20+%20D_%7B%5Cchi%5E2%7D(p(z%7Cx)%7Cq(z;%5Clambda))%5D%0A%5Cend%7Balign%7D%0A"> Then we can take the log of both sides of the equation, which gives us:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B1%7D%7B2%7Dlog(1%20+%20D_%7B%5Cchi%5E2%7D(p(z%7Cx)%7Cq(z;%5Clambda)))%20=%20-logp(x)%20+%20%5Cfrac%7B1%7D%7B2%7Dlog%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2%5D%20%20%0A"> …and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and the <img src="https://latex.codecogs.com/png.latex?-logp(x)"> term is constant as we optimize <img src="https://latex.codecogs.com/png.latex?q">, so we’ve found something that we’re close to able to minimize:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0ACUBO_%7B2%7D(%5Clambda)%20=%20%5Cfrac%7B1%7D%7B2%7Dlog%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2%5D%0A"> Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus named <img src="https://latex.codecogs.com/png.latex?%5Cchi"> upper bound (CUBO)<sup>4</sup>.</p>
+</section>
+<section id="but-can-we-estimate-it" class="level2">
+<h2 class="anchored" data-anchor-id="but-can-we-estimate-it">… But can we estimate it?</h2>
+<p>One other issue here: how do we estimate this? The CUBO objective got rid of the <img src="https://latex.codecogs.com/png.latex?logp(x)"> we were worried about, but it seems like that expectation is going to be difficult to estimate in general.</p>
+<p>Your first idea might be to Monte Carlo (not MCMC) estimate it roughly like this:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0ACUBO_2(%5Clambda)%20=%20%5Cfrac%7B1%7D%7B2%7Dlog%5Cfrac%7B1%7D%7BS%7D%5Csum_%7Bs=1%7D%5E%7BS%7D%5B(%5Cfrac%7Bp(x,z%5E%7Bs%7D)%7D%7Bq(z%5E%7Bs%7D;%5Clambda)%7D)%5E2%5D%0A"> Unfortunately, the <img src="https://latex.codecogs.com/png.latex?log"> transform here means our Monte Carlo estimator will be biased: we can see this by applying Jensen’s inequality to the above. To make this stably act as an upper bound, we can apply a clever transformation:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbf%7BL%7D%20=%20exp(n*%20CUBO_2(%5Clambda))%0A"></p>
+<p>Since exp is monotonic, this has the same objective as the CUBO, but we can Monte Carlo estimate it unbiasedly. Is that the last problem to solve?</p>
+</section>
+<section id="but-can-we-calculate-gradients-efficiently" class="level2">
+<h2 class="anchored" data-anchor-id="but-can-we-calculate-gradients-efficiently">… But can we calculate gradients efficiently?</h2>
+<p>Wait, wait no. Sorry to keep saying there’s one more step here, but there’s a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbf%7BL%7D"> above, <img src="https://latex.codecogs.com/png.latex?%5Cbf%7B%5Chat%7BL%7D%7D">. The issue is that we don’t have any guarantee that a unbiased Monte Carlo estimator of <img src="https://latex.codecogs.com/png.latex?%5Cbf%7B%5Chat%7BL%7D%7D"> gets us a Monte Carlo way to estimate <img src="https://latex.codecogs.com/png.latex?%5Cnabla_%5Clambda%5Cbf%7B%5Chat%7BL%7D%7D">- we can’t guarantee that the gradient of the expectation is equal to the expectation of the gradient.</p>
+<p>For this, we need to pull out a trick from the variational autoencoder literature. This is usually referred to as the “Reparameterization Trick”<sup>5</sup>, but the original CHIVI paper refers to them as “reparmeterization gradients”. We will assume we can rewrite the generative process of our model as <img src="https://latex.codecogs.com/png.latex?z%20=%20g(%5Clambda,%5Cepsilon)">, where <img src="https://latex.codecogs.com/png.latex?%5Cepsilon%20%5Csim%20p(%5Cepsilon)"> and g being a deterministic function. Then we have a new estimator for both <img src="https://latex.codecogs.com/png.latex?%5Cbf%7B%5Chat%7BL%7D%7D"> and it’s gradient:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cbf%7B%5Chat%7BL%7D%7D%20&amp;=%20%5Cfrac%7B1%7D%7BB%7D%5Csum_%7Bb=1%7D%5EB(%5Cfrac%7Bp(x,g(%5Clambda,%5Cepsilon%5E%7B(b)%7D))%7D%7Bq(g(%5Clambda,%5Cepsilon%5E%7B(b)%7D;%5Clambda))%7D)%5E%7B2%7D%20%5C%5C%0A%5Cnabla_%5Clambda%5Cbf%7B%5Chat%7BL%7D%7D%20%20&amp;=%20%5Cfrac%7B2%7D%7BB%7D%5Csum_%7Bb=1%7D%5EB(%5Cfrac%7Bp(x,g(%5Clambda,%5Cepsilon%5E%7B(b)%7D))%7D%7Bq(g(%5Clambda,%5Cepsilon%5E%7B(b)%7D;%5Clambda))%7D)%5E2%20%5Cnabla_%5Clambda%20log(%5Cfrac%7Bp(x,g(%5Clambda,%5Cepsilon%5E%7B(b)%7D))%7D%7Bq(g(%5Clambda,%5Cepsilon%5E%7B(b)%7D;%5Clambda))%7D)%0A%5Cend%7Balign%7D%0A"> There are one or two more neat computational tricks in the paper I won’t explain here (essentially: how do we extend this to work in minibatch fashion, and how do we avoid numerical underflow issues), but this is now essentially functional. The whole algorithm, which they dubbed CHIVI is below:</p>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt3/images/CHIVI_algorithm.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="the-bigger-picture-again" class="level1">
+<h1>The Bigger Picture Again</h1>
+<p>Stepping back, let’s talk about some practical properties of the algorithm we’ve been stepping through.</p>
+<p>First, and probably most exciting given what we saw in the last post, CHIVI’s objective has the property that it is inclusive, unlike the ELBO we were using earlier. This won’t be the right choice for all variational inference problems, but given our prior issues with very narrow posteriors this will be exciting to test<sup>6</sup>. And as we’ll see in the next section, this overdispersion tendency in the posterior will often have a beneficial interaction with importance sampling which can improve our estimates further.</p>
+<p>Another nice thing here is that if we were to estimate both the ELBO and CUBO for a given problem, we’d get both a upper and lower bound on the model evidence. This is theoretically convenient in that we now have a sandwich estimator, which actually obtains reasonably tight bounds. We’ll even be able use the fact we have both later to get some bounds on practical bounds on quantities we tend to report in practice like means and covariances!</p>
+<p>A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it’s even better when we’re ensembling because we can lean more heavily on each model for the tasks it succeeds on.</p>
+<p>One potential downside here is that we introduced a solution that partially relies on a Monte Carlo estimator. That said, this is pretty cheap in practice; if we’re using VI as a drop in for MCMC, this is still going to be much much faster than MCMC for any big problem. We’ll need to think about a reasonable number of samples in a given case, but realistically this isn’t going to be a driving factor in determining compute time.</p>
+<p>Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn’t free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>In truth, both KL divergences encode structural preferences for the type of optimization solution they admit- neither will be the right choice for every problem and variational family combination. But as we’ll see, being able to choose will give us more options to fit models we believe.↩︎</p></li>
+<li id="fn2"><p>This is the footnote for those of you that are annoyed because you tried to write out how this would happen, and got something like <img src="https://latex.codecogs.com/png.latex?p(x)%20log%20%5Cfrac%7Bp(x)%7D%7B0%7D">, which should be undefined if we’re following normal math rules. But this is information theory, and in this strange land we say <img src="https://latex.codecogs.com/png.latex?p(x)%20log%20%5Cfrac%7Bp(x)%7D%7B0%7D%20=%20%5Cinfty">. I don’t have a strong intuition for why this is the best solution, but a information encoding perspective makes it make more sense at least: if we know the distribution of <img src="https://latex.codecogs.com/png.latex?p">, we can construct a code for it with average description length <img src="https://latex.codecogs.com/png.latex?H(x)">. One way to understand the KL divergence is as what happens when we try to use the code for a distribution <img src="https://latex.codecogs.com/png.latex?q"> to describe <img src="https://latex.codecogs.com/png.latex?p">, we’d need <img src="https://latex.codecogs.com/png.latex?H(p)%20+%20KL(p%7C%7Cq)"> bits on average to describe <img src="https://latex.codecogs.com/png.latex?p">. In the code for <img src="https://latex.codecogs.com/png.latex?q"> has no way to represent some element of <img src="https://latex.codecogs.com/png.latex?p">, then requiring… infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.↩︎</p></li>
+<li id="fn3"><p>I’ll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.↩︎</p></li>
+<li id="fn4"><p>This approach actually defines a family of <img src="https://latex.codecogs.com/png.latex?n"> new divergences, where you replace the <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B2%7D"> with <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7Bn%7D"> and similarly replace the square an exponent with n.&nbsp;Fully stepping through why this is neat wasn’t worth how far afield it’d take us, but the original <img src="https://latex.codecogs.com/png.latex?CHIVI"> paper has some cool derivations based on this, one of which I’ll discuss on the next section on importance sampling.↩︎</p></li>
+<li id="fn5"><p>I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you’re interested in learning more about why this is important for optimization through stocastic models, I’d recommend starting with Gregory Gundersen’s explanation <a href="https://gregorygundersen.com/blog/2018/04/29/reparameterization/">here</a> and then move on to the original Kingma &amp; Welling, 2013 paper. As general advice on understanding it better though, I’ll echo Greg’s point that some of the online explanations I’ve seen are a bit loose- the key is that we want to express a gradient of an expectation (can’t MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function <img src="https://latex.codecogs.com/png.latex?g"> is differentiable).↩︎</p></li>
+<li id="fn6"><p>In a few posts, we’re theoryposting for a bit.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Andy Timm},
+  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
+    {Distributions}},
+  date = {2023-05-02},
+  url = {https://andytimm.github.io/variational_mrp_3.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
+Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> May 2, 2023. <a href="https://andytimm.github.io/variational_mrp_3.html">https://andytimm.github.io/variational_mrp_3.html</a>.
+</div></div></section></div> ]]></description>
+  <category>MRP</category>
+  <category>Variational Inference</category>
+  <guid>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</guid>
+  <pubDate>Tue, 02 May 2023 04:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt3/images/CHIVI_algorithm.png" medium="image" type="image/png" height="70" width="144"/>
+</item>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
   <dc:creator>Andy Timm</dc:creator>
@@ -847,145 +986,6 @@ Posterior Distributions.”</span> October 10, 2022. <a href="https://andytimm.g
   <guid>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</guid>
   <pubDate>Mon, 10 Oct 2022 04:00:00 GMT</pubDate>
   <media:content url="https://andytimm.github.io/posts/Variational MRP Pt1/elboplot.png" medium="image" type="image/png" height="43" width="144"/>
-</item>
-<item>
-  <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
-  <dc:creator>Andy Timm</dc:creator>
-  <link>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
-<p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html">last post</a> we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we’ll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.</p>
-<p>The general structure for the next couple of posts will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in the next three posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
-<p>The rough plan for the series is as follows:</p>
-<ol type="1">
-<li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
-<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
-<li><strong>(This post)</strong> Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
-<li>Problem 2: Not all samples are of equal utility; can we weight them cleverly?</li>
-<li>Problem 3: How can we know when VI is wrong? Are there useful error bounds?</li>
-<li>Better grounded diagnostics and workflow</li>
-<li>Seeing if some more sophisticated techniques like normalizing flows add much</li>
-</ol>
-<section id="inclusive-versus-exclusive-kl-divergence" class="level1">
-<h1>Inclusive versus Exclusive KL-divergence</h1>
-<p>Like I mentioned in the first post in the series, the Evidence Lower Bound (ELBO), our optimization objective we’re working with is a tractable approximation of the Kullback-Leibler Divergence between our choice of approximating distribution <img src="https://latex.codecogs.com/png.latex?q(z)"> to our true posterior <img src="https://latex.codecogs.com/png.latex?p(z)">.</p>
-<p>The KL divergence is asymmetric: in general, <img src="https://latex.codecogs.com/png.latex?KL(p%7C%7Cq)%20%5Cneq%20KL(q%7C%7Cp)">. Previously, we saw that this asymmetry mattered quite a bit for our ELBO idea:</p>
-<p><img src="https://latex.codecogs.com/png.latex?argmin_%7Bq(z)%20%5Cin%20%5Cmathscr%7BQ%7D%7D(q(z)%7C%7C%5Cfrac%7Bp(z,x)%7D%7B%5Cbf%20p(x)%7D)%20=%20%5Cmathbb%7BE%7D%5Blogq(z)%5D%20-%20%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20+%20%7B%5Cbf%20logp(x)%7D"> We can’t calculate the bolded term <img src="https://latex.codecogs.com/png.latex?logp(x)">; if we could we wouldn’t be finding this inference thing so hard in the first place. The way we sidestepped that with the ELBO is to note that the term is constant with respect to <img src="https://latex.codecogs.com/png.latex?q">; so we can go on our merry way minimizing the above without it.</p>
-<p>If we flip the divergence around though, we’ve got an issue. That term would then be a <img src="https://latex.codecogs.com/png.latex?logq(x)"> … which we can’t write off in the same way- it varies as we optimize. So if we’re doing this ELBO minimizing version of variational inference, we’re obligated to use this “reverse” KL divergence, the second option below.</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0AKL(p%7C%7Cq)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bp(x)%7Dlog%5B%5Cfrac%7Bp(x)%7D%7Bq(x)%7D%5D%20%20%5C%5C%0AKL(q%7C%7Cp)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bq(x)%7Dlog%5B%5Cfrac%7Bq(x)%7D%7Bp(x)%7D%5D%0A%5Cend%7Balign%7D%0A"></p>
-<p>Unfortunately, this choice to optimize the “reverse” KL divergence bakes in preference for a certain type of solution<sup>1</sup>.</p>
-<p>I found I built better intuition for this encoded preference after seeing it presented many different overlapping ways, so here are a few of my favorites.</p>
-<p>One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs.&nbsp;Reverse KL (2):</p>
-<ol type="1">
-<li>Inclusive vs.&nbsp;Exclusive (my favorite, and so what I’m using for the section header)</li>
-<li>Mean Seeking vs.&nbsp;Mode Seeking</li>
-<li>Zero Avoiding vs.&nbsp;Zero Forcing</li>
-</ol>
-<p>let’s quickly sketch what this might look like in the case of a simple mixture of normals with a single normal as a variational family:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(ggplot2)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;">library</span>(gridExtra)</span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;">library</span>(tidyverse)</span>
-<span id="cb1-4"></span>
-<span id="cb1-5">mixture <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(<span class="at" style="color: #657422;">normals =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">1000</span>,<span class="dv" style="color: #AD0000;">3</span>,<span class="dv" style="color: #AD0000;">1</span>),<span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">1000</span>,<span class="dv" style="color: #AD0000;">15</span>,<span class="dv" style="color: #AD0000;">2</span>)),</span>
-<span id="cb1-6">                      <span class="at" style="color: #657422;">mode_seeking_kl =</span> <span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">2000</span>,<span class="fl" style="color: #AD0000;">3.5</span>,<span class="dv" style="color: #AD0000;">2</span>),</span>
-<span id="cb1-7">                      <span class="at" style="color: #657422;">mean_seeking_kl =</span> <span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">2000</span>,<span class="dv" style="color: #AD0000;">9</span>,<span class="dv" style="color: #AD0000;">4</span>))</span>
-<span id="cb1-8"></span>
-<span id="cb1-9">rkl_plot <span class="ot" style="color: #003B4F;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals)) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-10">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"red"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-11">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mode_seeking_kl), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"green"</span>) <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"Exclusive KL"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-12">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">""</span>)</span>
-<span id="cb1-13"></span>
-<span id="cb1-14">fkl_plot <span class="ot" style="color: #003B4F;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals)) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-15">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"red"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-16">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mean_seeking_kl), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"green"</span>) <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"Inclusive KL"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-17">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">""</span>)</span>
-<span id="cb1-18"></span>
-<span id="cb1-19"><span class="fu" style="color: #4758AB;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>To approximate the same exact red distribution <img src="https://latex.codecogs.com/png.latex?p(x)">, Inclusive KL (1) and Exclusive KL (2) would optimize the green <img src="https://latex.codecogs.com/png.latex?q(p)"> in quite different manner.</p>
-<p>To spell out the ways to describe this above: Inclusive KL will try to cover all the probability mass in <img src="https://latex.codecogs.com/png.latex?p(x)">, even if it means a peak at a unfortunate middle ground. Exclusive KL, on the other hand, will try to concentrate it’s mass on the largest mode, even if it means missing much of the mixture of normals. Alternatively, we could describe the top graph as mode seeking, and the bottom as mean seeking. Finally, we could say the top graph shows “Zero Forcing” behavior- it will heavily favor putting zero mass on some parts of the graph to avoid any weight where <img src="https://latex.codecogs.com/png.latex?p(x)"> has no mass, even if it means missing an entire mode. Conversely, Inclusive KL will aim to cover all the mass of <img src="https://latex.codecogs.com/png.latex?p(x)"> in full even if the result is an odd solution, in order to avoid having zero mass where <img src="https://latex.codecogs.com/png.latex?p(x)"> has some.</p>
-<p>How does this follow from the form of the divergence?</p>
-<p>To start with, notice that for inclusive KL we could think of the <img src="https://latex.codecogs.com/png.latex?log(%5Cfrac%7Bp(x)%7D%7Bq(x)%7D)"> part of the term being weighted by <img src="https://latex.codecogs.com/png.latex?p(x)">- if in some range of <img src="https://latex.codecogs.com/png.latex?x"> <img src="https://latex.codecogs.com/png.latex?p(x)"> is 0, we don’t pay a penalty if <img src="https://latex.codecogs.com/png.latex?q(x)"> puts mass. The reverse is not true however- if our <img src="https://latex.codecogs.com/png.latex?q(x)"> is zero where there should be mass in our true distribution, our Inclusive KL divergence is infinite<sup>2</sup>.</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0AKL(p%7C%7Cq)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bp(x)%7Dlog%5B%5Cfrac%7Bp(x)%7D%7Bq(x)%7D%5D%20%20%5C%5C%0AKL(q%7C%7Cp)%20=%20%5Csum_%7Bx%20%5Cin%20X%7D%7Bq(x)%7Dlog%5B%5Cfrac%7Bq(x)%7D%7Bp(x)%7D%5D%0A%5Cend%7Balign%7D%0A"></p>
-<p>And if we change the direction of the divergence, the opposite zeros and infinities show up, enforcing strong preferences for a specific type of solution.</p>
-<p>When the example is a simple mix of two gaussians approximated with a single gaussian, it’s fairly easy to intuit how the choice of KL divergence will influence the optimization solution. This all gets a bit more opaque on harder problems- like we saw with the example last post, ELBO based VI will tend to underestimate the support of <img src="https://latex.codecogs.com/png.latex?p(x)"> but whether the solution is narrow but overall reasonable, or pretty much degenerate, is hard to predict. However, this exploration of how the form of the divergence influences the results still gives a rough intuition for why our ELBO optimized posteriors might collapse.</p>
-<p>If we want to try the opposite direction of KL divergence, it isn’t immediately obvious there’s a global objective we can choose that favors overdispersed solutions. Like I mentioned above, if we try to make an ELBO-esque target but reverse the KL divergence, the <img src="https://latex.codecogs.com/png.latex?logp(x)"> which is constant with respect to the <img src="https://latex.codecogs.com/png.latex?q(x)"> we’re optimizing becomes a <img src="https://latex.codecogs.com/png.latex?logq(x)"> which we can’t so easily work around.</p>
-<p>Let’s look first at a solution in the spirit of VI<sup>3</sup> to the above problem which requires us to pick up a new divergence, the <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D">-divergence, and optimizes a new bound. Let’s take a look at it.</p>
-<section id="chi2-variational-inference-chivi-and-the-cubo-bound" class="level2">
-<h2 class="anchored" data-anchor-id="chi2-variational-inference-chivi-and-the-cubo-bound"><img src="https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D"> Variational Inference (CHIVI) and the CUBO bound</h2>
-<p>The <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E%7B2%7D">-divergence has form:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0AD_%7B%5Cchi%5E2%7D(p%7C%7Cq)%20=%20%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2%20-1%5D%0A"> For simplicity and comparability, I’m switching here to using <a href="https://arxiv.org/abs/1611.00328">Dieng et Al. (2017)</a>’s notation here- they use <img src="https://latex.codecogs.com/png.latex?q(z;%5Clambda)"> to refer to the variational family we’re using, indexed by parameters <img src="https://latex.codecogs.com/png.latex?%5Clambda">.</p>
-<p>This divergence has the properties we wanted when we tried to use Inclusive KL Divergence- it tends to be mean seeking instead of mode seeking.</p>
-<p>Like with the ELBO, we need to show that we have a bound here independent of <img src="https://latex.codecogs.com/png.latex?logp(x)">, and that we have a way to estimate that bound efficiently.</p>
-<p>Let’s first move around a few pieces of the first term above:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2&amp;%20=%201%20+%20D_%7B%5Cchi%5E2%7D(p(z%7Cx)%7Cq(z;%5Clambda))%20%5C%5C%0A&amp;=%20p(x)%5E2%5B1%20+%20D_%7B%5Cchi%5E2%7D(p(z%7Cx)%7Cq(z;%5Clambda))%5D%0A%5Cend%7Balign%7D%0A"> Then we can take the log of both sides of the equation, which gives us:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B1%7D%7B2%7Dlog(1%20+%20D_%7B%5Cchi%5E2%7D(p(z%7Cx)%7Cq(z;%5Clambda)))%20=%20-logp(x)%20+%20%5Cfrac%7B1%7D%7B2%7Dlog%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2%5D%20%20%0A"> …and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and the <img src="https://latex.codecogs.com/png.latex?-logp(x)"> term is constant as we optimize <img src="https://latex.codecogs.com/png.latex?q">, so we’ve found something that we’re close to able to minimize:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0ACUBO_%7B2%7D(%5Clambda)%20=%20%5Cfrac%7B1%7D%7B2%7Dlog%5Cmathbb%7BE%7D_%7Bq(z;%5Clambda)%7D%5B(%5Cfrac%7Bp(z%7Cx)%7D%7Bq(z;%5Clambda)%7D)%5E2%5D%0A"> Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus named <img src="https://latex.codecogs.com/png.latex?%5Cchi"> upper bound (CUBO)<sup>4</sup>.</p>
-</section>
-<section id="but-can-we-estimate-it" class="level2">
-<h2 class="anchored" data-anchor-id="but-can-we-estimate-it">… But can we estimate it?</h2>
-<p>One other issue here: how do we estimate this? The CUBO objective got rid of the <img src="https://latex.codecogs.com/png.latex?logp(x)"> we were worried about, but it seems like that expectation is going to be difficult to estimate in general.</p>
-<p>Your first idea might be to Monte Carlo (not MCMC) estimate it roughly like this:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0ACUBO_2(%5Clambda)%20=%20%5Cfrac%7B1%7D%7B2%7Dlog%5Cfrac%7B1%7D%7BS%7D%5Csum_%7Bs=1%7D%5E%7BS%7D%5B(%5Cfrac%7Bp(x,z%5E%7Bs%7D)%7D%7Bq(z%5E%7Bs%7D;%5Clambda)%7D)%5E2%5D%0A"> Unfortunately, the <img src="https://latex.codecogs.com/png.latex?log"> transform here means our Monte Carlo estimator will be biased: we can see this by applying Jensen’s inequality to the above. To make this stably act as an upper bound, we can apply a clever transformation:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbf%7BL%7D%20=%20exp(n*%20CUBO_2(%5Clambda))%0A"></p>
-<p>Since exp is monotonic, this has the same objective as the CUBO, but we can Monte Carlo estimate it unbiasedly. Is that the last problem to solve?</p>
-</section>
-<section id="but-can-we-calculate-gradients-efficiently" class="level2">
-<h2 class="anchored" data-anchor-id="but-can-we-calculate-gradients-efficiently">… But can we calculate gradients efficiently?</h2>
-<p>Wait, wait no. Sorry to keep saying there’s one more step here, but there’s a lot that goes into making a full, convenient, general use algorithm here. The last step (for real this time) is that we need to figure out how to get gradients for the estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbf%7BL%7D"> above, <img src="https://latex.codecogs.com/png.latex?%5Cbf%7B%5Chat%7BL%7D%7D">. The issue is that we don’t have any guarantee that a unbiased Monte Carlo estimator of <img src="https://latex.codecogs.com/png.latex?%5Cbf%7B%5Chat%7BL%7D%7D"> gets us a Monte Carlo way to estimate <img src="https://latex.codecogs.com/png.latex?%5Cnabla_%5Clambda%5Cbf%7B%5Chat%7BL%7D%7D">- we can’t guarantee that the gradient of the expectation is equal to the expectation of the gradient.</p>
-<p>For this, we need to pull out a trick from the variational autoencoder literature. This is usually referred to as the “Reparameterization Trick”<sup>5</sup>, but the original CHIVI paper refers to them as “reparmeterization gradients”. We will assume we can rewrite the generative process of our model as <img src="https://latex.codecogs.com/png.latex?z%20=%20g(%5Clambda,%5Cepsilon)">, where <img src="https://latex.codecogs.com/png.latex?%5Cepsilon%20%5Csim%20p(%5Cepsilon)"> and g being a deterministic function. Then we have a new estimator for both <img src="https://latex.codecogs.com/png.latex?%5Cbf%7B%5Chat%7BL%7D%7D"> and it’s gradient:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cbf%7B%5Chat%7BL%7D%7D%20&amp;=%20%5Cfrac%7B1%7D%7BB%7D%5Csum_%7Bb=1%7D%5EB(%5Cfrac%7Bp(x,g(%5Clambda,%5Cepsilon%5E%7B(b)%7D))%7D%7Bq(g(%5Clambda,%5Cepsilon%5E%7B(b)%7D;%5Clambda))%7D)%5E%7B2%7D%20%5C%5C%0A%5Cnabla_%5Clambda%5Cbf%7B%5Chat%7BL%7D%7D%20%20&amp;=%20%5Cfrac%7B2%7D%7BB%7D%5Csum_%7Bb=1%7D%5EB(%5Cfrac%7Bp(x,g(%5Clambda,%5Cepsilon%5E%7B(b)%7D))%7D%7Bq(g(%5Clambda,%5Cepsilon%5E%7B(b)%7D;%5Clambda))%7D)%5E2%20%5Cnabla_%5Clambda%20log(%5Cfrac%7Bp(x,g(%5Clambda,%5Cepsilon%5E%7B(b)%7D))%7D%7Bq(g(%5Clambda,%5Cepsilon%5E%7B(b)%7D;%5Clambda))%7D)%0A%5Cend%7Balign%7D%0A"> There are one or two more neat computational tricks in the paper I won’t explain here (essentially: how do we extend this to work in minibatch fashion, and how do we avoid numerical underflow issues), but this is now essentially functional. The whole algorithm, which they dubbed CHIVI is below:</p>
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt3/images/CHIVI_algorithm.png" class="img-fluid"></p>
-</section>
-</section>
-<section id="the-bigger-picture-again" class="level1">
-<h1>The Bigger Picture Again</h1>
-<p>Stepping back, let’s talk about some practical properties of the algorithm we’ve been stepping through.</p>
-<p>First, and probably most exciting given what we saw in the last post, CHIVI’s objective has the property that it is inclusive, unlike the ELBO we were using earlier. This won’t be the right choice for all variational inference problems, but given our prior issues with very narrow posteriors this will be exciting to test<sup>6</sup>. And as we’ll see in the next section, this overdispersion tendency in the posterior will often have a beneficial interaction with importance sampling which can improve our estimates further.</p>
-<p>Another nice thing here is that if we were to estimate both the ELBO and CUBO for a given problem, we’d get both a upper and lower bound on the model evidence. This is theoretically convenient in that we now have a sandwich estimator, which actually obtains reasonably tight bounds. We’ll even be able use the fact we have both later to get some bounds on practical bounds on quantities we tend to report in practice like means and covariances!</p>
-<p>A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it’s even better when we’re ensembling because we can lean more heavily on each model for the tasks it succeeds on.</p>
-<p>One potential downside here is that we introduced a solution that partially relies on a Monte Carlo estimator. That said, this is pretty cheap in practice; if we’re using VI as a drop in for MCMC, this is still going to be much much faster than MCMC for any big problem. We’ll need to think about a reasonable number of samples in a given case, but realistically this isn’t going to be a driving factor in determining compute time.</p>
-<p>Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn’t free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.</p>
-
-
-</section>
-
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>In truth, both KL divergences encode structural preferences for the type of optimization solution they admit- neither will be the right choice for every problem and variational family combination. But as we’ll see, being able to choose will give us more options to fit models we believe.↩︎</p></li>
-<li id="fn2"><p>This is the footnote for those of you that are annoyed because you tried to write out how this would happen, and got something like <img src="https://latex.codecogs.com/png.latex?p(x)%20log%20%5Cfrac%7Bp(x)%7D%7B0%7D">, which should be undefined if we’re following normal math rules. But this is information theory, and in this strange land we say <img src="https://latex.codecogs.com/png.latex?p(x)%20log%20%5Cfrac%7Bp(x)%7D%7B0%7D%20=%20%5Cinfty">. I don’t have a strong intuition for why this is the best solution, but a information encoding perspective makes it make more sense at least: if we know the distribution of <img src="https://latex.codecogs.com/png.latex?p">, we can construct a code for it with average description length <img src="https://latex.codecogs.com/png.latex?H(x)">. One way to understand the KL divergence is as what happens when we try to use the code for a distribution <img src="https://latex.codecogs.com/png.latex?q"> to describe <img src="https://latex.codecogs.com/png.latex?p">, we’d need <img src="https://latex.codecogs.com/png.latex?H(p)%20+%20KL(p%7C%7Cq)"> bits on average to describe <img src="https://latex.codecogs.com/png.latex?p">. In the code for <img src="https://latex.codecogs.com/png.latex?q"> has no way to represent some element of <img src="https://latex.codecogs.com/png.latex?p">, then requiring… infinite bits feels like the right way to describe the breakdown of meaning? All this to say this condition is something our optimizer will try hard to avoid.↩︎</p></li>
-<li id="fn3"><p>I’ll mention an alternative approach, Expectation Propagation, that takes a different (not global objective based) approach further down.↩︎</p></li>
-<li id="fn4"><p>This approach actually defines a family of <img src="https://latex.codecogs.com/png.latex?n"> new divergences, where you replace the <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B2%7D"> with <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7Bn%7D"> and similarly replace the square an exponent with n.&nbsp;Fully stepping through why this is neat wasn’t worth how far afield it’d take us, but the original <img src="https://latex.codecogs.com/png.latex?CHIVI"> paper has some cool derivations based on this, one of which I’ll discuss on the next section on importance sampling.↩︎</p></li>
-<li id="fn5"><p>I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you’re interested in learning more about why this is important for optimization through stocastic models, I’d recommend starting with Gregory Gundersen’s explanation <a href="https://gregorygundersen.com/blog/2018/04/29/reparameterization/">here</a> and then move on to the original Kingma &amp; Welling, 2013 paper. As general advice on understanding it better though, I’ll echo Greg’s point that some of the online explanations I’ve seen are a bit loose- the key is that we want to express a gradient of an expectation (can’t MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function <img src="https://latex.codecogs.com/png.latex?g"> is differentiable).↩︎</p></li>
-<li id="fn6"><p>In a few posts, we’re theoryposting for a bit.↩︎</p></li>
-</ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
-  author = {Andy Timm},
-  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
-    {Distributions}},
-  date = {2022-05-02},
-  url = {https://andytimm.github.io/variational_mrp_3.html},
-  langid = {en}
-}
-</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas">
-Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> May 2, 2022. <a href="https://andytimm.github.io/variational_mrp_3.html">https://andytimm.github.io/variational_mrp_3.html</a>.
-</div></div></section></div> ]]></description>
-  <category>MRP</category>
-  <category>Variational Inference</category>
-  <guid>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</guid>
-  <pubDate>Mon, 02 May 2022 04:00:00 GMT</pubDate>
-  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt3/images/CHIVI_algorithm.png" medium="image" type="image/png" height="70" width="144"/>
 </item>
 <item>
   <title>BART with varying intercepts in the MRP framework</title>

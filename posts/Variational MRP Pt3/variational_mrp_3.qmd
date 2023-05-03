@@ -2,7 +2,7 @@
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 3- Alternatives to KL Divergence
-date: 2022-05-02
+date: 2023-05-02
 categories:
 - MRP
 - Variational Inference
