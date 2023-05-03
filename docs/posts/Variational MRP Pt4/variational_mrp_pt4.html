@@ -257,9 +257,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
+<p>This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
+<p>The general structure for this post and the ones before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
+<p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html">last post</a> we took a look at how our ELBO objective requires specific version of KL Divergence (the “Exclusive” formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more “inclusive” solution.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
+<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
+<li><strong>(This post)</strong> Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?</li>
+<li>Problem 3: How can we know when VI is wrong? Are there useful error bounds?</li>
+<li>Better grounded diagnostics and workflow</li>
+<li>Seeing if some more sophisticated techniques like normalizing flows add much</li>
+</ol>
 <section id="not-all-samples-are-equally-good" class="level1">
 <h1>Not all samples are equally good</h1>
-<p>So we’ve made an approximation q(x) that’s cheap to sample from, and is somewhat close to p(x), our true posterior. The way to improve the approximation we’ve focused on so far is to just go back to the start and make q(x) better; for example, through changing up the variational family, or to switching to a different optimization objective like the CUBO. That’s one solution that’s often necessary, but can we work with a particular q(x) we have and somehow make it look more like p(x)?</p>
+<p>So we’ve made an approximation q(x) that’s cheap to sample from, and is somewhat close to p(x), our true posterior. The way to improve the approximation we’ve focused on so far is to just go back to the start and make q(x) better; for example, through changing up the variational family, or to switching to a different optimization objective like the CUBO. That’s one solution that’s often necessary, but can we work with a particular q(x) we have and make better use of the parts of it that are the closest to being right?</p>
 <p>… Phased this way, this sounds a lot like importance sampling. If you haven’t seen them before, an importance sampling estimator allows us to take draws from a (preferably) easy to sample from distribution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and reweight the samples to look more like our true target distribution. The weight <span class="math inline">w_i</span> for each sample <span class="math inline">i</span> take form:</p>
 <p><span class="math display">
 w_i = \frac{p(x_i)}{q(x_i)}

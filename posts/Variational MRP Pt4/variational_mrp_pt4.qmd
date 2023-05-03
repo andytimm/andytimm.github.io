@@ -9,6 +9,22 @@ categories:
 - Variational Inference
 ---
 
+This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
+
+The general structure for this post and the ones before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
+
+In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html) we took a look at how our ELBO objective requires  specific version of KL Divergence (the "Exclusive" formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more "inclusive" solution.
+
+The rough plan for the series is as follows:
+
+1.  Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
+3.  Problem 1: KL-D prefers exclusive solutions; are there alternatives?
+4. **(This post)** Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?
+5. Problem 3: How can we know when VI is wrong? Are there useful error bounds?
+5. Better grounded diagnostics and workflow
+6. Seeing if some more sophisticated techniques like normalizing flows add much
+
 # Not all samples are equally good
 
 So we've made an approximation q(x) that's cheap to sample from, and is somewhat
@@ -16,8 +32,7 @@ close to p(x), our true posterior. The way to improve the approximation we've
 focused on so far is to just go back to the start and make q(x) better; for example,
 through changing up the variational family, or to switching to a different
 optimization objective like the CUBO. That's one solution that's often necessary,
-but can we work with a particular q(x) we have and somehow make it look more like
-p(x)?
+but can we work with a particular q(x) we have and make better use of the parts of it that are the closest to being right?
 
 ... Phased this way, this sounds a lot like importance sampling. If you haven't seen them before,
 an importance sampling estimator allows us to take draws from a (preferably) easy to sample
