@@ -1,27 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://andytimm.github.io/projects.html</loc>
-    <lastmod>2023-02-12T18:28:41.063Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/software.html</loc>
-    <lastmod>2023-02-04T20:29:27.955Z</lastmod>
-  </url>
-  <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2023-02-12T19:01:50.002Z</lastmod>
+    <lastmod>2023-05-03T01:29:09.010Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2023-02-12T18:25:19.322Z</lastmod>
+    <lastmod>2023-05-03T01:11:56.595Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/LICENSE.html</loc>
+    <lastmod>2023-04-08T19:12:31.031Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/BART VI/2020-03-06-BART-vi.html</loc>
+    <lastmod>2023-04-08T21:54:26.105Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Convention Model/2019-07-13-convention-model.html</loc>
+    <lastmod>2023-04-08T19:12:32.166Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html</loc>
+    <lastmod>2023-04-08T19:12:32.813Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html</loc>
+    <lastmod>2023-04-08T19:12:33.520Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html</loc>
+    <lastmod>2023-04-08T19:12:33.951Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html</loc>
+    <lastmod>2023-04-08T19:12:34.323Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Race Models Pt 1/race_models_part1.html</loc>
+    <lastmod>2023-04-08T19:12:34.795Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</loc>
-    <lastmod>2023-02-04T18:52:34.760Z</lastmod>
+    <lastmod>2023-05-01T00:38:23.969Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html</loc>
-    <lastmod>2022-11-21T17:48:55.988Z</lastmod>
+    <lastmod>2023-05-01T00:40:33.953Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/projects.html</loc>
+    <lastmod>2023-05-01T00:38:14.443Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/software.html</loc>
+    <lastmod>2023-04-08T19:12:51.914Z</lastmod>
   </url>
 </urlset>
