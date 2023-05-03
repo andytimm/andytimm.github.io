@@ -240,6 +240,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#but-can-we-estimate-it" id="toc-but-can-we-estimate-it" class="nav-link" data-scroll-target="#but-can-we-estimate-it">… But can we estimate it?</a></li>
   <li><a href="#but-can-we-calculate-gradients-efficiently" id="toc-but-can-we-calculate-gradients-efficiently" class="nav-link" data-scroll-target="#but-can-we-calculate-gradients-efficiently">… But can we calculate gradients efficiently?</a></li>
   </ul></li>
+  <li><a href="#the-bigger-picture-again" id="toc-the-bigger-picture-again" class="nav-link" data-scroll-target="#the-bigger-picture-again">The Bigger Picture Again</a></li>
   </ul>
 </nav>
     </div>
@@ -275,14 +276,14 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 </span></p>
 <p>Unfortunately, this choice to optimize the “reverse” KL divergence bakes in preference for a certain type of solution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-<p>I found I built better intuition for this encoded preference after seeing it presented many different ways, so here are a few of my favorites.</p>
+<p>I found I built better intuition for this encoded preference after seeing it presented many different overlapping ways, so here are a few of my favorites.</p>
 <p>One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs.&nbsp;Reverse KL (2):</p>
 <ol type="1">
 <li>Inclusive vs.&nbsp;Exclusive (my favorite, and so what I’m using for the section header)</li>
 <li>Mean Seeking vs.&nbsp;Mode Seeking</li>
 <li>Zero Avoiding vs.&nbsp;Zero Forcing</li>
 </ol>
-<p>let’s quickly sketch what this might look like in the case of a simple mixture of normals:</p>
+<p>let’s quickly sketch what this might look like in the case of a simple mixture of normals with a single normal as a variational family:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
@@ -318,15 +319,15 @@ KL(q||p) = \sum_{x \in X}{q(x)}log[\frac{q(x)}{p(x)}]
 \end{align}
 </span></p>
 <p>And if we change the direction of the divergence, the opposite zeros and infinities show up, enforcing strong preferences for a specific type of solution.</p>
-<p>When the example is a simple mix of two gaussians approximated with a single gaussian, it’s fairly easy to intuit how the choice of KL divergence will influence the optimization solution. This all gets a bit more opaque on harder problems- like we saw with the example last post, ELBO based VI will tend to underestimate the support of <span class="math inline">p(x)</span> but whether the solution is narrow but overall reasonable, or pretty much degenerate is hard to predict. However, this exploration of how the form of the divergence influences the results still gives a rough intuition for why our ELBO optimized posteriors might collapse.</p>
-<p>If we want to try the opposite direction of KL divergence, it isn’t immediately obvious there’s a global objective we can choose to perhaps seek out a optimization problem that favors overdispersed solutions. Like I mentioned above, if we try to make an ELBO-esque target but reverse the KL divergence, the <span class="math inline">logp(x)</span> which is constant with respect to the <span class="math inline">q(x)</span> we’re optimizing becomes a <span class="math inline">logq(x)</span> which we can’t so easily work around.</p>
+<p>When the example is a simple mix of two gaussians approximated with a single gaussian, it’s fairly easy to intuit how the choice of KL divergence will influence the optimization solution. This all gets a bit more opaque on harder problems- like we saw with the example last post, ELBO based VI will tend to underestimate the support of <span class="math inline">p(x)</span> but whether the solution is narrow but overall reasonable, or pretty much degenerate, is hard to predict. However, this exploration of how the form of the divergence influences the results still gives a rough intuition for why our ELBO optimized posteriors might collapse.</p>
+<p>If we want to try the opposite direction of KL divergence, it isn’t immediately obvious there’s a global objective we can choose that favors overdispersed solutions. Like I mentioned above, if we try to make an ELBO-esque target but reverse the KL divergence, the <span class="math inline">logp(x)</span> which is constant with respect to the <span class="math inline">q(x)</span> we’re optimizing becomes a <span class="math inline">logq(x)</span> which we can’t so easily work around.</p>
 <p>Let’s look first at a solution in the spirit of VI<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> to the above problem which requires us to pick up a new divergence, the <span class="math inline">\chi^{2}</span>-divergence, and optimizes a new bound. Let’s take a look at it.</p>
 <section id="chi2-variational-inference-chivi-and-the-cubo-bound" class="level2">
 <h2 class="anchored" data-anchor-id="chi2-variational-inference-chivi-and-the-cubo-bound"><span class="math inline">\chi^{2}</span> Variational Inference (CHIVI) and the CUBO bound</h2>
 <p>The <span class="math inline">\chi^{2}</span>-divergence has form:</p>
 <p><span class="math display">
 D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
-</span> For simplicity and comparability, I’m switching here to using Dieng et Al. (2017)’s notation here- they use <span class="math inline">q(z;\lambda)</span> to refer to the variational family we’re using, indexed by parameters <span class="math inline">\lambda</span>.</p>
+</span> For simplicity and comparability, I’m switching here to using <a href="https://arxiv.org/abs/1611.00328">Dieng et Al. (2017)</a>’s notation here- they use <span class="math inline">q(z;\lambda)</span> to refer to the variational family we’re using, indexed by parameters <span class="math inline">\lambda</span>.</p>
 <p>This divergence has the properties we wanted when we tried to use Inclusive KL Divergence- it tends to be mean seeking instead of mode seeking.</p>
 <p>Like with the ELBO, we need to show that we have a bound here independent of <span class="math inline">logp(x)</span>, and that we have a way to estimate that bound efficiently.</p>
 <p>Let’s first move around a few pieces of the first term above:</p>
@@ -335,10 +336,10 @@ D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
 \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2&amp; = 1 + D_{\chi^2}(p(z|x)|q(z;\lambda)) \\
 &amp;= p(x)^2[1 + D_{\chi^2}(p(z|x)|q(z;\lambda))]
 \end{align}
-</span> Then we can take the log of both the right hand side equations, which gives us:</p>
+</span> Then we can take the log of both sides of the equation, which gives us:</p>
 <p><span class="math display">
 \frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]  
-</span> …and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and logp(x) is constant as we optimize <span class="math inline">q</span>, so we’ve found something that we’re close to able to minimize:</p>
+</span> …and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and the <span class="math inline">-logp(x)</span> term is constant as we optimize <span class="math inline">q</span>, so we’ve found something that we’re close to able to minimize:</p>
 <p><span class="math display">
 CUBO_{2}(\lambda) = \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
 </span> Since this new divergence is non-negative as well, this is a upper bound of the model evidence. This is thus named <span class="math inline">\chi</span> upper bound (CUBO)<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
@@ -366,15 +367,18 @@ CUBO_2(\lambda) = \frac{1}{2}log\frac{1}{S}\sum_{s=1}^{S}[(\frac{p(x,z^{s})}{q(z
 \end{align}
 </span> There are one or two more neat computational tricks in the paper I won’t explain here (essentially: how do we extend this to work in minibatch fashion, and how do we avoid numerical underflow issues), but this is now essentially functional. The whole algorithm, which they dubbed CHIVI is below:</p>
 <p><img src="images/CHIVI_algorithm.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="the-bigger-picture-again" class="level1">
+<h1>The Bigger Picture Again</h1>
 <p>Stepping back, let’s talk about some practical properties of the algorithm we’ve been stepping through.</p>
 <p>First, and probably most exciting given what we saw in the last post, CHIVI’s objective has the property that it is inclusive, unlike the ELBO we were using earlier. This won’t be the right choice for all variational inference problems, but given our prior issues with very narrow posteriors this will be exciting to test<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. And as we’ll see in the next section, this overdispersion tendency in the posterior will often have a beneficial interaction with importance sampling which can improve our estimates further.</p>
 <p>Another nice thing here is that if we were to estimate both the ELBO and CUBO for a given problem, we’d get both a upper and lower bound on the model evidence. This is theoretically convenient in that we now have a sandwich estimator, which actually obtains reasonably tight bounds. We’ll even be able use the fact we have both later to get some bounds on practical bounds on quantities we tend to report in practice like means and covariances!</p>
-<p>A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it’s even better when we’re ensembling because we can leave more heavily on each model for the tasks it succeeds on.</p>
+<p>A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it’s even better when we’re ensembling because we can lean more heavily on each model for the tasks it succeeds on.</p>
 <p>One potential downside here is that we introduced a solution that partially relies on a Monte Carlo estimator. That said, this is pretty cheap in practice; if we’re using VI as a drop in for MCMC, this is still going to be much much faster than MCMC for any big problem. We’ll need to think about a reasonable number of samples in a given case, but realistically this isn’t going to be a driving factor in determining compute time.</p>
 <p>Another final problem is that the estimator we built out for the CUBO that we could actually estimate tends to end up having pretty high variance. Exponentiating the objective isn’t free in that sense; but this problem of variance reduction in estimators is something that feels like a tractable problem to iterate on.</p>
 
 
-</section>
 </section>
 
 

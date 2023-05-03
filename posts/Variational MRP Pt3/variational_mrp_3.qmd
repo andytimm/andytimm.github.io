@@ -56,7 +56,7 @@ Unfortunately, this choice to optimize the "reverse" KL divergence bakes in pref
 for a certain type of solution[^1]. 
 
 I found I built better intuition for this encoded preference after seeing it presented many
-different ways, so here are a few of my favorites.
+different overlapping ways, so here are a few of my favorites.
 
 One way to see the difference is through a variety of labels for each direction. One could call Forward KL (1) vs. Reverse KL (2):
 
@@ -64,7 +64,7 @@ One way to see the difference is through a variety of labels for each direction.
 2. Mean Seeking vs. Mode Seeking
 3. Zero Avoiding vs. Zero Forcing
 
-let's quickly sketch what this might look like in the case of a simple mixture of normals:
+let's quickly sketch what this might look like in the case of a simple mixture of normals with a single normal as a variational family:
 ```{r, message=F}
 library(ggplot2)
 library(gridExtra)
@@ -119,14 +119,13 @@ When the example is a simple mix of two gaussians approximated with a single
 gaussian, it's fairly easy to intuit how the choice of KL divergence will influence
 the optimization solution. This all gets a bit more opaque on harder problems-
 like we saw with the example last post, ELBO based VI will tend to underestimate
-the support of $p(x)$ but whether the solution is narrow but overall reasonable, or pretty much degenerate
+the support of $p(x)$ but whether the solution is narrow but overall reasonable, or pretty much degenerate,
 is hard to predict. However, this exploration of how the form of the divergence
 influences the results still gives a rough intuition for why our ELBO optimized
 posteriors might collapse.
 
 If we want to try the opposite direction of KL divergence, it isn't immediately obvious there's a
-global objective we can choose to perhaps seek out a optimization problem
-that favors overdispersed solutions. Like I mentioned above, if we try to make
+global objective we can choose that favors overdispersed solutions. Like I mentioned above, if we try to make
 an ELBO-esque target but reverse the KL divergence, the $logp(x)$ which is constant with respect
 to the $q(x)$ we're optimizing becomes a $logq(x)$ which we can't so easily work around.
 
@@ -139,7 +138,7 @@ The $\chi^{2}$-divergence has form:
 $$
 D_{\chi^2}(p||q) = \mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2 -1]
 $$
-For simplicity and comparability, I'm switching here to using Dieng et Al. (2017)'s notation here- they use $q(z;\lambda)$ to refer to the variational family we're using, indexed by parameters $\lambda$.
+For simplicity and comparability, I'm switching here to using [Dieng et Al. (2017)](https://arxiv.org/abs/1611.00328)'s notation here- they use $q(z;\lambda)$ to refer to the variational family we're using, indexed by parameters $\lambda$.
 
 This divergence has the properties we wanted when we tried to use Inclusive KL Divergence- it tends to be mean seeking instead of mode seeking.
 
@@ -153,12 +152,12 @@ $$
 &= p(x)^2[1 + D_{\chi^2}(p(z|x)|q(z;\lambda))]
 \end{align}
 $$
-Then we can take the log of both the right hand side equations, which gives us:
+Then we can take the log of both sides of the equation, which gives us:
 
 $$
 \frac{1}{2}log(1 + D_{\chi^2}(p(z|x)|q(z;\lambda))) = -logp(x) + \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]  
 $$
-...and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and logp(x) is constant as we optimize $q$, so we've found something that we're close to able to minimize:
+...and this is starting to feel a lot like the ELBO derivation. Log is monotonic, and the $-logp(x)$ term is constant as we optimize $q$, so we've found something that we're close to able to minimize:
 
 $$
 CUBO_{2}(\lambda) = \frac{1}{2}log\mathbb{E}_{q(z;\lambda)}[(\frac{p(z|x)}{q(z;\lambda)})^2]
@@ -198,13 +197,15 @@ There are one or two more neat computational tricks in the paper I won't explain
 
 ![](images/CHIVI_algorithm.png)
 
+# The Bigger Picture Again
+
 Stepping back, let's talk about some practical properties of the algorithm we've been stepping through. 
 
 First, and probably most exciting given what we saw in the last post, CHIVI's objective has the property that it is inclusive, unlike the ELBO we were using earlier. This won't be the right choice for all variational inference problems, but given our prior issues with very narrow posteriors this will be exciting to test[^6]. And as we'll see in the next section, this overdispersion tendency in the posterior will often have a beneficial interaction with importance sampling which can improve our estimates further.
 
 Another nice thing here is that if we were to estimate both the ELBO and CUBO for a given problem, we'd get both a upper and lower bound on the model evidence. This is theoretically convenient in that we now have a sandwich estimator, which actually obtains reasonably tight bounds. We'll even be able use the fact we have both later to get some bounds on practical bounds on quantities we tend to report in practice like means and covariances!
 
-A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it's even better when we're ensembling because we can leave more heavily on each model for the tasks it succeeds on.
+A final neat benefit here is that to the extent we are willing to consider ensembling models (again, more on that soon), this CHIVI framework will produce estimates that succeed (and fail) in less similar ways that the the ELBO based estimators we looked at last post. Expanding our available set of tools is always good, but it's even better when we're ensembling because we can lean more heavily on each model for the tasks it succeeds on.
 
 One potential downside here is that we introduced a solution that partially relies on a Monte Carlo estimator. That said, this is pretty cheap in practice; if we're using VI as a drop in for MCMC, this is still going to be much much faster than MCMC for any big problem. We'll need to think about a reasonable number of samples in a given case, but realistically this isn't going to be a driving factor in determining compute time.
 
