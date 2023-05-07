@@ -11,7 +11,7 @@ categories:
 
 This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
 
-The general structure for this post and the ones before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
+The general structure for this post and the one before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html) we took a look at how our ELBO objective requires  specific version of KL Divergence (the "Exclusive" formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more "inclusive" solution.
 
@@ -200,7 +200,7 @@ While the Importance Sampling Literature is huge and there are a lot of possible
 solutions here, I'll next introduce [Vehtari et Al. (2015)](https://arxiv.org/abs/1507.02646)'s Pareto-Smoothed Importance Sampling. I'm a huge fan of this paper, and it's
 amongst the coolest things I got to study in grad school. 
 
-The core idea here as I started to describe above is that  
+The core idea here as I started to describe above is that.
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
 

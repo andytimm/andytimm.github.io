@@ -258,7 +258,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <p>This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
-<p>The general structure for this post and the ones before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
+<p>The general structure for this post and the one before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
 <p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html">last post</a> we took a look at how our ELBO objective requires specific version of KL Divergence (the “Exclusive” formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more “inclusive” solution.</p>
 <p>The rough plan for the series is as follows:</p>
 <ol type="1">
@@ -342,7 +342,7 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <h2 class="anchored" data-anchor-id="solving-our-is-problems-with-pareto-smoothed-importance-sampling">Solving our IS problems with Pareto-Smoothed Importance Sampling</h2>
 <p>As we’ve been talking about importance sampling, we’ve been leaving some of the messier details aside (how many samples to draw, how to deal with the cases when some of the weights get huge, how to know when our proposal distribution is “close” enough).</p>
 <p>While the Importance Sampling Literature is huge and there are a lot of possible solutions here, I’ll next introduce <a href="https://arxiv.org/abs/1507.02646">Vehtari et Al. (2015)</a>’s Pareto-Smoothed Importance Sampling. I’m a huge fan of this paper, and it’s amongst the coolest things I got to study in grad school.</p>
-<p>The core idea here as I started to describe above is that</p>
+<p>The core idea here as I started to describe above is that.</p>
 </section>
 <section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
