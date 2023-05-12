@@ -15,7 +15,7 @@ The general structure for this post and the one before and after it will be to d
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html) we took a look at how our ELBO objective requires  specific version of KL Divergence (the "Exclusive" formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more "inclusive" solution.
 
-In this post, we'll leverage importance sampling to make the most of the samples we do have, emphasizing the parts of our $q(x)$ that look like $p(x)$ and de-emphasizing the parts that do not.  The first way to do this will occur "at train time", modifying the ELBO objective into a Importance Weighted ELBO that can both tighten our bound and positively alter our incentives in choosing a variational family. Another way to do this is simply at "test time", reweighting samples already drawn to warp $q(x)$ into a distribution more like $p(x)$. We'll then look at a particularly elegant and efficient form of IS, Pareto Smoothed Importance Sampling, both because it improves and eases the prior two applications of IS to variational inference, and because it's the basis of a diagnostic for variational inference more generally. Finally, we'll end by taking the importance sampling process a little too far- and we'll look at the idea of Multiple Importance Sampling, grabbing a handful of different $q(x)$'s and spackling them together to approach $p(x)$.
+In this post, we'll leverage importance sampling to make the most of the samples we do have, emphasizing the parts of our $q(x)$ that look like $p(x)$ and de-emphasizing the parts that do not.
 
 The rough plan for the series is as follows:
 
@@ -46,7 +46,7 @@ w_i = \frac{p(x_i)}{q(x_i)}
 $$
 Before you get worried that we don't have $p(x_i)$ because of the normalizing constant like every time we talk about having $p(x)$ in this series, there's a clever estimator that
 "self-normalizes" such that this can be a reasonable strategy. Intuitively, we're
-just placing more weight on samples in the support of $p(x)$.
+just placing more weight on samples likely $p(x)$.
 
 This footenote[^8] has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some
 particularly important sub-problems to solve in making a good importance sampling estimator, and good important sampling estimator for VI. 
@@ -77,10 +77,16 @@ So with those points we need to address, here are the next topics in this post:
 
 ## Importance Weighted Variational Inference
 
-The actual use of Importance Weighting for VI in it's simplest form is
-pretty intuitive (draw samples from $q(x)$, weight them...), but let's derive the
-new Importance Weighted Variational Inference (IWVI) estimator since some nice
-intuition will come with it.
+The use of Importance Weighting for VI in it's simplest form is
+pretty intuitive (draw samples from an already trained $q(x)$, weight them...), but let's derive the
+new Importance Weighted Variational Inference (IWVI) estimator first since some nice
+intuition will come with it. 
+
+I want to emphasize something that wasn't clear to me for a good while-
+that these two ideas are not equivalent. While both
+are useful tools, the "train time",
+objective-modifying IWVI estimator is a distinct approach from the "test time" importance sampling approach
+that takes draws from $q(x)$ as already fixed and reweights them as best it can.
 
 We'll aim to show that we can get a tighter ELBO by using importance weights. This
 type of tighter ELBO was first shown by [Burda et Al. (2015)](https://arxiv.org/abs/1509.00519)
@@ -90,7 +96,7 @@ fleshed out some details of that extension- I'll be explaining some of the latte
 results first.
 
 To start, imagine a random variable $R$, such that $\mathbb{E}{R} = p(x)$, which
-we'll think of as a estimator of p(x). Then by Jensen's Inequality:
+we'll think of as a estimator of $p(x)$. Then by Jensen's Inequality:
 
 $$
 logp(x) = \mathbb{E}logR + \mathbb{E}log\frac{p(x)}{R}
@@ -118,7 +124,7 @@ From there, we can derive a tighter bound on $logp(x)$, referred to as the IW-EL
 $$
 IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\frac{p(z_m,x)}{q(z_m)}
 $$
-Where we're using the $1:M$ as a shorthand for eg $q(z_{1:M}) = q(z_1)...q(z_M)$.
+Where we're using the $1:M$ as a shorthand for $q(z_{1:M}) = q(z_1)...q(z_M)$.
 
 
 It's worth noting that the last few lines don't specify a particular form of importance
@@ -167,13 +173,15 @@ grid.arrange(rkl_plot,fkl_plot)
 
 If we can use importance samples though, quite the opposite is be true! Note that we're
 still using the ELBO, a reverse-KL based metric- that hasn't changed. What has changed is our
-ability to mitigate the objective costs of those samples between the two extremes.
-Points outside the two target modes will get lower importance weights, and points within
+ability to mitigate the objective costs of those samples between the two extremes. Via this "train time" implementation of IS,
+points outside the two target modes will get lower importance weights, and points within
 the modes will get higher ones, so as long as we're covering the modes with some reasonable amount of probability mass, and drawing enough samples we can actually
-do better with the distribution centered between the modes. 
+do better with the distribution centered between the modes.
 
-We can also imagine how varying the number of samples might effect the point
-from the last paragraph. Between $M=1$ and "enough draws to get all the benefits of IS",
+To further drive home the point about how a "train time" and "test time" implementations of IS differ, could "test time" IS do this? Not really- because the ability to better minimize the ELBO via sampling requires the IW-ELBO variant and associated training process. If we hard coded $q(x)$ as the green $N(9,4)$ shown above, "test time" IS could weight the right samples up to better approximate $p(x)$, but it doesn't fundamentally alter our optimization problem the way the above estimand does.
+
+We can also imagine how varying the number of samples might effect optimization.
+ Between $M=1$ and "enough draws to get all the benefits of IS",
 we can imagine there's a slow transition from "just stick with 1 mode" and "go with IS".
 So it seems like we should be worried about getting the number of samples right, but
 fortunately as we'll see in the next section there are great rules of thumb in
@@ -188,7 +196,7 @@ of a variational family, if we're aiming for coverage, moving towards thicker-ta
 the IW-ELBO above to build intuition, there's no reason not to apply VI to the CUBO
  and thus CHIVI- this also naturally produces nicely overdispersed distributions which can
  be importance sampled closer to the true $p(x)$. This idea of aiming for a
- wide proposal to sample from is referred to in the importance sampling literature (eg [Owen, 2013](https://artowen.su.domains/mc/)) as "defensive sampling", with [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034) exploring the VI connection more fully. For intuition, by ensuring most of p(x) is covered by some reasonable mass makes it easier to efficiently
+ wide proposal to sample from is referred to in the importance sampling literature (eg [Owen, 2013](https://artowen.su.domains/mc/)) as "defensive sampling", with [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034) exploring the VI connection more fully. For intuition, by ensuring most of $p(x)$ is covered by some reasonable mass makes it easier to efficiently
  get draws that can be weighted into a final posterior, even if the unweighted
  posterior might be too wide.
 
