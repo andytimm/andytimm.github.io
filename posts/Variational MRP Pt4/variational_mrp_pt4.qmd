@@ -15,6 +15,8 @@ The general structure for this post and the one before and after it will be to d
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html) we took a look at how our ELBO objective requires  specific version of KL Divergence (the "Exclusive" formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more "inclusive" solution.
 
+In this post, we'll leverage importance sampling to make the most of the samples we do have, emphasizing the parts of our $q(x)$ that look like $p(x)$ and de-emphasizing the parts that do not.  The first way to do this will occur "at train time", modifying the ELBO objective into a Importance Weighted ELBO that can both tighten our bound and positively alter our incentives in choosing a variational family. Another way to do this is simply at "test time", reweighting samples already drawn to warp $q(x)$ into a distribution more like $p(x)$. We'll then look at a particularly elegant and efficient form of IS, Pareto Smoothed Importance Sampling, both because it improves and eases the prior two applications of IS to variational inference, and because it's the basis of a diagnostic for variational inference more generally. Finally, we'll end by taking the importance sampling process a little too far- and we'll look at the idea of Multiple Importance Sampling, grabbing a handful of different $q(x)$'s and spackling them together to approach $p(x)$.
+
 The rough plan for the series is as follows:
 
 1.  Introducing the Problem- Why is VI useful, why VI can produce spherical cows
