@@ -71,24 +71,23 @@ reliable.
 So with those points we need to address, here are the next topics in this post:
 
 1. Importance Weighted Variational Inference
-2. Robust importance sampling with built in diagnostics via PSIS
+2. Robust importance sampling with built in diagnostics via Pareto-Smoothed Importance Sampling
 3. Combining multiple proposal distributions via Multiple Importance Sampling
 
 
 ## Importance Weighted Variational Inference
 
-The use of Importance Weighting for VI in it's simplest form is
+Importance Weighting for VI in it's simplest form is
 pretty intuitive (draw samples from an already trained $q(x)$, weight them...), but let's derive the
 new Importance Weighted Variational Inference (IWVI) estimator first since some nice
 intuition will come with it. 
 
-I want to emphasize something that wasn't clear to me for a good while-
-that these two ideas are not equivalent. While both
+I want to emphasize something that wasn't clear to me for a good while- these two ideas are not equivalent. While both
 are useful tools, the "train time",
 objective-modifying IWVI estimator is a distinct approach from the "test time" importance sampling approach
 that takes draws from $q(x)$ as already fixed and reweights them as best it can.
 
-We'll aim to show that we can get a tighter ELBO by using importance weights. This
+We'll aim to show that we can get a tighter ELBO by using importance sampling. This
 type of tighter ELBO was first shown by [Burda et Al. (2015)](https://arxiv.org/abs/1509.00519)
 in the context of Variational Autoencoders after which is was fairly clear this could apply
 to variational inference, but [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034)
@@ -105,14 +104,14 @@ $$
 The first term is the bound, which will be tighter if $R$ is highly concentrated. 
 
 This is a more general form of the ELBO; we can make it quite familiar looking by
-having our R above be:
+having our $R$ above be:
 
 $$
 R = \frac{p(z,x)}{q(z)}, z \sim q
 $$
 
-The reason pointing out this fairly simple generalization is helpful is that it
-frames how to tighten our ELBO bound on $logp(x)$ via alternative estimators $R$.
+The reason for pointing out this fairly simple generalization is helpful is that it
+frames how to tighten our ELBO on $logp(x)$ via alternative estimators $R$.
 
 By drawing $M$ samples and averaging them as in importance sampling, we get:
 
@@ -171,14 +170,14 @@ fkl_plot <- mixture %>% ggplot(aes(x = normals)) +
 grid.arrange(rkl_plot,fkl_plot)
 ```
 
-If we can use importance samples though, quite the opposite is be true! Note that we're
+If we can use importance sampling though, quite the opposite is be true! Note that we're
 still using the ELBO, a reverse-KL based metric- that hasn't changed. What has changed is our
 ability to mitigate the objective costs of those samples between the two extremes. Via this "train time" implementation of IS,
 points outside the two target modes will get lower importance weights, and points within
 the modes will get higher ones, so as long as we're covering the modes with some reasonable amount of probability mass, and drawing enough samples we can actually
 do better with the distribution centered between the modes.
 
-To further drive home the point about how a "train time" and "test time" implementations of IS differ, could "test time" IS do this? Not really- because the ability to better minimize the ELBO via sampling requires the IW-ELBO variant and associated training process. If we hard coded $q(x)$ as the green $N(9,4)$ shown above, "test time" IS could weight the right samples up to better approximate $p(x)$, but it doesn't fundamentally alter our optimization problem the way the above estimand does.
+To further drive home the point about how a "train time" and "test time" implementations of IS differ, could "test time" IS do this? Not really- because the ability to better minimize the ELBO via sampling requires the IW-ELBO variant and associated training process. If we hard-coded $q(x)$ as the green $N(9,4)$ shown above, "test time" IS could weight the right samples up to better approximate $p(x)$, but it doesn't fundamentally alter our optimization problem the way the IWVI estimand does.
 
 We can also imagine how varying the number of samples might effect optimization.
  Between $M=1$ and "enough draws to get all the benefits of IS",
@@ -207,10 +206,12 @@ messier details aside (how many samples to draw, how to deal with the cases when
 of the weights get huge, how to know when our proposal distribution is "close" enough).
 
 While the Importance Sampling Literature is huge and there are a lot of possible
-solutions here, I'll next introduce [Vehtari et Al. (2015)](https://arxiv.org/abs/1507.02646)'s Pareto-Smoothed Importance Sampling. I'm a huge fan of this paper, and it's
-amongst the coolest things I got to study in grad school. 
+solutions here, I'll next introduce [Vehtari et Al. (2015)](https://arxiv.org/abs/1507.02646)'s Pareto-Smoothed Importance Sampling. I'm a huge fan of this paper- it's a really
+elegant and powerful tool, derived from taking Bayesian principles seriously.
 
-The core idea here as I started to describe above is that.
+Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude
+larger than others, dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to 
+
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
 
