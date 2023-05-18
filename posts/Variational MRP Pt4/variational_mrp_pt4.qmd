@@ -143,6 +143,10 @@ is expensive per our ELBO objective, so better to choose a mode.
 library(ggplot2)
 library(gridExtra)
 library(tidyverse)
+library(loo)
+
+set.seed(605)
+options(mc.cores = 8)
 ```
 
 
@@ -216,12 +220,63 @@ describing extreme values, and replace the most extreme weights with modeled (an
 more stable values).
 
 For concreteness, let's introduce a simple 1-D example. We'll aim to use importance
-sampling to approximate distributions <span style="color:red;">$\mathcal{T}(\mu = 0,\sigma = 1,t =5$)</span> and <span style="color:blue;">$\mathcal{C}(x_0= 0,\gamma = 10)$</span> with a <span style="color:green;">$\mathcal{N}(\mu = 0,\sigma = 1$)</span>. 
+sampling to approximate distributions <span style="color:red;">$\mathcal{T}(\mu = 0,\sigma = 1,t =5$)</span> and <span style="color:blue;">$\mathcal{C}(x_0= 0,\gamma = 10)$</span> with a <span style="color:green;">$\mathcal{N}(\mu = 0,\sigma = 1$)</span> distribution. If that
+sounds like the opposite of preferring wide tails on $q(x)$'s I described above,
+you're right, but using a poor choice here will illustrate some useful properties.
 
 ```{r}
+simulated_data <- tibble(
+q_x = rnorm(100000),
+manageable_p_x = rt(100000,5),
+unmanageable_p_x = rcauchy(100000),
+manageable_ratios = dt(q_x,5)/dnorm(q_x),
+unmanageable_ratios = dcauchy(q_x,0,10)/dnorm(q_x)
+)
 
+simulated_data %>%
+            pivot_longer(c(q_x,manageable_p_x,unmanageable_p_x),
+                         values_to = "draws",
+                         names_to = "distributions") %>%
+            ggplot(aes(x = draws, color = distributions)) +
+            geom_density() +
+            # If you wanted to show the full reach of the Cauchy, it'd be
+            # hard to see the shape of the T vs N; it's that wide.
+            # Hence the 6k values removed
+            xlim(-10,10) +
+            ggtitle("Visualizing the distributions in question") +
+            theme(legend.position="none")
 ```
 
+The tails on that Cauchy distribution are super, super wide compared to our
+normal, so the samples far, far out in the tails of the normal will need massive
+weights to approximate the cauchy. The t-distribution is wider too, so we'll need
+some higher weights, but not nearly as many. As a way to visualize this, you can
+see that just a handful of draws have weights away from ~1, but these weights are
+as much as 1000x higher than the mean ratio, and will dominate any average we make of them.
+
+```{r}
+simulated_data %>%
+  arrange(unmanageable_ratios) %>%
+  mutate(n = seq(1,100000)) %>%
+  ggplot(aes(x = n,y = unmanageable_ratios)) +
+  geom_point() +
+  ggtitle("A pretty typical 'unsaveable' set of importance ratios")
+```
+
+The t-distribution ratio plot would look similar, but with a much smaller y-scale. The max weight
+would still be much larger than the average, but more than an order of magnitude or so less large:
+
+```{r}
+mean_t <- mean(simulated_data$manageable_ratios)
+max_t <- max(simulated_data$manageable_ratios)
+
+mean_c <- mean(simulated_data$unmanageable_ratios)
+max_c <-max(simulated_data$unmanageable_ratios)
+
+print(paste0("the mean of the t is: ",mean_t," compared to a max of ",max_t,";",
+             "The cauchy cause is more extreme- the mean of the cauchy is: ",mean_c," compared to a max of ",max_c))
+
+```
 
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling

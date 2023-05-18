@@ -346,9 +346,60 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <p>As we’ve been talking about importance sampling, we’ve been leaving some of the messier details aside (how many samples to draw, how to deal with the cases when some of the weights get huge, how to know when our proposal distribution is “close” enough).</p>
 <p>While the Importance Sampling Literature is huge and there are a lot of possible solutions here, I’ll next introduce <a href="https://arxiv.org/abs/1507.02646">Vehtari et Al. (2015)</a>’s Pareto-Smoothed Importance Sampling. I’m a huge fan of this paper- it’s a really elegant and powerful tool, derived from taking Bayesian principles seriously.</p>
 <p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those tail values as coming from a Generalized Pareto Distribution, a distribution for describing extreme values, and replace the most extreme weights with modeled (and more stable values).</p>
-<p>For concreteness, let’s introduce a simple 1-D example. We’ll aim to use importance sampling to approximate distributions <span style="color:red;"><span class="math inline">\mathcal{T}(\mu = 0,\sigma = 1,t =5</span>)</span> and <span style="color:blue;"><span class="math inline">\mathcal{C}(x_0= 0,\gamma = 10)</span></span> with a <span style="color:green;"><span class="math inline">\mathcal{N}(\mu = 0,\sigma = 1</span>)</span>.</p>
+<p>For concreteness, let’s introduce a simple 1-D example. We’ll aim to use importance sampling to approximate distributions <span style="color:red;"><span class="math inline">\mathcal{T}(\mu = 0,\sigma = 1,t =5</span>)</span> and <span style="color:blue;"><span class="math inline">\mathcal{C}(x_0= 0,\gamma = 10)</span></span> with a <span style="color:green;"><span class="math inline">\mathcal{N}(\mu = 0,\sigma = 1</span>)</span> distribution. If that sounds like the opposite of preferring wide tails on <span class="math inline">q(x)</span>’s I described above, you’re right, but using a poor choice here will illustrate some useful properties.</p>
 <div class="cell">
-
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simulated_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">q_x =</span> <span class="fu">rnorm</span>(<span class="dv">100000</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">manageable_p_x =</span> <span class="fu">rt</span>(<span class="dv">100000</span>,<span class="dv">5</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">unmanageable_p_x =</span> <span class="fu">rcauchy</span>(<span class="dv">100000</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">manageable_ratios =</span> <span class="fu">dt</span>(q_x,<span class="dv">5</span>)<span class="sc">/</span><span class="fu">dnorm</span>(q_x),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">unmanageable_ratios =</span> <span class="fu">dcauchy</span>(q_x,<span class="dv">0</span>,<span class="dv">10</span>)<span class="sc">/</span><span class="fu">dnorm</span>(q_x)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>simulated_data <span class="sc">%&gt;%</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="fu">pivot_longer</span>(<span class="fu">c</span>(q_x,manageable_p_x,unmanageable_p_x),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                         <span class="at">values_to =</span> <span class="st">"draws"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                         <span class="at">names_to =</span> <span class="st">"distributions"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> draws, <span class="at">color =</span> distributions)) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            <span class="co"># If you wanted to show the full reach of the Cauchy, it'd be</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            <span class="co"># hard to see the shape of the T vs N; it's that wide.</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Hence the 6k values removed</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">10</span>,<span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ggtitle</span>(<span class="st">"Visualizing the distributions in question"</span>) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 6245 rows containing non-finite values (stat_density).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="variational_mrp_pt4_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The tails on that Cauchy distribution are super, super wide compared to our normal, so the samples far, far out in the tails of the normal will need massive weights to approximate the cauchy. The t-distribution is wider too, so we’ll need some higher weights, but not nearly as many. As a way to visualize this, you can see that just a handful of draws have weights away from ~1, but these weights are as much as 1000x higher than the mean ratio, and will dominate any average we make of them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>simulated_data <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(unmanageable_ratios) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n =</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">100000</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n,<span class="at">y =</span> unmanageable_ratios)) <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"A pretty typical 'unsaveable' set of importance ratios"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="variational_mrp_pt4_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The t-distribution ratio plot would look similar, but with a much smaller y-scale. The max weight would still be much larger than the average, but more than an order of magnitude or so less large:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mean_t <span class="ot">&lt;-</span> <span class="fu">mean</span>(simulated_data<span class="sc">$</span>manageable_ratios)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>max_t <span class="ot">&lt;-</span> <span class="fu">max</span>(simulated_data<span class="sc">$</span>manageable_ratios)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mean_c <span class="ot">&lt;-</span> <span class="fu">mean</span>(simulated_data<span class="sc">$</span>unmanageable_ratios)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>max_c <span class="ot">&lt;-</span><span class="fu">max</span>(simulated_data<span class="sc">$</span>unmanageable_ratios)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">"the mean of the t is: "</span>,mean_t,<span class="st">" compared to a max of "</span>,max_t,<span class="st">";"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>             <span class="st">"The cauchy cause is more extreme- the mean of the cauchy is: "</span>,mean_c,<span class="st">" compared to a max of "</span>,max_c))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "the mean of the t is: 0.995904306317625 compared to a max of 164.448932152079;The cauchy cause is more extreme- the mean of the cauchy is: 0.283655933763642 compared to a max of 1428.22324178729"</code></pre>
+</div>
 </div>
 </section>
 <section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
