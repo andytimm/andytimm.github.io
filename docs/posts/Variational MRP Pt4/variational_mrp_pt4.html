@@ -375,7 +375,7 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <p><img src="variational_mrp_pt4_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>The tails on that Cauchy distribution are super, super wide compared to our normal, so the samples far, far out in the tails of the normal will need massive weights to approximate the cauchy. The t-distribution is wider too, so we’ll need some higher weights, but not nearly as many. As a way to visualize this, you can see that just a handful of draws have weights away from ~1, but these weights are as much as 1000x higher than the mean ratio, and will dominate any average we make of them.</p>
+<p>The tails on that Cauchy distribution are super, super wide compared to our normal, so the samples far, far out in the tails of the normal will need massive weights to approximate the cauchy. The t-distribution is wider too, so we’ll need some higher weights, but not nearly as many. As a way to visualize this, you can see that just a handful of draws have weights away from ~1, but these weights are as much as 5000x higher than the mean ratio, and will dominate any average we make of them.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>simulated_data <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(unmanageable_ratios) <span class="sc">%&gt;%</span></span>

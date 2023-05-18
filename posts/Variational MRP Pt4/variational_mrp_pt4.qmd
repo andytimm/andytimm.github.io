@@ -252,7 +252,7 @@ normal, so the samples far, far out in the tails of the normal will need massive
 weights to approximate the cauchy. The t-distribution is wider too, so we'll need
 some higher weights, but not nearly as many. As a way to visualize this, you can
 see that just a handful of draws have weights away from ~1, but these weights are
-as much as 1000x higher than the mean ratio, and will dominate any average we make of them.
+as much as 5000x higher than the mean ratio, and will dominate any average we make of them.
 
 ```{r}
 simulated_data %>%
