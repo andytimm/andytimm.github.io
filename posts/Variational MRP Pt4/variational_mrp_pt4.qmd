@@ -210,7 +210,18 @@ solutions here, I'll next introduce [Vehtari et Al. (2015)](https://arxiv.org/ab
 elegant and powerful tool, derived from taking Bayesian principles seriously.
 
 Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude
-larger than others, dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to 
+larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those
+tail values as coming from a Generalized Pareto Distribution, a distribution for
+describing extreme values, and replace the most extreme weights with modeled (and
+more stable values).
+
+For concreteness, let's introduce a simple 1-D example. We'll aim to use importance
+sampling to approximate distributions <span style="color:red;">$\mathcal{T}(\mu = 0,\sigma = 1,t =5$)</span> and <span style="color:blue;">$\mathcal{C}(x_0= 0,\gamma = 10)$</span> with a <span style="color:green;">$\mathcal{N}(\mu = 0,\sigma = 1$)</span>. 
+
+```{r}
+
+```
+
 
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling

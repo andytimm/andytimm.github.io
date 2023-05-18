@@ -345,7 +345,11 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <h2 class="anchored" data-anchor-id="solving-our-is-problems-with-pareto-smoothed-importance-sampling">Solving our IS problems with Pareto-Smoothed Importance Sampling</h2>
 <p>As we’ve been talking about importance sampling, we’ve been leaving some of the messier details aside (how many samples to draw, how to deal with the cases when some of the weights get huge, how to know when our proposal distribution is “close” enough).</p>
 <p>While the Importance Sampling Literature is huge and there are a lot of possible solutions here, I’ll next introduce <a href="https://arxiv.org/abs/1507.02646">Vehtari et Al. (2015)</a>’s Pareto-Smoothed Importance Sampling. I’m a huge fan of this paper- it’s a really elegant and powerful tool, derived from taking Bayesian principles seriously.</p>
-<p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to</p>
+<p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those tail values as coming from a Generalized Pareto Distribution, a distribution for describing extreme values, and replace the most extreme weights with modeled (and more stable values).</p>
+<p>For concreteness, let’s introduce a simple 1-D example. We’ll aim to use importance sampling to approximate distributions <span style="color:red;"><span class="math inline">\mathcal{T}(\mu = 0,\sigma = 1,t =5</span>)</span> and <span style="color:blue;"><span class="math inline">\mathcal{C}(x_0= 0,\gamma = 10)</span></span> with a <span style="color:green;"><span class="math inline">\mathcal{N}(\mu = 0,\sigma = 1</span>)</span>.</p>
+<div class="cell">
+
+</div>
 </section>
 <section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
