@@ -278,7 +278,7 @@ print(paste0("the mean of the t is: ",mean_t," compared to a max of ",max_t,";",
 
 ```
 
-So let's bring this back to Pareto Smoothing here. We want to model and smooth
+So let's bring this back to Pareto smoothing here. We want to model and smooth
 that long tail of the ratio distribution. It turns out there's plenty of study
 of the distribution of extreme events, and there's some classical limit results showing:
 
