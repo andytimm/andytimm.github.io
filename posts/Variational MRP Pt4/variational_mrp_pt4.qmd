@@ -39,7 +39,7 @@ but can we work with a particular $q(x)$ we have and make better use of the part
 ... Phased this way, this sounds a lot like importance sampling. If you haven't seen them before,
 an importance sampling estimator allows us to take draws from a (preferably) easy to sample
 from distribution[^7] and reweight the samples to look more like our true target
-distribution. The weight $w_i$ for each sample $i$ take form:
+distribution. The weight $w_i$ (or ratio, $r_i$) for each sample $i$ take form:
 
 $$
 w_i = \frac{p(x_i)}{q(x_i)}
@@ -217,7 +217,7 @@ Above, I described a common failure mode for IS estimators, where some weights a
 larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those
 tail values as coming from a Generalized Pareto Distribution, a distribution for
 describing extreme values, and replace the most extreme weights with modeled (and
-more stable values).
+more stable) values.
 
 For concreteness, let's introduce a simple 1-D example. We'll aim to use importance
 sampling to approximate distributions <span style="color:red;">$\mathcal{T}(\mu = 0,\sigma = 1,t =5$)</span> and <span style="color:blue;">$\mathcal{C}(x_0= 0,\gamma = 10)$</span> with a <span style="color:green;">$\mathcal{N}(\mu = 0,\sigma = 1$)</span> distribution. If that
@@ -276,6 +276,35 @@ max_c <-max(simulated_data$unmanageable_ratios)
 print(paste0("the mean of the t is: ",mean_t," compared to a max of ",max_t,";",
              "The cauchy cause is more extreme- the mean of the cauchy is: ",mean_c," compared to a max of ",max_c))
 
+```
+
+So let's bring this back to Pareto Smoothing here. We want to model and smooth
+that long tail of the ratio distribution. It turns out there's plenty of study
+of the distribution of extreme events, and there's some classical limit results showing:
+
+$$
+r(x_i) | r(x_i) > \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow \infty
+$$
+
+where $\tau$ is a lower bound parameter, which in our case defines how many ratios from the tail
+we'll actually model. $\sigma$ is a scale parameter, and $k$ is a unconstrained shape parameter. The Generalized Pareto Distribution has form:
+
+$$
+\frac{1}{\sigma} \left(1 + k\frac{r - \tau}{\sigma} \right)^{-1/k-1}
+$$
+
+
+
+```{r}
+manageable_psis <- psis(log(simulated_data$manageable_ratios),
+                       r_eff = NA)
+
+manageable_psis$diagnostics
+
+unmanageable_psis <- psis(log(simulated_data$unmanageable_ratios),
+                          r_eff = NA)
+
+unmanageable_psis$diagnostics
 ```
 
 

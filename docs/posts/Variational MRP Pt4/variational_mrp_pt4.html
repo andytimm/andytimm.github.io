@@ -274,7 +274,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="not-all-samples-are-equally-good" class="level1">
 <h1>Not all samples are equally good</h1>
 <p>So we’ve made an approximation <span class="math inline">q(x)</span> that’s cheap to sample from, and is somewhat close to <span class="math inline">p(x)</span>, our true posterior. The way to improve the approximation we’ve focused on so far is to just go back to the start and make <span class="math inline">q(x)</span> better; for example, through changing up the variational family, or to switching to a different optimization objective like the CUBO. That’s one solution that’s often necessary, but can we work with a particular <span class="math inline">q(x)</span> we have and make better use of the parts of it that are the closest to being right?</p>
-<p>… Phased this way, this sounds a lot like importance sampling. If you haven’t seen them before, an importance sampling estimator allows us to take draws from a (preferably) easy to sample from distribution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and reweight the samples to look more like our true target distribution. The weight <span class="math inline">w_i</span> for each sample <span class="math inline">i</span> take form:</p>
+<p>… Phased this way, this sounds a lot like importance sampling. If you haven’t seen them before, an importance sampling estimator allows us to take draws from a (preferably) easy to sample from distribution<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and reweight the samples to look more like our true target distribution. The weight <span class="math inline">w_i</span> (or ratio, <span class="math inline">r_i</span>) for each sample <span class="math inline">i</span> take form:</p>
 <p><span class="math display">
 w_i = \frac{p(x_i)}{q(x_i)}
 </span> Before you get worried that we don’t have <span class="math inline">p(x_i)</span> because of the normalizing constant like every time we talk about having <span class="math inline">p(x)</span> in this series, there’s a clever estimator that “self-normalizes” such that this can be a reasonable strategy. Intuitively, we’re just placing more weight on samples likely <span class="math inline">p(x)</span>.</p>
@@ -345,7 +345,7 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <h2 class="anchored" data-anchor-id="solving-our-is-problems-with-pareto-smoothed-importance-sampling">Solving our IS problems with Pareto-Smoothed Importance Sampling</h2>
 <p>As we’ve been talking about importance sampling, we’ve been leaving some of the messier details aside (how many samples to draw, how to deal with the cases when some of the weights get huge, how to know when our proposal distribution is “close” enough).</p>
 <p>While the Importance Sampling Literature is huge and there are a lot of possible solutions here, I’ll next introduce <a href="https://arxiv.org/abs/1507.02646">Vehtari et Al. (2015)</a>’s Pareto-Smoothed Importance Sampling. I’m a huge fan of this paper- it’s a really elegant and powerful tool, derived from taking Bayesian principles seriously.</p>
-<p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those tail values as coming from a Generalized Pareto Distribution, a distribution for describing extreme values, and replace the most extreme weights with modeled (and more stable values).</p>
+<p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those tail values as coming from a Generalized Pareto Distribution, a distribution for describing extreme values, and replace the most extreme weights with modeled (and more stable) values.</p>
 <p>For concreteness, let’s introduce a simple 1-D example. We’ll aim to use importance sampling to approximate distributions <span style="color:red;"><span class="math inline">\mathcal{T}(\mu = 0,\sigma = 1,t =5</span>)</span> and <span style="color:blue;"><span class="math inline">\mathcal{C}(x_0= 0,\gamma = 10)</span></span> with a <span style="color:green;"><span class="math inline">\mathcal{N}(\mu = 0,\sigma = 1</span>)</span> distribution. If that sounds like the opposite of preferring wide tails on <span class="math inline">q(x)</span>’s I described above, you’re right, but using a poor choice here will illustrate some useful properties.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simulated_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
@@ -399,6 +399,42 @@ IW-ELBO_M[q(z)||p(z,x)] := \mathbb{E}_{q(z_{1:M})}log\frac{1}{M} \sum_{m=1}^{M}\
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>             <span class="st">"The cauchy cause is more extreme- the mean of the cauchy is: "</span>,mean_c,<span class="st">" compared to a max of "</span>,max_c))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "the mean of the t is: 0.995904306317625 compared to a max of 164.448932152079;The cauchy cause is more extreme- the mean of the cauchy is: 0.283655933763642 compared to a max of 1428.22324178729"</code></pre>
+</div>
+</div>
+<p>So let’s bring this back to Pareto Smoothing here. We want to model and smooth that long tail of the ratio distribution. It turns out there’s plenty of study of the distribution of extreme events, and there’s some classical limit results showing:</p>
+<p><span class="math display">
+r(x_i) | r(x_i) &gt; \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow \infty
+</span></p>
+<p>where <span class="math inline">\tau</span> is a lower bound parameter, which in our case defines how many ratios from the tail we’ll actually model. <span class="math inline">\sigma</span> is a scale parameter, and <span class="math inline">k</span> is a unconstrained shape parameter. The Generalized Pareto Distribution has form:</p>
+<p><span class="math display">
+\frac{1}{\sigma} \left(1 + k\frac{r - \tau}{\sigma} \right)^{-1/k-1}
+</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>manageable_psis <span class="ot">&lt;-</span> <span class="fu">psis</span>(<span class="fu">log</span>(simulated_data<span class="sc">$</span>manageable_ratios),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">r_eff =</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Some Pareto k diagnostic values are slightly high. See help('pareto-k-diagnostic') for details.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>manageable_psis<span class="sc">$</span>diagnostics</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$pareto_k
+[1] 0.5963495
+
+$n_eff
+[1] 62963.93</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>unmanageable_psis <span class="ot">&lt;-</span> <span class="fu">psis</span>(<span class="fu">log</span>(simulated_data<span class="sc">$</span>unmanageable_ratios),</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">r_eff =</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help('pareto-k-diagnostic') for details.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>unmanageable_psis<span class="sc">$</span>diagnostics</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$pareto_k
+[1] 0.8533127
+
+$n_eff
+[1] 249.2052</code></pre>
 </div>
 </div>
 </section>
