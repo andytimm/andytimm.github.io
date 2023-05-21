@@ -292,7 +292,7 @@ we'll actually model. $\sigma$ is a scale parameter, and $k$ is a unconstrained 
 $$
 \frac{1}{\sigma} \left(1 + k\frac{r - \tau}{\sigma} \right)^{-1/k-1}
 $$
-
+One of the best things about this approximation is that also provides a practical
 
 
 ```{r}

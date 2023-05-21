@@ -408,7 +408,7 @@ r(x_i) | r(x_i) &gt; \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow \inft
 <p>where <span class="math inline">\tau</span> is a lower bound parameter, which in our case defines how many ratios from the tail we’ll actually model. <span class="math inline">\sigma</span> is a scale parameter, and <span class="math inline">k</span> is a unconstrained shape parameter. The Generalized Pareto Distribution has form:</p>
 <p><span class="math display">
 \frac{1}{\sigma} \left(1 + k\frac{r - \tau}{\sigma} \right)^{-1/k-1}
-</span></p>
+</span> One of the best things about this approximation is that also provides a practical</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>manageable_psis <span class="ot">&lt;-</span> <span class="fu">psis</span>(<span class="fu">log</span>(simulated_data<span class="sc">$</span>manageable_ratios),</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">r_eff =</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
