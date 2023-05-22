@@ -312,7 +312,7 @@ an alternative question, and kill two birds with one stone: what sample size do
 we need for PSIS to work? [Chaterjee and Draconis (2018)](https://arxiv.org/abs/1511.01437)
 showed that for a given accuracy, how big $S$ needs to be for importance sampling
 more broadly depends on how close $q(x)$ is to $p(x)$ in KL distance- we need to
-satisfy $log(S) \geq \mathbb{E}_{\theta \sim q(x)}[r(\theta)log(\theta)]$ to
+satisfy $log(S) \geq \mathbb{E}_{\theta \sim q(x)}[r(\theta)log(r(\theta))]$ to
 get accuracy. 
 
 Well, we don't know the distribution of $r$, we should have some pretty good
