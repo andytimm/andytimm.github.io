@@ -297,7 +297,7 @@ and we can replace our M biggest ratios with estimated values calculated via the
 Generalized Pareto Distribution.
 
 One of the best things about PSIS is it comes with a built in diagnostic via $\hat{k}$. To see
-how this works, it's useful to know that vanilla importance sampling depends on how many moments $r(\theta)$ has- for example, if at least two moments exist, the estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD
+how this works, it's useful to know that importance sampling depends on how many moments $r(\theta)$ has- for example, if at least two moments exist, the vanilla IS estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD
 has $k^{-1}$ finite fractional moments when $k > 0$.
 
 Vehtari et al. show that the replacement of the largest M ratios above changes
@@ -307,12 +307,12 @@ really cool bit- $k < .7$ turns out to be a remarkably robust indicator of when
 we can expect PSIS to work in a ton of different simulation studies and practical
 examples.
 
-Why is this true? 1.4 Fractional moments seems awful arbitrary, right? Let's ask
+Why is this true? 1.4 fractional moments seems awful arbitrary, right? Let's ask
 an alternative question, and kill two birds with one stone: what sample size do
 we need for PSIS to work? [Chaterjee and Draconis (2018)](https://arxiv.org/abs/1511.01437)
 showed that for a given accuracy, how big $S$ needs to be for importance sampling
 more broadly depends on how close $q(x)$ is to $p(x)$ in KL distance- we need to
-satisfy $log(S) \geq \mathbb{E}_{\theta ~ q(x)}[r(\theta)log(\theta)]$ to
+satisfy $log(S) \geq \mathbb{E}_{\theta \sim q(x)}[r(\theta)log(\theta)]$ to
 get accuracy. 
 
 Well, we don't know the distribution of $r$, we should have some pretty good
@@ -329,7 +329,7 @@ $\hat{k}$[^4], and to give a few example points-
 
 : for given $\hat{k}$, roughly what $S$ is needed if $r$ is exactly Pareto {tbl-colwidths="[75,25]"}
 
-While we of course $r$ isn't Pareto exactly exactly, hopefully this helps with intuition
+While we of course know $r$ isn't Pareto exactly exactly, hopefully this helps with intuition
 around $\hat{k}$ telling us when we're getting into "sampling forever to have any chance
 at all to control the variance" land.
 
@@ -352,6 +352,21 @@ As we expected, the the Normal proposal distribution isn't ideal for the T
 distribution, but it's manageable. On the other hand, we'd need somewhere
 between **a trillion and "oh god no :("** samples to make the normal proposal work out
 for the Cauchy.
+
+Bringing the discussion back to variational inference, PSIS is super helpful-
+importance sampling more generally broadens the class of $q(x)$es that are
+close enough to $p(x)$ for variational inference to work, and PSIS considerably
+widens that basin of feasibility. The extensive theoretical and simulation framework around the method
+also give us a solid way to realize when importance sampling isn't feasible via the $\hat{k}$ diagnostic,
+and tells us how roughly samples we need to draw. Super, super cool.
+
+One more great thing PSIS does for variational inference- $\hat{k}$ serves as
+a powerful diagnostic for variational inference itself! I'll save most of this
+discussion for the next post (on diagnostics), but to sketch out the logic- $\hat{k}$
+tells us when $q(x)$ is too far from $p(x)$ for importance sampling to work, which
+is a function of KL Divergence from $q(x)$ to $p(x)$- if that distance is too great
+for importance sampling to allow us to bridge, that implies we aren't close
+enough to trust our base variational approximation either!
 
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
@@ -381,7 +396,7 @@ the [original MIS paper itself](https://dl.acm.org/doi/10.1145/218380.218498), V
 a bit of reading around or reading into computer graphics to grok their examples
 and notational choices. 
 [^3]: Slight more weeds here- it turns out that this idea to use Vehtari et al.'s
-rule of thumb for selecting M and get $\tau$ from there is fairly important. The
+rule of thumb for selecting M and getting $\tau$ from there is fairly important. The
 GPD Approximation is pretty sensitive to getting $\tau$ right- it'll be poor
 if $\tau$ is too low. Having a deterministic rule of thumb that preforms better than alternative
 more complicated schemes for estimating $\tau$ is great, and they work through
