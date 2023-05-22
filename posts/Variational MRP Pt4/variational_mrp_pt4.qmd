@@ -298,7 +298,42 @@ Generalized Pareto Distribution.
 
 One of the best things about PSIS is it comes with a built in diagnostic via $\hat{k}$. To see
 how this works, it's useful to know that vanilla importance sampling depends on how many moments $r(\theta)$ has- for example, if at least two moments exist, the estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD
-has $k^{-1}$ finite moments when $k > 0$, which we can use to reason about  
+has $k^{-1}$ finite fractional moments when $k > 0$.
+
+Vehtari et al. show that the replacement of the largest M ratios above changes
+PSIS to have finite variance and an error distribution converging to normal when
+$k \in (.5,1)$. What about actually practical to work with variance? This is the
+really cool bit- $k < .7$ turns out to be a remarkably robust indicator of when
+we can expect PSIS to work in a ton of different simulation studies and practical
+examples.
+
+Why is this true? 1.4 Fractional moments seems awful arbitrary, right? Let's ask
+an alternative question, and kill two birds with one stone: what sample size do
+we need for PSIS to work? [Chaterjee and Draconis (2018)](https://arxiv.org/abs/1511.01437)
+showed that for a given accuracy, how big $S$ needs to be for importance sampling
+more broadly depends on how close $q(x)$ is to $p(x)$ in KL distance- we need to
+satisfy $log(S) \geq \mathbb{E}_{\theta ~ q(x)}[r(\theta)log(\theta)]$ to
+get accuracy. 
+
+Well, we don't know the distribution of $r$, we should have some pretty good
+intuition that the important part (read: that explosive, variance ruining tail) 
+is Pareto. If we take $r$ as exactly Pareto, you can trace out $S$ for different
+$\hat{k}$[^4], and to give a few example points-
+
+| $\hat{k}$  | $S$ needed  |
+|--------|--------|
+| .5  | ~1,000   |
+| .7   | ~140,000   |
+| .8 | 1,000,000,000,000   |
+| .9 | please stop you're making your compute sad. |
+
+: for given $\hat{k}$, roughly what $S$ is needed if $r$ is exactly Pareto {tbl-colwidths="[75,25]"}
+
+While we of course $r$ isn't Pareto exactly exactly, hopefully this helps with intuition
+around $\hat{k}$ telling us when we're getting into "sampling forever to have any chance
+at all to control the variance" land.
+
+Neat! So what does that look like for our Cauchy and T distribution example?
 
 
 ```{r}
@@ -312,6 +347,11 @@ unmanageable_psis <- psis(log(simulated_data$unmanageable_ratios),
 
 unmanageable_psis$diagnostics
 ```
+
+As we expected, the the Normal proposal distribution isn't ideal for the T
+distribution, but it's manageable. On the other hand, we'd need somewhere
+between **a trillion and "oh god no :("** samples to make the normal proposal work out
+for the Cauchy.
 
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
@@ -346,3 +386,5 @@ GPD Approximation is pretty sensitive to getting $\tau$ right- it'll be poor
 if $\tau$ is too low. Having a deterministic rule of thumb that preforms better than alternative
 more complicated schemes for estimating $\tau$ is great, and they work through
 showing it works well in most reasonable cases.
+[^4]: I'll be lazy here and not derive or plot this- you can see the plot in Dan Simpson's
+slides mentioned above.

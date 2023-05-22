@@ -410,7 +410,43 @@ r(\theta) | r(\theta) &gt; \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow
 \frac{1}{\sigma} \left(1 + k\frac{r - \tau}{\sigma} \right)^{-1/k-1}
 </span></p>
 <p>and we can replace our M biggest ratios with estimated values calculated via the CDF of the Generalized Pareto Distribution.</p>
-<p>One of the best things about PSIS is it comes with a built in diagnostic via <span class="math inline">\hat{k}</span>. To see how this works, it’s useful to know that vanilla importance sampling depends on how many moments <span class="math inline">r(\theta)</span> has- for example, if at least two moments exist, the estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD has <span class="math inline">k^{-1}</span> finite moments when <span class="math inline">k &gt; 0</span>, which we can use to reason about</p>
+<p>One of the best things about PSIS is it comes with a built in diagnostic via <span class="math inline">\hat{k}</span>. To see how this works, it’s useful to know that vanilla importance sampling depends on how many moments <span class="math inline">r(\theta)</span> has- for example, if at least two moments exist, the estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD has <span class="math inline">k^{-1}</span> finite fractional moments when <span class="math inline">k &gt; 0</span>.</p>
+<p>Vehtari et al.&nbsp;show that the replacement of the largest M ratios above changes PSIS to have finite variance and an error distribution converging to normal when <span class="math inline">k \in (.5,1)</span>. What about actually practical to work with variance? This is the really cool bit- <span class="math inline">k &lt; .7</span> turns out to be a remarkably robust indicator of when we can expect PSIS to work in a ton of different simulation studies and practical examples.</p>
+<p>Why is this true? 1.4 Fractional moments seems awful arbitrary, right? Let’s ask an alternative question, and kill two birds with one stone: what sample size do we need for PSIS to work? <a href="https://arxiv.org/abs/1511.01437">Chaterjee and Draconis (2018)</a> showed that for a given accuracy, how big <span class="math inline">S</span> needs to be for importance sampling more broadly depends on how close <span class="math inline">q(x)</span> is to <span class="math inline">p(x)</span> in KL distance- we need to satisfy <span class="math inline">log(S) \geq \mathbb{E}_{\theta ~ q(x)}[r(\theta)log(\theta)]</span> to get accuracy.</p>
+<p>Well, we don’t know the distribution of <span class="math inline">r</span>, we should have some pretty good intuition that the important part (read: that explosive, variance ruining tail) is Pareto. If we take <span class="math inline">r</span> as exactly Pareto, you can trace out <span class="math inline">S</span> for different <span class="math inline">\hat{k}</span><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, and to give a few example points-</p>
+<table class="table">
+<caption>for given <span class="math inline">\hat{k}</span>, roughly what <span class="math inline">S</span> is needed if <span class="math inline">r</span> is exactly Pareto</caption>
+<colgroup>
+<col style="width: 75%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\hat{k}</span></th>
+<th><span class="math inline">S</span> needed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>.5</td>
+<td>~1,000</td>
+</tr>
+<tr class="even">
+<td>.7</td>
+<td>~140,000</td>
+</tr>
+<tr class="odd">
+<td>.8</td>
+<td>1,000,000,000,000</td>
+</tr>
+<tr class="even">
+<td>.9</td>
+<td>please stop you’re making your compute sad.</td>
+</tr>
+</tbody>
+</table>
+<p>While we of course <span class="math inline">r</span> isn’t Pareto exactly exactly, hopefully this helps with intuition around <span class="math inline">\hat{k}</span> telling us when we’re getting into “sampling forever to have any chance at all to control the variance” land.</p>
+<p>Neat! So what does that look like for our Cauchy and T distribution example?</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>manageable_psis <span class="ot">&lt;-</span> <span class="fu">psis</span>(<span class="fu">log</span>(simulated_data<span class="sc">$</span>manageable_ratios),</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">r_eff =</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -439,6 +475,7 @@ $n_eff
 [1] 249.2052</code></pre>
 </div>
 </div>
+<p>As we expected, the the Normal proposal distribution isn’t ideal for the T distribution, but it’s manageable. On the other hand, we’d need somewhere between <strong>a trillion and “oh god no :(”</strong> samples to make the normal proposal work out for the Cauchy.</p>
 </section>
 <section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
@@ -463,6 +500,7 @@ $n_eff
 <li id="fn1"><p>we’ll call it q(x) here to make the application super clear, but often I see the “proposal” distribution called f(x) and the the distribution we want to approximate called g(x).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>If you’re looking to learn about importance sampling for the first time, a great place to start is Ben Lambert’s video introductions to the basic idea: <a href="https://www.youtube.com/watch?v=V8f8ueBc9sY">video 1</a>, and <a href="https://www.youtube.com/watch?v=F5PdIQxMA28">video 2</a>. For building more intuition about why we need all these variance reducing modifications to general IS, Dan Simpson has some great <a href="https://dpsimpson.github.io/pages/talks/Importance_sampling_unsw_2019.pdf">slides</a> which have a side benefit of being hilarious. Those slides will mention a lot of the books/papers I find most instructive, but it’s worth calling out especially Vehtari et Al’s Pareto Smoothed Importance Sampling <a href="https://arxiv.org/abs/1507.02646">paper</a> as particularly well written and paradigm shaping. Finally, Elvira et Al’s (2019) Multiple Importance Sampling <a href="https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full">paper</a> is the most thorough I know, but isn’t particularly approachable. Instead, for MIS I’d recommend starting with the first few minutes of <a href="https://www.youtube.com/watch?v=dxFSwplfdpk">this talk</a> (although the main topic of their talk is less relevant, the visualizations are super helpful), and the first ~8 pages of <a href="https://arxiv.org/pdf/2102.05407.pdf">this paper</a>, also by Elvira et Al. (2021) (I especially like that it spends a bit more time on notation; since multiple importance sampling comes from/comes up in computer graphics, the notational choices sometimes feel a bit annoying to me). Finally, the <a href="https://dl.acm.org/doi/10.1145/218380.218498">original MIS paper itself</a>, Veach &amp; Guibas (1995) is quite readable, but requires a bit of reading around or reading into computer graphics to grok their examples and notational choices.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Slight more weeds here- it turns out that this idea to use Vehtari et al.’s rule of thumb for selecting M and get <span class="math inline">\tau</span> from there is fairly important. The GPD Approximation is pretty sensitive to getting <span class="math inline">\tau</span> right- it’ll be poor if <span class="math inline">\tau</span> is too low. Having a deterministic rule of thumb that preforms better than alternative more complicated schemes for estimating <span class="math inline">\tau</span> is great, and they work through showing it works well in most reasonable cases.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>I’ll be lazy here and not derive or plot this- you can see the plot in Dan Simpson’s slides mentioned above.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},
