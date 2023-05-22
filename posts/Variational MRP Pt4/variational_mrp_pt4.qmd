@@ -38,7 +38,7 @@ but can we work with a particular $q(x)$ we have and make better use of the part
 
 ... Phased this way, this sounds a lot like importance sampling. If you haven't seen them before,
 an importance sampling estimator allows us to take draws from a (preferably) easy to sample
-from distribution[^7] and reweight the samples to look more like our true target
+from distribution[^1] and reweight the samples to look more like our true target
 distribution. The weight $w_i$ (or ratio, $r_i$) for each sample $i$ take form:
 
 $$
@@ -48,7 +48,7 @@ Before you get worried that we don't have $p(x_i)$ because of the normalizing co
 "self-normalizes" such that this can be a reasonable strategy. Intuitively, we're
 just placing more weight on samples likely $p(x)$.
 
-This footenote[^8] has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some
+This footenote[^2] has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some
 particularly important sub-problems to solve in making a good importance sampling estimator, and good important sampling estimator for VI. 
 
 First, our choice of the "proposal" distribution we're reweighting to be more like
@@ -283,16 +283,22 @@ that long tail of the ratio distribution. It turns out there's plenty of study
 of the distribution of extreme events, and there's some classical limit results showing:
 
 $$
-r(x_i) | r(x_i) > \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow \infty
+r(\theta) | r(\theta) > \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow \infty
 $$
 
 where $\tau$ is a lower bound parameter, which in our case defines how many ratios from the tail
-we'll actually model. $\sigma$ is a scale parameter, and $k$ is a unconstrained shape parameter. The Generalized Pareto Distribution has form:
+we'll actually model. $\sigma$ is a scale parameter, and $k$ is a unconstrained shape parameter. Without getting too far into the weeds, we can implicitly define $\tau$ via using a well-supported role of thumb suggesting to use the M largest ratios, $M = min(0.2S,3\sqrt{S})$[^3]. From there, the $\hat{k}$ and $\hat{\sigma}$ have easy and efficient estimators. The Generalized Pareto Distribution has form:
 
 $$
 \frac{1}{\sigma} \left(1 + k\frac{r - \tau}{\sigma} \right)^{-1/k-1}
 $$
-One of the best things about this approximation is that also provides a practical
+
+and we can replace our M biggest ratios with estimated values calculated via the CDF of the
+Generalized Pareto Distribution.
+
+One of the best things about PSIS is it comes with a built in diagnostic via $\hat{k}$. To see
+how this works, it's useful to know that vanilla importance sampling depends on how many moments $r(\theta)$ has- for example, if at least two moments exist, the estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD
+has $k^{-1}$ finite moments when $k > 0$, which we can use to reason about  
 
 
 ```{r}
@@ -317,10 +323,10 @@ unmanageable_psis$diagnostics
 # Conclusions + Bonus Context
 
 
-[^7]: we'll call it q(x) here to make the application super clear, but often
+[^1]: we'll call it q(x) here to make the application super clear, but often
 I see the "proposal" distribution called f(x) and the the distribution we want
 to approximate called g(x). 
-[^8]: If you're looking to learn about importance sampling for the first time,
+[^2]: If you're looking to learn about importance sampling for the first time,
 a great place to start is Ben Lambert's video introductions to the basic idea:
 [video 1](https://www.youtube.com/watch?v=V8f8ueBc9sY), and [video 2](https://www.youtube.com/watch?v=F5PdIQxMA28). For building more intuition about
 why we need all these variance reducing modifications to general IS, Dan Simpson
@@ -334,3 +340,9 @@ in computer graphics, the notational choices sometimes feel a bit annoying to me
 the [original MIS paper itself](https://dl.acm.org/doi/10.1145/218380.218498), Veach & Guibas (1995) is quite readable, but requires
 a bit of reading around or reading into computer graphics to grok their examples
 and notational choices. 
+[^3]: Slight more weeds here- it turns out that this idea to use Vehtari et al.'s
+rule of thumb for selecting M and get $\tau$ from there is fairly important. The
+GPD Approximation is pretty sensitive to getting $\tau$ right- it'll be poor
+if $\tau$ is too low. Having a deterministic rule of thumb that preforms better than alternative
+more complicated schemes for estimating $\tau$ is great, and they work through
+showing it works well in most reasonable cases.
