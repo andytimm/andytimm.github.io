@@ -336,14 +336,14 @@ at all to control the variance" land.
 Neat! So what does that look like for our Cauchy and T distribution example?
 
 
-```{r}
+```{r, warning=FALSE}
 manageable_psis <- psis(log(simulated_data$manageable_ratios),
                        r_eff = NA)
 
-manageable_psis$diagnostics
-
 unmanageable_psis <- psis(log(simulated_data$unmanageable_ratios),
                           r_eff = NA)
+
+manageable_psis$diagnostics
 
 unmanageable_psis$diagnostics
 ```
@@ -370,6 +370,15 @@ enough to trust our base variational approximation either!
 
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
+
+Why stop at just one proposal?
+
+Intuition Building with graphics people.
+
+How do we actually do this? lots of possibilities.
+
+How practical is this?
+
 
 # Can we bound error in terms of ELBO or CUBO?
 
