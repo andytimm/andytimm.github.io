@@ -8,6 +8,17 @@ categories:
 - Variational Inference
 ---
 
+**Note:** I've gotten a lot more pessimistic about how generally useful the
+alternatives to simple KL-Divergence are since writing this post.
+I still think these are really useful ideas to think to build intuition about VI,
+and techniques like CHIVI are useful for some lower dimensional problems or as
+part of an ensemble of techniques for high dimensional ones. However, [this paper](https://arxiv.org/abs/2103.01085) from Dhaka et al. is very convincing that CHIVI and currently available similar algorithms are in practice very hard to optimize
+for high dimensional, and that some of the intuitive
+benefits shown about CHIVI below in low dimensions don't really generalize the
+way we'd expect to higher dimensions. 
+
+---
+
 This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html) we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we'll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.

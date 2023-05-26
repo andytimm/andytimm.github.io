@@ -2,7 +2,7 @@
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 4- Some theory on why VI is hard
-date: 2023-05-02
+date: 2023-05-22
 draft: True
 categories:
 - MRP
