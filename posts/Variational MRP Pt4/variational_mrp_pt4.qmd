@@ -432,7 +432,7 @@ information from that one proposal; we're now using everything at hand.
 
 This feels like it should be pretty solidly better than just using a single proposal density,
 and indeed Elvira et al. have a result showing that the variance of the mixture
-based weighting scheme is under pretty general conditions $\leq$ that of the
+based weighting scheme is under pretty general conditions lesser than or equal to that of the
 single proposal density one[^5].
 
 [Veach and Guibas (1995)](https://dl.acm.org/doi/10.1145/218380.218498), the paper
@@ -440,8 +440,7 @@ to introduce MIS, called this
 weighting scheme the *balance heuristic*, since the weighting scheme is unique
 in that each sample value at particular $x$ is the same regardless of which distribution produced it. They also prove a bound on the variance of this estimator, showing that there isn't a
 lot of room to improve on it, even in the most ideal circumstances. Without getting
-into the weeds, their result suggests that there isn't a massively better general
-case weighting scheme, which is a helpful guide to practical use.
+into the weeds, their result suggests that there isn't a massively better general-case weighting scheme, which is a helpful guide to practical use.
 
 When can we do (a bit) better than the weighting scheme above? The answer is essentially
 in cases where we know some of our $J$ proposals are much better than others. In these
@@ -457,6 +456,10 @@ $$
 which raises the weights to a power $\beta$, and normalizes. For intuition, notice that if
 $\beta = 1$, then this is the *balance heuristic* again, and as $\beta \rightarrow \infty$, this moves towards only selecting the best proposal at each point.
 
+As a final note, we can also Pareto Smooth any of these types of weights once
+we have them, and this sparks joy, as we can add begin to envision model setups
+with glorious abbreviations like IW-ELBO-PSIS-MIS-VI.
+
 So stepping back, we have some provably efficient, provably hard to beat ways to use MIS to combine
 variational approximations together. Again, there's a whole literature on MIS
 which the Elvira paper above reviews, but fairly intuitive weighting schemes
@@ -465,7 +468,7 @@ more atypical cases to reduce the variance of the MIS estimator as well.
 
 ###  What proposals combine best?
 
-A next natural question is: what different proposals should we use here? There's
+A next natural question is what different proposals should we use? There's
 a little less work in this area than I expected, but there are a couple of papers; my favorite is [Lopez et al. (2020)](https://arxiv.org/abs/2002.07217)[^6]. 
 
 They find that using VI approximations based on different objectives is quite
@@ -479,7 +482,7 @@ we want to find proposals that are both good and sufficiently different from one
 another that combining them adds value.
 
 It seems to me there's a lot of room to explore this search space still;
-there are a lot of generic ML ensembling tricks that feel like they could work here.
+there are a lot of generic ML ensembling tricks that feel like they could work.
 For example, could we save state several times throughout optimizing a
 variational approximation, and MIS combine samples from each of those, similar to
 how people cheaply ensemble for neural networks? Or are there ways to optimize
@@ -502,13 +505,32 @@ compute cost given all the objective based models take  around the same time to 
 well since they didn't do the work to parallelize their models. On the problems
 they were working on, this is a pretty small (~30s more time) time cost in exchange
 for a meaningful accuracy improvement in the real world biology application they
-apply this to.
+apply this to. 
 
-# Can we bound error in terms of ELBO or CUBO?
+Depending on what you're working on, the answer may well be yes, this can be
+computationally feasible and well worth it.
 
-## Wasserstein Bounds
+## Conclusions
 
-# Conclusions + Bonus Context
+Importance Sampling is a workhorse of modern computational statistics, and it should be no surprise it
+brings a lot to variational inference. Like with the last post, my overall impression is of decreasing
+fragility for variational inference and a broader set of tools for increasing
+performance. With IW-ELBO and similar objectives, we can get a tighter bound
+than the vanilla ELBO, and introduce some new incentives in training our
+approximation as well. With importance sampling in general and PSIS especially,
+we can make weight an approximation that is close to the target but not perfect into a much, much
+better approximation of our posterior, and do some in a principled and theoretically
+grounded way with built-in diagnostics. With MIS, we can make the most of several approximations at once, if
+we're willing to pay that computational cost. Collectively, we're building up
+a set of tools that broaden the class of problems for which VI works, provided
+you're willing to spend time searching for a combination of tools that works well
+for your specific application. 
+
+Thanks for reading. In the next post, we'll look at Normalizing Flows, an
+incredibly powerful and general tool for making maximally flexible variational
+distributions. All code for this post can be found [here](https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt4/variational_mrp_pt4.qmd).
+
+
 
 
 [^1]: we'll call it q(x) here to make the application super clear, but often
@@ -536,7 +558,7 @@ more complicated schemes for estimating $\tau$ is great, and they work through
 showing it works well in most reasonable cases.
 [^4]: I'll be lazy here and not derive or plot this- you can see the plot in Dan Simpson's
 slides mentioned above.
-[^5: One fascinating caveat here is that they proved this only for the case
+[^5]: One fascinating caveat here is that they proved this only for the case
 where we know the normalizing constant, not the self-normalized case we pretty
 much always have to live with, but they have some numerical results and some
 pretty common sense arguments that the result should extend in most reasonable
