@@ -243,6 +243,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#solving-our-is-problems-with-pareto-smoothed-importance-sampling" id="toc-solving-our-is-problems-with-pareto-smoothed-importance-sampling" class="nav-link" data-scroll-target="#solving-our-is-problems-with-pareto-smoothed-importance-sampling">Solving our IS problems with Pareto-Smoothed Importance Sampling</a></li>
   <li><a href="#multiple-proposal-distributions-with-multiple-importance-sampling" id="toc-multiple-proposal-distributions-with-multiple-importance-sampling" class="nav-link" data-scroll-target="#multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</a></li>
   </ul></li>
+  <li><a href="#how-do-mis-weights-work" id="toc-how-do-mis-weights-work" class="nav-link" data-scroll-target="#how-do-mis-weights-work">How do MIS weights work?</a></li>
+  <li><a href="#what-proposals-combine-best" id="toc-what-proposals-combine-best" class="nav-link" data-scroll-target="#what-proposals-combine-best">What proposals combine best?</a></li>
   <li><a href="#can-we-bound-error-in-terms-of-elbo-or-cubo" id="toc-can-we-bound-error-in-terms-of-elbo-or-cubo" class="nav-link" data-scroll-target="#can-we-bound-error-in-terms-of-elbo-or-cubo">Can we bound error in terms of ELBO or CUBO?</a>
   <ul>
   <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a></li>
@@ -411,7 +413,7 @@ r(\theta) | r(\theta) &gt; \tau \rightarrow GPD(\tau,\sigma,k), \tau \rightarrow
 </span></p>
 <p>and we can replace our M biggest ratios with estimated values calculated via the CDF of the Generalized Pareto Distribution.</p>
 <p>One of the best things about PSIS is it comes with a built in diagnostic via <span class="math inline">\hat{k}</span>. To see how this works, it’s useful to know that importance sampling depends on how many moments <span class="math inline">r(\theta)</span> has- for example, if at least two moments exist, the vanilla IS estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD has <span class="math inline">k^{-1}</span> finite fractional moments when <span class="math inline">k &gt; 0</span>.</p>
-<p>Vehtari et al.&nbsp;show that the replacement of the largest M ratios above changes PSIS to have finite variance and an error distribution converging to normal when <span class="math inline">k \in (.5,1)</span>. Intuitively, k &gt; .5 implies the raw ratios have infinite variance, but PSIS trades a little bias to make the variance finite again.</p>
+<p>Vehtari et al.&nbsp;show that the replacement of the largest M ratios above changes PSIS to have finite variance and an error distribution converging to normal when <span class="math inline">k \in (.5,1)</span>. Intuitively, <span class="math inline">k &gt; .5</span> implies the raw ratios have infinite variance, but PSIS trades a little bias to make the variance finite again.</p>
 <p>What about actually practical to work with variance? This is the really cool bit- <span class="math inline">k &lt; .7</span> turns out to be a remarkably robust indicator of when we can expect PSIS to work in a ton of different simulation studies and practical examples.</p>
 <p>Why is this true? 1.4 fractional moments seems awful arbitrary, right? Let’s ask an alternative question, and kill two birds with one stone: what sample size do we need for PSIS to work? <a href="https://arxiv.org/abs/1511.01437">Chaterjee and Draconis (2018)</a> showed that for a given accuracy, how big <span class="math inline">S</span> needs to be for importance sampling more broadly depends on how close <span class="math inline">q(x)</span> is to <span class="math inline">p(x)</span> in KL distance- we need to satisfy <span class="math inline">log(S) \geq \mathbb{E}_{\theta \sim q(x)}[r(\theta)log(r(\theta))]</span> to get accuracy.</p>
 <p>Well, we don’t know the distribution of <span class="math inline">r</span>, we should have some pretty good intuition that the important part (read: that explosive, variance ruining tail) is Pareto. If we take <span class="math inline">r</span> as exactly Pareto, you can trace out <span class="math inline">S</span> for different <span class="math inline">\hat{k}</span><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, and to give a few example points-</p>
@@ -478,11 +480,38 @@ $n_eff
 </section>
 <section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
-<p>Why stop at just one proposal?</p>
-<p>Intuition Building with graphics people.</p>
-<p>How do we actually do this? lots of possibilities.</p>
-<p>How practical is this?</p>
+<p>Why stop at just one proposal distribution? This is basically the jumping off point for Multiple Importance sampling, or MIS. If we have several different <span class="math inline">q(x)</span>, and each does a somewhat better job of handling a certain region of the target posterior, then we can efficiently combine them using MIS into an overall better final estimate, and this will work out to be pretty obviously more optimal than just fitting a bunch of VI approximations and averaging them.</p>
+<p>If we can suddenly have multiple different <span class="math inline">q(x)</span> working together, this naturally explodes the search space for a good VI strategy. I’d refer the more interested reader to <a href="https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full">Elvira et al.&nbsp;(2019)</a> which lays out a framework for thinking about all the decision space of MIS more comprehensively, but for the purposes of improving VI specifically, I’ll cover:</p>
+<ol type="1">
+<li>How do we weight the proposals together?</li>
+<li>Which proposals make sense to include in a MIS framework?</li>
+<li>How practical is fitting multiple proposals?</li>
+</ol>
 </section>
+</section>
+<section id="how-do-mis-weights-work" class="level1">
+<h1>How do MIS weights work?</h1>
+<p>How do we generalize a notion of importance weights like the one introduced above:</p>
+<p><span class="math display">
+w_i = \frac{p(x_i)}{q(x_i)}
+</span></p>
+<p>to multiple proposals? While there are some obviously not good properties we want to avoid (it’d be pretty silly to give up our unbiasedness), there are a ton of apparent degrees of freedom in MIS weighting. we’ll relax this assumption in a bit, but let’s start by assuming we don’t have any prior information about which proposals might be better, and that we’ll draw the same number of samples from each proposal.</p>
+<p>While I won’t work through as extensive of an example as in the last section, let’s fix an example where we’ll have <span class="math inline">J = 3</span> different proposals, <span style="color:cyan;"><span class="math inline">q_1(x)</span>)</span>, <span style="color:purple;"><span class="math inline">q_2(x)</span></span>, and <span style="color:pink;"><span class="math inline">q_3(x)</span>)</span>.</p>
+<p>A first question is how to choose the denominator in the weight. One simple and efficient option is to simply use the density of a sample from <span class="math inline">j</span> to make a weight, for example weighting a draw from <span style="color:pink;"><span class="math inline">q_3(x)</span>)</span> as:</p>
+<p><span class="math display">
+w_{i} = \frac{p(x_i)}{\textcolor{pink}{q_3(x_i)}}
+</span> This works, and is pretty common in MIS applications, but we’re not really using all the information we have from having several proposals. We can get a provably lower variance estimator by defining the mixture of the densities <span class="math inline">\psi(x)</span> as:</p>
+<p><span class="math display">
+\psi(x) = \frac{1}{J} \sum\limits_{J = 1}\limits^{J} q_j(x)
+</span></p>
+<p>and using that as the denominator. So for the example above, this’d be:</p>
+<p><span class="math display">
+w_{i} = \frac{p(x_i)}{\frac{1}{3}(\textcolor{cyan}{q_1(x)} + \textcolor{purple}{q_2(x_i)} + \textcolor{pink}{q_3(x_i))}}
+</span> By defining this mixture and and incorporating it into our weighting, we intuitively should have more efficient exchange of information between the different <span class="math inline">q(x)</span>. By this, I mean that we no longer just are weighting each sample from a proposal using information from that one proposal; we’re now</p>
+</section>
+<section id="what-proposals-combine-best" class="level1">
+<h1>What proposals combine best?</h1>
+<p>#How practical is MIS for VI?</p>
 </section>
 <section id="can-we-bound-error-in-terms-of-elbo-or-cubo" class="level1">
 <h1>Can we bound error in terms of ELBO or CUBO?</h1>

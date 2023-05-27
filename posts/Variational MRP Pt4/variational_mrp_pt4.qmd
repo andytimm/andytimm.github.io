@@ -302,7 +302,7 @@ has $k^{-1}$ finite fractional moments when $k > 0$.
 
 Vehtari et al. show that the replacement of the largest M ratios above changes
 PSIS to have finite variance and an error distribution converging to normal when
-$k \in (.5,1)$. Intuitively, k > .5 implies the raw ratios have infinite variance,
+$k \in (.5,1)$. Intuitively, $k > .5$ implies the raw ratios have infinite variance,
 but PSIS trades a little bias to make the variance finite again.
 
 What about actually practical to work with variance? This is the
@@ -374,13 +374,66 @@ enough to trust our base variational approximation either!
 
 ## Multiple Proposal Distributions with Multiple Importance Sampling
 
-Why stop at just one proposal?
+Why stop at just one proposal distribution? This is basically the jumping off point for 
+Multiple Importance sampling, or MIS. If we have several different $q(x)$, and
+each does a somewhat better job of handling a certain region of the target
+posterior, then we can efficiently combine them using MIS into an overall
+better final estimate, and this will work out to be pretty obviously more
+optimal than just fitting a bunch of VI approximations and averaging them.
 
-Intuition Building with graphics people.
+If we can suddenly have multiple different $q(x)$ working together, this naturally
+explodes the search space for a good VI strategy. I'd refer the more interested
+reader to [Elvira et al. (2019)](https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full) which lays out
+a framework for thinking about all the decision space of MIS more comprehensively,
+but for the purposes of improving VI specifically, I'll cover:
 
-How do we actually do this? lots of possibilities.
+1. How do we weight the proposals together?
+2. Which proposals make sense to include in a MIS framework?
+3. How practical is fitting multiple proposals?
 
-How practical is this?
+# How do MIS weights work?
+
+How do we generalize a notion of importance weights like the one introduced above:
+
+$$
+w_i = \frac{p(x_i)}{q(x_i)}
+$$
+
+to multiple proposals? While there are some obviously not good properties we
+want to avoid (it'd be pretty silly to give up our unbiasedness), there are a ton
+of apparent degrees of freedom in MIS weighting. we'll relax this assumption in a bit, but let's start by assuming we don't have any prior information about which proposals might be better, and that we'll draw the same number of samples from each proposal.
+
+While I won't work through as
+extensive of an example as in the last section, let's fix an example where we'll have $J = 3$ different proposals, <span style="color:cyan;">$q_1(x)$)</span>, <span style="color:purple;">$q_2(x)$</span>, and <span style="color:pink;">$q_3(x)$)</span>.
+
+A first question is how to choose the denominator in the weight. One simple and
+efficient option is to simply use the density of a sample from $j$ to make a weight,
+for example weighting a draw from <span style="color:pink;">$q_3(x)$)</span> as:
+
+$$
+w_{i} = \frac{p(x_i)}{\textcolor{pink}{q_3(x_i)}}
+$$
+This works, and is pretty common in MIS applications, but we're not really using all the information we have from having several proposals. We can get a provably lower variance estimator
+by defining the mixture of the densities $\psi(x)$ as:
+
+$$
+\psi(x) = \frac{1}{J} \sum\limits_{J = 1}\limits^{J} q_j(x)
+$$
+
+and using that as the denominator. So for the example above, this'd be:
+
+$$
+w_{i} = \frac{p(x_i)}{\frac{1}{3}(\textcolor{cyan}{q_1(x)} + \textcolor{purple}{q_2(x_i)} + \textcolor{pink}{q_3(x_i))}}
+$$
+By defining this mixture and and incorporating it into our weighting, we intuitively
+should have more efficient exchange of information between the different $q(x)$. By
+this, I mean that we no longer just are weighting each sample from a proposal using
+information from that one proposal; we're now 
+
+
+# What proposals combine best?
+
+#How practical is MIS for VI?
 
 
 # Can we bound error in terms of ELBO or CUBO?
