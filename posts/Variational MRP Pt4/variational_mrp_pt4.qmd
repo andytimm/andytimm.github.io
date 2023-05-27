@@ -302,7 +302,10 @@ has $k^{-1}$ finite fractional moments when $k > 0$.
 
 Vehtari et al. show that the replacement of the largest M ratios above changes
 PSIS to have finite variance and an error distribution converging to normal when
-$k \in (.5,1)$. What about actually practical to work with variance? This is the
+$k \in (.5,1)$. Intuitively, k > .5 implies the raw ratios have infinite variance,
+but PSIS trades a little bias to make the variance finite again.
+
+What about actually practical to work with variance? This is the
 really cool bit- $k < .7$ turns out to be a remarkably robust indicator of when
 we can expect PSIS to work in a ton of different simulation studies and practical
 examples.
