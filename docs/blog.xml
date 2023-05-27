@@ -10,7 +10,301 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Tue, 02 May 2023 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 27 May 2023 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
+<p>The general structure for this post and the ones after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
+<p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html">last post</a> we took a look at how our ELBO objective requires specific version of KL Divergence (the “Exclusive” formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more “inclusive” solution.</p>
+<p>In this post, we’ll leverage importance sampling to make the most of the samples we do have, emphasizing the parts of our <img src="https://latex.codecogs.com/png.latex?q(x)"> that look like <img src="https://latex.codecogs.com/png.latex?p(x)"> and de-emphasizing the parts that do not.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
+<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
+<li><strong>(This post)</strong> Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?</li>
+<li>Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?</li>
+<li>Problem 4: How can we know when VI is wrong? Are there useful error bounds?</li>
+<li>Better grounded diagnostics and workflow</li>
+</ol>
+<section id="not-all-samples-are-equally-good" class="level1">
+<h1>Not all samples are equally good</h1>
+<p>So we’ve made an approximation <img src="https://latex.codecogs.com/png.latex?q(x)"> that’s cheap to sample from, and is somewhat close to <img src="https://latex.codecogs.com/png.latex?p(x)">, our true posterior. The way to improve the approximation we’ve focused on so far is to just go back to the start and make <img src="https://latex.codecogs.com/png.latex?q(x)"> better; for example, through changing up the variational family, or to switching to a different optimization objective like the CUBO. That’s one solution that’s often necessary, but can we work with a particular <img src="https://latex.codecogs.com/png.latex?q(x)"> we have and make better use of the parts of it that are the closest to being right?</p>
+<p>… Phased this way, this sounds a lot like importance sampling. If you haven’t seen them before, an importance sampling estimator allows us to take draws from a (preferably) easy to sample from distribution<sup>1</sup> and reweight the samples to look more like our true target distribution. The weight <img src="https://latex.codecogs.com/png.latex?w_i"> (or ratio, <img src="https://latex.codecogs.com/png.latex?r_i">) for each sample <img src="https://latex.codecogs.com/png.latex?i"> take form:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_i%20=%20%5Cfrac%7Bp(x_i)%7D%7Bq(x_i)%7D%0A"> Before you get worried that we don’t have <img src="https://latex.codecogs.com/png.latex?p(x_i)"> because of the normalizing constant like every time we talk about having <img src="https://latex.codecogs.com/png.latex?p(x)"> in this series, there’s a clever estimator that “self-normalizes” such that this can be a reasonable strategy. Intuitively, we’re just placing more weight on samples more likely under <img src="https://latex.codecogs.com/png.latex?p(x)">.</p>
+<p>This footenote<sup>2</sup> has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some particularly important sub-problems to solve in making a good importance sampling estimator, and good important sampling estimator for VI.</p>
+<p>First, our choice of the “proposal” distribution we’re reweighting to be more like <img src="https://latex.codecogs.com/png.latex?p(x)"> matters for making this process practically feasible. We need the proposal distribution to be close enough to <img src="https://latex.codecogs.com/png.latex?p(x)"> that a realistic number of the draws get non-negligible weights. It might be true that we could draw proposals from a big <img src="https://latex.codecogs.com/png.latex?N"> dimensional uniform distribution for every problem, but if we want to be done sampling enough this century we need to at least get fairly close with our initial <img src="https://latex.codecogs.com/png.latex?q(x)">.</p>
+<p>A second, but related problem is that it’s quite common for the unmodified importance sampling estimator to have some weights which are orders and orders of magnitude higher than the average weight, blowing up the variance of the estimator. Dan Simpson’s slides I linked above has an instructive example with not too weird <img src="https://latex.codecogs.com/png.latex?p(x)"> and <img src="https://latex.codecogs.com/png.latex?q(x)">’s, but high dimension, that has a max weight ~1.4 million (!) times the average. If that happens, our estimator will essentially ignore most samples without gigantic weights, and it’ll take ages for that estimator to tell us anything remotely reliable.</p>
+<p>So with those points we need to address, here are the next topics in this post:</p>
+<ol type="1">
+<li>Importance Weighted Variational Inference</li>
+<li>Robust importance sampling with built in diagnostics via Pareto-Smoothed Importance Sampling</li>
+<li>Combining multiple proposal distributions via Multiple Importance Sampling</li>
+</ol>
+<section id="importance-weighted-variational-inference" class="level2">
+<h2 class="anchored" data-anchor-id="importance-weighted-variational-inference">Importance Weighted Variational Inference</h2>
+<p>Importance Weighting for VI in it’s simplest form is pretty intuitive (draw samples from an already trained <img src="https://latex.codecogs.com/png.latex?q(x)">, weight them…), so let’s derive the new Importance Weighted Variational Inference (IWVI) estimator first since some nice intuition will come with it.</p>
+<p>I want to emphasize something that wasn’t clear to me for a good while- these two ideas are not equivalent. While both are useful tools, the “train time”, objective-modifying IWVI estimator is a distinct approach from the “test time” importance sampling approach that takes draws from a fixed <img src="https://latex.codecogs.com/png.latex?q(x)"> and reweights them as best it can.</p>
+<p>We’ll aim to show that we can get a tighter ELBO by using importance sampling. This type of tighter ELBO was first shown by <a href="https://arxiv.org/abs/1509.00519">Burda et Al. (2015)</a> in the context of Variational Autoencoders after which is was fairly clear this could apply to variational inference, but <a href="https://arxiv.org/abs/1808.09034">Domke and Sheldon (2018)</a> fleshed out some details of that extension- I’ll be explaining some of the latter group’s main results first.</p>
+<p>To start, imagine a random variable <img src="https://latex.codecogs.com/png.latex?R">, such that <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D%7BR%7D%20=%20p(x)">, which we’ll think of as a estimator of <img src="https://latex.codecogs.com/png.latex?p(x)">. Then by Jensen’s Inequality:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Alogp(x)%20=%20%5Cmathbb%7BE%7DlogR%20+%20%5Cmathbb%7BE%7Dlog%5Cfrac%7Bp(x)%7D%7BR%7D%0A"></p>
+<p>The first term is the bound, which will be tighter if <img src="https://latex.codecogs.com/png.latex?R"> is highly concentrated.</p>
+<p>This is a more general form of the ELBO; we can make it quite familiar looking by having our <img src="https://latex.codecogs.com/png.latex?R"> above be:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AR%20=%20%5Cfrac%7Bp(z,x)%7D%7Bq(z)%7D,%20z%20%5Csim%20q%0A"></p>
+<p>The reason for pointing out this fairly simple generalization is helpful is that it frames how to tighten our ELBO on <img src="https://latex.codecogs.com/png.latex?logp(x)"> via alternative estimators <img src="https://latex.codecogs.com/png.latex?R">.</p>
+<p>By drawing <img src="https://latex.codecogs.com/png.latex?M"> samples and averaging them as in importance sampling, we get:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AR_M%20=%20%5Cfrac%7B1%7D%7BM%7D%5Csum_%7Bm=1%7D%5E%7BM%7D%5Cfrac%7Bp(z_m,x)%7D%7Bq(z_m)%7D,%20z_m%20%5Csim%20q%0A"> From there, we can derive a tighter bound on <img src="https://latex.codecogs.com/png.latex?logp(x)">, referred to as the IW-ELBO:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AIW-ELBO_M%5Bq(z)%7C%7Cp(z,x)%5D%20:=%20%5Cmathbb%7BE%7D_%7Bq(z_%7B1:M%7D)%7Dlog%5Cfrac%7B1%7D%7BM%7D%20%5Csum_%7Bm=1%7D%5E%7BM%7D%5Cfrac%7Bp(z_m,x)%7D%7Bq(z_m)%7D%0A"> Where we’re using the <img src="https://latex.codecogs.com/png.latex?1:M"> as a shorthand for <img src="https://latex.codecogs.com/png.latex?q(z_%7B1:M%7D)%20=%20q(z_1)...q(z_M)">.</p>
+<p>It’s worth noting that the last few lines don’t specify a particular form of importance sampling- we’re getting the tighter theoretical bounding behavior from the averaging of samples from <img src="https://latex.codecogs.com/png.latex?q">. We’ll see a particularly good form of importance sampling with desirable practical properties in a moment.</p>
+<section id="how-does-iw-elbo-change-the-vi-problem-conceptually" class="level3">
+<h3 class="anchored" data-anchor-id="how-does-iw-elbo-change-the-vi-problem-conceptually">How does IW-ELBO change the VI problem conceptually?</h3>
+<p>The tighter bound is nice, but importance sampling also has the side effect (done right, side benefit) of modifying our incentives in choosing a variational family. To see what I mean, we can re-use the example distributions from last post we used to build intuition for KL Divergence, where red was the true distribution, and green were our potential approximations. If we’re not going to draw multiple samples and weight them, it makes sense to choose something like the first plot below. Every draw in the middle of the two target modes is expensive per our ELBO objective, so better to choose a mode.</p>
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">rkl_plot <span class="ot" style="color: #003B4F;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-2">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"red"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-3">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mode_seeking_kl), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"green"</span>) <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"Without weighting, we prefer to capture a mode"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-4">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">""</span>)</span>
+<span id="cb1-5"></span>
+<span id="cb1-6">fkl_plot <span class="ot" style="color: #003B4F;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;">%&gt;%</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-7">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> normals), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"red"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-8">  <span class="fu" style="color: #4758AB;">geom_density</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mean_seeking_kl), <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">"green"</span>) <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"With importance sampling, weights allow us to prefer coverage"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-9">  <span class="fu" style="color: #4758AB;">xlab</span>(<span class="st" style="color: #20794D;">""</span>)</span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="fu" style="color: #4758AB;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>If we can use importance sampling though, quite the opposite is be true! Note that we’re still using the ELBO, a reverse-KL based metric- that hasn’t changed. What has changed is our ability to mitigate the objective costs of those samples between the two extremes. Via this “train time” implementation of IS, points outside the two target modes will get lower importance weights, and points within the modes will get higher ones, so as long as we’re covering the modes with some reasonable amount of probability mass, and drawing enough samples we can actually do better with the distribution centered between the modes.</p>
+<p>To further drive home the point about how a “train time” and “test time” implementations of IS differ, could “test time” IS do this? Not really- because the ability to better minimize the ELBO via sampling requires the IW-ELBO variant and associated training process. If we hard-coded <img src="https://latex.codecogs.com/png.latex?q(x)"> as the green <img src="https://latex.codecogs.com/png.latex?N(9,4)"> shown above, “test time” IS could weight the right samples up to better approximate <img src="https://latex.codecogs.com/png.latex?p(x)">, but it doesn’t fundamentally alter our optimization problem the way the IWVI objective does.</p>
+<p>We can also imagine how varying the number of samples might effect optimization. Between <img src="https://latex.codecogs.com/png.latex?S=1"> and “enough draws to get all the benefits of IS”, we can imagine there’s a slow transition from “just stick with 1 mode” and “go with IS”. So it seems like we should be worried about getting the number of samples right, but fortunately as we’ll see in the next section there are great rules of thumb in some variants of IS. We’ll still need to bear the cost of sampling (which gets higher as <img src="https://latex.codecogs.com/png.latex?q(x)"> becomes “further” from <img src="https://latex.codecogs.com/png.latex?p(x)">, as we’ll need more samples to weight into a good approximation), but the cost of sampling for most VI implementations will often be pretty manageable if our proposal distribution is somewhat close to <img src="https://latex.codecogs.com/png.latex?p(x)">.</p>
+<p>Another way to think about how importance sampling changes our task with variational inference is to think about what sorts of distributions make sense to have as our variational family, and even which objective might be better given IS. On choice of a variational family, if we’re aiming for coverage, moving towards thicker-tailed distributions like t distributions makes a lot of sense. While we explored the IW-ELBO above to build intuition, there’s no reason not to apply IW to the CUBO and thus CHIVI- this also naturally produces nicely overdispersed distributions which can be importance sampled closer to the true <img src="https://latex.codecogs.com/png.latex?p(x)">. This idea of aiming for a wide proposal to sample from is referred to in the importance sampling literature (eg <a href="https://artowen.su.domains/mc/">Owen, 2013</a>) as “defensive sampling”, with <a href="https://arxiv.org/abs/1808.09034">Domke and Sheldon (2018)</a> exploring the VI connection more fully. For intuition, by ensuring most of <img src="https://latex.codecogs.com/png.latex?p(x)"> is covered by some reasonable mass makes it easier to efficiently get draws that can be weighted into a final posterior, even if the unweighted posterior might be too wide.</p>
+</section>
+</section>
+<section id="solving-our-is-problems-with-pareto-smoothed-importance-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="solving-our-is-problems-with-pareto-smoothed-importance-sampling">Solving our IS problems with Pareto-Smoothed Importance Sampling</h2>
+<p>As we’ve been talking about importance sampling, we’ve been leaving some of the messier details aside (how many samples to draw, how to deal with the cases when some of the weights get huge, how to know when our proposal distribution is “close” enough).</p>
+<p>While the Importance Sampling Literature is huge and there are a lot of possible solutions here, I’ll next introduce <a href="https://arxiv.org/abs/1507.02646">Vehtari et Al. (2015)</a>’s Pareto-Smoothed Importance Sampling. I’m a huge fan of this paper- it’s a really elegant and powerful tool, derived from taking Bayesian principles seriously.</p>
+<p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those tail values as coming from a Generalized Pareto Distribution, a distribution for describing extreme values, and replace the most extreme weights with modeled (and more stable) values.</p>
+<p>For concreteness, let’s introduce a simple 1-D example. We’ll aim to use importance sampling to approximate distributions <span style="color:red;"><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D(%5Cmu%20=%200,%5Csigma%20=%201,t%20=5">)</span> and <span style="color:blue;"><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BC%7D(x_0=%200,%5Cgamma%20=%2010)"></span> with a <span style="color:green;"><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(%5Cmu%20=%200,%5Csigma%20=%201">)</span> distribution. If that sounds like the opposite of preferring wide tails on <img src="https://latex.codecogs.com/png.latex?q(x)">’s I described above, you’re right, but using a poor choice here will illustrate some useful properties.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">simulated_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">tibble</span>(</span>
+<span id="cb2-2"><span class="at" style="color: #657422;">q_x =</span> <span class="fu" style="color: #4758AB;">rnorm</span>(<span class="dv" style="color: #AD0000;">100000</span>),</span>
+<span id="cb2-3"><span class="at" style="color: #657422;">manageable_p_x =</span> <span class="fu" style="color: #4758AB;">rt</span>(<span class="dv" style="color: #AD0000;">100000</span>,<span class="dv" style="color: #AD0000;">5</span>),</span>
+<span id="cb2-4"><span class="at" style="color: #657422;">unmanageable_p_x =</span> <span class="fu" style="color: #4758AB;">rcauchy</span>(<span class="dv" style="color: #AD0000;">100000</span>),</span>
+<span id="cb2-5"><span class="at" style="color: #657422;">manageable_ratios =</span> <span class="fu" style="color: #4758AB;">dt</span>(q_x,<span class="dv" style="color: #AD0000;">5</span>)<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">dnorm</span>(q_x),</span>
+<span id="cb2-6"><span class="at" style="color: #657422;">unmanageable_ratios =</span> <span class="fu" style="color: #4758AB;">dcauchy</span>(q_x,<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">10</span>)<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">dnorm</span>(q_x)</span>
+<span id="cb2-7">)</span>
+<span id="cb2-8"></span>
+<span id="cb2-9">simulated_data <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb2-10">            <span class="fu" style="color: #4758AB;">pivot_longer</span>(<span class="fu" style="color: #4758AB;">c</span>(q_x,manageable_p_x,unmanageable_p_x),</span>
+<span id="cb2-11">                         <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">"draws"</span>,</span>
+<span id="cb2-12">                         <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">"distributions"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb2-13">            <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> draws, <span class="at" style="color: #657422;">color =</span> distributions)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-14">            <span class="fu" style="color: #4758AB;">geom_density</span>() <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-15">            <span class="co" style="color: #5E5E5E;"># If you wanted to show the full reach of the Cauchy, it'd be</span></span>
+<span id="cb2-16">            <span class="co" style="color: #5E5E5E;"># hard to see the shape of the T vs N; it's that wide.</span></span>
+<span id="cb2-17">            <span class="co" style="color: #5E5E5E;"># Hence the 6k values removed</span></span>
+<span id="cb2-18">            <span class="fu" style="color: #4758AB;">xlim</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">10</span>,<span class="dv" style="color: #AD0000;">10</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-19">            <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"Visualizing the distributions in question"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-20">            <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">legend.position=</span><span class="st" style="color: #20794D;">"none"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 6245 rows containing non-finite values (stat_density).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The tails on that Cauchy distribution are super, super wide compared to our normal, so the samples far, far out in the tails of the normal will need massive weights to approximate the cauchy. The t-distribution is wider too, so we’ll need some higher weights, but not nearly as many. As a way to visualize this, you can see that just a handful of draws have weights away from ~1, but these weights are as much as 5000x higher than the mean ratio, and will dominate any average we make of them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">simulated_data <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-2">  <span class="fu" style="color: #4758AB;">arrange</span>(unmanageable_ratios) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-3">  <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">n =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="dv" style="color: #AD0000;">1</span>,<span class="dv" style="color: #AD0000;">100000</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb4-4">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> n,<span class="at" style="color: #657422;">y =</span> unmanageable_ratios)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-5">  <span class="fu" style="color: #4758AB;">geom_point</span>() <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb4-6">  <span class="fu" style="color: #4758AB;">ggtitle</span>(<span class="st" style="color: #20794D;">"A pretty typical 'unsaveable' set of importance ratios"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The t-distribution ratio plot would look similar, but with a much smaller y-scale. The max weight would still be much larger than the average, but more than an order of magnitude or so less large:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">mean_t <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(simulated_data<span class="sc" style="color: #5E5E5E;">$</span>manageable_ratios)</span>
+<span id="cb5-2">max_t <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">max</span>(simulated_data<span class="sc" style="color: #5E5E5E;">$</span>manageable_ratios)</span>
+<span id="cb5-3"></span>
+<span id="cb5-4">mean_c <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(simulated_data<span class="sc" style="color: #5E5E5E;">$</span>unmanageable_ratios)</span>
+<span id="cb5-5">max_c <span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">max</span>(simulated_data<span class="sc" style="color: #5E5E5E;">$</span>unmanageable_ratios)</span>
+<span id="cb5-6"></span>
+<span id="cb5-7"><span class="fu" style="color: #4758AB;">print</span>(<span class="fu" style="color: #4758AB;">paste0</span>(<span class="st" style="color: #20794D;">"the mean of the t is: "</span>,mean_t,<span class="st" style="color: #20794D;">" compared to a max of "</span>,max_t,<span class="st" style="color: #20794D;">";"</span>,</span>
+<span id="cb5-8">             <span class="st" style="color: #20794D;">"The cauchy cause is more extreme- the mean of the cauchy is: "</span>,mean_c,<span class="st" style="color: #20794D;">" compared to a max of "</span>,max_c))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "the mean of the t is: 0.995904306317625 compared to a max of 164.448932152079;The cauchy cause is more extreme- the mean of the cauchy is: 0.283655933763642 compared to a max of 1428.22324178729"</code></pre>
+</div>
+</div>
+<p>So let’s bring this back to Pareto smoothing here. We want to model and smooth that long tail of the ratio distribution. It turns out there’s plenty of study of the distribution of extreme events, and there’s some classical limit results showing:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ar(%5Ctheta)%20%7C%20r(%5Ctheta)%20%3E%20%5Ctau%20%5Crightarrow%20GPD(%5Ctau,%5Csigma,k),%20%5Ctau%20%5Crightarrow%20%5Cinfty%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Ctau"> is a lower bound parameter, which in our case defines how many ratios from the tail we’ll actually model. <img src="https://latex.codecogs.com/png.latex?%5Csigma"> is a scale parameter, and <img src="https://latex.codecogs.com/png.latex?k"> is a unconstrained shape parameter. Without getting too far into the weeds, we can implicitly define <img src="https://latex.codecogs.com/png.latex?%5Ctau"> via using a well-supported role of thumb suggesting to use the M largest ratios, <img src="https://latex.codecogs.com/png.latex?M%20=%20min(0.2S,3%5Csqrt%7BS%7D)"><sup>3</sup>. From there, the <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Chat%7B%5Csigma%7D"> have easy and efficient estimators. The Generalized Pareto Distribution has form:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B1%7D%7B%5Csigma%7D%20%5Cleft(1%20+%20k%5Cfrac%7Br%20-%20%5Ctau%7D%7B%5Csigma%7D%20%5Cright)%5E%7B-1/k-1%7D%0A"></p>
+<p>and we can replace our M biggest ratios with estimated values calculated via the CDF of the Generalized Pareto Distribution.</p>
+<p>One of the best things about PSIS is it comes with a built in diagnostic via <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D">. To see how this works, it’s useful to know that importance sampling depends on how many moments <img src="https://latex.codecogs.com/png.latex?r(%5Ctheta)"> has- for example, if at least two moments exist, the vanilla IS estimator has finite variance (which is obviously required, but no guarantee of performance since it might be finite but massive). The GPD has <img src="https://latex.codecogs.com/png.latex?k%5E%7B-1%7D"> finite fractional moments when <img src="https://latex.codecogs.com/png.latex?k%20%3E%200">.</p>
+<p>Vehtari et al.&nbsp;show that the replacement of the largest M ratios above changes PSIS to have finite variance and an error distribution converging to normal when <img src="https://latex.codecogs.com/png.latex?k%20%5Cin%20(.5,1)">. Intuitively, <img src="https://latex.codecogs.com/png.latex?k%20%3E%20.5"> implies the raw ratios have infinite variance, but PSIS trades a little bias to make the variance finite again.</p>
+<p>What about actually practical to work with variance? This is the really cool bit- <img src="https://latex.codecogs.com/png.latex?k%20%3C%20.7"> turns out to be a remarkably robust indicator of when we can expect PSIS to work in a ton of different simulation studies and practical examples.</p>
+<p>Why is this true? 1.4 fractional moments seems awful arbitrary, right? Let’s ask an alternative question, and kill two birds with one stone: what sample size do we need for PSIS to work? <a href="https://arxiv.org/abs/1511.01437">Chaterjee and Draconis (2018)</a> showed that for a given accuracy, how big <img src="https://latex.codecogs.com/png.latex?S"> needs to be for importance sampling more broadly depends on how close <img src="https://latex.codecogs.com/png.latex?q(x)"> is to <img src="https://latex.codecogs.com/png.latex?p(x)"> in KL distance- we need to satisfy <img src="https://latex.codecogs.com/png.latex?log(S)%20%5Cgeq%20%5Cmathbb%7BE%7D_%7B%5Ctheta%20%5Csim%20q(x)%7D%5Br(%5Ctheta)log(r(%5Ctheta))%5D"> to get accuracy.</p>
+<p>Well, we don’t know the distribution of <img src="https://latex.codecogs.com/png.latex?r">, we should have some pretty good intuition that the important part (read: that explosive, variance ruining tail) is Pareto. If we take <img src="https://latex.codecogs.com/png.latex?r"> as exactly Pareto, you can trace out <img src="https://latex.codecogs.com/png.latex?S"> for different <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"><sup>4</sup>, and to give a few example points-</p>
+<table class="table">
+<caption>for given <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D">, roughly what <img src="https://latex.codecogs.com/png.latex?S"> is needed if <img src="https://latex.codecogs.com/png.latex?r"> is exactly Pareto</caption>
+<colgroup>
+<col style="width: 75%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"></th>
+<th><img src="https://latex.codecogs.com/png.latex?S"> needed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>.5</td>
+<td>~1,000</td>
+</tr>
+<tr class="even">
+<td>.7</td>
+<td>~140,000</td>
+</tr>
+<tr class="odd">
+<td>.8</td>
+<td>1,000,000,000,000</td>
+</tr>
+<tr class="even">
+<td>.9</td>
+<td>please stop you’re making your compute sad.</td>
+</tr>
+</tbody>
+</table>
+<p>While we of course know <img src="https://latex.codecogs.com/png.latex?r"> isn’t Pareto exactly exactly, hopefully this helps with intuition around <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> telling us when we’re getting into “sampling forever to have any chance at all to control the variance” land.</p>
+<p>Neat! So what does that look like for our Cauchy and T distribution example?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">manageable_psis <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">psis</span>(<span class="fu" style="color: #4758AB;">log</span>(simulated_data<span class="sc" style="color: #5E5E5E;">$</span>manageable_ratios),</span>
+<span id="cb7-2">                       <span class="at" style="color: #657422;">r_eff =</span> <span class="cn" style="color: #8f5902;">NA</span>)</span>
+<span id="cb7-3"></span>
+<span id="cb7-4">unmanageable_psis <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">psis</span>(<span class="fu" style="color: #4758AB;">log</span>(simulated_data<span class="sc" style="color: #5E5E5E;">$</span>unmanageable_ratios),</span>
+<span id="cb7-5">                          <span class="at" style="color: #657422;">r_eff =</span> <span class="cn" style="color: #8f5902;">NA</span>)</span>
+<span id="cb7-6"></span>
+<span id="cb7-7">manageable_psis<span class="sc" style="color: #5E5E5E;">$</span>diagnostics</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$pareto_k
+[1] 0.5963495
+
+$n_eff
+[1] 62963.93</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">unmanageable_psis<span class="sc" style="color: #5E5E5E;">$</span>diagnostics</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$pareto_k
+[1] 0.8533127
+
+$n_eff
+[1] 249.2052</code></pre>
+</div>
+</div>
+<p>As we expected, the the Normal proposal distribution isn’t ideal for the T distribution, but it’s manageable. On the other hand, we’d need somewhere between <strong>a trillion and “oh god no :(”</strong> samples to make the normal proposal work out for the Cauchy.</p>
+<p>Bringing the discussion back to variational inference, PSIS is super helpful- importance sampling more generally broadens the class of <img src="https://latex.codecogs.com/png.latex?q(x)">es that are close enough to <img src="https://latex.codecogs.com/png.latex?p(x)"> for variational inference to work, and PSIS considerably widens that basin of feasibility. The extensive theoretical and simulation framework around the method also give us a solid way to realize when importance sampling isn’t feasible via the <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> diagnostic, and tells us how roughly samples we need to draw. Super, super cool.</p>
+<p>One more great thing PSIS does for variational inference- <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> serves as a powerful diagnostic for variational inference itself! I’ll save most of this discussion for the post on diagnostics, but to sketch out the logic- <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> tells us when <img src="https://latex.codecogs.com/png.latex?q(x)"> is too far from <img src="https://latex.codecogs.com/png.latex?p(x)"> for importance sampling to work, which is a function of KL Divergence from <img src="https://latex.codecogs.com/png.latex?q(x)"> to <img src="https://latex.codecogs.com/png.latex?p(x)">- if that distance is too great for importance sampling to allow us to bridge, that implies we aren’t close enough to trust our base variational approximation either!</p>
+</section>
+<section id="multiple-proposal-distributions-with-multiple-importance-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-proposal-distributions-with-multiple-importance-sampling">Multiple Proposal Distributions with Multiple Importance Sampling</h2>
+<p>Why stop at just one proposal distribution? This is basically the jumping off point for Multiple Importance sampling, or MIS. If we have several different <img src="https://latex.codecogs.com/png.latex?q(x)">, and each does a somewhat better job of handling a certain region of the target posterior, then we can efficiently combine them using MIS into an overall better final estimate, and this will work out to be pretty obviously more optimal than just fitting a bunch of VI approximations and averaging them.</p>
+<p>If we can suddenly have multiple different <img src="https://latex.codecogs.com/png.latex?q(x)"> working together, this naturally explodes the search space for a good VI strategy. I’d refer the more interested reader to <a href="https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full">Elvira et al.&nbsp;(2019)</a> which lays out a framework for thinking about all the decision space of MIS more comprehensively, but for the purposes of improving VI specifically, I’ll cover:</p>
+<ol type="1">
+<li>How do we weight the proposals together?</li>
+<li>Which proposals make sense to include in a MIS framework?</li>
+<li>How practical is fitting multiple proposals?</li>
+</ol>
+<section id="how-do-mis-weights-work" class="level3">
+<h3 class="anchored" data-anchor-id="how-do-mis-weights-work">How do MIS weights work?</h3>
+<p>How do we generalize a notion of importance weights like the one introduced above:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_i%20=%20%5Cfrac%7Bp(x_i)%7D%7Bq(x_i)%7D%0A"></p>
+<p>to multiple proposals? While there are some obviously not good properties we want to avoid (it’d be pretty silly to give up our unbiasedness), there are a ton of apparent degrees of freedom in MIS weighting. we’ll relax this assumption in a bit, but let’s start by assuming we don’t have any prior information about which proposals might be better, and that we’ll draw the same number of samples from each proposal.</p>
+<p>While I won’t work through as extensive of an example as in the last section, let’s fix an example where we’ll have <img src="https://latex.codecogs.com/png.latex?J%20=%203"> different proposals, <span style="color:cyan;"><img src="https://latex.codecogs.com/png.latex?q_1(x)">)</span>, <span style="color:purple;"><img src="https://latex.codecogs.com/png.latex?q_2(x)"></span>, and <span style="color:pink;"><img src="https://latex.codecogs.com/png.latex?q_3(x)">)</span>.</p>
+<p>A first question is how to choose the denominator in the weight. One simple and efficient option is to simply use the density of a sample from <img src="https://latex.codecogs.com/png.latex?j"> to make a weight, for example weighting a draw from <span style="color:pink;"><img src="https://latex.codecogs.com/png.latex?q_3(x)">)</span> as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_%7Bi%7D%20=%20%5Cfrac%7Bp(x_i)%7D%7B%5Ctextcolor%7Bpink%7D%7Bq_3(x_i)%7D%7D%0A"> This works, and is pretty common in MIS applications, but we’re not really using all the information we have from having several proposals. We can get a provably lower variance estimator by defining the mixture of the densities <img src="https://latex.codecogs.com/png.latex?%5Cpsi(x)"> as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cpsi(x)%20=%20%5Cfrac%7B1%7D%7BJ%7D%20%5Csum%5Climits_%7BJ%20=%201%7D%5Climits%5E%7BJ%7D%20q_j(x)%0A"></p>
+<p>and using that as the denominator. So for the example above, this’d be:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_%7Bi%7D%20=%20%5Cfrac%7Bp(x_i)%7D%7B%5Cfrac%7B1%7D%7B3%7D(%5Ctextcolor%7Bcyan%7D%7Bq_1(x)%7D%20+%20%5Ctextcolor%7Bpurple%7D%7Bq_2(x_i)%7D%20+%20%5Ctextcolor%7Bpink%7D%7Bq_3(x_i))%7D%7D%0A"> By defining this mixture and and incorporating it into our weighting, we intuitively should have more efficient exchange of information between the different <img src="https://latex.codecogs.com/png.latex?q(x)">. By this, I mean that we no longer just are weighting each sample from a proposal using information from that one proposal; we’re now using everything at hand.</p>
+<p>This feels like it should be pretty solidly better than just using a single proposal density, and indeed Elvira et al.&nbsp;have a result showing that the variance of the mixture based weighting scheme is under pretty general conditions lesser than or equal to that of the single proposal density one<sup>5</sup>.</p>
+<p><a href="https://dl.acm.org/doi/10.1145/218380.218498">Veach and Guibas (1995)</a>, the paper to introduce MIS, called this weighting scheme the <em>balance heuristic</em>, since the weighting scheme is unique in that each sample value at particular <img src="https://latex.codecogs.com/png.latex?x"> is the same regardless of which distribution produced it. They also prove a bound on the variance of this estimator, showing that there isn’t a lot of room to improve on it, even in the most ideal circumstances. Without getting into the weeds, their result suggests that there isn’t a massively better general-case weighting scheme, which is a helpful guide to practical use.</p>
+<p>When can we do (a bit) better than the weighting scheme above? The answer is essentially in cases where we know some of our <img src="https://latex.codecogs.com/png.latex?J"> proposals are much better than others. In these situations, the variance can often be lowered by pushing weights towards the extremes, making low weights closer to zero, and high weights closer to 1. Their <em>cutoff heuristic</em> suggests an estimator where you pick some bound <img src="https://latex.codecogs.com/png.latex?%5Calpha">, below which low weights are reassigned to zero (and the rest of the distribution is adjusted back to sum correctly). Their also propose the <em>power heuristic</em>-</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_i%20=%20%5Cfrac%7Bp_i%5E%5Cbeta%7D%7B%5Csum%5Climits_%7Bj%7Dp_j%5E%5Cbeta%7D%0A"> which raises the weights to a power <img src="https://latex.codecogs.com/png.latex?%5Cbeta">, and normalizes. For intuition, notice that if <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%201">, then this is the <em>balance heuristic</em> again, and as <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20%5Crightarrow%20%5Cinfty">, this moves towards only selecting the best proposal at each point.</p>
+<p>As a final note, we can also Pareto Smooth any of these types of weights once we have them, and this sparks joy, as we can add begin to envision model setups with glorious abbreviations like IW-ELBO/IW-CUBO-PSIS-MIS-VI.</p>
+<p>So stepping back, we have some provably efficient, provably hard to beat ways to use MIS to combine variational approximations together. Again, there’s a whole literature on MIS which the Elvira paper above reviews, but fairly intuitive weighting schemes exist that work well in most cases, and there are reasonable things to try in more atypical cases to reduce the variance of the MIS estimator as well.</p>
+</section>
+<section id="what-proposals-combine-best" class="level3">
+<h3 class="anchored" data-anchor-id="what-proposals-combine-best">What proposals combine best?</h3>
+<p>A next natural question is what different proposals should we use? There’s a little less work in this area than I expected, but there are a couple of papers; my favorite is <a href="https://arxiv.org/abs/2002.07217">Lopez et al.&nbsp;(2020)</a><sup>6</sup>.</p>
+<p>They find that using VI approximations based on different objectives is quite performant- for example, having all of a vanilla ELBO, IW-ELBO and <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E2"> divergence based VI approximation works particularly well, and as you’d expect, better than any individual model, just like we’d expect with regular ensembling techniques. They also look at taking some samples directly from our priors, which is moderately surprising to me given how broad weakly-informative priors usually are. Overall though, a core nugget of logic from ensembling more generally applies here too: we want to find proposals that are both good and sufficiently different from one another that combining them adds value.</p>
+<p>It seems to me there’s a lot of room to explore this search space still; there are a lot of generic ML ensembling tricks that feel like they could work. For example, could we save state several times throughout optimizing a variational approximation, and MIS combine samples from each of those, similar to how people cheaply ensemble for neural networks? Or are there ways to optimize the proposals for use together in this way?</p>
+</section>
+<section id="how-practical-is-mis-for-vi" class="level3">
+<h3 class="anchored" data-anchor-id="how-practical-is-mis-for-vi">How practical is MIS for VI?</h3>
+<p>A last obvious question is whether fitting many variational approximations and combining them is computationally practical. While MIS for VIS certainly trades back some computational cost and time for potential accuracy, the good news is everything feels cheap compared to MCMC.</p>
+<p>Fitting <img src="https://latex.codecogs.com/png.latex?J"> VI approximations instead of 1 roughly scales your compute need for fitting the models by a factor of ~<img src="https://latex.codecogs.com/png.latex?J">, and then there’s a small additional cost in the MIS combination stage to evaluate all the models to make each importance sampling weight denominator. Unlike with MCMC, these computational needs are parallelizable.</p>
+<p>Lopez et al.&nbsp;(2020) find that using 3 proposals slightly more than triples their compute cost given all the objective based models take around the same time to fit, and in practice slightly more than triples their compute time as well since they didn’t do the work to parallelize their models. On the problems they were working on, this is a pretty small (~30s more) time cost in exchange for a meaningful accuracy improvement in the real world biology application they apply this to.</p>
+<p>Depending on what you’re working on, the answer may well be yes, this can be computationally feasible and well worth it.</p>
+</section>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<p>Importance Sampling is a workhorse of modern computational statistics, and it should be no surprise it brings a lot to variational inference.</p>
+<p>Like with the last post, my overall impression is of decreasing fragility for variational inference and a broader set of tools for increasing performance. With IW-ELBO and similar objectives, we can get a tighter bound than the vanilla ELBO, and introduce some new incentives in training our approximation as well. With importance sampling in general and PSIS especially, we can weight an approximation that is close to the target but not perfect into a much, much better approximation of our posterior, and do some in a principled and theoretically grounded way with built-in diagnostics. With MIS, we can make the most of several approximations at once, if we’re willing to pay that computational cost. Collectively, we’re building up a set of tools that broaden the class of problems for which VI works, provided you’re willing to spend time searching for a combination of tools that works well for your specific application.</p>
+<p>Thanks for reading. In the next post, we’ll look at Normalizing Flows, an incredibly powerful and general tool for making maximally flexible variational distributions. All code for this post can be found <a href="https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt4/variational_mrp_pt4.qmd">here</a>.</p>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>we’ll call it q(x) here to make the application super clear, but often I see the “proposal” distribution called g(x) and the the distribution we want to approximate called p(x). Another common notation would be <img src="https://latex.codecogs.com/png.latex?%5Cpi(x)"> for the target and <img src="https://latex.codecogs.com/png.latex?q(x)"> for the proposal. It’s also helpful to know that the computer graphics (as in, image rendering) community is the source of a lot of work especially around Multiple Importance Sampling since they need to solve lots of light transport integrals, and they have yet another set of conventions from most statisticians, but you can usually figure out their choices by squinting a bit.↩︎</p></li>
+<li id="fn2"><p>If you’re looking to learn about importance sampling for the first time, a great place to start is Ben Lambert’s video introductions to the basic idea: <a href="https://www.youtube.com/watch?v=V8f8ueBc9sY">video 1</a>, and <a href="https://www.youtube.com/watch?v=F5PdIQxMA28">video 2</a>. For building more intuition about why we need all these variance reducing modifications to general IS, Dan Simpson has some great <a href="https://dpsimpson.github.io/pages/talks/Importance_sampling_unsw_2019.pdf">slides</a> which have a side benefit of being hilarious. Those slides will mention a lot of the books/papers I find most instructive, but it’s worth calling out especially Vehtari et Al’s Pareto Smoothed Importance Sampling <a href="https://arxiv.org/abs/1507.02646">paper</a> as particularly well written and paradigm shaping. Finally, Elvira et Al’s (2019) Multiple Importance Sampling <a href="https://projecteuclid.org/journals/statistical-science/volume-34/issue-1/Generalized-Multiple-Importance-Sampling/10.1214/18-STS668.full">paper</a> is the most thorough I know, but isn’t particularly approachable. Instead, for MIS I’d recommend starting with the first few minutes of <a href="https://www.youtube.com/watch?v=dxFSwplfdpk">this talk</a> (although the main topic of their talk is less relevant, the visualizations are super helpful), and the first ~8 pages of <a href="https://arxiv.org/pdf/2102.05407.pdf">this paper</a>, also by Elvira et Al. (2021) (I especially like that it spends a bit more time on notation; since multiple importance sampling comes from/comes up in computer graphics, the notational choices sometimes feel a bit annoying to me). Finally, the <a href="https://dl.acm.org/doi/10.1145/218380.218498">original MIS paper itself</a>, Veach &amp; Guibas (1995) is quite readable, but requires a bit of reading around or reading into computer graphics to grok their examples and notational choices.↩︎</p></li>
+<li id="fn3"><p>Slight more weeds here- it turns out that this idea to use Vehtari et al.’s rule of thumb for selecting M and getting <img src="https://latex.codecogs.com/png.latex?%5Ctau"> from there is fairly important. The GPD Approximation is pretty sensitive to getting <img src="https://latex.codecogs.com/png.latex?%5Ctau"> right- it’ll be poor if <img src="https://latex.codecogs.com/png.latex?%5Ctau"> is too low. Having a deterministic rule of thumb that preforms better than alternative more complicated schemes for estimating <img src="https://latex.codecogs.com/png.latex?%5Ctau"> is great, and they work through showing it works well in most reasonable cases.↩︎</p></li>
+<li id="fn4"><p>I’ll be lazy here and not derive or plot this- you can see the plot in Dan Simpson’s slides mentioned above.↩︎</p></li>
+<li id="fn5"><p>One fascinating caveat here is that they proved this only for the case where we know the normalizing constant, not the self-normalized case we pretty much always have to live with, but they have some numerical results and some pretty common sense arguments that the result should extend in most reasonable cases to SNIS as well.↩︎</p></li>
+<li id="fn6"><p>Worth noting that one of the authors here is Michael l. Jordan, which is a pretty good heuristic for “this will be a banger of a stats paper”.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Andy Timm},
+  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
+    {Distributions}},
+  date = {2023-05-27},
+  url = {https://andytimm.github.io/variational_mrp_pt4.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
+Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.github.io/variational_mrp_pt4.html">https://andytimm.github.io/variational_mrp_pt4.html</a>.
+</div></div></section></div> ]]></description>
+  <category>MRP</category>
+  <category>Variational Inference</category>
+  <guid>https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html</guid>
+  <pubDate>Sat, 27 May 2023 04:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt4/images/importance-weights-preview.png" medium="image" type="image/png" height="72" width="144"/>
+</item>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
   <dc:creator>Andy Timm</dc:creator>
@@ -20,7 +314,7 @@
 
 
 
-<p><strong>Note:</strong> I’ve gotten a lot more pessimistic about how generally useful the alternatives to simple KL-Divergence are since writing this post. I still think these are really useful ideas to think to build intuition about VI, and techniques like CHIVI are useful for some lower dimensional problems or as part of an ensemble of techniques for high dimensional ones. However, <a href="https://arxiv.org/abs/2103.01085">this paper</a> from Dhaka et al.&nbsp;is very convincing that CHIVI and currently available similar algorithms are in practice very hard to optimize for high dimensional, and that some of the intuitive benefits shown about CHIVI below in low dimensions don’t really generalize the way we’d expect to higher dimensions.</p>
+<p><strong>Note:</strong> I’ve gotten a lot more pessimistic about how generally useful the alternatives to simple KL-Divergence are on their own since writing this post. I still think these are really useful ideas to think to build intuition about VI, and techniques like CHIVI are useful for some lower dimensional problems or as part of an ensemble of techniques for high dimensional ones. However, <a href="https://arxiv.org/abs/2103.01085">this paper</a> from Dhaka et al.&nbsp;is very convincing that CHIVI and currently available similar algorithms are in practice very hard to optimize for high dimensional, and that some of the intuitive benefits shown about CHIVI below in low dimensions don’t really generalize the way we’d expect to higher dimensions.</p>
 <hr>
 <p>This is section 3 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
 <p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt2/Variational_MRP_pt2.html">last post</a> we threw caution to the wind, and tried out some simple variational inference implementations, to build up some intuition about what bad VI might look like. Just pulling a simple variational inference implementation off the shelf and whacking run perhaps unsurprisingly produced dubious models, so in this post we’ll bring in long overdue theory to understand why VI is so difficult, and what we can do about it.</p>

@@ -1,9 +1,9 @@
 ---
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
-subtitle: Part 4- Some theory on why VI is hard
-date: 2023-05-22
-draft: True
+subtitle: Part 4- Importance Sampling
+image: images/importance-weights-preview.png
+date: 2023-05-27
 categories:
 - MRP
 - Variational Inference
@@ -11,7 +11,7 @@ categories:
 
 This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
 
-The general structure for this post and the one before and after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these three posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
+The general structure for this post and the ones after it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt3/variational_mrp_3.html) we took a look at how our ELBO objective requires  specific version of KL Divergence (the "Exclusive" formulation of KLD), and saw that it encoded a preference for a certain type of solution to the VI problem. Then we looked at CUBO and CHIVI, an alternative bound and algorithm that avoid this problem, often leading to a more useful posterior distribution by pursuing a more "inclusive" solution.
 
@@ -23,9 +23,9 @@ The rough plan for the series is as follows:
 2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
 3.  Problem 1: KL-D prefers exclusive solutions; are there alternatives?
 4. **(This post)** Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?
-5. Problem 3: How can we know when VI is wrong? Are there useful error bounds?
-5. Better grounded diagnostics and workflow
-6. Seeing if some more sophisticated techniques like normalizing flows add much
+5. Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?
+6. Problem 4: How can we know when VI is wrong? Are there useful error bounds?
+7. Better grounded diagnostics and workflow
 
 # Not all samples are equally good
 
@@ -46,7 +46,7 @@ w_i = \frac{p(x_i)}{q(x_i)}
 $$
 Before you get worried that we don't have $p(x_i)$ because of the normalizing constant like every time we talk about having $p(x)$ in this series, there's a clever estimator that
 "self-normalizes" such that this can be a reasonable strategy. Intuitively, we're
-just placing more weight on samples likely $p(x)$.
+just placing more weight on samples more likely under $p(x)$.
 
 This footenote[^2] has a selection of some of my favorite resources for learning more or refreshing your memory about importance sampling, but for the main discussion let me pull out some
 particularly important sub-problems to solve in making a good importance sampling estimator, and good important sampling estimator for VI. 
@@ -63,7 +63,7 @@ A second, but related problem is that it's quite common for the unmodified
 importance sampling estimator to have some weights which are orders and orders
 of magnitude higher than the average weight, blowing up the variance of the estimator.
 Dan Simpson's slides I linked above has an instructive example with not too
-weird $p(x)$ and $q(x)$'s that has a max weight ~1.4 million (!) times the average.
+weird $p(x)$ and $q(x)$'s, but high dimension, that has a max weight ~1.4 million (!) times the average.
 If that happens, our estimator will essentially ignore most samples without gigantic
 weights, and it'll take ages for that estimator to tell us anything remotely
 reliable. 
@@ -78,14 +78,14 @@ So with those points we need to address, here are the next topics in this post:
 ## Importance Weighted Variational Inference
 
 Importance Weighting for VI in it's simplest form is
-pretty intuitive (draw samples from an already trained $q(x)$, weight them...), but let's derive the
+pretty intuitive (draw samples from an already trained $q(x)$, weight them...), so let's derive the
 new Importance Weighted Variational Inference (IWVI) estimator first since some nice
 intuition will come with it. 
 
 I want to emphasize something that wasn't clear to me for a good while- these two ideas are not equivalent. While both
 are useful tools, the "train time",
 objective-modifying IWVI estimator is a distinct approach from the "test time" importance sampling approach
-that takes draws from $q(x)$ as already fixed and reweights them as best it can.
+that takes draws from a fixed $q(x)$ and reweights them as best it can.
 
 We'll aim to show that we can get a tighter ELBO by using importance sampling. This
 type of tighter ELBO was first shown by [Burda et Al. (2015)](https://arxiv.org/abs/1509.00519)
@@ -181,10 +181,10 @@ points outside the two target modes will get lower importance weights, and point
 the modes will get higher ones, so as long as we're covering the modes with some reasonable amount of probability mass, and drawing enough samples we can actually
 do better with the distribution centered between the modes.
 
-To further drive home the point about how a "train time" and "test time" implementations of IS differ, could "test time" IS do this? Not really- because the ability to better minimize the ELBO via sampling requires the IW-ELBO variant and associated training process. If we hard-coded $q(x)$ as the green $N(9,4)$ shown above, "test time" IS could weight the right samples up to better approximate $p(x)$, but it doesn't fundamentally alter our optimization problem the way the IWVI estimand does.
+To further drive home the point about how a "train time" and "test time" implementations of IS differ, could "test time" IS do this? Not really- because the ability to better minimize the ELBO via sampling requires the IW-ELBO variant and associated training process. If we hard-coded $q(x)$ as the green $N(9,4)$ shown above, "test time" IS could weight the right samples up to better approximate $p(x)$, but it doesn't fundamentally alter our optimization problem the way the IWVI objective does.
 
 We can also imagine how varying the number of samples might effect optimization.
- Between $M=1$ and "enough draws to get all the benefits of IS",
+ Between $S=1$ and "enough draws to get all the benefits of IS",
 we can imagine there's a slow transition from "just stick with 1 mode" and "go with IS".
 So it seems like we should be worried about getting the number of samples right, but
 fortunately as we'll see in the next section there are great rules of thumb in
@@ -196,7 +196,7 @@ Another way to think about how importance sampling changes our task with variati
 inference is to think about what sorts of distributions make sense to have as
 our variational family, and even which objective might be better given IS. On choice
 of a variational family, if we're aiming for coverage, moving towards thicker-tailed distributions like t distributions makes a lot of sense. While we explored
-the IW-ELBO above to build intuition, there's no reason not to apply VI to the CUBO
+the IW-ELBO above to build intuition, there's no reason not to apply IW to the CUBO
  and thus CHIVI- this also naturally produces nicely overdispersed distributions which can
  be importance sampled closer to the true $p(x)$. This idea of aiming for a
  wide proposal to sample from is referred to in the importance sampling literature (eg [Owen, 2013](https://artowen.su.domains/mc/)) as "defensive sampling", with [Domke and Sheldon (2018)](https://arxiv.org/abs/1808.09034) exploring the VI connection more fully. For intuition, by ensuring most of $p(x)$ is covered by some reasonable mass makes it easier to efficiently
@@ -365,7 +365,7 @@ and tells us how roughly samples we need to draw. Super, super cool.
 
 One more great thing PSIS does for variational inference- $\hat{k}$ serves as
 a powerful diagnostic for variational inference itself! I'll save most of this
-discussion for the next post (on diagnostics), but to sketch out the logic- $\hat{k}$
+discussion for the post on diagnostics, but to sketch out the logic- $\hat{k}$
 tells us when $q(x)$ is too far from $p(x)$ for importance sampling to work, which
 is a function of KL Divergence from $q(x)$ to $p(x)$- if that distance is too great
 for importance sampling to allow us to bridge, that implies we aren't close
@@ -444,7 +444,7 @@ into the weeds, their result suggests that there isn't a massively better genera
 
 When can we do (a bit) better than the weighting scheme above? The answer is essentially
 in cases where we know some of our $J$ proposals are much better than others. In these
-situations, the variance can often be lowered by pushing weights towards the extremes, and making
+situations, the variance can often be lowered by pushing weights towards the extremes, making
 low weights closer to zero, and high weights closer to 1. Their *cutoff heuristic*
 suggests an estimator where you pick some bound $\alpha$, below which low
 weights are reassigned to zero (and the rest of the distribution is adjusted
@@ -458,7 +458,7 @@ $\beta = 1$, then this is the *balance heuristic* again, and as $\beta \rightarr
 
 As a final note, we can also Pareto Smooth any of these types of weights once
 we have them, and this sparks joy, as we can add begin to envision model setups
-with glorious abbreviations like IW-ELBO-PSIS-MIS-VI.
+with glorious abbreviations like IW-ELBO/IW-CUBO-PSIS-MIS-VI.
 
 So stepping back, we have some provably efficient, provably hard to beat ways to use MIS to combine
 variational approximations together. Again, there's a whole literature on MIS
@@ -472,11 +472,11 @@ A next natural question is what different proposals should we use? There's
 a little less work in this area than I expected, but there are a couple of papers; my favorite is [Lopez et al. (2020)](https://arxiv.org/abs/2002.07217)[^6]. 
 
 They find that using VI approximations based on different objectives is quite
-performant- for example, having both a vanilla ELBO, IW-ELBO and $\chi^2$ divergence based
+performant- for example, having all of a vanilla ELBO, IW-ELBO and $\chi^2$ divergence based
 VI approximation works particularly well, and as you'd expect, better than any individual
 model, just like we'd expect with regular ensembling techniques. They also look
 at taking some samples directly from our priors, which is moderately surprising
-to me that it works given how broad weakly-informative priors usually are. Overall
+to me given how broad weakly-informative priors usually are. Overall
 though, a core nugget of logic from ensembling more generally applies here too:
 we want to find proposals that are both good and sufficiently different from one
 another that combining them adds value.
@@ -503,7 +503,7 @@ sampling weight denominator. Unlike with MCMC, these computational needs are par
 Lopez et al. (2020) find that using 3 proposals slightly more than triples their
 compute cost given all the objective based models take  around the same time to fit, and in practice slightly more than triples their compute time as
 well since they didn't do the work to parallelize their models. On the problems
-they were working on, this is a pretty small (~30s more time) time cost in exchange
+they were working on, this is a pretty small (~30s more) time cost in exchange
 for a meaningful accuracy improvement in the real world biology application they
 apply this to. 
 
@@ -513,12 +513,14 @@ computationally feasible and well worth it.
 ## Conclusions
 
 Importance Sampling is a workhorse of modern computational statistics, and it should be no surprise it
-brings a lot to variational inference. Like with the last post, my overall impression is of decreasing
+brings a lot to variational inference. 
+
+Like with the last post, my overall impression is of decreasing
 fragility for variational inference and a broader set of tools for increasing
 performance. With IW-ELBO and similar objectives, we can get a tighter bound
 than the vanilla ELBO, and introduce some new incentives in training our
 approximation as well. With importance sampling in general and PSIS especially,
-we can make weight an approximation that is close to the target but not perfect into a much, much
+we can weight an approximation that is close to the target but not perfect into a much, much
 better approximation of our posterior, and do some in a principled and theoretically
 grounded way with built-in diagnostics. With MIS, we can make the most of several approximations at once, if
 we're willing to pay that computational cost. Collectively, we're building up
@@ -534,8 +536,13 @@ distributions. All code for this post can be found [here](https://github.com/and
 
 
 [^1]: we'll call it q(x) here to make the application super clear, but often
-I see the "proposal" distribution called f(x) and the the distribution we want
-to approximate called g(x). 
+I see the "proposal" distribution called g(x) and the the distribution we want
+to approximate called p(x). Another common notation would be $\pi(x)$ for the target
+and $q(x)$ for the proposal. It's also helpful to know that the
+computer graphics (as in, image rendering) community is the source of a lot of work
+especially around Multiple Importance Sampling since they need to solve lots of light transport integrals, and they have yet another set
+of conventions from most statisticians, but you can usually figure out their
+choices by squinting a bit.
 [^2]: If you're looking to learn about importance sampling for the first time,
 a great place to start is Ben Lambert's video introductions to the basic idea:
 [video 1](https://www.youtube.com/watch?v=V8f8ueBc9sY), and [video 2](https://www.youtube.com/watch?v=F5PdIQxMA28). For building more intuition about

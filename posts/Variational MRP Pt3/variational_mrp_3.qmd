@@ -9,7 +9,7 @@ categories:
 ---
 
 **Note:** I've gotten a lot more pessimistic about how generally useful the
-alternatives to simple KL-Divergence are since writing this post.
+alternatives to simple KL-Divergence are on their own since writing this post.
 I still think these are really useful ideas to think to build intuition about VI,
 and techniques like CHIVI are useful for some lower dimensional problems or as
 part of an ensemble of techniques for high dimensional ones. However, [this paper](https://arxiv.org/abs/2103.01085) from Dhaka et al. is very convincing that CHIVI and currently available similar algorithms are in practice very hard to optimize
