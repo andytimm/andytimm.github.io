@@ -36,6 +36,61 @@ The rough plan for the series is as follows:
 
 # A problem adaptive variational family with less tinkering?
 
+![](images/flows_stairs_meme.png){fig-alt="Something about NNs makes me meme more"}
+
+Jumping from mean-field or full-rank Gaussians and similar distributions
+to neural networks feels a little... dramatic[^1],  so I want to spend
+some time justifying why this is a good idea.
+
+For VI to work well, we need something that's still simple to sample from, but capable
+of, in aggregate, representing a posterior that is probably pretty complex. Certainly,
+some problems are amenable to the simple variational families $\mathscr{Q}$ we've tried so far,
+but it's worth reemphasizing that we're probably trying to represent something complex,
+and even moderate success at that using a composition of normals should be
+a little surprising, not the expected outcome.
+
+If we need $\mathscr{Q}$ to be more complex, aren't there choices between what
+we've seen and a neural network? There's a whole literature of them- from using
+mixture distributions as variational distributions to inducing some additional
+structure into a mean-field type solution if you have some specific knowledge
+about your target posterior you can use. By and large though, this type of
+class of solutions has been surpassed by normalizing flows in much of modern
+use for more complex posteriors.
+
+Why? A first reason is described in the paper that started the normalizing flows
+for VI literature, Rezende and Mohamed's [**Variational Inference with Normalizing Flows
+**](https://arxiv.org/pdf/1505.05770.pdf): making our base variational distribution
+more complex adds a variety of different computational costs, which add up quickly.
+This isn't the most face-valid argument when I'm claiming a neural network
+is a good alternative, but it gets more plausible when you think through
+how poorly it'd scale to keep making your mixture distribution more and more
+complex as your posteriors get harder to handle. So this is a *scalability*
+argument- it might sound extreme to bring in a neural net, but as problems
+get bigger, .
+
+The other point I'd raise is that all these other tools aren't very black box at
+all- if we can make things work with a problem-adapted version of mean-field with
+some structure based on the knowledge of a specific problem we have, that sounds
+like it gets time expensive fast for the user quickly. If I'm going to have
+to find a particular, problem-specific solution each time I want to use variational
+inference, that feels fragile and fiddly as well- that's a poor user experience.
+
+The novel idea with normalizing flows is that we'll start with a simple base
+density like a normal distribution that is easy to sample from, but instead of only optimizing the parameters
+of that normal distribution, we'll also use the training on our ELBO or
+other objective to learn a transformation that reshapes that normal distribution to
+look like our posterior. By having that transforming component be a neural network,
+we give ourselves access to an incredibly expressive, automatically problem adaptive,
+and heavily scalable variant of variational inference that is incredibly
+popularly used.
+
+And if the approximation isn't expressive enough? Deep Learning researchers have
+an unfussy, general purpose innovation for that: more layers![^2]
+
+![](images/more_layers.png){fig-alt="Wow such estimator, very deep"}
+
+# What is a normalizing flow?
+
 # How to train your neural net
 
 # A basic flow
@@ -43,3 +98,12 @@ The rough plan for the series is as follows:
 # What more complicated NNs look like
 
 # Conclusion
+
+[^1]: It also almost has a bit of "no brain no pain" ML guy energy, in the sense
+that we're really pulling out the biggest algorithm possible. It really is a funny
+trajectory to me to go from "I'd like to still be Bayesian, but avoid MCMC because it's slow"
+to "screw subtle design, let's throw a NN at it".
+[^2]: This is mostly a joke, but it really is a tremendous convenience that
+there's such a straight forward knob to turn for "expressivity" in this context.
+We'll get into the ways that isn't completely true soon, but NNs provide fantastic
+convenience in terms of workflow for improving model flexibility.

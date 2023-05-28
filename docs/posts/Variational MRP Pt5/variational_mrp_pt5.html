@@ -173,6 +173,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#a-problem-adaptive-variational-family-with-less-tinkering" id="toc-a-problem-adaptive-variational-family-with-less-tinkering" class="nav-link active" data-scroll-target="#a-problem-adaptive-variational-family-with-less-tinkering">A problem adaptive variational family with less tinkering?</a></li>
+  <li><a href="#what-is-a-normalizing-flow" id="toc-what-is-a-normalizing-flow" class="nav-link" data-scroll-target="#what-is-a-normalizing-flow">What is a normalizing flow?</a></li>
   <li><a href="#how-to-train-your-neural-net" id="toc-how-to-train-your-neural-net" class="nav-link" data-scroll-target="#how-to-train-your-neural-net">How to train your neural net</a></li>
   <li><a href="#a-basic-flow" id="toc-a-basic-flow" class="nav-link" data-scroll-target="#a-basic-flow">A basic flow</a></li>
   <li><a href="#what-more-complicated-nns-look-like" id="toc-what-more-complicated-nns-look-like" class="nav-link" data-scroll-target="#what-more-complicated-nns-look-like">What more complicated NNs look like</a></li>
@@ -202,6 +203,18 @@ ul.task-list li input[type="checkbox"] {
 </ol>
 <section id="a-problem-adaptive-variational-family-with-less-tinkering" class="level1">
 <h1>A problem adaptive variational family with less tinkering?</h1>
+<p><img src="images/flows_stairs_meme.png" class="img-fluid" alt="Something about NNs makes me meme more"></p>
+<p>Jumping from mean-field or full-rank Gaussians and similar distributions to neural networks feels a little… dramatic<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, so I want to spend some time justifying why this is a good idea.</p>
+<p>For VI to work well, we need something that’s still simple to sample from, but capable of, in aggregate, representing a posterior that is probably pretty complex. Certainly, some problems are amenable to the simple variational families <span class="math inline">\mathscr{Q}</span> we’ve tried so far, but it’s worth reemphasizing that we’re probably trying to represent something complex, and even moderate success at that using a composition of normals should be a little surprising, not the expected outcome.</p>
+<p>If we need <span class="math inline">\mathscr{Q}</span> to be more complex, aren’t there choices between what we’ve seen and a neural network? There’s a whole literature of them- from using mixture distributions as variational distributions to inducing some additional structure into a mean-field type solution if you have some specific knowledge about your target posterior you can use. By and large though, this type of class of solutions has been surpassed by normalizing flows in much of modern use for more complex posteriors.</p>
+<p>Why? A first reason is described in the paper that started the normalizing flows for VI literature, Rezende and Mohamed’s <a href="https://arxiv.org/pdf/1505.05770.pdf"><strong>Variational Inference with Normalizing Flows </strong></a>: making our base variational distribution more complex adds a variety of different computational costs, which add up quickly. This isn’t the most face-valid argument when I’m claiming a neural network is a good alternative, but it gets more plausible when you think through how poorly it’d scale to keep making your mixture distribution more and more complex as your posteriors get harder to handle. So this is a <em>scalability</em> argument- it might sound extreme to bring in a neural net, but as problems get bigger, .</p>
+<p>The other point I’d raise is that all these other tools aren’t very black box at all- if we can make things work with a problem-adapted version of mean-field with some structure based on the knowledge of a specific problem we have, that sounds like it gets time expensive fast for the user quickly. If I’m going to have to find a particular, problem-specific solution each time I want to use variational inference, that feels fragile and fiddly as well- that’s a poor user experience.</p>
+<p>The novel idea with normalizing flows is that we’ll start with a simple base density like a normal distribution that is easy to sample from, but instead of only optimizing the parameters of that normal distribution, we’ll also use the training on our ELBO or other objective to learn a transformation that reshapes that normal distribution to look like our posterior. By having that transforming component be a neural network, we give ourselves access to an incredibly expressive, automatically problem adaptive, and heavily scalable variant of variational inference that is incredibly popularly used.</p>
+<p>And if the approximation isn’t expressive enough? Deep Learning researchers have an unfussy, general purpose innovation for that: more layers!<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p><img src="images/more_layers.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
+</section>
+<section id="what-is-a-normalizing-flow" class="level1">
+<h1>What is a normalizing flow?</h1>
 </section>
 <section id="how-to-train-your-neural-net" class="level1">
 <h1>How to train your neural net</h1>
@@ -218,7 +231,14 @@ ul.task-list li input[type="checkbox"] {
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>It also almost has a bit of “no brain no pain” ML guy energy, in the sense that we’re really pulling out the biggest algorithm possible. It really is a funny trajectory to me to go from “I’d like to still be Bayesian, but avoid MCMC because it’s slow” to “screw subtle design, let’s throw a NN at it”.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This is mostly a joke, but it really is a tremendous convenience that there’s such a straight forward knob to turn for “expressivity” in this context. We’ll get into the ways that isn’t completely true soon, but NNs provide fantastic convenience in terms of workflow for improving model flexibility.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
