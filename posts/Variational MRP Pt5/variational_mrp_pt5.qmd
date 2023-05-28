@@ -1,0 +1,45 @@
+---
+layout: post
+title: Variational Inference for MRP with Reliable Posterior Distributions
+subtitle: Part 5- Normalizing Flows
+date: 2023-05-27
+draft: True
+categories:
+  - MRP
+  - Variational Inference
+  - Normalizing Flows
+---
+   
+This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
+
+The general structure for this post and the around it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
+
+In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt4/variational_mrp_4.html) we saw a variety of different ways importance sampling can be used to improve VI and make it more robust, from defining a tighter bound to optimize in the importance weighted ELBO, to weighting $q(x)$ samples together efficiently to look more like $p(x)$, to combining entirely different variational approximations together to cover different parts of the posterior with multiple importance sampling.
+
+In this post, we'll tackle the problem of how to define a deeply flexible variational
+family $\mathscr{Q}$ that can adapt to each problem while still being easy to sample from.
+To do this, we'll draw on normalizing flows, a technique for defining a composition
+of invertible transformations on top of a simple base distribution like a normal
+distribution. We'll build our way up to using increasingly complex neural networks
+to define those transformations, allowing for for truly complex variational
+families that are problem adaptive, training as we train our variational model.
+
+The rough plan for the series is as follows:
+
+1.  Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
+3.  Problem 1: KL-D prefers exclusive solutions; are there alternatives?
+4.  Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?
+5.  **(This post)** Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?
+6. Problem 4: How can we know when VI is wrong? Are there useful error bounds?
+7. Better grounded diagnostics and workflow
+
+# A problem adaptive variational family with less tinkering?
+
+# How to train your neural net
+
+# A basic flow
+
+# What more complicated NNs look like
+
+# Conclusion
