@@ -218,7 +218,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="what-is-a-normalizing-flow" class="level1">
 <h1>What is a normalizing flow?</h1>
-<p>A normalizing flow transforms a simple base density into a complex one through a sequence of invertible transformations. By stacking more and more of these invertible transformations (having the density “flow” through them), we can create arbitrarily complex distributions that remain valid probability distributions.</p>
+<p>A normalizing flow transforms a simple base density into a complex one through a sequence of invertible transformations. By stacking more and more of these invertible transformations (having the density “flow” through them), we can create arbitrarily complex distributions that remain valid probability distributions. Since it isn’t universal in the flows literature, let me be explicit that I’ll consider “forward” to be the direction flowing from the base density to the posterior, and the “backward” or “normalizing” direction as towards the base density.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/normalizing-flow.png" class="img-fluid figure-img"></p>
@@ -237,12 +237,21 @@ x_K = f(x) \circ ... \circ f_2 \circ f_1(x_0)
 <p><span class="math display">
 ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\partial f_k}{\partial x_{k-1}} \rvert^{-1}
 </span></p>
-<p>Neat!</p>
+<p>Neat, and surprisingly simple! If the terms above are all easy to calculate, we can very efficiently stack a bunch of these transformations and make an expressive model.</p>
 <section id="normalizing-flows-for-variational-inference-versus-other-applications" class="level2">
 <h2 class="anchored" data-anchor-id="normalizing-flows-for-variational-inference-versus-other-applications">Normalizing Flows for variational inference versus other applications</h2>
 <p>One source of confusion when I was learning about normalizing flows for variational inference was that variational inference makes up a fairly small proportion of the use cases for normalizing flows, and thus the academic literature and online discussion. More common applications include density estimation, image generation, representation learning, and reinforcement learning. In addition to making specifically applicable discussions harder to find, often resources will make strong claims about properties of a given flow structure, that really only holding in some subset of the above applications<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
-<p>By taking a second to explain this crisply and compare different application’s needs , hopefully I can save you some confusion and make engaging with the broader literature easier.</p>
-<p>The differences</p>
+<p>By taking a second to explain this crisply and compare different application’s needs, hopefully I can save you some confusion and make engaging with the broader literature easier.</p>
+<p>To start, consider the relevant operations we’ve introduced so far:</p>
+<ol type="1">
+<li>computing <span class="math inline">f</span>, that is pushing a sample through the transformations</li>
+<li>computing <span class="math inline">g</span>, <span class="math inline">f</span>’s inverse which undoes the manipulations</li>
+<li>computing the (log) determinant of the Jacobian</li>
+</ol>
+<p>1 and 3 definitely need to be efficient for our use case, since we need to be able to sample and push through using the formula above efficiently to calculate an ELBO and train our model. 2 is where things get more subtle: we definitely need <span class="math inline">f</span> to be invertible, since our formulas above are dependent on a property of Jacobians of invertible functions. But we don’t actually really need to explicitly compute <span class="math inline">g</span> for variational inference.</p>
+<p>Contrast this with density estimation, where the goal would not to sample from the distribution, but instead to estimate the density. In this case, most of the time would be spent going in the opposite direction, so that they can evaluate the log-likliehood of the data, and maximize it to improve the model<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. The need for an expressive transformation of densities unite these two cases, but the goal is quite different!</p>
+<p>This level of goal disagreement also shows it face in what direction papers choose to call forward: Most papers outside of variational inference applications consider forward to be the opposite of what I do here, the direction towards the base density, the “normalizing” direction.</p>
+<p>For our use, hopefully this short digression has clarified which operations we need to be fast versus just exist. If you dive deeper into further work on normalizing flows, hopefully recognizing there are two different ways to point this thing helps you more quickly orient yourself to how other work describe flows.</p>
 </section>
 </section>
 <section id="how-to-train-your-neural-net" class="level1">
@@ -268,6 +277,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <li id="fn2"><p>This is mostly a joke, but it really is a tremendous convenience that there’s such a straight forward knob to turn for “expressivity” in this context. We’ll get into the ways that isn’t completely true soon, but NNs provide fantastic convenience in terms of workflow for improving model flexibility.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>You can see it in the original Normalizing Flows paper linked above, or combined with a nice matrix calc review by <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">Lilian Weng</a>. As a more general note, since this is a common topic on a few different talented people’s blogs, I’ll try to focus on covering material I think I can provide more intuition for, or that are most relevant for variational inference.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>A great example of this is Lilian Weng’s <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">NF walkthrough</a> which I reccomended above- It has a fantastic review of the needed linear algebra and covers a lot of different flow types, but is a bit overly general about what properties are most desirable in a flow, and therefore initially a bit fuzzy on the value different flows have.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Deriving precisely how this works would take us too far afield, but see <a href="https://arxiv.org/abs/1908.09257">Kobyzev et al.&nbsp;(2020)</a> if you’re interested. It’s a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus different notations and framings that they very successfully bridge. are many different implicit and explicit objectives and<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},

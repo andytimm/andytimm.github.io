@@ -95,7 +95,10 @@ an unfussy, general purpose innovation for that: MORE LAYERS![^2]
 A normalizing flow transforms a simple base density into a complex one through
 a sequence of invertible transformations. By stacking more and more of these
 invertible transformations (having the density "flow" through them), we can create
-arbitrarily complex distributions that remain valid probability distributions.
+arbitrarily complex distributions that remain valid probability distributions. Since
+it isn't universal in the flows literature, let me be explicit that I'll consider
+"forward" to be the direction flowing from the base density to the posterior, and
+the "backward" or "normalizing" direction as towards the base density.
 
 ![Image Credit to [Simon Boehm](https://siboehm.com/articles/19/normalizing-flow-network) here](images/normalizing-flow.png)
 
@@ -122,7 +125,9 @@ $$
 ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\partial f_k}{\partial x_{k-1}} \rvert^{-1}
 $$
 
-Neat!
+Neat, and surprisingly simple! If the terms above are all easy to calculate,
+we can very efficiently stack a bunch of these transformations and make
+an expressive model.
 
 ## Normalizing Flows for variational inference versus other applications
 
@@ -134,10 +139,38 @@ representation learning, and reinforcement learning. In addition to making speci
 discussions harder to find, often resources will make strong claims about properties of a given
 flow structure, that really only holding in some subset of the above applications[^4].
 
-By taking a second to explain this crisply and compare different application's needs
-, hopefully I can save you some confusion and make engaging with the broader literature easier.
+By taking a second to explain this crisply and compare different application's needs,
+hopefully I can save you some confusion and make engaging with the broader literature easier.
 
-The differences 
+To start, consider the relevant operations we've introduced so far:
+
+1. computing $f$, that is pushing a sample through the transformations
+2. computing $g$, $f$'s inverse which undoes the manipulations
+3. computing the (log) determinant of the Jacobian
+ 
+1 and 3 definitely need to be efficient for our use case, since we need to be
+able to sample and push through using the formula above efficiently to calculate
+an ELBO and train our model. 2 is where things get
+more subtle: we definitely need $f$ to be invertible, since our formulas above
+are dependent on a property of Jacobians of invertible functions. But we don't
+actually really need to explicitly compute $g$ for variational inference. 
+
+Contrast
+this with density estimation, where the goal would not to sample from the distribution,
+but instead to estimate the density. In this case, most of the time would be
+spent going in the opposite direction, so that they can evaluate the log-likliehood
+of the data, and maximize it to improve the model[^5]. The need for an expressive
+transformation of densities unite these two cases, but the goal is quite different!
+
+This level of goal disagreement also shows it face in what direction papers
+choose to call forward: Most papers outside of variational inference applications consider forward to be the opposite of what I do here, the direction towards
+the base density, the "normalizing" direction. 
+
+For our use, hopefully this short digression has clarified which operations we need to be
+fast versus just exist. If you dive deeper into
+further work on normalizing flows, hopefully recognizing there are two
+different ways to point this thing helps you more quickly orient yourself
+to how other work describe flows.
 
 # How to train your neural net
 
@@ -165,3 +198,7 @@ has a fantastic review of the needed linear algebra and covers a lot of differen
 flow types, but is a bit overly general about what properties are most desirable
 in a flow, and therefore initially a bit fuzzy on the value different flows
 have.
+[^5]: Deriving precisely how this works would take us too far afield, but see [Kobyzev et
+al. (2020)](https://arxiv.org/abs/1908.09257) if you're interested. It's a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus
+different notations and framings that they very successfully bridge.
+are many different implicit and explicit objectives and 
