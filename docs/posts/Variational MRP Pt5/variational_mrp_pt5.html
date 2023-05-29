@@ -222,7 +222,20 @@ ul.task-list li input[type="checkbox"] {
 <p></p><figcaption class="figure-caption">Image Credit to <a href="https://siboehm.com/articles/19/normalizing-flow-network">Simon Boehm</a> here</figcaption><p></p>
 </figure>
 </div>
-<p>If we have a random variable <span class="math inline">z</span>, with distribution <span class="math inline">q(z)</span>,</p>
+<p>If we have a random variable <span class="math inline">z</span>, with distribution <span class="math inline">q(z)</span>, some function <span class="math inline">f</span> with an inverse <span class="math inline">f^{-1} = g, g \circ f(z) = z</span>, then the distribution of the result of one iteration of z through, <span class="math inline">q^\prime(z)</span> is:</p>
+<p><span class="math display">
+q\prime(z) = q(z) \lvert det \frac{\partial f^{-1}}{\partial z^\prime} \rvert = q(z) \lvert \frac{\partial f}{\partial z} \rvert^{-1}
+</span> I won’t derive this identity<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, but it follows from the chain rule and the properties of Jacobians of invertible functions.</p>
+<p>The real power comes in here when we see that these transformations stack. If we’ve got a chain of transformations (eg <span class="math inline">f_K(...(f_2f_1(z))</span>:</p>
+<p><span class="math display">
+z_K = f(z) \circ ... \circ f_2 \circ f_1(z_0)
+</span></p>
+<p>then the resulting density <span class="math inline">q_K(z)</span> looks like:</p>
+<p><span class="math display">
+ln q_K (z_K) = lnq_0(z_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\partial f_k}{\partial z_{k-1}} \rvert^{-1}
+</span></p>
+<p>This is a bit involved, so let’s back up for some intuition. With a setup like this, we can sample from something super simple, and plug and chug through the above calculations to get our samples from the transformed distribution which we can model to fix our posterior target well.</p>
+<p>That said, We want to be able to apply a bunch of transformations like this efficiently so that we can iterate scalably. When is that true? There are two main operations here we need to care about the efficiency of: we need <span class="math inline">f</span> to be easily invertible, and we need to be able to calculate the determinant of it’s Jacobian easily as well.</p>
 </section>
 <section id="how-to-train-your-neural-net" class="level1">
 <h1>How to train your neural net</h1>
@@ -245,6 +258,7 @@ ul.task-list li input[type="checkbox"] {
 <ol>
 <li id="fn1"><p>It also almost has a bit of “no brain no pain” ML guy energy, in the sense that we’re really pulling out the biggest algorithm possible. It really is a funny trajectory to me to go from “I’d like to still be Bayesian, but avoid MCMC because it’s slow” to “screw subtle design, let’s throw a NN at it”.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>This is mostly a joke, but it really is a tremendous convenience that there’s such a straight forward knob to turn for “expressivity” in this context. We’ll get into the ways that isn’t completely true soon, but NNs provide fantastic convenience in terms of workflow for improving model flexibility.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>You can see it in the original Normalizing Flows paper linked above, or combined with a nice matrix calc review by <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">Lilian Weng</a>. As a more general note, since this is a common topic on a few different talented people’s blogs, I’ll try to focus on covering material I think I can provide more intuition for, or that are most relevant for variational inference.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},

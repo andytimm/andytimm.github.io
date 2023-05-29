@@ -98,7 +98,41 @@ arbitrarily complex distributions that remain valid probability distributions.
 
 ![Image Credit to [Simon Boehm](https://siboehm.com/articles/19/normalizing-flow-network) here](images/normalizing-flow.png)
 
-If we have a random variable $z$, with distribution $q(z)$, 
+If we have a random variable $z$, with distribution $q(z)$, some function $f$ with an inverse
+$f^{-1} = g, g \circ f(z) = z$, then the distribution of the result of
+one iteration of z through, $q^\prime(z)$ is:
+
+$$
+q\prime(z) = q(z) \lvert det \frac{\partial f^{-1}}{\partial z^\prime} \rvert = q(z) \lvert \frac{\partial f}{\partial z} \rvert^{-1}
+$$
+I won't derive this identity[^3], but it follows from the chain rule and the
+ properties of Jacobians of invertible functions.
+
+The real power comes in here when we see that these transformations stack. If
+we've got a chain of transformations (eg $f_K(...(f_2f_1(z))$:
+
+$$
+z_K = f(z) \circ ... \circ f_2 \circ f_1(z_0)
+$$
+
+then the resulting density $q_K(z)$ looks like:
+
+$$
+ln q_K (z_K) = lnq_0(z_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\partial f_k}{\partial z_{k-1}} \rvert^{-1}
+$$
+
+This is a bit involved, so let's back up for some intuition. With a setup
+like this, we can sample from something super simple, and plug and chug
+through the above calculations to get our samples from the transformed
+distribution which we can model to fix our posterior target well.
+
+That said, We want to be able
+to apply a bunch of transformations like this efficiently so that we can iterate
+scalably. When is that
+true? There are
+two main operations here we need to care about the efficiency of: we need 
+$f$ to be easily invertible, and we need to be able to calculate the determinant
+of it's Jacobian easily as well. 
 
 # How to train your neural net
 
@@ -116,3 +150,7 @@ to "screw subtle design, let's throw a NN at it".
 there's such a straight forward knob to turn for "expressivity" in this context.
 We'll get into the ways that isn't completely true soon, but NNs provide fantastic
 convenience in terms of workflow for improving model flexibility.
+[^3]: You can see it in the original Normalizing Flows paper linked above, or
+combined with a nice matrix calc review by [Lilian Weng](https://lilianweng.github.io/posts/2018-10-13-flow-models/). As a more general note, since this is a common topic on a few different talented
+people's blogs, I'll try to focus on covering material I think I can provide
+more intuition for, or that are most relevant for variational inference.
