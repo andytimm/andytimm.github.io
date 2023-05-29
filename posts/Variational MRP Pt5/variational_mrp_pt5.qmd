@@ -45,7 +45,7 @@ some time justifying why this is a good idea.
 For VI to work well, we need something that's still simple to sample from, but capable
 of, in aggregate, representing a posterior that is probably pretty complex. Certainly,
 some problems are amenable to the simple variational families $\mathscr{Q}$ we've tried so far,
-but it's worth reemphasizing that we're probably trying to represent something complex,
+but it's worth re-emphasizing that we're probably trying to represent something complex,
 and even moderate success at that using a composition of normals should be
 a little surprising, not the expected outcome.
 
@@ -66,12 +66,12 @@ is a good alternative, but it gets more plausible when you think through
 how poorly it'd scale to keep making your mixture distribution more and more
 complex as your posteriors get harder to handle. So this is a *scalability*
 argument- it might sound extreme to bring in a neural net, but as problems
-get bigger, scale matters.
+get bigger, scaling matters.
 
 The other point I'd raise is that all these other tools aren't very black box at
 all- if we can make things work with a problem-adapted version of mean-field with
 some structure based on the knowledge of a specific problem we have, that sounds
-like it gets time expensive fast for the user quickly. If I'm going to have
+like it gets time consuming fast. If I'm going to have
 to find a particular, problem-specific solution each time I want to use variational
 inference, that feels fragile and fiddly as well- that's a poor user experience.
 
@@ -79,7 +79,8 @@ The novel idea with normalizing flows is that we'll start with a simple base
 density like a normal distribution that is easy to sample from, but instead of only optimizing the parameters
 of that normal distribution, we'll also use the training on our ELBO or
 other objective to learn a transformation that reshapes that normal distribution to
-look like our posterior. By having that transforming component be a neural network,
+look like our posterior. By having that transforming component be partially
+composed of a neural network,
 we give ourselves access to an incredibly expressive, automatically problem adaptive,
 and heavily scalable variant of variational inference that is quite
 widely used.
@@ -98,41 +99,45 @@ arbitrarily complex distributions that remain valid probability distributions.
 
 ![Image Credit to [Simon Boehm](https://siboehm.com/articles/19/normalizing-flow-network) here](images/normalizing-flow.png)
 
-If we have a random variable $z$, with distribution $q(z)$, some function $f$ with an inverse
-$f^{-1} = g, g \circ f(z) = z$, then the distribution of the result of
-one iteration of z through, $q^\prime(z)$ is:
+If we have a random variable $x$, with distribution $q(x)$, some function $f$ with an inverse
+$f^{-1} = g, g \circ f(x) = x$, then the distribution of the result of
+one iteration of x through, $q^\prime(x)$ is:
 
 $$
-q\prime(z) = q(z) \lvert det \frac{\partial f^{-1}}{\partial z^\prime} \rvert = q(z) \lvert \frac{\partial f}{\partial z} \rvert^{-1}
+q\prime(z) = q(x) \lvert det \frac{\partial f^{-1}}{\partial x^\prime} \rvert = q(x) \lvert \frac{\partial f}{\partial x} \rvert^{-1}
 $$
 I won't derive this identity[^3], but it follows from the chain rule and the
  properties of Jacobians of invertible functions.
 
 The real power comes in here when we see that these transformations stack. If
-we've got a chain of transformations (eg $f_K(...(f_2f_1(z))$:
+we've got a chain of transformations (eg $f_K(...(f_2f_1(x))$:
 
 $$
-z_K = f(z) \circ ... \circ f_2 \circ f_1(z_0)
+x_K = f(x) \circ ... \circ f_2 \circ f_1(x_0)
 $$
 
-then the resulting density $q_K(z)$ looks like:
+then the resulting density $q_K(x)$ looks like:
 
 $$
-ln q_K (z_K) = lnq_0(z_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\partial f_k}{\partial z_{k-1}} \rvert^{-1}
+ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\partial f_k}{\partial x_{k-1}} \rvert^{-1}
 $$
 
-This is a bit involved, so let's back up for some intuition. With a setup
-like this, we can sample from something super simple, and plug and chug
-through the above calculations to get our samples from the transformed
-distribution which we can model to fix our posterior target well.
+Neat!
 
-That said, We want to be able
-to apply a bunch of transformations like this efficiently so that we can iterate
-scalably. When is that
-true? There are
-two main operations here we need to care about the efficiency of: we need 
-$f$ to be easily invertible, and we need to be able to calculate the determinant
-of it's Jacobian easily as well. 
+## Normalizing Flows for variational inference versus other applications
+
+One source of confusion when I was learning about normalizing flows for
+variational inference was that variational inference makes up a fairly
+small proportion of the use cases for normalizing flows, and thus the academic
+literature and online discussion. More common applications include density estimation, image generation,
+representation learning, and reinforcement learning. In addition to making specifically applicable
+discussions harder to find, often resources will make strong claims about properties of a given
+flow structure, that really only holding in some subset of the above applications[^4].
+
+By taking a second to explain this crisply and compare different application's needs
+, hopefully I can save you some confusion and make engaging with the broader literature easier.
+
+The differences 
 
 # How to train your neural net
 
@@ -154,3 +159,9 @@ convenience in terms of workflow for improving model flexibility.
 combined with a nice matrix calc review by [Lilian Weng](https://lilianweng.github.io/posts/2018-10-13-flow-models/). As a more general note, since this is a common topic on a few different talented
 people's blogs, I'll try to focus on covering material I think I can provide
 more intuition for, or that are most relevant for variational inference.
+[^4]: A great example of this is Lilian Weng's [NF walkthrough](https://lilianweng.github.io/posts/2018-10-13-flow-models/) which
+I reccomended above- It
+has a fantastic review of the needed linear algebra and covers a lot of different
+flow types, but is a bit overly general about what properties are most desirable
+in a flow, and therefore initially a bit fuzzy on the value different flows
+have.
