@@ -153,7 +153,8 @@ able to sample and push through using the formula above efficiently to calculate
 an ELBO and train our model. 2 is where things get
 more subtle: we definitely need $f$ to be invertible, since our formulas above
 are dependent on a property of Jacobians of invertible functions. But we don't
-actually really need to explicitly compute $g$ for variational inference. 
+actually really need to explicitly compute $g$ for variational inference. Even knowing the inverse
+exists but not having a formula might be fine for us!
 
 Contrast
 this with density estimation, where the goal would not to sample from the distribution,
@@ -173,6 +174,18 @@ different ways to point this thing helps you more quickly orient yourself
 to how other work describe flows.
 
 # How to train your neural net
+
+Now, let's turn to how we actually fit a normalizing flow. Since this would be a bit
+hard to grok a code presentation if I took advantage of the full flexibility and abstraction that
+something like [`vistan`](https://github.com/abhiagwl/vistan/tree/master) provides, before
+heading into general purpose tools I'll build a bit more explicit implementation
+of a simpler flow called a planar flow from scratch in `PyTorch` for illustration.
+
+In this section,
+I'll define conceptually how we're fitting the model, and build out a fun
+target distribution and loss`- since I expect many people reading
+this may moderately new to PyTorch, I'll explain in detail
+than normal what each operation is doing and why we need it.
 
 # A basic flow
 

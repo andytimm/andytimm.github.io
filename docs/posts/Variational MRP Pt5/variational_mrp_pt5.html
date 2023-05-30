@@ -248,7 +248,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <li>computing <span class="math inline">g</span>, <span class="math inline">f</span>’s inverse which undoes the manipulations</li>
 <li>computing the (log) determinant of the Jacobian</li>
 </ol>
-<p>1 and 3 definitely need to be efficient for our use case, since we need to be able to sample and push through using the formula above efficiently to calculate an ELBO and train our model. 2 is where things get more subtle: we definitely need <span class="math inline">f</span> to be invertible, since our formulas above are dependent on a property of Jacobians of invertible functions. But we don’t actually really need to explicitly compute <span class="math inline">g</span> for variational inference.</p>
+<p>1 and 3 definitely need to be efficient for our use case, since we need to be able to sample and push through using the formula above efficiently to calculate an ELBO and train our model. 2 is where things get more subtle: we definitely need <span class="math inline">f</span> to be invertible, since our formulas above are dependent on a property of Jacobians of invertible functions. But we don’t actually really need to explicitly compute <span class="math inline">g</span> for variational inference. Even knowing the inverse exists but not having a formula might be fine for us!</p>
 <p>Contrast this with density estimation, where the goal would not to sample from the distribution, but instead to estimate the density. In this case, most of the time would be spent going in the opposite direction, so that they can evaluate the log-likliehood of the data, and maximize it to improve the model<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. The need for an expressive transformation of densities unite these two cases, but the goal is quite different!</p>
 <p>This level of goal disagreement also shows it face in what direction papers choose to call forward: Most papers outside of variational inference applications consider forward to be the opposite of what I do here, the direction towards the base density, the “normalizing” direction.</p>
 <p>For our use, hopefully this short digression has clarified which operations we need to be fast versus just exist. If you dive deeper into further work on normalizing flows, hopefully recognizing there are two different ways to point this thing helps you more quickly orient yourself to how other work describe flows.</p>
@@ -256,6 +256,8 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 </section>
 <section id="how-to-train-your-neural-net" class="level1">
 <h1>How to train your neural net</h1>
+<p>Now, let’s turn to how we actually fit a normalizing flow. Since this would be a bit hard to grok a code presentation if I took advantage of the full flexibility and abstraction that something like <a href="https://github.com/abhiagwl/vistan/tree/master"><code>vistan</code></a> provides, before heading into general purpose tools I’ll build a bit more explicit implementation of a simpler flow called a planar flow from scratch in <code>PyTorch</code> for illustration.</p>
+<p>In this section, I’ll define conceptually how we’re fitting the model, and build out a fun target distribution and loss`- since I expect many people reading this may moderately new to PyTorch, I’ll explain in detail than normal what each operation is doing and why we need it.</p>
 </section>
 <section id="a-basic-flow" class="level1">
 <h1>A basic flow</h1>
