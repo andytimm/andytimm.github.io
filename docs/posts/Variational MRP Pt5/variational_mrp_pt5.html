@@ -311,7 +311,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <p>In this section, I’ll define conceptually how we’re fitting the model, and build out a fun target distribution and loss`- since I expect many people reading this may moderately new to PyTorch, I’ll explain in detail than normal what each operation is doing and why we need it.</p>
 <p>Let’s first make a fun target posterior distribution from an image to model. I think it’d be a fun preview gif for the post to watch the model say Hi:</p>
 <p><img src="images/hard_to_draw_posterior.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
-<p>It’s quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor:</p>
+<p>It’s quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor. To represent this as a 2-D density we can fit models against, we’ll read in the image, collapse along the color dimension, and transform it into a torch tensor:</p>
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>raw_img <span class="op">=</span> Image.<span class="bu">open</span>(<span class="st">"images/hard_to_draw_posterior.png"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -328,6 +328,27 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>torch.Size([300, 300])</code></pre>
 </div>
+</div>
+<p>Now let’s define our loss for training, which will just be a slight reformulation of our ELBO:</p>
+<p><span class="math display">
+\mathbb{E}[logp(z,x)] - \mathbb{E}[logq(z)]
+</span></p>
+<p>To do this, we’ll define a class for the loss.</p>
+<p>First, we pick a simple base distribution to push through our flow, here a 2-D Normal distribution called <code>base_distr</code>. We’ll also include the interesting target we just made above, <code>distr</code>.</p>
+<p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropogation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
+<p>Keeping with the structure above of numbering successive stages of the flow, <code>z0</code> here is our base distribution, and <code>z</code> will be the learned approximation to the target. In addition to the terms you’d expect in the ELBO, we’re also tracking and making use of the sum of the log determinant of the Jacobians to a handle on the distortion of the base density the flows apply.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/e-hulten/planar-flows/blob/master/loss.py</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VariationalLoss(nn.Module):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,distribution):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.distr <span class="op">=</span> distribution</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.base_distr <span class="op">=</span> MultivariateNormal(torch.zeros(<span class="dv">2</span>), torch.eye(<span class="dv">2</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> forward(<span class="va">self</span>, z0: Tensor, z: Tensor, sum_log_det_J: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>      base_log_prob <span class="op">=</span> <span class="va">self</span>.base_distr.log_prob(z0)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      target_density_log_prob <span class="op">=</span> <span class="op">-</span><span class="va">self</span>.distr(z)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> (base_log_prob <span class="op">-</span> target_density_log_prob <span class="op">-</span> sum_log_det_J).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="a-basic-flow" class="level1">

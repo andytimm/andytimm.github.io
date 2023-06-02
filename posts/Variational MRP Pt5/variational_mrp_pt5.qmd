@@ -206,7 +206,10 @@ think it'd be a fun preview gif for the post to watch the model say Hi:
 
 ![](images/hard_to_draw_posterior.png){fig-alt="Wow such estimator, very deep"}
 
-It's quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor:
+It's quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor.
+To represent this as a 2-D density we can fit models against, we'll read in
+the image, collapse along the color dimension, and transform it into a torch
+tensor:
 
 ```{python}
 raw_img = Image.open("images/hard_to_draw_posterior.png")
@@ -223,6 +226,44 @@ torch_posterior = torch.from_numpy(normalized_image)
 torch_posterior.shape
 ```
 
+Now let's define our loss for training, which will just be a slight
+reformulation of our ELBO:
+
+$$
+ \mathbb{E}[logp(z,x)] - \mathbb{E}[logq(z)]
+$$
+
+To do this, we'll define a class for the loss.
+
+First, we pick a simple base distribution to push through our flow, here a 
+2-D Normal distribution called `base_distr`. We'll also include the interesting
+target we just made above, `distr`.
+
+Next, the forward pass structure. The `forward` method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and 
+gives PyTorch the needed information for automatic differentiation, which allows smooth calculation
+and backpropogation of loss through the model to train it. This `VariationalLoss`
+module will run at the end of the forward pass to calculate the loss and allow us
+to pass it back through the graph for training.
+
+Keeping with the structure above of numbering successive stages of the flow,
+`z0` here is our base distribution, and `z` will be the learned approximation
+to the target. In addition to the terms you'd expect in the ELBO, we're also
+tracking and making use of the sum of the log determinant of the Jacobians to
+a handle on the distortion of the base density the flows apply.
+
+```{python}
+# https://github.com/e-hulten/planar-flows/blob/master/loss.py
+class VariationalLoss(nn.Module):
+  def __init__(self,distribution):
+      super().__init__()
+      self.distr = distribution
+      self.base_distr = MultivariateNormal(torch.zeros(2), torch.eye(2))
+
+  def forward(self, z0: Tensor, z: Tensor, sum_log_det_J: float) -> float:
+      base_log_prob = self.base_distr.log_prob(z0)
+      target_density_log_prob = -self.distr(z)
+      return (base_log_prob - target_density_log_prob - sum_log_det_J).mean()
+```
 
 
 
