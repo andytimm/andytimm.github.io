@@ -178,16 +178,15 @@ to how other work describe flows.
 Now, let's turn to how we actually fit a normalizing flow. Since this would be a bit
 hard to grok a code presentation if I took advantage of the full flexibility and abstraction that
 something like [`vistan`](https://github.com/abhiagwl/vistan/tree/master) provides, before
-heading into general purpose tools I'll build a bit more explicit implementation
-of a simpler flow called a planar flow from scratch in `PyTorch` for illustration.
+heading into general purpose tools I'll talk through a bit more explicit implementation
+of a simpler flow called a planar flow `PyTorch` for illustration. Rather than
+reinventing the wheel, I'll leverage Edvard Hulten's implementation [here](https://github.com/e-hulten/planar-flows).
 
 In this section,
 I'll define conceptually how we're fitting the model, and build out a fun
 target distribution and loss`- since I expect many people reading
 this may moderately new to PyTorch, I'll explain in detail
 than normal what each operation is doing and why we need it.
-
-
 
 
 ```{python}
@@ -198,8 +197,33 @@ import torch.nn as nn
 from torch.distributions import Uniform
 from torch.distributions import MultivariateNormal
 from torch import Tensor
+from PIL import Image
 
 ```
+
+Let's first make a fun target posterior distribution from an image to model. I
+think it'd be a fun preview gif for the post to watch the model say Hi:
+
+![](images/hard_to_draw_posterior.png){fig-alt="Wow such estimator, very deep"}
+
+It's quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor:
+
+```{python}
+raw_img = Image.open("images/hard_to_draw_posterior.png")
+
+# Sum the 3 color channels
+greyscale_img = np.array(raw_img).sum(axis = 2)
+
+# Normalize values to help with fitting
+normalized_image  = (greyscale_img - greyscale_img.min()) / (greyscale_img.max() - greyscale_img.min())
+ 
+# Make a torch tensor of the target to use
+torch_posterior = torch.from_numpy(normalized_image)
+
+torch_posterior.shape
+```
+
+
 
 
 
