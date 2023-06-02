@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.0.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -13,15 +13,10 @@
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
-  vertical-align: middle;
-}
 </style>
 
 
@@ -87,7 +82,6 @@ ul.task-list li input[type="checkbox"] {
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta name="twitter:description" content="Part 5- Normalizing Flows">
 <meta name="twitter:creator" content="@andy_timm">
-<meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
@@ -97,31 +91,25 @@ ul.task-list li input[type="checkbox"] {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
-    <a class="navbar-brand" href="../../index.html">
+      <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andy Timm</span>
-    </a>
-  </div>
+  </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../index.html">About</a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../projects.html">
- <span class="menu-text">Projects</span></a>
+    <a class="nav-link" href="../../projects.html">Projects</a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../software.html">
- <span class="menu-text">Software</span></a>
+    <a class="nav-link" href="../../software.html">Software</a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../blog.html">
- <span class="menu-text">Rarely Updated Blog</span></a>
+    <a class="nav-link" href="../../blog.html">Rarely Updated Blog</a>
   </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
@@ -159,7 +147,6 @@ ul.task-list li input[type="checkbox"] {
         <p class="date">May 27, 2023</p>
       </div>
     </div>
-    
       
     </div>
     
@@ -168,13 +155,13 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc">
     <h2 id="toc-title">Contents</h2>
    
   <ul>
   <li><a href="#a-problem-adaptive-variational-family-with-less-tinkering" id="toc-a-problem-adaptive-variational-family-with-less-tinkering" class="nav-link active" data-scroll-target="#a-problem-adaptive-variational-family-with-less-tinkering">A problem adaptive variational family with less tinkering?</a></li>
   <li><a href="#what-is-a-normalizing-flow" id="toc-what-is-a-normalizing-flow" class="nav-link" data-scroll-target="#what-is-a-normalizing-flow">What is a normalizing flow?</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#normalizing-flows-for-variational-inference-versus-other-applications" id="toc-normalizing-flows-for-variational-inference-versus-other-applications" class="nav-link" data-scroll-target="#normalizing-flows-for-variational-inference-versus-other-applications">Normalizing Flows for variational inference versus other applications</a></li>
   </ul></li>
   <li><a href="#how-to-train-your-neural-net" id="toc-how-to-train-your-neural-net" class="nav-link" data-scroll-target="#how-to-train-your-neural-net">How to train your neural net</a></li>
@@ -228,7 +215,8 @@ ul.task-list li input[type="checkbox"] {
 <p>If we have a random variable <span class="math inline">x</span>, with distribution <span class="math inline">q(x)</span>, some function <span class="math inline">f</span> with an inverse <span class="math inline">f^{-1} = g, g \circ f(x) = x</span>, then the distribution of the result of one iteration of x through, <span class="math inline">q^\prime(x)</span> is:</p>
 <p><span class="math display">
 q\prime(z) = q(x) \lvert det \frac{\partial f^{-1}}{\partial x^\prime} \rvert = q(x) \lvert \frac{\partial f}{\partial x} \rvert^{-1}
-</span> I won’t derive this identity<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, but it follows from the chain rule and the properties of Jacobians of invertible functions.</p>
+</span></p>
+<p>I won’t derive this identity<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, but it follows from the chain rule and the properties of Jacobians of invertible functions.</p>
 <p>The real power comes in here when we see that these transformations stack. If we’ve got a chain of transformations (eg <span class="math inline">f_K(...(f_2f_1(x))</span>:</p>
 <p><span class="math display">
 x_K = f(x) \circ ... \circ f_2 \circ f_1(x_0)
@@ -272,26 +260,27 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>It also almost has a bit of “no brain no pain” ML guy energy, in the sense that we’re really pulling out the biggest algorithm possible. It really is a funny trajectory to me to go from “I’d like to still be Bayesian, but avoid MCMC because it’s slow” to “screw subtle design, let’s throw a NN at it”.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>This is mostly a joke, but it really is a tremendous convenience that there’s such a straight forward knob to turn for “expressivity” in this context. We’ll get into the ways that isn’t completely true soon, but NNs provide fantastic convenience in terms of workflow for improving model flexibility.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>You can see it in the original Normalizing Flows paper linked above, or combined with a nice matrix calc review by <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">Lilian Weng</a>. As a more general note, since this is a common topic on a few different talented people’s blogs, I’ll try to focus on covering material I think I can provide more intuition for, or that are most relevant for variational inference.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>A great example of this is Lilian Weng’s <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">NF walkthrough</a> which I reccomended above- It has a fantastic review of the needed linear algebra and covers a lot of different flow types, but is a bit overly general about what properties are most desirable in a flow, and therefore initially a bit fuzzy on the value different flows have.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>Deriving precisely how this works would take us too far afield, but see <a href="https://arxiv.org/abs/1908.09257">Kobyzev et al.&nbsp;(2020)</a> if you’re interested. It’s a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus different notations and framings that they very successfully bridge. are many different implicit and explicit objectives and<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1" role="doc-endnote"><p>It also almost has a bit of “no brain no pain” ML guy energy, in the sense that we’re really pulling out the biggest algorithm possible. It really is a funny trajectory to me to go from “I’d like to still be Bayesian, but avoid MCMC because it’s slow” to “screw subtle design, let’s throw a NN at it”.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p>This is mostly a joke, but it really is a tremendous convenience that there’s such a straight forward knob to turn for “expressivity” in this context. We’ll get into the ways that isn’t completely true soon, but NNs provide fantastic convenience in terms of workflow for improving model flexibility.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3" role="doc-endnote"><p>You can see it in the original Normalizing Flows paper linked above, or combined with a nice matrix calc review by <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">Lilian Weng</a>. As a more general note, since this is a common topic on a few different talented people’s blogs, I’ll try to focus on covering material I think I can provide more intuition for, or that are most relevant for variational inference.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4" role="doc-endnote"><p>A great example of this is Lilian Weng’s <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">NF walkthrough</a> which I reccomended above- It has a fantastic review of the needed linear algebra and covers a lot of different flow types, but is a bit overly general about what properties are most desirable in a flow, and therefore initially a bit fuzzy on the value different flows have.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5" role="doc-endnote"><p>Deriving precisely how this works would take us too far afield, but see <a href="https://arxiv.org/abs/1908.09257">Kobyzev et al.&nbsp;(2020)</a> if you’re interested. It’s a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus different notations and framings that they very successfully bridge. are many different implicit and explicit objectives and<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2023-05-27},
-  url = {https://andytimm.github.io/variational_mrp_pt5.html},
+  url = {https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
 Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.github.io/variational_mrp_pt5.html">https://andytimm.github.io/variational_mrp_pt5.html</a>.
+Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html">https://andytimm.github.io/posts/Variational
+MRP Pt5/variational_mrp_pt5.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -334,24 +323,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
     setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -379,50 +351,31 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   for (var i=0; i<noterefs.length; i++) {
     const ref = noterefs[i];
     tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      let href = ref.getAttribute('href');
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
     });
   }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
       });
-    }
+      return popup.innerHTML;
+    });
   }
 });
 </script>

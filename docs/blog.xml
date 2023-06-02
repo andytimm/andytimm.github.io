@@ -9,7 +9,7 @@
 <link>https://andytimm.github.io/blog.html</link>
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
-<generator>quarto-1.2.269</generator>
+<generator>quarto-1.0.36</generator>
 <lastBuildDate>Sat, 27 May 2023 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>

@@ -1,0 +1,84 @@
+---
+title: "Python Plotting Tests"
+editor: visual
+---
+
+```{python}
+xlim=4
+ylim=4
+
+def density(z):
+  u = 0.5 * ((torch.norm(z, 2, dim=1) - 2) / 0.4) ** 2
+  u = u - torch.log(
+      torch.exp(-0.5 * ((z[:, 0] - 2) / 0.6) ** 2)
+      + torch.exp(-0.5 * ((z[:, 0] + 2) / 0.6) ** 2)
+  )
+  return u
+
+x = y = np.linspace(-xlim, xlim, 300)
+X, Y = np.meshgrid(x, y)
+shape = X.shape
+X_flatten, Y_flatten = np.reshape(X, (-1, 1)), np.reshape(Y, (-1, 1))
+Z = torch.from_numpy(np.concatenate([X_flatten, Y_flatten], 1))
+
+u = 0.5 * ((torch.norm(Z, 2, dim=1) - 2) / 0.4) ** 2
+u = u - torch.log(
+      torch.exp(-0.5 * ((Z[:, 0] - 2) / 0.6) ** 2)
+      + torch.exp(-0.5 * ((Z[:, 0] + 2) / 0.6) ** 2))
+
+U = torch.exp(-density(Z))
+U = U.reshape(shape)
+
+U.size()
+U
+
+x
+```
+
+
+```{python}
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def U_1(z):
+  u = 0.5 * ((torch.norm(z, 2, dim=1) - 2) / 0.4) ** 2
+  u = u - torch.log(
+      torch.exp(-0.5 * ((z[:, 0] - 2) / 0.6) ** 2)
+      + torch.exp(-0.5 * ((z[:, 0] + 2) / 0.6) ** 2)
+  )
+  return u
+
+def plot_density(density, xlim=4, ylim=4, ax=None, cmap="Purples"):
+  x = y = np.linspace(-xlim, xlim, 300)
+  X, Y = np.meshgrid(x, y)
+  shape = X.shape
+  X_flatten, Y_flatten = np.reshape(X, (-1, 1)), np.reshape(Y, (-1, 1))
+  Z = torch.from_numpy(np.concatenate([X_flatten, Y_flatten], 1))
+  U = torch.exp(-density(Z))
+  U = U.reshape(shape)
+  if ax is None:
+      fig = plt.figure(figsize=(7, 7))
+      ax = fig.add_subplot(111)
+  
+  ax.set_xlim(-xlim, xlim)
+  ax.set_ylim(-xlim, xlim)
+  ax.set_aspect(1)
+  
+  ax.pcolormesh(X, Y, U, cmap=cmap, rasterized=True)
+  ax.tick_params(
+      axis="both",
+      left=False,
+      top=False,
+      right=False,
+      bottom=False,
+      labelleft=False,
+      labeltop=False,
+      labelright=False,
+      labelbottom=False,
+  )
+  return ax
+
+plot_density(U_1)
+```

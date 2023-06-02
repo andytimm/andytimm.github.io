@@ -187,6 +187,23 @@ target distribution and loss`- since I expect many people reading
 this may moderately new to PyTorch, I'll explain in detail
 than normal what each operation is doing and why we need it.
 
+
+
+
+```{python}
+#| echo: false
+import torch
+import numpy as np
+import torch.nn as nn
+from torch.distributions import Uniform
+from torch.distributions import MultivariateNormal
+from torch import Tensor
+
+```
+
+
+
+
 # A basic flow
 
 # What more complicated NNs look like
