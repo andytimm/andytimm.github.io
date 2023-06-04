@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Andy Timm - Python Plotting Tests</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Andy Timm - Python Plotting Tests">
+<meta property="og:site-name" content="Andy Timm">
+<meta name="twitter:title" content="Andy Timm - Python Plotting Tests">
+<meta name="twitter:creator" content="@andy_timm">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Andy Timm</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../projects.html">Projects</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../software.html">Software</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html">Rarely Updated Blog</a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Python Plotting Tests</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> density(z):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> u</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> y <span class="op">=</span> np.linspace(<span class="op">-</span>xlim, xlim, <span class="dv">300</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>shape <span class="op">=</span> X.shape</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>X_flatten, Y_flatten <span class="op">=</span> np.reshape(X, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)), np.reshape(Y, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> torch.from_numpy(np.concatenate([X_flatten, Y_flatten], <span class="dv">1</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(Z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((Z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((Z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>U <span class="op">=</span> torch.exp(<span class="op">-</span>density(Z))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>U <span class="op">=</span> U.reshape(shape)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>U.size()</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>U</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>array([-4.        , -3.97324415, -3.94648829, -3.91973244, -3.89297659,
+       -3.86622074, -3.83946488, -3.81270903, -3.78595318, -3.75919732,
+       -3.73244147, -3.70568562, -3.67892977, -3.65217391, -3.62541806,
+       -3.59866221, -3.57190635, -3.5451505 , -3.51839465, -3.4916388 ,
+       -3.46488294, -3.43812709, -3.41137124, -3.38461538, -3.35785953,
+       -3.33110368, -3.30434783, -3.27759197, -3.25083612, -3.22408027,
+       -3.19732441, -3.17056856, -3.14381271, -3.11705686, -3.090301  ,
+       -3.06354515, -3.0367893 , -3.01003344, -2.98327759, -2.95652174,
+       -2.92976589, -2.90301003, -2.87625418, -2.84949833, -2.82274247,
+       -2.79598662, -2.76923077, -2.74247492, -2.71571906, -2.68896321,
+       -2.66220736, -2.63545151, -2.60869565, -2.5819398 , -2.55518395,
+       -2.52842809, -2.50167224, -2.47491639, -2.44816054, -2.42140468,
+       -2.39464883, -2.36789298, -2.34113712, -2.31438127, -2.28762542,
+       -2.26086957, -2.23411371, -2.20735786, -2.18060201, -2.15384615,
+       -2.1270903 , -2.10033445, -2.0735786 , -2.04682274, -2.02006689,
+       -1.99331104, -1.96655518, -1.93979933, -1.91304348, -1.88628763,
+       -1.85953177, -1.83277592, -1.80602007, -1.77926421, -1.75250836,
+       -1.72575251, -1.69899666, -1.6722408 , -1.64548495, -1.6187291 ,
+       -1.59197324, -1.56521739, -1.53846154, -1.51170569, -1.48494983,
+       -1.45819398, -1.43143813, -1.40468227, -1.37792642, -1.35117057,
+       -1.32441472, -1.29765886, -1.27090301, -1.24414716, -1.2173913 ,
+       -1.19063545, -1.1638796 , -1.13712375, -1.11036789, -1.08361204,
+       -1.05685619, -1.03010033, -1.00334448, -0.97658863, -0.94983278,
+       -0.92307692, -0.89632107, -0.86956522, -0.84280936, -0.81605351,
+       -0.78929766, -0.76254181, -0.73578595, -0.7090301 , -0.68227425,
+       -0.65551839, -0.62876254, -0.60200669, -0.57525084, -0.54849498,
+       -0.52173913, -0.49498328, -0.46822742, -0.44147157, -0.41471572,
+       -0.38795987, -0.36120401, -0.33444816, -0.30769231, -0.28093645,
+       -0.2541806 , -0.22742475, -0.2006689 , -0.17391304, -0.14715719,
+       -0.12040134, -0.09364548, -0.06688963, -0.04013378, -0.01337793,
+        0.01337793,  0.04013378,  0.06688963,  0.09364548,  0.12040134,
+        0.14715719,  0.17391304,  0.2006689 ,  0.22742475,  0.2541806 ,
+        0.28093645,  0.30769231,  0.33444816,  0.36120401,  0.38795987,
+        0.41471572,  0.44147157,  0.46822742,  0.49498328,  0.52173913,
+        0.54849498,  0.57525084,  0.60200669,  0.62876254,  0.65551839,
+        0.68227425,  0.7090301 ,  0.73578595,  0.76254181,  0.78929766,
+        0.81605351,  0.84280936,  0.86956522,  0.89632107,  0.92307692,
+        0.94983278,  0.97658863,  1.00334448,  1.03010033,  1.05685619,
+        1.08361204,  1.11036789,  1.13712375,  1.1638796 ,  1.19063545,
+        1.2173913 ,  1.24414716,  1.27090301,  1.29765886,  1.32441472,
+        1.35117057,  1.37792642,  1.40468227,  1.43143813,  1.45819398,
+        1.48494983,  1.51170569,  1.53846154,  1.56521739,  1.59197324,
+        1.6187291 ,  1.64548495,  1.6722408 ,  1.69899666,  1.72575251,
+        1.75250836,  1.77926421,  1.80602007,  1.83277592,  1.85953177,
+        1.88628763,  1.91304348,  1.93979933,  1.96655518,  1.99331104,
+        2.02006689,  2.04682274,  2.0735786 ,  2.10033445,  2.1270903 ,
+        2.15384615,  2.18060201,  2.20735786,  2.23411371,  2.26086957,
+        2.28762542,  2.31438127,  2.34113712,  2.36789298,  2.39464883,
+        2.42140468,  2.44816054,  2.47491639,  2.50167224,  2.52842809,
+        2.55518395,  2.5819398 ,  2.60869565,  2.63545151,  2.66220736,
+        2.68896321,  2.71571906,  2.74247492,  2.76923077,  2.79598662,
+        2.82274247,  2.84949833,  2.87625418,  2.90301003,  2.92976589,
+        2.95652174,  2.98327759,  3.01003344,  3.0367893 ,  3.06354515,
+        3.090301  ,  3.11705686,  3.14381271,  3.17056856,  3.19732441,
+        3.22408027,  3.25083612,  3.27759197,  3.30434783,  3.33110368,
+        3.35785953,  3.38461538,  3.41137124,  3.43812709,  3.46488294,
+        3.4916388 ,  3.51839465,  3.5451505 ,  3.57190635,  3.59866221,
+        3.62541806,  3.65217391,  3.67892977,  3.70568562,  3.73244147,
+        3.75919732,  3.78595318,  3.81270903,  3.83946488,  3.86622074,
+        3.89297659,  3.91973244,  3.94648829,  3.97324415,  4.        ])</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> U_1(z):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> u</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_density(density, xlim<span class="op">=</span><span class="dv">4</span>, ylim<span class="op">=</span><span class="dv">4</span>, ax<span class="op">=</span><span class="va">None</span>, cmap<span class="op">=</span><span class="st">"Purples"</span>):</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> y <span class="op">=</span> np.linspace(<span class="op">-</span>xlim, xlim, <span class="dv">300</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  shape <span class="op">=</span> X.shape</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  X_flatten, Y_flatten <span class="op">=</span> np.reshape(X, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)), np.reshape(Y, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  Z <span class="op">=</span> torch.from_numpy(np.concatenate([X_flatten, Y_flatten], <span class="dv">1</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  U <span class="op">=</span> torch.exp(<span class="op">-</span>density(Z))</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  U <span class="op">=</span> U.reshape(shape)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>      ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim(<span class="op">-</span>xlim, xlim)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  ax.set_ylim(<span class="op">-</span>xlim, xlim)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  ax.set_aspect(<span class="dv">1</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  ax.pcolormesh(X, Y, U, cmap<span class="op">=</span>cmap, rasterized<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  ax.tick_params(</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>      axis<span class="op">=</span><span class="st">"both"</span>,</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>      left<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>      top<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>      right<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>      bottom<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>      labelleft<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>      labeltop<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>      labelright<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>      labelbottom<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ax</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>plot_density(U_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;Axes: &gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="python_plotting_tests_files/figure-html/cell-3-output-2.png" width="537" height="537"></p>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
