@@ -337,7 +337,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>torch_posterior <span class="op">=</span> torch.from_numpy(normalized_image)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>torch_posterior.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="34">
 <pre><code>torch.Size([300, 300])</code></pre>
 </div>
 </div>
@@ -373,49 +373,75 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <p><span class="math inline">w</span> and <span class="math inline">b</span> define the hyperplane and u specifies the direction and strength of the expansion. I’ll show a visualization of just one layer of that below.</p>
 <p>If you’re more used to working with neural nets, you might wonder why we choose the non-linearity <span class="math inline">tanh</span> here, which generally isn’t as popular as something like <span class="math inline">relu</span> or it’s variants in more recent years due to it’s more unstable gradient flows. As the authors show in appendix <span class="math inline">A.1</span>, functions like the above aren’t actually always invertible, and choosing <span class="math inline">tanh</span> allows them to impose some constraints that make things reliably invertible. See the Appendix for more details about how that works, or take a careful look at Edvard’s implementation of the single function below:</p>
 <div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarTransform(nn.Module):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">"""Implementation of the invertible transformation used in planar flow:</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">      f(z) = z + u * h(dot(w.T, z) + b)</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">  See Section 4.1 in https://arxiv.org/pdf/1505.05770.pdf. </span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">  """</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>):</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      <span class="co">"""Initialise weights and bias.</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">      </span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">      Args:</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">          dim: Dimensionality of the distribution to be estimated.</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">      """</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.w <span class="op">=</span> nn.Parameter(torch.randn(<span class="dv">1</span>, dim).normal_(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.b <span class="op">=</span> nn.Parameter(torch.randn(<span class="dv">1</span>).normal_(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.u <span class="op">=</span> nn.Parameter(torch.randn(<span class="dv">1</span>, dim).normal_(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> forward(<span class="va">self</span>, z: Tensor) <span class="op">-&gt;</span> Tensor:</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> torch.mm(<span class="va">self</span>.u, <span class="va">self</span>.w.T) <span class="op">&lt;</span> <span class="op">-</span><span class="dv">1</span>:</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>          <span class="va">self</span>.get_u_hat()</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> z <span class="op">+</span> <span class="va">self</span>.u <span class="op">*</span> nn.Tanh()(torch.mm(z, <span class="va">self</span>.w.T) <span class="op">+</span> <span class="va">self</span>.b)</span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From https://github.com/e-hulten/planar-flows/blob/master/planar_transform.py</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarTransform(nn.Module):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">"""Implementation of the invertible transformation used in planar flow:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">      f(z) = z + u * h(dot(w.T, z) + b)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">  See Section 4.1 in https://arxiv.org/pdf/1505.05770.pdf. </span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">  """</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>):</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="co">"""Initialise weights and bias.</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">      </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">      Args:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">          dim: Dimensionality of the distribution to be estimated.</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">      """</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.w <span class="op">=</span> nn.Parameter(torch.randn(<span class="dv">1</span>, dim).normal_(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.b <span class="op">=</span> nn.Parameter(torch.randn(<span class="dv">1</span>).normal_(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.u <span class="op">=</span> nn.Parameter(torch.randn(<span class="dv">1</span>, dim).normal_(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> forward(<span class="va">self</span>, z: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> torch.mm(<span class="va">self</span>.u, <span class="va">self</span>.w.T) <span class="op">&lt;</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>          <span class="va">self</span>.get_u_hat()</span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> log_det_J(<span class="va">self</span>, z: Tensor) <span class="op">-&gt;</span> Tensor:</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> torch.mm(<span class="va">self</span>.u, <span class="va">self</span>.w.T) <span class="op">&lt;</span> <span class="op">-</span><span class="dv">1</span>:</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>          <span class="va">self</span>.get_u_hat()</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>      a <span class="op">=</span> torch.mm(z, <span class="va">self</span>.w.T) <span class="op">+</span> <span class="va">self</span>.b</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>      psi <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> nn.Tanh()(a) <span class="op">**</span> <span class="dv">2</span>) <span class="op">*</span> <span class="va">self</span>.w</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>      abs_det <span class="op">=</span> (<span class="dv">1</span> <span class="op">+</span> torch.mm(<span class="va">self</span>.u, psi.T)).<span class="bu">abs</span>()</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      log_det <span class="op">=</span> torch.log(<span class="fl">1e-4</span> <span class="op">+</span> abs_det)</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> log_det</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> z <span class="op">+</span> <span class="va">self</span>.u <span class="op">*</span> nn.Tanh()(torch.mm(z, <span class="va">self</span>.w.T) <span class="op">+</span> <span class="va">self</span>.b)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> log_det_J(<span class="va">self</span>, z: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> torch.mm(<span class="va">self</span>.u, <span class="va">self</span>.w.T) <span class="op">&lt;</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>          <span class="va">self</span>.get_u_hat()</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>      a <span class="op">=</span> torch.mm(z, <span class="va">self</span>.w.T) <span class="op">+</span> <span class="va">self</span>.b</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      psi <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> nn.Tanh()(a) <span class="op">**</span> <span class="dv">2</span>) <span class="op">*</span> <span class="va">self</span>.w</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>      abs_det <span class="op">=</span> (<span class="dv">1</span> <span class="op">+</span> torch.mm(<span class="va">self</span>.u, psi.T)).<span class="bu">abs</span>()</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>      log_det <span class="op">=</span> torch.log(<span class="fl">1e-4</span> <span class="op">+</span> abs_det)</span>
 <span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> get_u_hat(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>      <span class="co">"""Enforce w^T u &gt;= -1. When using h(.) = tanh(.), this is a sufficient condition </span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">      for invertibility of the transformation f(z). See Appendix A.1.</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">      """</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>      wtu <span class="op">=</span> torch.mm(<span class="va">self</span>.u, <span class="va">self</span>.w.T)</span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>      m_wtu <span class="op">=</span> <span class="op">-</span><span class="dv">1</span> <span class="op">+</span> torch.log(<span class="dv">1</span> <span class="op">+</span> torch.exp(wtu))</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.u.data <span class="op">=</span> (</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>          <span class="va">self</span>.u <span class="op">+</span> (m_wtu <span class="op">-</span> wtu) <span class="op">*</span> <span class="va">self</span>.w <span class="op">/</span> torch.norm(<span class="va">self</span>.w, p<span class="op">=</span><span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>      )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> log_det</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> get_u_hat(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>      <span class="co">"""Enforce w^T u &gt;= -1. When using h(.) = tanh(.), this is a sufficient condition </span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">      for invertibility of the transformation f(z). See Appendix A.1.</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">      """</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>      wtu <span class="op">=</span> torch.mm(<span class="va">self</span>.u, <span class="va">self</span>.w.T)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>      m_wtu <span class="op">=</span> <span class="op">-</span><span class="dv">1</span> <span class="op">+</span> torch.log(<span class="dv">1</span> <span class="op">+</span> torch.exp(wtu))</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>      <span class="va">self</span>.u.data <span class="op">=</span> (</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>          <span class="va">self</span>.u <span class="op">+</span> (m_wtu <span class="op">-</span> wtu) <span class="op">*</span> <span class="va">self</span>.w <span class="op">/</span> torch.norm(<span class="va">self</span>.w, p<span class="op">=</span><span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>      )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Where things will start to get exciting is multiple layers of the flow; here’s how we can make an abstraction that allows us to stack up <span class="math inline">K</span> layers of the flow to control the flexibility of our approximation.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarFlow(nn.Module):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>, K: <span class="bu">int</span> <span class="op">=</span> <span class="dv">6</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Make a planar flow by stacking planar transformations in sequence.</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">            dim: Dimensionality of the distribution to be estimated.</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">            K: Number of transformations in the flow. </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> [PlanarTransform(dim) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(K)]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> nn.Sequential(<span class="op">*</span><span class="va">self</span>.layers)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, z: Tensor) <span class="op">-&gt;</span> Tuple[Tensor, <span class="bu">float</span>]:</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        log_det_J <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer <span class="kw">in</span> <span class="va">self</span>.layers:</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            log_det_J <span class="op">+=</span> layer.log_det_J(z)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            z <span class="op">=</span> layer(z)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z, log_det_J</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s run this for a single layer to introduce the training loop, and build some intuition on the planar flow. Note that I’m hiding setting up the plot code.</p>
 </section>
 <section id="what-more-complicated-nns-look-like" class="level1">
 <h1>What more complicated NNs look like</h1>
