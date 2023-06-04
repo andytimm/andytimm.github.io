@@ -272,6 +272,71 @@ Next, let's define the structure of the actual flow. To do this, we'll first
 describe a single layer of the flow, then we'll show structure to stack
 the flow in layers.
 
+Our first flow we look at will be the **planar flow** from the original
+Normalizing Flows for variational Inference paper mentioned above. The name
+comes from how the function defines a (hyper)plane, and compress or expand
+the density around it:
+
+$$
+f(x) = x + u*tanh(w^Tx + b), w, u \in 	\mathbb{R}^d, b \in	\mathbb{R} 
+$$
+
+$w$ and $b$ define the hyperplane and u specifies the direction and strength
+of the expansion. I'll show a visualization of just one layer of that below.
+
+If you're more used to working with neural nets, you might wonder why we
+choose the non-linearity $tanh$ here, which generally isn't as popular as something
+like $relu$ or it's variants in more recent years due to it's more unstable
+gradient flows. As the authors show in appendix $A.1$, functions like the
+above aren't actually always invertible, and choosing $tanh$ allows them
+to impose some constraints that make things reliably invertible. See the Appendix
+for more details about how that works, or take a careful look at Edvard's
+implementation of the single function below:
+
+```{python}
+class PlanarTransform(nn.Module):
+  """Implementation of the invertible transformation used in planar flow:
+      f(z) = z + u * h(dot(w.T, z) + b)
+  See Section 4.1 in https://arxiv.org/pdf/1505.05770.pdf. 
+  """
+
+  def __init__(self, dim: int = 2):
+      """Initialise weights and bias.
+      
+      Args:
+          dim: Dimensionality of the distribution to be estimated.
+      """
+      super().__init__()
+      self.w = nn.Parameter(torch.randn(1, dim).normal_(0, 0.1))
+      self.b = nn.Parameter(torch.randn(1).normal_(0, 0.1))
+      self.u = nn.Parameter(torch.randn(1, dim).normal_(0, 0.1))
+
+  def forward(self, z: Tensor) -> Tensor:
+      if torch.mm(self.u, self.w.T) < -1:
+          self.get_u_hat()
+
+      return z + self.u * nn.Tanh()(torch.mm(z, self.w.T) + self.b)
+
+  def log_det_J(self, z: Tensor) -> Tensor:
+      if torch.mm(self.u, self.w.T) < -1:
+          self.get_u_hat()
+      a = torch.mm(z, self.w.T) + self.b
+      psi = (1 - nn.Tanh()(a) ** 2) * self.w
+      abs_det = (1 + torch.mm(self.u, psi.T)).abs()
+      log_det = torch.log(1e-4 + abs_det)
+
+      return log_det
+
+  def get_u_hat(self) -> None:
+      """Enforce w^T u >= -1. When using h(.) = tanh(.), this is a sufficient condition 
+      for invertibility of the transformation f(z). See Appendix A.1.
+      """
+      wtu = torch.mm(self.u, self.w.T)
+      m_wtu = -1 + torch.log(1 + torch.exp(wtu))
+      self.u.data = (
+          self.u + (m_wtu - wtu) * self.w / torch.norm(self.w, p=2, dim=1) ** 2
+      )
+```
 
 
 # What more complicated NNs look like
