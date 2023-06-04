@@ -93,9 +93,62 @@ def U_1(z):
                 )
                 return u
               
-test = U_1(torch.randn(1, 1))
+test = U_1(torch.randn(128,2, 2))
 
 test
 
+#torch.randn(2, 2)
+
+```
+
+```{python}
+torch_posterior.shape
+
+# Unlike above, where his function takes a batch and batch norms them in 1 x 2 x 2,
+# I think I need to just return
+torch_posterior[128.3,128.4]
+```
+
+```{python}
+def interpolate_tensor(tensor, x, y):
+# Get the dimensions of the tensor
+  height, width = tensor.shape
+  
+  # Calculate the indices of the four surrounding elements
+  x1 = int(x)
+  x2 = x1 + 1
+  y1 = int(y)
+  y2 = y1 + 1
+  
+  # Check if the indices are within the tensor boundaries
+  if x1 >= width - 1 or y1 >= height - 1:
+    return None
+  
+  # Calculate the weight for interpolation
+  weight_x2 = x - x1
+  weight_x1 = 1 - weight_x2
+  weight_y2 = y - y1
+  weight_y1 = 1 - weight_y2
+  
+  # Perform interpolation
+  value = (
+      tensor[y1, x1] * weight_x1 * weight_y1 +
+      tensor[y1, x2] * weight_x2 * weight_y1 +
+      tensor[y2, x1] * weight_x1 * weight_y2 +
+      tensor[y2, x2] * weight_x2 * weight_y2
+  )
+  
+  return value
+    
+tensor = torch.tensor([[1, 2, 3],
+                         [4, 5, 6],
+                         [7, 8, 9]])
+
+# Interpolate at continuous coordinates
+x = 1.5
+y = 2.2
+interpolated_value = interpolate_tensor(tensor, x, y)
+
+print(interpolated_value)
 ```
 
