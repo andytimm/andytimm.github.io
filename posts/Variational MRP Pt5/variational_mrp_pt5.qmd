@@ -266,14 +266,17 @@ class VariationalLoss(nn.Module):
 ```
 
 
-
-
-
 # A basic flow
+
+Next, let's define the structure of the actual flow. To do this, we'll first
+describe a single layer of the flow, then we'll show structure to stack
+the flow in layers.
+
+
 
 # What more complicated NNs look like
 
-# Conclusion
+# Conclusion 
 
 [^1]: It also almost has a bit of "no brain no pain" ML guy energy, in the sense
 that we're really pulling out the biggest algorithm possible. It really is a funny

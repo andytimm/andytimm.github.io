@@ -4,8 +4,11 @@ editor: visual
 ---
 
 ```{python}
-xlim=4
-ylim=4
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+
+xlim = ylim = 4
 
 def density(z):
   u = 0.5 * ((torch.norm(z, 2, dim=1) - 2) / 0.4) ** 2
@@ -37,9 +40,7 @@ x
 
 
 ```{python}
-import torch
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 
 def U_1(z):
