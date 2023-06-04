@@ -199,6 +199,11 @@ from torch.distributions import MultivariateNormal
 from torch import Tensor
 from PIL import Image
 from typing import Tuple
+from typing import Callable
+import matplotlib.pyplot as plt
+
+torch.set_default_device('cuda')
+
 ```
 
 Let's first make a fun target posterior distribution from an image to model. I
@@ -250,6 +255,80 @@ Keeping with the structure above of numbering successive stages of the flow,
 to the target. In addition to the terms you'd expect in the ELBO, we're also
 tracking and making use of the sum of the log determinant of the Jacobians to
 a handle on the distortion of the base density the flows apply.
+
+```{python}
+#| echo: False
+class TargetDistribution:
+    def __init__(self, name: str):
+        """Define target distribution. 
+
+        Args:
+            name: The name of the target density to use. 
+                  Valid choices: ["U_1", "U_2", "U_3", "U_4", "ring"].
+        """
+        self.func = self.get_target_distribution(name)
+
+    def __call__(self, z: Tensor) -> Tensor:
+        return self.func(z)
+
+    @staticmethod
+    def get_target_distribution(name: str) -> Callable[[Tensor], Tensor]:
+        w1 = lambda z: torch.sin(2 * np.pi * z[:, 0] / 4)
+        w2 = lambda z: 3 * torch.exp(-0.5 * ((z[:, 0] - 1) / 0.6) ** 2)
+        w3 = lambda z: 3 * torch.sigmoid((z[:, 0] - 1) / 0.3)
+
+        if name == "U_1":
+
+            def U_1(z):
+                u = 0.5 * ((torch.norm(z, 2, dim=1) - 2) / 0.4) ** 2
+                u = u - torch.log(
+                    torch.exp(-0.5 * ((z[:, 0] - 2) / 0.6) ** 2)
+                    + torch.exp(-0.5 * ((z[:, 0] + 2) / 0.6) ** 2)
+                )
+                return u
+
+            return U_1
+        elif name == "U_2":
+
+            def U_2(z):
+                u = 0.5 * ((z[:, 1] - w1(z)) / 0.4) ** 2
+                return u
+
+            return U_2
+        elif name == "U_3":
+
+            def U_3(z):
+                u = -torch.log(
+                    torch.exp(-0.5 * ((z[:, 1] - w1(z)) / 0.35) ** 2)
+                    + torch.exp(-0.5 * ((z[:, 1] - w1(z) + w2(z)) / 0.35) ** 2)
+                    + 1e-6
+                )
+                return u
+
+            return U_3
+        elif name == "U_4":
+
+            def U_4(z):
+                u = -torch.log(
+                    torch.exp(-0.5 * ((z[:, 1] - w1(z)) / 0.4) ** 2)
+                    + torch.exp(-0.5 * ((z[:, 1] - w1(z) + w3(z)) / 0.35) ** 2)
+                    + 1e-6
+                )
+                return u
+
+            return U_4
+        elif name == "ring":
+
+            def ring_density(z):
+                exp1 = torch.exp(-0.5 * ((z[:, 0] - 2) / 0.8) ** 2)
+                exp2 = torch.exp(-0.5 * ((z[:, 0] + 2) / 0.8) ** 2)
+                u = 0.5 * ((torch.norm(z, 2, dim=1) - 4) / 0.4) ** 2
+                u = u - torch.log(exp1 + exp2 + 1e-6)
+                return u
+
+            return ring_density
+```
+
 
 ```{python}
 # https://github.com/e-hulten/planar-flows/blob/master/loss.py
@@ -429,23 +508,27 @@ def plot_transformation(model, n=500, xlim=4, ylim=4, ax=None, cmap="Purples"):
     zz = torch.stack((xx.flatten(), yy.flatten()), dim=-1).squeeze()
 
     zk, sum_log_jacobians = model(zz)
+    
 
     base_log_prob = base_distr.log_prob(zz)
     final_log_prob = base_log_prob - sum_log_jacobians
     qk = torch.exp(final_log_prob)
+    
     if ax is None:
         fig = plt.figure(figsize=[7, 7])
         ax = fig.add_subplot(111)
     ax.set_xlim(-xlim, xlim)
     ax.set_ylim(-ylim, ylim)
     ax.set_aspect(1)
+    
     ax.pcolormesh(
-        zk[:, 0].detach().data.reshape(n, n),
-        zk[:, 1].detach().data.reshape(n, n),
-        qk.detach().data.reshape(n, n),
+        zk[:, 0].detach().cpu().data.reshape(n, n),
+        zk[:, 1].detach().cpu().data.reshape(n, n),
+        qk.detach().cpu().data.reshape(n, n),
         cmap=cmap,
         rasterized=True,
     )
+    
 
     plt.tick_params(
         axis="both",
@@ -458,8 +541,8 @@ def plot_transformation(model, n=500, xlim=4, ylim=4, ax=None, cmap="Purples"):
         labelright=False,
         labelbottom=False,
     )
-    if cmap == "Blues":
-        ax.set_facecolor(plt.cm.Blues(0.0))
+    if cmap == "Purples":
+        ax.set_facecolor(plt.cm.Purples(0.0))
     elif cmap == "Reds":
         ax.set_facecolor(plt.cm.Reds(0.0))
 
@@ -477,7 +560,7 @@ def plot_training(model, flow_length, batch_num, lr, axlim):
         horizontalalignment="center",
     )
     plt.savefig(
-        f"train_plots/iteration_{batch_num:06d}.png",
+        f"training_plots/iteration_{batch_num:06d}.png",
         bbox_inches="tight",
         pad_inches=0.5,
     )
@@ -544,16 +627,16 @@ def plot_available_distributions():
 
 ```{python}
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
-target_distr = "Hi"  # U_1, U_2, U_3, U_4, ring
-flow_length = 1
+target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
+flow_length = 32
 dim = 2
 num_batches = 20000
 batch_size = 128
 lr = 6e-4
-xlim = ylim = 7  # 5 for U_1 to U_4, 7 for ring
+axlim = xlim = ylim = 7  # 5 for U_1 to U_4, 7 for ring
 # ------------------------------------
 
-density = torch_posterior
+density = TargetDistribution(target_distr)
 model = PlanarFlow(dim, K=flow_length)
 bound = VariationalLoss(density)
 optimiser = torch.optim.Adam(model.parameters(), lr=lr)
@@ -577,19 +660,8 @@ for batch_num in range(1, num_batches + 1):
     if batch_num == 1 or batch_num % 100 == 0:
         # Save plots during training. Plots are saved to the 'train_plots' folder.
         plot_training(model, flow_length, batch_num, lr, axlim)
-
-if torch.isnan(log_jacobians).sum() == 0:
-    torch.save(
-        {
-            "epoch": num_batches,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimiser.state_dict(),
-            "loss": loss,
-        },
-        "models/model_" + target_distr + "_K_" + str(flow_length) + ".pt",
-    )
 ```
-
+ 
 
 # What more complicated NNs look like
 

@@ -337,7 +337,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>torch_posterior <span class="op">=</span> torch.from_numpy(normalized_image)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>torch_posterior.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="34">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>torch.Size([300, 300])</code></pre>
 </div>
 </div>
@@ -349,7 +349,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <p>First, we pick a simple base distribution to push through our flow, here a 2-D Normal distribution called <code>base_distr</code>. We’ll also include the interesting target we just made above, <code>distr</code>.</p>
 <p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropogation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
 <p>Keeping with the structure above of numbering successive stages of the flow, <code>z0</code> here is our base distribution, and <code>z</code> will be the learned approximation to the target. In addition to the terms you’d expect in the ELBO, we’re also tracking and making use of the sum of the log determinant of the Jacobians to a handle on the distortion of the base density the flows apply.</p>
-<div class="cell" data-execution_count="3">
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/e-hulten/planar-flows/blob/master/loss.py</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VariationalLoss(nn.Module):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,distribution):</span>
@@ -372,7 +372,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 </span></p>
 <p><span class="math inline">w</span> and <span class="math inline">b</span> define the hyperplane and u specifies the direction and strength of the expansion. I’ll show a visualization of just one layer of that below.</p>
 <p>If you’re more used to working with neural nets, you might wonder why we choose the non-linearity <span class="math inline">tanh</span> here, which generally isn’t as popular as something like <span class="math inline">relu</span> or it’s variants in more recent years due to it’s more unstable gradient flows. As the authors show in appendix <span class="math inline">A.1</span>, functions like the above aren’t actually always invertible, and choosing <span class="math inline">tanh</span> allows them to impose some constraints that make things reliably invertible. See the Appendix for more details about how that works, or take a careful look at Edvard’s implementation of the single function below:</p>
-<div class="cell" data-execution_count="4">
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From https://github.com/e-hulten/planar-flows/blob/master/planar_transform.py</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarTransform(nn.Module):</span>
@@ -419,7 +419,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>      )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Where things will start to get exciting is multiple layers of the flow; here’s how we can make an abstraction that allows us to stack up <span class="math inline">K</span> layers of the flow to control the flexibility of our approximation.</p>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarFlow(nn.Module):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>, K: <span class="bu">int</span> <span class="op">=</span> <span class="dv">6</span>):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Make a planar flow by stacking planar transformations in sequence.</span></span>
@@ -442,6 +442,108 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z, log_det_J</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s run this for a single layer to introduce the training loop, and build some intuition on the planar flow. Note that I’m hiding setting up the plot code.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>target_distr <span class="op">=</span> <span class="st">"ring"</span>  <span class="co"># U_1, U_2, U_3, U_4, ring</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">32</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dim <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>num_batches <span class="op">=</span> <span class="dv">20000</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">128</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">6e-4</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>axlim <span class="op">=</span> xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">7</span>  <span class="co"># 5 for U_1 to U_4, 7 for ring</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>density <span class="op">=</span> TargetDistribution(target_distr)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> PlanarFlow(dim, K<span class="op">=</span>flow_length)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>bound <span class="op">=</span> VariationalLoss(density)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>optimiser <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Train model.</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch_num <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, num_batches <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get batch from N(0,I).</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    batch <span class="op">=</span> torch.zeros(size<span class="op">=</span>(batch_size, <span class="dv">2</span>)).normal_(mean<span class="op">=</span><span class="dv">0</span>, std<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pass batch through flow.</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    zk, log_jacobians <span class="op">=</span> model(batch)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute loss under target distribution.</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> bound(batch, zk, log_jacobians)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    optimiser.zero_grad()</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    optimiser.step()</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">%</span> <span class="dv">1000</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"(batch_num </span><span class="sc">{</span>batch_num<span class="sc">:05d}</span><span class="ss">/</span><span class="sc">{</span>num_batches<span class="sc">}</span><span class="ss">) loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">==</span> <span class="dv">1</span> <span class="kw">or</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Python311\Lib\site-packages\torch\functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ..\aten\src\ATen\native\TensorShape.cpp:3484.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+C:\Users\timma\AppData\Local\Temp\ipykernel_11204\4251992244.py:69: UserWarning: The input coordinates to pcolormesh are interpreted as cell centers, but are not monotonically increasing or decreasing. This may lead to incorrectly calculated cell edges, in which case, please supply explicit cell edges to pcolormesh.
+  ax.pcolormesh(</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 01000/20000) loss: 1.089542269706726</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02000/20000) loss: -0.6800646185874939</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03000/20000) loss: -1.6687774658203125</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04000/20000) loss: -1.9710859060287476</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05000/20000) loss: -2.136465549468994</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06000/20000) loss: -2.087111473083496</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07000/20000) loss: -2.1833701133728027</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08000/20000) loss: -2.3048152923583984</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09000/20000) loss: -2.240042209625244</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10000/20000) loss: -2.249819755554199</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11000/20000) loss: -2.2902894020080566</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12000/20000) loss: -2.1870293617248535</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13000/20000) loss: -2.2856862545013428</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14000/20000) loss: -2.315763473510742</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15000/20000) loss: -2.296020269393921</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16000/20000) loss: -2.2717132568359375</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17000/20000) loss: -2.2703466415405273</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18000/20000) loss: -2.333778142929077</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19000/20000) loss: -2.320394992828369</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 20000/20000) loss: -2.3190441131591797</code></pre>
+</div>
+</div>
 </section>
 <section id="what-more-complicated-nns-look-like" class="level1">
 <h1>What more complicated NNs look like</h1>
