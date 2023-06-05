@@ -377,6 +377,17 @@ class TargetDistribution:
               return interpolate_tensor(torch_posterior,z)
           
           return hi_density
+        
+        elif name == "moons":
+          
+          def two_moons_density(z):
+            x = z[:, 0]
+            y = z[:, 1]
+            d = torch.sqrt(x**2 + y**2)
+            density = torch.exp(-0.2 * d) * torch.cos(4 * np.pi * d)
+            return density
+          
+          return two_moons_density
 
 ```
 
@@ -678,11 +689,11 @@ def plot_available_distributions():
 
 ```{python}
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
-target_distr = "hi"  # U_1, U_2, U_3, U_4, ring, hi
+target_distr = "moons"  # U_1, U_2, U_3, U_4, ring, hi, moons
 flow_length = 32
 dim = 2
 num_batches = 20000
-batch_size = 256
+batch_size = 128
 lr = 6e-4
 axlim = xlim = ylim = 5  # 5 for U_1 to U_4, 7 for ring
 # ------------------------------------
@@ -695,7 +706,7 @@ optimiser = torch.optim.Adam(model.parameters(), lr=lr)
 # Train model.
 for batch_num in range(1, num_batches + 1):
     # Get batch from N(0,I).
-    batch = torch.zeros(size=(batch_size, 2)).normal_(mean=150, std=30)
+    batch = torch.zeros(size=(batch_size, 2)).normal_(mean=0, std=1)
     # Pass batch through flow.
     zk, log_jacobians = model(batch)
     
@@ -708,7 +719,7 @@ for batch_num in range(1, num_batches + 1):
 
     if batch_num % 100 == 0:
         print(f"(batch_num {batch_num:05d}/{num_batches}) loss: {loss}")
-        #print(interpolate_tensor(torch_posterior,batch))
+        #print(log_jacobians)
 
     if batch_num == 1 or batch_num % 100 == 0:
         # Save plots during training. Plots are saved to the 'train_plots' folder.
