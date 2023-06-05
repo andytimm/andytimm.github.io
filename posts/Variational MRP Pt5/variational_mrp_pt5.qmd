@@ -203,6 +203,7 @@ from typing import Callable
 import matplotlib.pyplot as plt
 
 torch.set_default_device('cuda')
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ```
 
@@ -222,13 +223,21 @@ raw_img = Image.open("images/hard_to_draw_posterior.png")
 # Sum the 3 color channels
 greyscale_img = np.array(raw_img).sum(axis = 2)
 
+# Replace white values (1020), with 0, so density is all at letters
+indices = greyscale_img == 1020
+
+# Replace the selected values with 0
+greyscale_img[indices] = 50
+
+
 # Normalize values to help with fitting
-normalized_image  = (greyscale_img - greyscale_img.min()) / (greyscale_img.max() - greyscale_img.min())
+normalized_image  = (greyscale_img - greyscale_img.min()) / (10000000)
  
 # Make a torch tensor of the target to use
-torch_posterior = torch.from_numpy(normalized_image)
+torch_posterior = torch.from_numpy(normalized_image).to(device)
 
-torch_posterior.shape
+#300 x 300 px, normalized grayscale representation of the above image
+torch_posterior.sum()
 ```
 
 Now let's define our loss for training, which will just be a slight
@@ -258,6 +267,40 @@ a handle on the distortion of the base density the flows apply.
 
 ```{python}
 #| echo: False
+
+
+# helper function to get a value for continuous density of my pixelated image
+# There's definitely a better way to do this, this is just quick
+def interpolate_tensor(tensor, z):
+  # Get the dimensions of the tensor
+  height, width = z.shape
+
+  # Separate x and y coordinates from the input tensor
+  x = z[:, 0]
+  y = z[:, 1]
+
+  # Calculate the indices of the four surrounding elements
+  x1 = x.floor().clamp(max=width - 1).long()
+  x2 = x1 + 1
+  y1 = y.floor().clamp(max=height - 1).long()
+  y2 = y1 + 1
+
+  # Calculate the weight for interpolation
+  weight_x2 = x - x1.float()
+  weight_x1 = 1 - weight_x2
+  weight_y2 = y - y1.float()
+  weight_y1 = 1 - weight_y2
+
+  # Perform interpolation
+  value = (
+      tensor[y1.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y1 +
+      tensor[y1.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y1 +
+      tensor[y2.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y2 +
+      tensor[y2.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y2
+  )
+
+  return value
+
 class TargetDistribution:
     def __init__(self, name: str):
         """Define target distribution. 
@@ -327,6 +370,14 @@ class TargetDistribution:
                 return u
 
             return ring_density
+          
+        elif name == "hi":
+
+          def hi_density(z):
+              return interpolate_tensor(torch_posterior,z)
+          
+          return hi_density
+
 ```
 
 
@@ -627,13 +678,13 @@ def plot_available_distributions():
 
 ```{python}
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
-target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
+target_distr = "hi"  # U_1, U_2, U_3, U_4, ring, hi
 flow_length = 32
 dim = 2
 num_batches = 20000
-batch_size = 128
+batch_size = 256
 lr = 6e-4
-axlim = xlim = ylim = 7  # 5 for U_1 to U_4, 7 for ring
+axlim = xlim = ylim = 5  # 5 for U_1 to U_4, 7 for ring
 # ------------------------------------
 
 density = TargetDistribution(target_distr)
@@ -644,9 +695,10 @@ optimiser = torch.optim.Adam(model.parameters(), lr=lr)
 # Train model.
 for batch_num in range(1, num_batches + 1):
     # Get batch from N(0,I).
-    batch = torch.zeros(size=(batch_size, 2)).normal_(mean=0, std=1)
+    batch = torch.zeros(size=(batch_size, 2)).normal_(mean=150, std=30)
     # Pass batch through flow.
     zk, log_jacobians = model(batch)
+    
     # Compute loss under target distribution.
     loss = bound(batch, zk, log_jacobians)
 
@@ -654,8 +706,9 @@ for batch_num in range(1, num_batches + 1):
     loss.backward()
     optimiser.step()
 
-    if batch_num % 1000 == 0:
+    if batch_num % 100 == 0:
         print(f"(batch_num {batch_num:05d}/{num_batches}) loss: {loss}")
+        #print(interpolate_tensor(torch_posterior,batch))
 
     if batch_num == 1 or batch_num % 100 == 0:
         # Save plots during training. Plots are saved to the 'train_plots' folder.
