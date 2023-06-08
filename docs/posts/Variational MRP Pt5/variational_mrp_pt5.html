@@ -330,15 +330,23 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sum the 3 color channels</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>greyscale_img <span class="op">=</span> np.array(raw_img).<span class="bu">sum</span>(axis <span class="op">=</span> <span class="dv">2</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize values to help with fitting</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>normalized_image  <span class="op">=</span> (greyscale_img <span class="op">-</span> greyscale_img.<span class="bu">min</span>()) <span class="op">/</span> (greyscale_img.<span class="bu">max</span>() <span class="op">-</span> greyscale_img.<span class="bu">min</span>())</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a torch tensor of the target to use</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>torch_posterior <span class="op">=</span> torch.from_numpy(normalized_image)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace white values (1020), with 0, so density is all at letters</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>indices <span class="op">=</span> greyscale_img <span class="op">==</span> <span class="dv">1020</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace the selected values with 0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>greyscale_img[indices] <span class="op">=</span> <span class="dv">50</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>torch_posterior.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize values to help with fitting</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>normalized_image  <span class="op">=</span> (greyscale_img <span class="op">-</span> greyscale_img.<span class="bu">min</span>()) <span class="op">/</span> (<span class="dv">10000000</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a torch tensor of the target to use</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>torch_posterior <span class="op">=</span> torch.from_numpy(normalized_image).to(device)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#300 x 300 px, normalized grayscale representation of the above image</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>torch_posterior.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>torch.Size([300, 300])</code></pre>
+<pre><code>tensor(0.9065, device='cuda:0', dtype=torch.float64)</code></pre>
 </div>
 </div>
 <p>Now let’s define our loss for training, which will just be a slight reformulation of our ELBO:</p>
@@ -445,12 +453,12 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>target_distr <span class="op">=</span> <span class="st">"ring"</span>  <span class="co"># U_1, U_2, U_3, U_4, ring</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">32</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">2</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dim <span class="op">=</span> <span class="dv">2</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>num_batches <span class="op">=</span> <span class="dv">20000</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">128</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">6e-4</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>axlim <span class="op">=</span> xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">7</span>  <span class="co"># 5 for U_1 to U_4, 7 for ring</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>axlim <span class="op">=</span> xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">5</span>  <span class="co"># 5 for U_1 to U_4, 7 for ring</span></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>density <span class="op">=</span> TargetDistribution(target_distr)</span>
@@ -464,84 +472,628 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    batch <span class="op">=</span> torch.zeros(size<span class="op">=</span>(batch_size, <span class="dv">2</span>)).normal_(mean<span class="op">=</span><span class="dv">0</span>, std<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pass batch through flow.</span></span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    zk, log_jacobians <span class="op">=</span> model(batch)</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute loss under target distribution.</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> bound(batch, zk, log_jacobians)</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    optimiser.zero_grad()</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    optimiser.step()</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">%</span> <span class="dv">1000</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"(batch_num </span><span class="sc">{</span>batch_num<span class="sc">:05d}</span><span class="ss">/</span><span class="sc">{</span>num_batches<span class="sc">}</span><span class="ss">) loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">==</span> <span class="dv">1</span> <span class="kw">or</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute loss under target distribution.</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> bound(batch, zk, log_jacobians)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    optimiser.zero_grad()</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    optimiser.step()</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"(batch_num </span><span class="sc">{</span>batch_num<span class="sc">:05d}</span><span class="ss">/</span><span class="sc">{</span>num_batches<span class="sc">}</span><span class="ss">) loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(log_jacobians)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">==</span> <span class="dv">1</span> <span class="kw">or</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>C:\Python311\Lib\site-packages\torch\functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ..\aten\src\ATen\native\TensorShape.cpp:3484.)
-  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
-C:\Users\timma\AppData\Local\Temp\ipykernel_11204\4251992244.py:69: UserWarning: The input coordinates to pcolormesh are interpreted as cell centers, but are not monotonically increasing or decreasing. This may lead to incorrectly calculated cell edges, in which case, please supply explicit cell edges to pcolormesh.
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 00100/20000) loss: 23.53183937072754</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\timma\AppData\Local\Temp\ipykernel_1480\4251992244.py:69: UserWarning: The input coordinates to pcolormesh are interpreted as cell centers, but are not monotonically increasing or decreasing. This may lead to incorrectly calculated cell edges, in which case, please supply explicit cell edges to pcolormesh.
   ax.pcolormesh(</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 01000/20000) loss: 1.089542269706726</code></pre>
+<pre><code>(batch_num 00200/20000) loss: 20.994998931884766</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 02000/20000) loss: -0.6800646185874939</code></pre>
+<pre><code>(batch_num 00300/20000) loss: 20.90053939819336</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 03000/20000) loss: -1.6687774658203125</code></pre>
+<pre><code>(batch_num 00400/20000) loss: 18.84044647216797</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 04000/20000) loss: -1.9710859060287476</code></pre>
+<pre><code>(batch_num 00500/20000) loss: 16.77310562133789</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 05000/20000) loss: -2.136465549468994</code></pre>
+<pre><code>(batch_num 00600/20000) loss: 16.30998992919922</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 06000/20000) loss: -2.087111473083496</code></pre>
+<pre><code>(batch_num 00700/20000) loss: 11.962639808654785</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 07000/20000) loss: -2.1833701133728027</code></pre>
+<pre><code>(batch_num 00800/20000) loss: 11.01216983795166</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 08000/20000) loss: -2.3048152923583984</code></pre>
+<pre><code>(batch_num 00900/20000) loss: 10.37910270690918</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 09000/20000) loss: -2.240042209625244</code></pre>
+<pre><code>(batch_num 01000/20000) loss: 8.418041229248047</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 10000/20000) loss: -2.249819755554199</code></pre>
+<pre><code>(batch_num 01100/20000) loss: 6.021894931793213</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 11000/20000) loss: -2.2902894020080566</code></pre>
+<pre><code>(batch_num 01200/20000) loss: 5.717703819274902</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 12000/20000) loss: -2.1870293617248535</code></pre>
+<pre><code>(batch_num 01300/20000) loss: 3.8855597972869873</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 13000/20000) loss: -2.2856862545013428</code></pre>
+<pre><code>(batch_num 01400/20000) loss: 3.86718487739563</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 14000/20000) loss: -2.315763473510742</code></pre>
+<pre><code>(batch_num 01500/20000) loss: 3.907670021057129</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 15000/20000) loss: -2.296020269393921</code></pre>
+<pre><code>(batch_num 01600/20000) loss: 1.847822904586792</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 16000/20000) loss: -2.2717132568359375</code></pre>
+<pre><code>(batch_num 01700/20000) loss: 4.638023853302002</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 17000/20000) loss: -2.2703466415405273</code></pre>
+<pre><code>(batch_num 01800/20000) loss: 3.2167813777923584</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 18000/20000) loss: -2.333778142929077</code></pre>
+<pre><code>(batch_num 01900/20000) loss: 1.8979766368865967</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 19000/20000) loss: -2.320394992828369</code></pre>
+<pre><code>(batch_num 02000/20000) loss: 2.2743802070617676</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>(batch_num 20000/20000) loss: -2.3190441131591797</code></pre>
+<pre><code>(batch_num 02100/20000) loss: 1.3806898593902588</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02200/20000) loss: 1.5938010215759277</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02300/20000) loss: 2.74418044090271</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02400/20000) loss: 3.166958808898926</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02500/20000) loss: 2.990528106689453</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02600/20000) loss: 1.1335718631744385</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02700/20000) loss: 1.306429386138916</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02800/20000) loss: 1.2546987533569336</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 02900/20000) loss: 0.30904117226600647</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03000/20000) loss: 1.9958691596984863</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03100/20000) loss: 1.4669091701507568</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03200/20000) loss: 1.7111603021621704</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03300/20000) loss: 1.8202102184295654</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03400/20000) loss: 1.8184399604797363</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03500/20000) loss: 1.2064381837844849</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03600/20000) loss: 0.8316801190376282</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03700/20000) loss: 0.12350399792194366</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03800/20000) loss: 0.7493021488189697</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 03900/20000) loss: 1.421569585800171</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04000/20000) loss: 0.44843626022338867</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04100/20000) loss: 0.6824027895927429</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04200/20000) loss: 0.7544111013412476</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04300/20000) loss: 0.8090195655822754</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04400/20000) loss: 0.5537429451942444</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04500/20000) loss: 0.04105612635612488</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04600/20000) loss: 0.6974716186523438</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04700/20000) loss: 0.19744260609149933</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04800/20000) loss: 0.20983920991420746</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 04900/20000) loss: -0.1809486746788025</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05000/20000) loss: 0.37607288360595703</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05100/20000) loss: 0.9134331941604614</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05200/20000) loss: 0.3730510175228119</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05300/20000) loss: -0.47192516922950745</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05400/20000) loss: 0.8290470838546753</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05500/20000) loss: 1.3974835872650146</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05600/20000) loss: 0.09541454911231995</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05700/20000) loss: -0.13839580118656158</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05800/20000) loss: 0.11648982018232346</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 05900/20000) loss: -0.6386630535125732</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06000/20000) loss: 0.9324575662612915</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06100/20000) loss: -0.24909564852714539</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06200/20000) loss: 1.4798192977905273</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06300/20000) loss: 0.43216240406036377</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06400/20000) loss: -0.7252155542373657</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06500/20000) loss: 0.5799909234046936</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06600/20000) loss: -0.21017222106456757</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06700/20000) loss: -0.3734526038169861</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06800/20000) loss: 0.5551584959030151</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 06900/20000) loss: 0.1255159080028534</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07000/20000) loss: -0.5630631446838379</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07100/20000) loss: -0.030557140707969666</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07200/20000) loss: -0.7508930563926697</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07300/20000) loss: -0.5233619213104248</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07400/20000) loss: 0.28095123171806335</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07500/20000) loss: 0.07843410968780518</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07600/20000) loss: 0.5511898994445801</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07700/20000) loss: -0.1848641335964203</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07800/20000) loss: 0.11113755404949188</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 07900/20000) loss: 0.008256569504737854</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08000/20000) loss: -0.19947832822799683</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08100/20000) loss: -0.45735034346580505</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08200/20000) loss: 0.5538589954376221</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08300/20000) loss: -0.10944157838821411</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08400/20000) loss: -0.4294120669364929</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08500/20000) loss: -0.25491130352020264</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08600/20000) loss: -0.5831103324890137</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08700/20000) loss: 0.04871252179145813</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08800/20000) loss: -0.4299813508987427</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 08900/20000) loss: 0.2146015167236328</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09000/20000) loss: 0.1435202658176422</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09100/20000) loss: -0.716264009475708</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09200/20000) loss: -0.6629137396812439</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09300/20000) loss: -0.30255424976348877</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09400/20000) loss: -0.09136298298835754</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09500/20000) loss: -0.39034590125083923</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09600/20000) loss: -0.4760989844799042</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09700/20000) loss: 0.29063454270362854</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09800/20000) loss: -0.5586217641830444</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 09900/20000) loss: -0.43544644117355347</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10000/20000) loss: -0.9282410144805908</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10100/20000) loss: 0.19365458190441132</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10200/20000) loss: 0.0816102921962738</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10300/20000) loss: -1.0993659496307373</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10400/20000) loss: -0.21989655494689941</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10500/20000) loss: -0.5877478718757629</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10600/20000) loss: -0.40770483016967773</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10700/20000) loss: -1.0903253555297852</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10800/20000) loss: -0.5532143712043762</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 10900/20000) loss: -0.16332033276557922</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11000/20000) loss: -0.4744631052017212</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11100/20000) loss: -0.09918088465929031</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11200/20000) loss: -0.567780077457428</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11300/20000) loss: -0.7111999988555908</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11400/20000) loss: -0.7287379503250122</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11500/20000) loss: -0.0649578869342804</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11600/20000) loss: 0.25484105944633484</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11700/20000) loss: -0.5245593786239624</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11800/20000) loss: -0.6941218376159668</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 11900/20000) loss: 0.5740460157394409</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12000/20000) loss: -0.20360657572746277</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12100/20000) loss: -0.7829161882400513</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12200/20000) loss: -0.08825202286243439</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12300/20000) loss: -1.2766939401626587</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12400/20000) loss: -0.7791504263877869</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12500/20000) loss: -0.39922642707824707</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12600/20000) loss: -0.15501278638839722</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12700/20000) loss: -0.3032105565071106</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12800/20000) loss: -0.5128021240234375</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 12900/20000) loss: -0.8823572993278503</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13000/20000) loss: -0.6840925216674805</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13100/20000) loss: -0.12149892747402191</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13200/20000) loss: -0.666481614112854</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13300/20000) loss: -0.8941734433174133</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13400/20000) loss: -1.0827946662902832</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13500/20000) loss: -1.045516848564148</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13600/20000) loss: -0.36946970224380493</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13700/20000) loss: -1.2924668788909912</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13800/20000) loss: -0.9714236259460449</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 13900/20000) loss: -0.13862578570842743</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14000/20000) loss: -0.6488382816314697</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14100/20000) loss: -0.8653355836868286</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14200/20000) loss: 0.01034960150718689</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14300/20000) loss: -0.2832479178905487</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14400/20000) loss: -0.6680377721786499</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14500/20000) loss: -0.8564409017562866</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14600/20000) loss: -0.06087149679660797</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14700/20000) loss: -0.5138503909111023</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14800/20000) loss: -0.7603799104690552</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 14900/20000) loss: -0.7985144853591919</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15000/20000) loss: -0.7117128372192383</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15100/20000) loss: -0.8555217981338501</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15200/20000) loss: -0.22392134368419647</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15300/20000) loss: -0.27232199907302856</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15400/20000) loss: -0.9488778114318848</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15500/20000) loss: -0.5534208416938782</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15600/20000) loss: -0.5648906826972961</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15700/20000) loss: -0.7468466758728027</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15800/20000) loss: -0.3864515721797943</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 15900/20000) loss: 0.24845197796821594</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16000/20000) loss: -1.1112899780273438</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16100/20000) loss: -0.3495236039161682</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16200/20000) loss: -0.842694878578186</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16300/20000) loss: -0.7514711618423462</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16400/20000) loss: -0.956265389919281</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16500/20000) loss: -0.6691103577613831</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16600/20000) loss: -0.6804472208023071</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16700/20000) loss: -1.0454661846160889</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16800/20000) loss: -0.8576145172119141</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 16900/20000) loss: -0.7169828414916992</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17000/20000) loss: -0.4931994378566742</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17100/20000) loss: -0.8349542617797852</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17200/20000) loss: -0.6177186369895935</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17300/20000) loss: -0.8593571186065674</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17400/20000) loss: -1.1710288524627686</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17500/20000) loss: -0.45717254281044006</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17600/20000) loss: -0.7136792540550232</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17700/20000) loss: -0.30101335048675537</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17800/20000) loss: -0.7737146019935608</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 17900/20000) loss: -0.7789114713668823</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18000/20000) loss: -0.40764886140823364</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18100/20000) loss: -0.46933722496032715</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18200/20000) loss: -0.5195136070251465</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18300/20000) loss: -0.29774248600006104</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18400/20000) loss: -0.45873814821243286</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18500/20000) loss: -0.9430521726608276</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18600/20000) loss: -0.8074394464492798</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18700/20000) loss: -0.6546366214752197</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18800/20000) loss: -0.6442867517471313</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 18900/20000) loss: -1.2402918338775635</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19000/20000) loss: -0.9669927358627319</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19100/20000) loss: -0.6719714403152466</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19200/20000) loss: -0.6797963976860046</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19300/20000) loss: -0.45326051115989685</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19400/20000) loss: -0.6933085322380066</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19500/20000) loss: -0.8500641584396362</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19600/20000) loss: -1.0281943082809448</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19700/20000) loss: -0.7677603363990784</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19800/20000) loss: -0.24082374572753906</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 19900/20000) loss: -0.24140426516532898</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(batch_num 20000/20000) loss: -0.9767911434173584</code></pre>
 </div>
 </div>
 </section>

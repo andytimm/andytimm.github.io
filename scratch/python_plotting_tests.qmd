@@ -1,6 +1,7 @@
 ---
 title: "Python Plotting Tests"
 editor: visual
+eval: False 
 ---
 
 ```{python}
@@ -101,54 +102,121 @@ test
 
 ```
 
-```{python}
-torch_posterior.shape
 
-# Unlike above, where his function takes a batch and batch norms them in 1 x 2 x 2,
-# I think I need to just return
-torch_posterior[128.3,128.4]
+```{python}
+import torch
+
+def interpolate_tensor(tensor, coords):
+    # Get the dimensions of the tensor
+    height, width = tensor.shape
+
+    # Separate x and y coordinates from the input tensor
+    x = coords[:, 0]
+    y = coords[:, 1]
+
+    # Calculate the indices of the four surrounding elements
+    x1 = x.floor().clamp(max=width - 1).long()
+    x2 = x1 + 1
+    y1 = y.floor().clamp(max=height - 1).long()
+    y2 = y1 + 1
+
+    # Calculate the weight for interpolation
+    weight_x2 = x - x1.float()
+    weight_x1 = 1 - weight_x2
+    weight_y2 = y - y1.float()
+    weight_y1 = 1 - weight_y2
+
+    # Perform interpolation
+    value = (
+        tensor[y1.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y1 +
+        tensor[y1.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y1 +
+        tensor[y2.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y2 +
+        tensor[y2.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y2
+    )
+
+    return value
+
+# Create a sample PyTorch tensor
+tensor = torch.tensor([[1, 2, 3],
+                       [4, 5, 6],
+                       [7, 8, 9]])
+
+# Create a tensor with x and y coordinates
+coords = torch.tensor([[1.5, 2.2],
+                       [0.2, 1.7]])
+
+# Interpolate at continuous coordinates
+interpolated_values = interpolate_tensor(tensor, coords)
+
+print(interpolated_values)
+
+
 ```
 
 ```{python}
-def interpolate_tensor(tensor, x, y):
-# Get the dimensions of the tensor
-  height, width = tensor.shape
-  
-  # Calculate the indices of the four surrounding elements
-  x1 = int(x)
-  x2 = x1 + 1
-  y1 = int(y)
-  y2 = y1 + 1
-  
-  # Check if the indices are within the tensor boundaries
-  if x1 >= width - 1 or y1 >= height - 1:
-    return None
-  
-  # Calculate the weight for interpolation
-  weight_x2 = x - x1
-  weight_x1 = 1 - weight_x2
-  weight_y2 = y - y1
-  weight_y1 = 1 - weight_y2
-  
-  # Perform interpolation
-  value = (
-      tensor[y1, x1] * weight_x1 * weight_y1 +
-      tensor[y1, x2] * weight_x2 * weight_y1 +
-      tensor[y2, x1] * weight_x1 * weight_y2 +
-      tensor[y2, x2] * weight_x2 * weight_y2
-  )
-  
-  return value
-    
-tensor = torch.tensor([[1, 2, 3],
-                         [4, 5, 6],
-                         [7, 8, 9]])
+unique_values, counts = torch.unique(torch_posterior, return_counts=True)
 
-# Interpolate at continuous coordinates
-x = 1.5
-y = 2.2
-interpolated_value = interpolate_tensor(tensor, x, y)
+# Print the unique values and their counts
+for value, count in zip(unique_values, counts):
+    print(f"Value: {value}, Count: {count}")
+```
 
-print(interpolated_value)
+```{python}
+fig, ax = plt.subplots()
+
+# Plot the tensor values
+ax.imshow(torch_posterior.cpu(), cmap='viridis')
+
+# Show the colorbar
+plt.colorbar()
+
+# Show the plot
+plt.show()
+```
+
+
+```{python}
+batch = torch.zeros(size=(batch_size, 2)).normal_(mean=0, std=1)
+batch2 = torch.zeros(size=(batch_size, 2)).normal_(mean=150, std=30)
+
+def two_moons_density(z):
+  x = z[:, 0]
+  y = z[:, 1]
+  d = torch.sqrt(x**2 + y**2)
+  density = torch.exp(-0.2 * d) * torch.cos(4 * np.pi * d)
+  return density
+
+def ring_density(z):
+    exp1 = torch.exp(-0.5 * ((z[:, 0] - 2) / 0.8) ** 2)
+    exp2 = torch.exp(-0.5 * ((z[:, 0] + 2) / 0.8) ** 2)
+    u = 0.5 * ((torch.norm(z, 2, dim=1) - 4) / 0.4) ** 2
+    u = u - torch.log(exp1 + exp2 + 1e-6)
+    return u
+
+two_moons_density(batch).min()
+ring_density(batch).min()
+#interpolate_tensor(torch_posterior,batch2).min()
+
+```
+
+```{python}
+interpolate_tensor(torch_posterior, torch.tensor([[81,44.5]]))
+
+torch_posterior[81,157]
+
+indices = torch.nonzero(torch_posterior != 0)
+
+len(indices)
+
+# Print the pairs of indices
+#for idx in indices:
+#    i, j = idx
+#    print(f"Pair of indices: ({i}, {j})")
+```
+
+```{python}
+test = MultivariateNormal(torch.zeros(2), torch.eye(2))
+
+test.sample()
 ```
 

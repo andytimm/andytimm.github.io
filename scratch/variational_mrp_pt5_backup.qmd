@@ -690,7 +690,7 @@ def plot_available_distributions():
 ```{python}
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
 target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
-flow_length = 32
+flow_length = 2
 dim = 2
 num_batches = 20000
 batch_size = 128
@@ -723,7 +723,7 @@ for batch_num in range(1, num_batches + 1):
 
     if batch_num == 1 or batch_num % 100 == 0:
         # Save plots during training. Plots are saved to the 'train_plots' folder.
-        plot_training(model, flow_length, batch_num, lr, axlim)
+        plot_training(model, flow_length, batch_num, lr, axlim) 
 ```
  
 

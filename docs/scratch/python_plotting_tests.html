@@ -231,131 +231,169 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>U</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>array([-4.        , -3.97324415, -3.94648829, -3.91973244, -3.89297659,
-       -3.86622074, -3.83946488, -3.81270903, -3.78595318, -3.75919732,
-       -3.73244147, -3.70568562, -3.67892977, -3.65217391, -3.62541806,
-       -3.59866221, -3.57190635, -3.5451505 , -3.51839465, -3.4916388 ,
-       -3.46488294, -3.43812709, -3.41137124, -3.38461538, -3.35785953,
-       -3.33110368, -3.30434783, -3.27759197, -3.25083612, -3.22408027,
-       -3.19732441, -3.17056856, -3.14381271, -3.11705686, -3.090301  ,
-       -3.06354515, -3.0367893 , -3.01003344, -2.98327759, -2.95652174,
-       -2.92976589, -2.90301003, -2.87625418, -2.84949833, -2.82274247,
-       -2.79598662, -2.76923077, -2.74247492, -2.71571906, -2.68896321,
-       -2.66220736, -2.63545151, -2.60869565, -2.5819398 , -2.55518395,
-       -2.52842809, -2.50167224, -2.47491639, -2.44816054, -2.42140468,
-       -2.39464883, -2.36789298, -2.34113712, -2.31438127, -2.28762542,
-       -2.26086957, -2.23411371, -2.20735786, -2.18060201, -2.15384615,
-       -2.1270903 , -2.10033445, -2.0735786 , -2.04682274, -2.02006689,
-       -1.99331104, -1.96655518, -1.93979933, -1.91304348, -1.88628763,
-       -1.85953177, -1.83277592, -1.80602007, -1.77926421, -1.75250836,
-       -1.72575251, -1.69899666, -1.6722408 , -1.64548495, -1.6187291 ,
-       -1.59197324, -1.56521739, -1.53846154, -1.51170569, -1.48494983,
-       -1.45819398, -1.43143813, -1.40468227, -1.37792642, -1.35117057,
-       -1.32441472, -1.29765886, -1.27090301, -1.24414716, -1.2173913 ,
-       -1.19063545, -1.1638796 , -1.13712375, -1.11036789, -1.08361204,
-       -1.05685619, -1.03010033, -1.00334448, -0.97658863, -0.94983278,
-       -0.92307692, -0.89632107, -0.86956522, -0.84280936, -0.81605351,
-       -0.78929766, -0.76254181, -0.73578595, -0.7090301 , -0.68227425,
-       -0.65551839, -0.62876254, -0.60200669, -0.57525084, -0.54849498,
-       -0.52173913, -0.49498328, -0.46822742, -0.44147157, -0.41471572,
-       -0.38795987, -0.36120401, -0.33444816, -0.30769231, -0.28093645,
-       -0.2541806 , -0.22742475, -0.2006689 , -0.17391304, -0.14715719,
-       -0.12040134, -0.09364548, -0.06688963, -0.04013378, -0.01337793,
-        0.01337793,  0.04013378,  0.06688963,  0.09364548,  0.12040134,
-        0.14715719,  0.17391304,  0.2006689 ,  0.22742475,  0.2541806 ,
-        0.28093645,  0.30769231,  0.33444816,  0.36120401,  0.38795987,
-        0.41471572,  0.44147157,  0.46822742,  0.49498328,  0.52173913,
-        0.54849498,  0.57525084,  0.60200669,  0.62876254,  0.65551839,
-        0.68227425,  0.7090301 ,  0.73578595,  0.76254181,  0.78929766,
-        0.81605351,  0.84280936,  0.86956522,  0.89632107,  0.92307692,
-        0.94983278,  0.97658863,  1.00334448,  1.03010033,  1.05685619,
-        1.08361204,  1.11036789,  1.13712375,  1.1638796 ,  1.19063545,
-        1.2173913 ,  1.24414716,  1.27090301,  1.29765886,  1.32441472,
-        1.35117057,  1.37792642,  1.40468227,  1.43143813,  1.45819398,
-        1.48494983,  1.51170569,  1.53846154,  1.56521739,  1.59197324,
-        1.6187291 ,  1.64548495,  1.6722408 ,  1.69899666,  1.72575251,
-        1.75250836,  1.77926421,  1.80602007,  1.83277592,  1.85953177,
-        1.88628763,  1.91304348,  1.93979933,  1.96655518,  1.99331104,
-        2.02006689,  2.04682274,  2.0735786 ,  2.10033445,  2.1270903 ,
-        2.15384615,  2.18060201,  2.20735786,  2.23411371,  2.26086957,
-        2.28762542,  2.31438127,  2.34113712,  2.36789298,  2.39464883,
-        2.42140468,  2.44816054,  2.47491639,  2.50167224,  2.52842809,
-        2.55518395,  2.5819398 ,  2.60869565,  2.63545151,  2.66220736,
-        2.68896321,  2.71571906,  2.74247492,  2.76923077,  2.79598662,
-        2.82274247,  2.84949833,  2.87625418,  2.90301003,  2.92976589,
-        2.95652174,  2.98327759,  3.01003344,  3.0367893 ,  3.06354515,
-        3.090301  ,  3.11705686,  3.14381271,  3.17056856,  3.19732441,
-        3.22408027,  3.25083612,  3.27759197,  3.30434783,  3.33110368,
-        3.35785953,  3.38461538,  3.41137124,  3.43812709,  3.46488294,
-        3.4916388 ,  3.51839465,  3.5451505 ,  3.57190635,  3.59866221,
-        3.62541806,  3.65217391,  3.67892977,  3.70568562,  3.73244147,
-        3.75919732,  3.78595318,  3.81270903,  3.83946488,  3.86622074,
-        3.89297659,  3.91973244,  3.94648829,  3.97324415,  4.        ])</code></pre>
-</div>
 </div>
 <div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> U_1(z):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> u</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_density(density, xlim<span class="op">=</span><span class="dv">4</span>, ylim<span class="op">=</span><span class="dv">4</span>, ax<span class="op">=</span><span class="va">None</span>, cmap<span class="op">=</span><span class="st">"Purples"</span>):</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> y <span class="op">=</span> np.linspace(<span class="op">-</span>xlim, xlim, <span class="dv">300</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  shape <span class="op">=</span> X.shape</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  X_flatten, Y_flatten <span class="op">=</span> np.reshape(X, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)), np.reshape(Y, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  Z <span class="op">=</span> torch.from_numpy(np.concatenate([X_flatten, Y_flatten], <span class="dv">1</span>))</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  U <span class="op">=</span> torch.exp(<span class="op">-</span>density(Z))</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  U <span class="op">=</span> U.reshape(shape)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>      ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>)</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim(<span class="op">-</span>xlim, xlim)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  ax.set_ylim(<span class="op">-</span>xlim, xlim)</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  ax.set_aspect(<span class="dv">1</span>)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  ax.pcolormesh(X, Y, U, cmap<span class="op">=</span>cmap, rasterized<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  ax.tick_params(</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>      axis<span class="op">=</span><span class="st">"both"</span>,</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>      left<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>      top<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>      right<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>      bottom<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>      labelleft<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>      labeltop<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>      labelright<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>      labelbottom<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ax</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>plot_density(U_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;Axes: &gt;</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="python_plotting_tests_files/figure-html/cell-3-output-2.png" width="537" height="537"></p>
-</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> U_1(z):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>      torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> u</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_density(density, xlim<span class="op">=</span><span class="dv">4</span>, ylim<span class="op">=</span><span class="dv">4</span>, ax<span class="op">=</span><span class="va">None</span>, cmap<span class="op">=</span><span class="st">"Purples"</span>):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> y <span class="op">=</span> np.linspace(<span class="op">-</span>xlim, xlim, <span class="dv">300</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  shape <span class="op">=</span> X.shape</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  X_flatten, Y_flatten <span class="op">=</span> np.reshape(X, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)), np.reshape(Y, (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  Z <span class="op">=</span> torch.from_numpy(np.concatenate([X_flatten, Y_flatten], <span class="dv">1</span>))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  U <span class="op">=</span> torch.exp(<span class="op">-</span>density(Z))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  U <span class="op">=</span> U.reshape(shape)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim(<span class="op">-</span>xlim, xlim)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  ax.set_ylim(<span class="op">-</span>xlim, xlim)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  ax.set_aspect(<span class="dv">1</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  ax.pcolormesh(X, Y, U, cmap<span class="op">=</span>cmap, rasterized<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  ax.tick_params(</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>      axis<span class="op">=</span><span class="st">"both"</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>      left<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>      top<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      right<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>      bottom<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>      labelleft<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      labeltop<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      labelright<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>      labelbottom<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ax</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>plot_density(U_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> U_1(z):</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                    torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> u</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>              </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> U_1(torch.randn(<span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>test</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>tensor([3.6387])</code></pre>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> U_1(z):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                u <span class="op">=</span> u <span class="op">-</span> torch.log(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                    torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                    <span class="op">+</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.6</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> u</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> U_1(torch.randn(<span class="dv">128</span>,<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>test</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#torch.randn(2, 2)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> interpolate_tensor(tensor, coords):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get the dimensions of the tensor</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    height, width <span class="op">=</span> tensor.shape</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Separate x and y coordinates from the input tensor</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> coords[:, <span class="dv">0</span>]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> coords[:, <span class="dv">1</span>]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the indices of the four surrounding elements</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> x.floor().clamp(<span class="bu">max</span><span class="op">=</span>width <span class="op">-</span> <span class="dv">1</span>).<span class="bu">long</span>()</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    x2 <span class="op">=</span> x1 <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    y1 <span class="op">=</span> y.floor().clamp(<span class="bu">max</span><span class="op">=</span>height <span class="op">-</span> <span class="dv">1</span>).<span class="bu">long</span>()</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    y2 <span class="op">=</span> y1 <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate the weight for interpolation</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    weight_x2 <span class="op">=</span> x <span class="op">-</span> x1.<span class="bu">float</span>()</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    weight_x1 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> weight_x2</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    weight_y2 <span class="op">=</span> y <span class="op">-</span> y1.<span class="bu">float</span>()</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    weight_y1 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> weight_y2</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Perform interpolation</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> (</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        tensor[y1.clamp(<span class="bu">max</span><span class="op">=</span>height <span class="op">-</span> <span class="dv">1</span>), x1.clamp(<span class="bu">max</span><span class="op">=</span>width <span class="op">-</span> <span class="dv">1</span>)] <span class="op">*</span> weight_x1 <span class="op">*</span> weight_y1 <span class="op">+</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        tensor[y1.clamp(<span class="bu">max</span><span class="op">=</span>height <span class="op">-</span> <span class="dv">1</span>), x2.clamp(<span class="bu">max</span><span class="op">=</span>width <span class="op">-</span> <span class="dv">1</span>)] <span class="op">*</span> weight_x2 <span class="op">*</span> weight_y1 <span class="op">+</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        tensor[y2.clamp(<span class="bu">max</span><span class="op">=</span>height <span class="op">-</span> <span class="dv">1</span>), x1.clamp(<span class="bu">max</span><span class="op">=</span>width <span class="op">-</span> <span class="dv">1</span>)] <span class="op">*</span> weight_x1 <span class="op">*</span> weight_y2 <span class="op">+</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        tensor[y2.clamp(<span class="bu">max</span><span class="op">=</span>height <span class="op">-</span> <span class="dv">1</span>), x2.clamp(<span class="bu">max</span><span class="op">=</span>width <span class="op">-</span> <span class="dv">1</span>)] <span class="op">*</span> weight_x2 <span class="op">*</span> weight_y2</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> value</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a sample PyTorch tensor</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>tensor <span class="op">=</span> torch.tensor([[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>],</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>                       [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>],</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>                       [<span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>]])</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a tensor with x and y coordinates</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> torch.tensor([[<span class="fl">1.5</span>, <span class="fl">2.2</span>],</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.2</span>, <span class="fl">1.7</span>]])</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Interpolate at continuous coordinates</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>interpolated_values <span class="op">=</span> interpolate_tensor(tensor, coords)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(interpolated_values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>unique_values, counts <span class="op">=</span> torch.unique(torch_posterior, return_counts<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the unique values and their counts</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> value, count <span class="kw">in</span> <span class="bu">zip</span>(unique_values, counts):</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Value: </span><span class="sc">{</span>value<span class="sc">}</span><span class="ss">, Count: </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the tensor values</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ax.imshow(torch_posterior.cpu(), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the colorbar</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>plt.colorbar()</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the plot</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>batch <span class="op">=</span> torch.zeros(size<span class="op">=</span>(batch_size, <span class="dv">2</span>)).normal_(mean<span class="op">=</span><span class="dv">0</span>, std<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>batch2 <span class="op">=</span> torch.zeros(size<span class="op">=</span>(batch_size, <span class="dv">2</span>)).normal_(mean<span class="op">=</span><span class="dv">150</span>, std<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> two_moons_density(z):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> z[:, <span class="dv">0</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  y <span class="op">=</span> z[:, <span class="dv">1</span>]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  d <span class="op">=</span> torch.sqrt(x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> y<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  density <span class="op">=</span> torch.exp(<span class="op">-</span><span class="fl">0.2</span> <span class="op">*</span> d) <span class="op">*</span> torch.cos(<span class="dv">4</span> <span class="op">*</span> np.pi <span class="op">*</span> d)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> density</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ring_density(z):</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    exp1 <span class="op">=</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.8</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    exp2 <span class="op">=</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.8</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">4</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    u <span class="op">=</span> u <span class="op">-</span> torch.log(exp1 <span class="op">+</span> exp2 <span class="op">+</span> <span class="fl">1e-6</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> u</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>two_moons_density(batch).<span class="bu">min</span>()</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ring_density(batch).<span class="bu">min</span>()</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#interpolate_tensor(torch_posterior,batch2).min()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>interpolate_tensor(torch_posterior, torch.tensor([[<span class="dv">81</span>,<span class="fl">44.5</span>]]))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>torch_posterior[<span class="dv">81</span>,<span class="dv">157</span>]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>indices <span class="op">=</span> torch.nonzero(torch_posterior <span class="op">!=</span> <span class="dv">0</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(indices)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the pairs of indices</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#for idx in indices:</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#    i, j = idx</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#    print(f"Pair of indices: ({i}, {j})")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> MultivariateNormal(torch.zeros(<span class="dv">2</span>), torch.eye(<span class="dv">2</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>test.sample()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
