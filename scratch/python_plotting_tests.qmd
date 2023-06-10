@@ -195,12 +195,71 @@ def ring_density(z):
 
 two_moons_density(batch).min()
 ring_density(batch).min()
-#interpolate_tensor(torch_posterior,batch2).min()
+ring_density(batch).max()
 
 ```
 
 ```{python}
-interpolate_tensor(torch_posterior, torch.tensor([[81,44.5]]))
+def interpolate_tensor(tensor, z):
+    # Get the dimensions of the tensor
+    height, width = tensor.shape[:2]
+
+    # Scale and shift the normal draws to match the image coordinates
+    x = (z[:, 0] * 150 + 150).clamp(0, width - 1).long()
+    y = (z[:, 1] * 150 + 150).clamp(0, height - 1).long()
+
+    # Calculate the indices of the four surrounding elements
+    x1 = x.floor()
+    x2 = x1 + 1
+    y1 = y.floor()
+    y2 = y1 + 1
+
+    # Calculate the weight for interpolation
+    weight_x2 = x - x1.float()
+    weight_x1 = 1 - weight_x2
+    weight_y2 = y - y1.float()
+    weight_y1 = 1 - weight_y2
+
+    # Perform interpolation
+    value = (
+        tensor[y1.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y1 +
+        tensor[y1.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y1 +
+        tensor[y2.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y2 +
+        tensor[y2.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y2
+    )
+
+    return value
+  
+batch = torch.zeros(size=(batch_size, 2)).normal_(mean=0, std=1)
+interpolate_tensor(torch_posterior, batch)
+
+#ring_density(batch)
+```
+
+
+```{python}
+#ring_density(batch)
+#interpolate_tensor(torch_posterior,batch2)
+batch2
+```
+
+
+```{python}
+fig, ax = plt.subplots()
+
+# Plot the tensor values
+ax.imshow(ring_density(batch).cpu(), cmap='viridis')
+
+# Show the colorbar
+plt.colorbar()
+
+# Show the plot
+plt.show()
+```
+
+
+```{python}
+interpolate_tensor(torch_posterior, torch.tensor([[81,156.5]]))
 
 torch_posterior[81,157]
 

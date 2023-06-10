@@ -224,17 +224,17 @@ raw_img = Image.open("images/hard_to_draw_posterior.png")
 greyscale_img = np.array(raw_img).sum(axis = 2)
 
 # Replace white values (1020), with 0, so density is all at letters
-indices = greyscale_img == 1020
+#indices = greyscale_img == 1020
 
-# Replace the selected values with 0
-greyscale_img[indices] = 50
+# Replace the selected values with 50
+#greyscale_img[indices] = 50
 
 
 # Normalize values to help with fitting
-normalized_image  = (greyscale_img - greyscale_img.min()) / (10000000)
+normalized_image  = (greyscale_img - greyscale_img.min()) / (greyscale_img.max() - greyscale_img.min())
  
 # Make a torch tensor of the target to use
-torch_posterior = torch.from_numpy(normalized_image).to(device)
+torch_posterior = torch.from_numpy(normalized_image).to(device).to(torch.float32)
 
 #300 x 300 px, normalized grayscale representation of the above image
 torch_posterior.sum()
@@ -272,34 +272,34 @@ a handle on the distortion of the base density the flows apply.
 # helper function to get a value for continuous density of my pixelated image
 # There's definitely a better way to do this, this is just quick
 def interpolate_tensor(tensor, z):
-  # Get the dimensions of the tensor
-  height, width = z.shape
+    # Get the dimensions of the tensor
+    height, width = tensor.shape[:2]
 
-  # Separate x and y coordinates from the input tensor
-  x = z[:, 0]
-  y = z[:, 1]
+    # Scale and shift the normal draws to match the image coordinates
+    x = (z[:, 0] * 150 + 150).clamp(0, width - 1).long()
+    y = (z[:, 1] * 150 + 150).clamp(0, height - 1).long()
 
-  # Calculate the indices of the four surrounding elements
-  x1 = x.floor().clamp(max=width - 1).long()
-  x2 = x1 + 1
-  y1 = y.floor().clamp(max=height - 1).long()
-  y2 = y1 + 1
+    # Calculate the indices of the four surrounding elements
+    x1 = x.floor()
+    x2 = x1 + 1
+    y1 = y.floor()
+    y2 = y1 + 1
 
-  # Calculate the weight for interpolation
-  weight_x2 = x - x1.float()
-  weight_x1 = 1 - weight_x2
-  weight_y2 = y - y1.float()
-  weight_y1 = 1 - weight_y2
+    # Calculate the weight for interpolation
+    weight_x2 = x - x1.float()
+    weight_x1 = 1 - weight_x2
+    weight_y2 = y - y1.float()
+    weight_y1 = 1 - weight_y2
 
-  # Perform interpolation
-  value = (
-      tensor[y1.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y1 +
-      tensor[y1.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y1 +
-      tensor[y2.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y2 +
-      tensor[y2.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y2
-  )
+    # Perform interpolation
+    value = (
+        tensor[y1.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y1 +
+        tensor[y1.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y1 +
+        tensor[y2.clamp(max=height - 1), x1.clamp(max=width - 1)] * weight_x1 * weight_y2 +
+        tensor[y2.clamp(max=height - 1), x2.clamp(max=width - 1)] * weight_x2 * weight_y2
+    )
 
-  return value
+    return value
 
 class TargetDistribution:
     def __init__(self, name: str):
@@ -695,7 +695,7 @@ dim = 2
 num_batches = 20000
 batch_size = 128
 lr = 6e-4
-axlim = xlim = ylim = 5  # 5 for U_1 to U_4, 7 for ring
+axlim = xlim = ylim = 7  # 5 for U_1 to U_4, 7 for ring
 # ------------------------------------
 
 density = TargetDistribution(target_distr)
