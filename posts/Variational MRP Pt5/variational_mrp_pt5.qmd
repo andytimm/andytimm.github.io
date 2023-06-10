@@ -4,6 +4,7 @@ title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 5- Normalizing Flows
 date: 2023-05-27
 draft: True
+image: images/32_layer.gif
 categories:
   - MRP
   - Variational Inference
@@ -729,17 +730,25 @@ for batch_num in range(1, num_batches + 1):
 
 ![](images/32_layer.gif){fig-alt="An actually useful normalizing flow"}
 
-Now we've got it! With this planar flow, we've transformed out base normal
-into a 
+Now we've got it! With this planar flow, we've transformed our base normal
+into a pretty complex (for 2-D) distribution, cool!
 
 This took about 20 minutes to train, so this is adding some considerable time
 to our VI workflow, but on the other hand, we're not spending the human time
 needed to figure out what weird base density could be fitted to look like this, which
 is a win. Also worth pointing out here is that we started with a simple example
 for illustration purposes, so if we did have something much more complicated
-or high dimensional to fit
+or high dimensional to fit, we'd start to see the scalability of normalizing
+flows start to shine more.
 
-# What more complicated NNs look like
+Planar flows are a great learning tool, but in reality they aren't a great
+choice once we get outside relatively low-dimensional examples. See [Kong and Chadhuri, 2020](https://arxiv.org/abs/2006.00392) if you want more mathamatical rigor, but intuitively,
+expansion or compression around a hyperplane doesn't scale to high dimensions well
+given the operation is pretty simple. We can get around this partially by
+making the flow deeper, but that introduces its own problems, namely that very deep
+flows can struggle to fit given the constraints put on the 
+
+# What more complicated Flows look like
 
 # Conclusion 
 
