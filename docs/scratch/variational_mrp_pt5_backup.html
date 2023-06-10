@@ -6,7 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andy Timm">
 <meta name="dcterms.date" content="2023-05-27">
 
 <title>Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions</title>
@@ -88,22 +87,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -123,7 +122,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
-<style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
@@ -143,14 +141,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
-<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../styles.css">
 <meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta property="og:description" content="Part 5- Normalizing Flows">
-<meta property="og:image" content="https://andytimm.github.io/posts\Variational MRP Pt5\images\32_layer.gif">
 <meta property="og:site-name" content="Andy Timm">
 <meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
 <meta name="twitter:description" content="Part 5- Normalizing Flows">
-<meta name="twitter:image" content="https://andytimm.github.io/posts\Variational MRP Pt5\images\32_layer.gif">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
@@ -163,7 +159,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Andy Timm</span>
     </a>
   </div>
@@ -173,19 +169,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html">
+    <a class="nav-link" href="../index.html">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../projects.html">
+    <a class="nav-link" href="../projects.html">
  <span class="menu-text">Projects</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../software.html">
+    <a class="nav-link" href="../software.html">
  <span class="menu-text">Software</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../blog.html">
+    <a class="nav-link" href="../blog.html">
  <span class="menu-text">Rarely Updated Blog</span></a>
   </li>  
 </ul>
@@ -195,41 +191,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Variational Inference for MRP with Reliable Posterior Distributions</h1>
-            <p class="subtitle lead">Part 5- Normalizing Flows</p>
-                                <div class="quarto-categories">
-                <div class="quarto-category">MRP</div>
-                <div class="quarto-category">Variational Inference</div>
-                <div class="quarto-category">Normalizing Flows</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Andy Timm </p>
-            </div>
-    </div>
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">May 27, 2023</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
@@ -244,16 +206,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#how-to-train-your-neural-net" id="toc-how-to-train-your-neural-net" class="nav-link" data-scroll-target="#how-to-train-your-neural-net">How to train your neural net</a></li>
   <li><a href="#a-basic-flow" id="toc-a-basic-flow" class="nav-link" data-scroll-target="#a-basic-flow">A basic flow</a></li>
-  <li><a href="#what-more-complicated-flows-look-like" id="toc-what-more-complicated-flows-look-like" class="nav-link" data-scroll-target="#what-more-complicated-flows-look-like">What more complicated Flows look like</a></li>
+  <li><a href="#what-more-complicated-nns-look-like" id="toc-what-more-complicated-nns-look-like" class="nav-link" data-scroll-target="#what-more-complicated-nns-look-like">What more complicated NNs look like</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Variational Inference for MRP with Reliable Posterior Distributions</h1>
+<p class="subtitle lead">Part 5- Normalizing Flows</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">MRP</div>
+    <div class="quarto-category">Variational Inference</div>
+    <div class="quarto-category">Normalizing Flows</div>
+  </div>
+  </div>
 
 
 
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 27, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
 
 <p>This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
 <p>The general structure for this post and the around it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
@@ -323,17 +311,30 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <h1>How to train your neural net</h1>
 <p>Now, let’s turn to how we actually fit a normalizing flow. Since this would be a bit hard to grok a code presentation if I took advantage of the full flexibility and abstraction that something like <a href="https://github.com/abhiagwl/vistan/tree/master"><code>vistan</code></a> provides, before heading into general purpose tools I’ll talk through a bit more explicit implementation of a simpler flow called a planar flow <code>PyTorch</code> for illustration. Rather than reinventing the wheel, I’ll leverage Edvard Hulten’s implementation <a href="https://github.com/e-hulten/planar-flows">here</a>.</p>
 <p>In this section, I’ll define conceptually how we’re fitting the model, and build out a fun target distribution and loss`- since I expect many people reading this may moderately new to PyTorch, I’ll explain in detail than normal what each operation is doing and why we need it.</p>
-<p>Let’s first make a fun target posterior distribution from an image to model. I think it’d be a fun preview gif for the post to watch this be fit from a normal, so let’s use this ring shaped density.</p>
-<p><img src="images/ring_true_density.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
-<p>This is a solid starting example in that this’d be quite hard to fit with a normal variational family, but it’s pretty easy to define in PyTorch as well:</p>
+<p>Let’s first make a fun target posterior distribution from an image to model. I think it’d be a fun preview gif for the post to watch the model say Hi:</p>
+<p><img src="images/hard_to_draw_posterior.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
+<p>It’s quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor. To represent this as a 2-D density we can fit models against, we’ll read in the image, collapse along the color dimension, and transform it into a torch tensor:</p>
 <div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/e-hulten/planar-flows/blob/master/target_distribution.py</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ring_density(z):</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                exp1 <span class="op">=</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">-</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.8</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                exp2 <span class="op">=</span> torch.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> ((z[:, <span class="dv">0</span>] <span class="op">+</span> <span class="dv">2</span>) <span class="op">/</span> <span class="fl">0.8</span>) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                u <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> ((torch.norm(z, <span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="dv">4</span>) <span class="op">/</span> <span class="fl">0.4</span>) <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                u <span class="op">=</span> u <span class="op">-</span> torch.log(exp1 <span class="op">+</span> exp2 <span class="op">+</span> <span class="fl">1e-6</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> u</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>raw_img <span class="op">=</span> Image.<span class="bu">open</span>(<span class="st">"images/hard_to_draw_posterior.png"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sum the 3 color channels</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>greyscale_img <span class="op">=</span> np.array(raw_img).<span class="bu">sum</span>(axis <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace white values (1020), with 0, so density is all at letters</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>indices <span class="op">=</span> greyscale_img <span class="op">==</span> <span class="dv">1020</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace the selected values with 0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>greyscale_img[indices] <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize values to help with fitting</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>normalized_image  <span class="op">=</span> (greyscale_img <span class="op">-</span> greyscale_img.<span class="bu">min</span>()) <span class="op">/</span> (<span class="dv">10000000</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a torch tensor of the target to use</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>torch_posterior <span class="op">=</span> torch.from_numpy(normalized_image).to(device)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#300 x 300 px, normalized grayscale representation of the above image</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>torch_posterior.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s define our loss for training, which will just be a slight reformulation of our ELBO:</p>
 <p><span class="math display">
@@ -341,7 +342,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 </span></p>
 <p>To do this, we’ll define a class for the loss.</p>
 <p>First, we pick a simple base distribution to push through our flow, here a 2-D Normal distribution called <code>base_distr</code>. We’ll also include the interesting target we just made above, <code>distr</code>.</p>
-<p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropagation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
+<p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropogation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
 <p>Keeping with the structure above of numbering successive stages of the flow, <code>z0</code> here is our base distribution, and <code>z</code> will be the learned approximation to the target. In addition to the terms you’d expect in the ELBO, we’re also tracking and making use of the sum of the log determinant of the Jacobians to a handle on the distortion of the base density the flows apply.</p>
 <div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/e-hulten/planar-flows/blob/master/loss.py</span></span>
@@ -439,12 +440,12 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>target_distr <span class="op">=</span> <span class="st">"ring"</span>  <span class="co"># U_1, U_2, U_3, U_4, ring</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">2</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>dim <span class="op">=</span> <span class="dv">2</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>num_batches <span class="op">=</span> <span class="dv">20000</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">128</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">6e-4</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>axlim <span class="op">=</span> xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">7</span>  <span class="co"># 5 for U_1 to U_4, 7 for ring</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>axlim <span class="op">=</span> xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">5</span>  <span class="co"># 5 for U_1 to U_4, 7 for ring</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>density <span class="op">=</span> TargetDistribution(target_distr)</span>
@@ -472,57 +473,11 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">==</span> <span class="dv">1</span> <span class="kw">or</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
 <span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here’s a gif of what that looks like over the course of training. With just a single layer of planar of course, this isn’t expressive enough to capture the full density, but we can see why this approach has some promise- it’s learning to cover the target density, rather than us having to get creative in specifying a base density that does this.</p>
-<p><img src="images/1_layer.gif" class="img-fluid" alt="Maximally engineered two biomodal"></p>
-<p>Let’s try a more serious attempt, with a depth of 32:</p>
-<div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>target_distr <span class="op">=</span> <span class="st">"ring"</span>  <span class="co"># U_1, U_2, U_3, U_4, ring</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">32</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dim <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>num_batches <span class="op">=</span> <span class="dv">20000</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">128</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">6e-4</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>axlim <span class="op">=</span> xlim <span class="op">=</span> ylim <span class="op">=</span> <span class="dv">7</span>  <span class="co"># 5 for U_1 to U_4, 7 for ring</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>density <span class="op">=</span> TargetDistribution(target_distr)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> PlanarFlow(dim, K<span class="op">=</span>flow_length)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>bound <span class="op">=</span> VariationalLoss(density)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>optimiser <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span>lr)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Train model.</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch_num <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, num_batches <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get batch from N(0,I).</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    batch <span class="op">=</span> torch.zeros(size<span class="op">=</span>(batch_size, <span class="dv">2</span>)).normal_(mean<span class="op">=</span><span class="dv">0</span>, std<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pass batch through flow.</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    zk, log_jacobians <span class="op">=</span> model(batch)</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute loss under target distribution.</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> bound(batch, zk, log_jacobians)</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    optimiser.zero_grad()</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    optimiser.step()</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"(batch_num </span><span class="sc">{</span>batch_num<span class="sc">:05d}</span><span class="ss">/</span><span class="sc">{</span>num_batches<span class="sc">}</span><span class="ss">) loss: </span><span class="sc">{</span>loss<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">#print(log_jacobians)</span></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> batch_num <span class="op">==</span> <span class="dv">1</span> <span class="kw">or</span> batch_num <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p><img src="images/32_layer.gif" class="img-fluid" alt="An actually useful normalizing flow"></p>
-<p>Now we’ve got it! With this planar flow, we’ve transformed our base normal into a pretty complex (for 2-D) distribution, cool!</p>
-<p>This took about 20 minutes to train, so this is adding some considerable time to our VI workflow, but on the other hand, we’re not spending the human time needed to figure out what weird base density could be fitted to look like this, which is a win. Also worth pointing out here is that we started with a simple example for illustration purposes, so if we did have something much more complicated or high dimensional to fit, we’d start to see the scalability of normalizing flows start to shine more.</p>
-<p>Planar flows are a great learning tool, but in reality they aren’t a great choice once we get outside relatively low-dimensional examples. See <a href="https://arxiv.org/abs/2006.00392">Kong and Chadhuri, 2020</a> if you want more mathematical rigor, but intuitively, expansion or compression around a hyperplane doesn’t scale to high dimensions well given the operation is pretty simple. We can get around this partially by making the flow deeper, but that introduces its own problems, namely that very deep flows can struggle to fit given the somewhat artificial constraints imposed in computing the log determinant of the Jacobian (implemented in <code>get_u_hat</code> above) to ensure invertability. Finally, there are just flows developed since the original normalizing flows paper that both are more expressive, and have cheaper to compute transformations and log determinants of the Jacobian- let’s turn to those now.</p>
 </section>
-<section id="what-more-complicated-flows-look-like" class="level1">
-<h1>What more complicated Flows look like</h1>
-<p>There are</p>
+<section id="what-more-complicated-nns-look-like" class="level1">
+<h1>What more complicated NNs look like</h1>
 </section>
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
@@ -540,18 +495,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <li id="fn4"><p>A great example of this is Lilian Weng’s <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">NF walkthrough</a> which I reccomended above- It has a fantastic review of the needed linear algebra and covers a lot of different flow types, but is a bit overly general about what properties are most desirable in a flow, and therefore initially a bit fuzzy on the value different flows have.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>Deriving precisely how this works would take us too far afield, but see <a href="https://arxiv.org/abs/1908.09257">Kobyzev et al.&nbsp;(2020)</a> if you’re interested. It’s a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus different notations and framings that they very successfully bridge. are many different implicit and explicit objectives and<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
-  author = {Andy Timm},
-  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
-    {Distributions}},
-  date = {2023-05-27},
-  url = {https://andytimm.github.io/variational_mrp_pt5.html},
-  langid = {en}
-}
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
-Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.github.io/variational_mrp_pt5.html">https://andytimm.github.io/variational_mrp_pt5.html</a>.
-</div></div></section></div></main> <!-- /main -->
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -689,5 +633,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>

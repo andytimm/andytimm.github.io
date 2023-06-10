@@ -8,6 +8,7 @@ categories:
   - MRP
   - Variational Inference
   - Normalizing Flows
+eval: False 
 ---
    
 This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 

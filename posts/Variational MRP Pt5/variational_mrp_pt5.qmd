@@ -641,7 +641,8 @@ def plot_available_distributions():
     plt.show()
 ```
 
-```{python,eval = False}
+```{python}
+#| eval: False
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
 target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
 flow_length = 1
@@ -690,6 +691,7 @@ than us having to get creative in specifying a base density that does this.
 Let's try a more serious attempt, with a depth of 32:
 
 ```{python,eval = False}
+#| eval: False
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
 target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
 flow_length = 32
@@ -742,13 +744,18 @@ or high dimensional to fit, we'd start to see the scalability of normalizing
 flows start to shine more.
 
 Planar flows are a great learning tool, but in reality they aren't a great
-choice once we get outside relatively low-dimensional examples. See [Kong and Chadhuri, 2020](https://arxiv.org/abs/2006.00392) if you want more mathamatical rigor, but intuitively,
+choice once we get outside relatively low-dimensional examples. See [Kong and Chadhuri, 2020](https://arxiv.org/abs/2006.00392) if you want more mathematical rigor, but intuitively,
 expansion or compression around a hyperplane doesn't scale to high dimensions well
 given the operation is pretty simple. We can get around this partially by
 making the flow deeper, but that introduces its own problems, namely that very deep
-flows can struggle to fit given the constraints put on the 
+flows can struggle to fit given the somewhat artificial constraints imposed in computing the log determinant of the Jacobian (implemented in `get_u_hat` above) to ensure invertability. Finally,
+there are just flows developed since the original normalizing flows paper
+that both are more expressive, and have cheaper to compute transformations
+and log determinants of the Jacobian- let's turn to those now.
 
 # What more complicated Flows look like
+
+There are
 
 # Conclusion 
 
