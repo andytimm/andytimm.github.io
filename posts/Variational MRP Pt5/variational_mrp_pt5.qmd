@@ -682,7 +682,7 @@ for batch_num in range(1, num_batches + 1):
 ```
  
 Here's a gif of what that looks like over the course of training. With just a single
-layer of planar  of course, this isn't expressive enough to capture the full density, but we can see why
+layer of planar flow of course, this isn't expressive enough to capture the full density, but we can see why
 this approach has some promise- it's learning to cover the target density, rather
 than us having to get creative in specifying a base density that does this.
 
@@ -777,14 +777,16 @@ of a *coupling flow*, where if the flow is $D$-dimensional, the first half of th
 remain unchanged, and $d+1:D$ are transformed as complex function of the first half:
 
 $$
-y_{1:d} = x_{1:d}
-y_{d+1:D} = x_{1:d} \odot exp(s(x_{1:d})) + t(x_{1:d})
+\begin{align}
+y_{1:d} &= x_{1:d}\\
+y_{d+1:D} &= x_{1:d} \odot exp(s(x_{1:d})) + t(x_{1:d})
+\end{align}
 $$
 
 Where s and t are scaling and transformation functions from $\mathbb{R}^d \mathbb{R}^{D-d}$,
 and $\odot$ is the Hadamard (element-wise) product. Visually, at each layer:
 
-![Figure credit due to [Eric Jang](https://blog.evjang.com/2018/01/nf2.html); he prefers $\alpha$ and $\mu$ instead of $s$ and $t$](images/real_nvp_illustration.png){fig-alt="transforming half of the dimensions as a function of the other half"}
+![Figure credit due to [Eric Jang](https://blog.evjang.com/2018/01/nf2.html); he uses the notation $\alpha$ and $\mu$ instead of $s$ and $t$](images/real_nvp_illustration.png){fig-alt="transforming half of the dimensions as a function of the other half"}
 
 This has a lot of really appealing properties. First, this
 

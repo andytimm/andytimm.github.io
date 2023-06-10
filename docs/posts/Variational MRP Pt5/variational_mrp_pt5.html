@@ -474,7 +474,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
 <span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        plot_training(model, flow_length, batch_num, lr, axlim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here’s a gif of what that looks like over the course of training. With just a single layer of planar of course, this isn’t expressive enough to capture the full density, but we can see why this approach has some promise- it’s learning to cover the target density, rather than us having to get creative in specifying a base density that does this.</p>
+<p>Here’s a gif of what that looks like over the course of training. With just a single layer of planar flow of course, this isn’t expressive enough to capture the full density, but we can see why this approach has some promise- it’s learning to cover the target density, rather than us having to get creative in specifying a base density that does this.</p>
 <p><img src="images/1_layer.gif" class="img-fluid" alt="Maximally engineered two biomodal"></p>
 <p>Let’s try a more serious attempt, with a depth of 32:</p>
 <div class="cell" data-execution_count="9">
@@ -527,14 +527,16 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <p>Dinh et al.&nbsp;start the RealNVP paper by noting some goals: they want a Jacobian that is <em>triangular</em>, because this makes computing the determinant incredibly cheap (it’s just the product of the diagonal terms). Second, they want a transformation that’s simple to invert, but complex via inducing interdependencies between different parts of the data.</p>
 <p>To do both of these at once, the key insight the authors come to is the idea of a <em>coupling flow</em>, where if the flow is <span class="math inline">D</span>-dimensional, the first half of the dimensions <span class="math inline">1:d</span> remain unchanged, and <span class="math inline">d+1:D</span> are transformed as complex function of the first half:</p>
 <p><span class="math display">
-y_{1:d} = x_{1:d}
-y_{d+1:D} = x_{1:d} \odot exp(s(x_{1:d})) + t(x_{1:d})
+\begin{align}
+y_{1:d} &amp;= x_{1:d}\\
+y_{d+1:D} &amp;= x_{1:d} \odot exp(s(x_{1:d})) + t(x_{1:d})
+\end{align}
 </span></p>
 <p>Where s and t are scaling and transformation functions from <span class="math inline">\mathbb{R}^d \mathbb{R}^{D-d}</span>, and <span class="math inline">\odot</span> is the Hadamard (element-wise) product. Visually, at each layer:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/real_nvp_illustration.png" class="img-fluid figure-img" alt="transforming half of the dimensions as a function of the other half"></p>
-<p></p><figcaption class="figure-caption">Figure credit due to <a href="https://blog.evjang.com/2018/01/nf2.html">Eric Jang</a>; he prefers <span class="math inline">\alpha</span> and <span class="math inline">\mu</span> instead of <span class="math inline">s</span> and <span class="math inline">t</span></figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure credit due to <a href="https://blog.evjang.com/2018/01/nf2.html">Eric Jang</a>; he uses the notation <span class="math inline">\alpha</span> and <span class="math inline">\mu</span> instead of <span class="math inline">s</span> and <span class="math inline">t</span></figcaption><p></p>
 </figure>
 </div>
 <p>This has a lot of really appealing properties. First, this</p>
