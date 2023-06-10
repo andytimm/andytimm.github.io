@@ -744,7 +744,7 @@ or high dimensional to fit, we'd start to see the scalability of normalizing
 flows start to shine more.
 
 Planar flows are a great learning tool, but in reality they aren't a great
-choice once we get outside relatively low-dimensional examples. See [Kong and Chadhuri, 2020](https://arxiv.org/abs/2006.00392) if you want more mathematical rigor, but intuitively,
+choice once we get outside relatively low-dimensional examples. See [Kong and Chadhuri, (2020)](https://arxiv.org/abs/2006.00392) if you want more mathematical rigor, but intuitively,
 expansion or compression around a hyperplane doesn't scale to high dimensions well
 given the operation is pretty simple. We can get around this partially by
 making the flow deeper, but that introduces its own problems, namely that very deep
@@ -755,7 +755,38 @@ and log determinants of the Jacobian- let's turn to those now.
 
 # What more complicated Flows look like
 
-There are
+More complex flows are an active area of research, and I won't attempt to talk
+through the whole zoo- I'd recommend either Lilian Weng's [blog post](https://lilianweng.github.io/posts/2018-10-13-flow-models/), or [Kobyzev et
+al. (2020)](https://arxiv.org/abs/1908.09257) as good starting points for seeing
+the full range of available flows.
+
+Instead, I'll introduce just a single more complex flow, RealNVP, introduced in
+[Dinh et al. (2017)](https://arxiv.org/abs/1605.08803). This is a good example
+both because the flow is shown to be robustly good for high dimensional variational inference tasks
+in review papers like [Dhaka et al. (2021)](https://arxiv.org/abs/2103.01085) and [Agrawal et al. (2020)](https://arxiv.org/abs/2006.10343), and because it illustrates some generalizable
+ideas about flow design.
+
+Dinh et al. start the RealNVP paper by noting some goals: they want a Jacobian
+that is *triangular*, because this makes computing the determinant incredibly cheap (it's just
+the product of the diagonal terms). Second, they want a transformation that's
+simple to invert, but complex via inducing interdependencies between different
+parts of the data.
+
+To do both of these at once, the key insight the authors come to is the idea
+of a *coupling flow*, where if the flow is $D$-dimensional, the first half of the dimensions $1:d$
+remain unchanged, and $d+1:D$ are transformed as complex function of the first half:
+
+$$
+y_{1:d} = x_{1:d}
+y_{d+1:D} = x_{1:d} \odot exp(s(x_{1:d})) + t(x_{1:d})
+$$
+
+Where s and t are scaling and transformation functions from $\mathbb{R}^d \mathbb{R}^{D-d}$,
+and $\odot$ is the Hadamard (element-wise) product. Visually, at each layer:
+
+![Figure credit due to [Eric Jang](https://blog.evjang.com/2018/01/nf2.html); he prefers $\alpha$ and $\mu$ instead of $s$ and $t$](images/real_nvp_illustration.png){fig-alt="transforming half of the dimensions as a function of the other half"}
+
+This has a lot of really appealing properties. First, this
 
 # Conclusion 
 
@@ -780,4 +811,3 @@ have.
 [^5]: Deriving precisely how this works would take us too far afield, but see [Kobyzev et
 al. (2020)](https://arxiv.org/abs/1908.09257) if you're interested. It's a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus
 different notations and framings that they very successfully bridge.
-are many different implicit and explicit objectives and 
