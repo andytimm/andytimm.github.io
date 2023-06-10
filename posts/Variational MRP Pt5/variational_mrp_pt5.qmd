@@ -640,10 +640,10 @@ def plot_available_distributions():
     plt.show()
 ```
 
-```{python}
+```{python,eval = False}
 #From https://github.com/e-hulten/planar-flows/blob/master/train.py
 target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
-flow_length = 2
+flow_length = 1
 dim = 2
 num_batches = 20000
 batch_size = 128
@@ -679,6 +679,65 @@ for batch_num in range(1, num_batches + 1):
         plot_training(model, flow_length, batch_num, lr, axlim)
 ```
  
+Here's a gif of what that looks like over the course of training. With just a single
+layer of planar  of course, this isn't expressive enough to capture the full density, but we can see why
+this approach has some promise- it's learning to cover the target density, rather
+than us having to get creative in specifying a base density that does this.
+
+![](images/1_layer.gif){fig-alt="Maximally engineered two biomodal"}
+
+Let's try a more serious attempt, with a depth of 32:
+
+```{python,eval = False}
+#From https://github.com/e-hulten/planar-flows/blob/master/train.py
+target_distr = "ring"  # U_1, U_2, U_3, U_4, ring
+flow_length = 32
+dim = 2
+num_batches = 20000
+batch_size = 128
+lr = 6e-4
+axlim = xlim = ylim = 7  # 5 for U_1 to U_4, 7 for ring
+# ------------------------------------
+
+density = TargetDistribution(target_distr)
+model = PlanarFlow(dim, K=flow_length)
+bound = VariationalLoss(density)
+optimiser = torch.optim.Adam(model.parameters(), lr=lr)
+
+# Train model.
+for batch_num in range(1, num_batches + 1):
+    # Get batch from N(0,I).
+    batch = torch.zeros(size=(batch_size, 2)).normal_(mean=0, std=1)
+    # Pass batch through flow.
+    zk, log_jacobians = model(batch)
+    
+    # Compute loss under target distribution.
+    loss = bound(batch, zk, log_jacobians)
+
+    optimiser.zero_grad()
+    loss.backward()
+    optimiser.step()
+
+    if batch_num % 100 == 0:
+        print(f"(batch_num {batch_num:05d}/{num_batches}) loss: {loss}")
+        #print(log_jacobians)
+
+    if batch_num == 1 or batch_num % 100 == 0:
+        # Save plots during training. Plots are saved to the 'train_plots' folder.
+        plot_training(model, flow_length, batch_num, lr, axlim)
+```
+
+![](images/32_layer.gif){fig-alt="An actually useful normalizing flow"}
+
+Now we've got it! With this planar flow, we've transformed out base normal
+into a 
+
+This took about 20 minutes to train, so this is adding some considerable time
+to our VI workflow, but on the other hand, we're not spending the human time
+needed to figure out what weird base density could be fitted to look like this, which
+is a win. Also worth pointing out here is that we started with a simple example
+for illustration purposes, so if we did have something much more complicated
+or high dimensional to fit
 
 # What more complicated NNs look like
 
