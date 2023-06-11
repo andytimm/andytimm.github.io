@@ -783,7 +783,7 @@ y_{d+1:D} &= x_{1:d} \odot exp(s(x_{1:d})) + t(x_{1:d})
 \end{align}
 $$
 
-Where s and t are scaling and transformation functions from $\mathbb{R}^d \mathbb{R}^{D-d}$,
+Where s and t are scaling and transformation functions from $\mathbb{R}^d \rightarrow \mathbb{R}^{D-d}$,
 and $\odot$ is the Hadamard (element-wise) product. Visually, at each layer:
 
 ![Figure credit due to [Eric Jang](https://blog.evjang.com/2018/01/nf2.html); he uses the notation $\alpha$ and $\mu$ instead of $s$ and $t$](images/real_nvp_illustration.png){fig-alt="transforming half of the dimensions as a function of the other half"}
@@ -836,7 +836,32 @@ architecture choices like residual connections to GPU compute.
 
 # Conclusion 
 
+Let's take stock of how normalizing flows continue our project of extending vanilla variational inference.
+Normalizing flows allow us to learn the variational family rather than iterating
+through a bunch of base densities until one works, and can do so for much
+more complex posteriors than any of the simple choices like a mean-field or
+full-rank gaussian we've seen so far. This is both a gain of functionality (we
+can now fit posteriors with VI that we absolutely couldn't before),
+and a gain of convenience (the workflow for "make my neural network expressive" is much, much
+more convenient than the one where the analyst tries to find or make increasingly weird distributions themselves).
 
+Of course, this adds compute time, and a requirement to start understanding neural network
+implementation choices well. This isn't a free lunch- even the simple planar flow
+on a toy example above took about 20 minutes to fit on my laptop, and having to
+understand neural nets well to fit a Bayesian model feels kind of silly. Still though,
+in the telling of review papers like [Dhaka et al. (2021)](https://arxiv.org/abs/2103.01085) and [Agrawal et al. (2020)](https://arxiv.org/abs/2006.10343), a basic RealNVP flow is a serious
+improvement for many complex posterior distributions at fairly palatable run times.
+This is a pretty good tradeoff for many realistic models, and it's for that reason that normalizing
+flows are an increasingly popular part of the variational inference toolbox.
+
+Like with alternative optimization objectives or the various uses of (Pareto smoothed)
+importance sampling from the last post, normalizing flows give us tools to
+fit a wider range of models with variational inference, and do so more robustly
+and conveniently. This can come with it's own problems, but these trades are
+often worth it. In the next post, we'll add a final set of tools to our VI
+toolbox: robust diagnostics to know if our approximation is good or not.
+
+Thanks for reading. The code for this post can be found [here](https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt5/variational_mrp_pt5.qmd).
 
 [^1]: It also almost has a bit of "no brain no pain" ML guy energy, in the sense
 that we're really pulling out the biggest algorithm possible. It really is a funny

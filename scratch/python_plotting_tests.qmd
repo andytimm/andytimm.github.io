@@ -286,7 +286,7 @@ import imageio
 
 def make_gif_from_train_plots(fname: str) -> None:
   # Hiding the directory when commiting, but easy to infer rihgt path
-    png_dir = "C:/Users/timma/Documents/personal-quarto-website-2022/posts/Variational MRP Pt5/training_plots"
+    png_dir = ""
     images = []
     sort = sorted(os.listdir(png_dir))
     for file_name in sort[1::1]:

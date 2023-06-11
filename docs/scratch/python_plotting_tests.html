@@ -455,7 +455,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_gif_from_train_plots(fname: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Hiding the directory when commiting, but easy to infer rihgt path</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    png_dir <span class="op">=</span> <span class="st">"C:/Users/timma/Documents/personal-quarto-website-2022/posts/Variational MRP Pt5/training_plots"</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    png_dir <span class="op">=</span> <span class="st">""</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    images <span class="op">=</span> []</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    sort <span class="op">=</span> <span class="bu">sorted</span>(os.listdir(png_dir))</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> file_name <span class="kw">in</span> sort[<span class="dv">1</span>::<span class="dv">1</span>]:</span>
