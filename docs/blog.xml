@@ -10,7 +10,342 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.2.475</generator>
-<lastBuildDate>Sat, 27 May 2023 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 11 Jun 2023 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
+<p>The general structure for this post and the posts around it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I’ll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.</p>
+<p>In the <a href="https://andytimm.github.io/posts/Variational%20MRP%20Pt4/variational_mrp_4.html">last post</a> we saw a variety of different ways importance sampling can be used to improve VI and make it more robust, from defining a tighter bound to optimize in the importance weighted ELBO, to weighting <img src="https://latex.codecogs.com/png.latex?q(x)"> samples together efficiently to look more like <img src="https://latex.codecogs.com/png.latex?p(x)">, to combining entirely different variational approximations together to cover different parts of the posterior with multiple importance sampling.</p>
+<p>In this post, we’ll tackle the problem of how to define a deeply flexible variational family <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D"> that can adapt to each problem while still being easy to sample from. To do this, we’ll draw on normalizing flows, a technique for defining a composition of invertible transformations on top of a simple base distribution like a normal distribution. We’ll build our way up to using increasingly complex neural networks to define those transformations, allowing for for truly complex variational families that are problem adaptive, training as we train our variational model.</p>
+<p>The rough plan for the series is as follows:</p>
+<ol type="1">
+<li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
+<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
+<li>Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?</li>
+<li><strong>(This post)</strong> Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?</li>
+<li>Problem 4: How can we know when VI is wrong? Are there useful error bounds?</li>
+<li>Better grounded diagnostics and workflow</li>
+</ol>
+<section id="a-problem-adaptive-variational-family-with-less-tinkering" class="level1">
+<h1>A problem adaptive variational family with less tinkering?</h1>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/flows_stairs_meme.png" class="img-fluid" alt="Something about NNs makes me meme more"></p>
+<p>Jumping from mean-field or full-rank Gaussians and similar distributions to neural networks feels a little… dramatic<sup>1</sup>, so I want to spend some time justifying why this is a good idea.</p>
+<p>For VI to work well, we need something that’s still simple to sample from, but capable of, in aggregate, representing a posterior that is probably pretty complex. Certainly, some problems are amenable to the simple variational families <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D"> we’ve tried so far, but it’s worth re-emphasizing that we’re probably trying to represent something complex, and even moderate success at that using a composition of normals should be a little surprising, not the expected outcome.</p>
+<p>If we need <img src="https://latex.codecogs.com/png.latex?%5Cmathscr%7BQ%7D"> to be more complex, aren’t there choices between what we’ve seen and a neural network? There’s a whole literature of them- from using mixture distributions as variational distributions to inducing some additional structure into a mean-field type solution if you have some specific knowledge about your target posterior you can use. By and large though, this type of class of solutions has been surpassed by normalizing flows in much of modern use for more complex posteriors.</p>
+<p>Why? A first reason is described in the paper that started the normalizing flows for VI literature, Rezende and Mohamed’s <a href="https://arxiv.org/pdf/1505.05770.pdf"><strong>Variational Inference with Normalizing Flows </strong></a>: making our base variational distribution more complex adds a variety of different computational costs, which add up quickly. This isn’t the most face-valid argument when I’m claiming a neural network is a good alternative, but it gets more plausible when you think through how poorly it’d scale to keep making your mixture distribution more and more complex as your posteriors get harder to handle. So this is a <em>scalability</em> argument- it might sound extreme to bring in a neural net, but as problems get bigger, scaling matters.</p>
+<p>The other point I’d raise is that all these other tools aren’t very black box at all- if we can make things work with a problem-adapted version of mean-field with some structure based on the knowledge of a specific problem we have, that sounds like it gets time consuming fast. If I’m going to have to find a particular, problem-specific solution each time I want to use variational inference, that feels fragile and fiddly.</p>
+<p>The novel idea with normalizing flows is that we’ll start with a simple base density like a normal distribution that is easy to sample from, but instead of only optimizing the parameters of that normal distribution, we’ll also use the training on our ELBO or other objective to learn a transformation that reshapes that normal distribution to look like our posterior. By having that transforming component be partially composed of a neural network, we give ourselves access to an incredibly expressive, problem adaptive, and heavily scalable variant of variational inference that is quite widely used.</p>
+<p>And if the approximation isn’t expressive enough? Deep learning researchers have an unfussy, general purpose innovation for that: MORE LAYERS!<sup>2</sup></p>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/more_layers.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
+</section>
+<section id="what-is-a-normalizing-flow" class="level1">
+<h1>What is a normalizing flow?</h1>
+<p>A normalizing flow transforms a simple base density into a complex one through a sequence of invertible transformations. By stacking more and more of these invertible transformations (having the density “flow” through them), we can create arbitrarily complex distributions that remain valid probability distributions. Since it isn’t universal in the flows literature, let me be explicit that I’ll consider “forward” to be the direction flowing from the base density to the posterior, and the “backward” or “normalizing” direction as towards the base density.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/normalizing-flow.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Image Credit to <a href="https://siboehm.com/articles/19/normalizing-flow-network">Simon Boehm</a> here</figcaption><p></p>
+</figure>
+</div>
+<p>If we have a random variable <img src="https://latex.codecogs.com/png.latex?z">, with distribution <img src="https://latex.codecogs.com/png.latex?q(x)">, some function <img src="https://latex.codecogs.com/png.latex?f"> with an inverse <img src="https://latex.codecogs.com/png.latex?f%5E%7B-1%7D%20=%20g,%20g%20%5Ccirc%20f(x)%20=%20x">, then the distribution of the result of one iteration of x through, <img src="https://latex.codecogs.com/png.latex?q%5E%5Cprime(x)"> is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aq%5Cprime(x)%20=%20q(x)%20%5Clvert%20det%20%5Cfrac%7B%5Cpartial%20f%5E%7B-1%7D%7D%7B%5Cpartial%20x%5E%5Cprime%7D%20%5Crvert%20=%20q(x)%20%5Clvert%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%7D%20%5Crvert%5E%7B-1%7D%0A"> I won’t derive this identity<sup>3</sup>, but it follows from the chain rule and the properties of Jacobians of invertible functions.</p>
+<p>The real power comes in here when we see that these transformations stack. If we’ve got a chain of transformations (e.g.&nbsp;<img src="https://latex.codecogs.com/png.latex?f_K(...(f_2f_1(x))">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ax_K%20=%20f(x)%20%5Ccirc%20...%20%5Ccirc%20f_2%20%5Ccirc%20f_1(x_0)%0A"></p>
+<p>then the resulting density <img src="https://latex.codecogs.com/png.latex?q_K(x)"> looks like:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aln%20q_K%20(x_K)%20=%20lnq_0(x_0)%20-%20%5Csum%20%5Climits_%7BK%20=%201%7D%5Climits%5E%7BK%7D%20ln%20%20%5Clvert%20%5Cfrac%7B%5Cpartial%20f_k%7D%7B%5Cpartial%20x_%7Bk-1%7D%7D%20%5Crvert%5E%7B-1%7D%0A"></p>
+<p>Neat, and surprisingly simple! If the terms above are all easy to calculate, we can very efficiently stack a bunch of these transformations and make an expressive model.</p>
+<section id="normalizing-flows-for-variational-inference-versus-other-applications" class="level2">
+<h2 class="anchored" data-anchor-id="normalizing-flows-for-variational-inference-versus-other-applications">Normalizing flows for variational inference versus other applications</h2>
+<p>One source of confusion when I was learning about normalizing flows for variational inference was that variational inference makes up a fairly small proportion of the use cases for normalizing flows, and thus the academic literature and online discussion. More common applications include density estimation, image generation, representation learning, and reinforcement learning. In addition to making specifically applicable discussions harder to find, often resources will make strong claims about properties of a given flow structure, that really only holding in some subset of the above applications<sup>4</sup>.</p>
+<p>By taking a second to explain this crisply and compare different application’s needs, hopefully I can save you some confusion and make engaging with the broader literature easier.</p>
+<p>To start, consider the relevant operations we’ve introduced so far:</p>
+<ol type="1">
+<li>computing <img src="https://latex.codecogs.com/png.latex?f">, that is pushing a sample through the transformations</li>
+<li>computing <img src="https://latex.codecogs.com/png.latex?g">, <img src="https://latex.codecogs.com/png.latex?f">’s inverse which undoes the manipulations</li>
+<li>computing the (log) determinant of the Jacobian</li>
+</ol>
+<p>1 and 3 definitely need to be efficient for our use case, since we need to be able to sample and push through using the formula above efficiently to calculate an ELBO and train our model. 2 is where things get more subtle: we definitely need <img src="https://latex.codecogs.com/png.latex?f"> to be invertible, since our formulas above are dependent on a property of Jacobians of invertible functions. But we don’t actually really need to explicitly compute <img src="https://latex.codecogs.com/png.latex?g"> for variational inference. Even knowing the inverse exists but not having a formula might be fine for us!</p>
+<p>Contrast this with density estimation, where the goal would not to sample from the distribution, but instead to estimate the density. In this case, most of the time would be spent going in the opposite direction, so that they can evaluate the log-likliehood of the data, and maximize it to improve the model<sup>5</sup>. The need for an expressive transformation of densities unite these two cases, but the goal is quite different!</p>
+<p>This level of goal disagreement also shows it face in what direction papers choose to call forward: Most papers outside of variational inference applications consider forward to be the opposite of what I do here. For them, “forward” is the direction towards the base density, the normalizing direction.</p>
+<p>For our use, hopefully this short digression has clarified which operations we need to be fast versus just exist. If you dive deeper into further work on normalizing flows, hopefully recognizing there are two different ways to consider forward helps you more quickly orient yourself to how other work describes flows.</p>
+</section>
+</section>
+<section id="how-to-train-your-neural-net" class="level1">
+<h1>How to train your neural net</h1>
+<p>Now, let’s turn to how we actually fit a normalizing flow. Since this would be a bit hard to grok a code presentation if I took advantage of the full flexibility and abstraction that something like <a href="https://github.com/abhiagwl/vistan/tree/master"><code>vistan</code></a> provides, before heading into general purpose tools I’ll talk through a bit more explicit implementation of a simpler flow called a planar flow in <code>PyTorch</code> for illustration. Rather than reinventing the wheel, I’ll leverage Edvard Hulten’s great implementation <a href="https://github.com/e-hulten/planar-flows">here</a>.</p>
+<p>In this section, I’ll define conceptually how we’re fitting the model, and build out a fun target distribution and loss- since I expect many people reading this may moderately new to PyTorch, I’ll explain in detail than normal what each operation is doing and why we need it.</p>
+<p>Let’s first make a fun target posterior distribution from an image to model. I think it’d be a fun preview gif for the post to watch this be fit from a normal, so let’s use this ring shaped density.</p>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/ring_true_density.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
+<p>This is a solid starting example in that this’d be quite hard to fit with a mean-field normal variational family, but it’s pretty easy to define in PyTorch as well:</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;"># https://github.com/e-hulten/planar-flows/blob/master/target_distribution.py</span></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;">def</span> ring_density(z):</span>
+<span id="cb1-3">                exp1 <span class="op" style="color: #5E5E5E;">=</span> torch.exp(<span class="op" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">0.5</span> <span class="op" style="color: #5E5E5E;">*</span> ((z[:, <span class="dv" style="color: #AD0000;">0</span>] <span class="op" style="color: #5E5E5E;">-</span> <span class="dv" style="color: #AD0000;">2</span>) <span class="op" style="color: #5E5E5E;">/</span> <span class="fl" style="color: #AD0000;">0.8</span>) <span class="op" style="color: #5E5E5E;">**</span> <span class="dv" style="color: #AD0000;">2</span>)</span>
+<span id="cb1-4">                exp2 <span class="op" style="color: #5E5E5E;">=</span> torch.exp(<span class="op" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">0.5</span> <span class="op" style="color: #5E5E5E;">*</span> ((z[:, <span class="dv" style="color: #AD0000;">0</span>] <span class="op" style="color: #5E5E5E;">+</span> <span class="dv" style="color: #AD0000;">2</span>) <span class="op" style="color: #5E5E5E;">/</span> <span class="fl" style="color: #AD0000;">0.8</span>) <span class="op" style="color: #5E5E5E;">**</span> <span class="dv" style="color: #AD0000;">2</span>)</span>
+<span id="cb1-5">                u <span class="op" style="color: #5E5E5E;">=</span> <span class="fl" style="color: #AD0000;">0.5</span> <span class="op" style="color: #5E5E5E;">*</span> ((torch.norm(z, <span class="dv" style="color: #AD0000;">2</span>, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>) <span class="op" style="color: #5E5E5E;">-</span> <span class="dv" style="color: #AD0000;">4</span>) <span class="op" style="color: #5E5E5E;">/</span> <span class="fl" style="color: #AD0000;">0.4</span>) <span class="op" style="color: #5E5E5E;">**</span> <span class="dv" style="color: #AD0000;">2</span></span>
+<span id="cb1-6">                u <span class="op" style="color: #5E5E5E;">=</span> u <span class="op" style="color: #5E5E5E;">-</span> torch.log(exp1 <span class="op" style="color: #5E5E5E;">+</span> exp2 <span class="op" style="color: #5E5E5E;">+</span> <span class="fl" style="color: #AD0000;">1e-6</span>)</span>
+<span id="cb1-7">                <span class="cf" style="color: #003B4F;">return</span> u</span></code></pre></div>
+</div>
+<p>Now let’s define our loss for training, which will just be a slight reformulation of our ELBO:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20-%20%5Cmathbb%7BE%7D%5Blogq(z)%5D%0A"></p>
+<p>To do this, we’ll define a class for the loss.</p>
+<p>First, we pick a simple base distribution to push through our flow, here a 2-D Normal distribution called <code>base_distr</code>. We’ll also include the interesting target we just made above, <code>distr</code>.</p>
+<p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropagation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
+<p>Keeping with the structure above of numbering successive stages of the flow, <code>z0</code> here is our base distribution, and <code>z</code> will be the learned approximation to the target. In addition to the terms you’d expect in the ELBO, we’re also tracking and making use of the sum of the log determinant of the Jacobians to a handle on the distortion of the base density the flows apply.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;"># https://github.com/e-hulten/planar-flows/blob/master/loss.py</span></span>
+<span id="cb2-2"><span class="kw" style="color: #003B4F;">class</span> VariationalLoss(nn.Module):</span>
+<span id="cb2-3">  <span class="kw" style="color: #003B4F;">def</span> <span class="fu" style="color: #4758AB;">__init__</span>(<span class="va" style="color: #111111;">self</span>,distribution):</span>
+<span id="cb2-4">      <span class="bu" style="color: null;">super</span>().<span class="fu" style="color: #4758AB;">__init__</span>()</span>
+<span id="cb2-5">      <span class="va" style="color: #111111;">self</span>.distr <span class="op" style="color: #5E5E5E;">=</span> distribution</span>
+<span id="cb2-6">      <span class="va" style="color: #111111;">self</span>.base_distr <span class="op" style="color: #5E5E5E;">=</span> MultivariateNormal(torch.zeros(<span class="dv" style="color: #AD0000;">2</span>), torch.eye(<span class="dv" style="color: #AD0000;">2</span>))</span>
+<span id="cb2-7"></span>
+<span id="cb2-8">  <span class="kw" style="color: #003B4F;">def</span> forward(<span class="va" style="color: #111111;">self</span>, z0: Tensor, z: Tensor, sum_log_det_J: <span class="bu" style="color: null;">float</span>) <span class="op" style="color: #5E5E5E;">-&gt;</span> <span class="bu" style="color: null;">float</span>:</span>
+<span id="cb2-9">      base_log_prob <span class="op" style="color: #5E5E5E;">=</span> <span class="va" style="color: #111111;">self</span>.base_distr.log_prob(z0)</span>
+<span id="cb2-10">      target_density_log_prob <span class="op" style="color: #5E5E5E;">=</span> <span class="op" style="color: #5E5E5E;">-</span><span class="va" style="color: #111111;">self</span>.distr(z)</span>
+<span id="cb2-11">      <span class="cf" style="color: #003B4F;">return</span> (base_log_prob <span class="op" style="color: #5E5E5E;">-</span> target_density_log_prob <span class="op" style="color: #5E5E5E;">-</span> sum_log_det_J).mean()</span></code></pre></div>
+</div>
+</section>
+<section id="a-basic-flow" class="level1">
+<h1>A basic flow</h1>
+<p>Next, let’s define the structure of the actual flow. To do this, we’ll first describe a single layer of the flow, then we’ll show structure to stack the flow in layers.</p>
+<p>Our first flow we look at will be the <strong>planar flow</strong> from the original Normalizing Flows for variational Inference paper mentioned above. The name comes from how the function defines a (hyper)plane, and compress or expand the density around it:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Af(x)%20=%20x%20+%20u*tanh(w%5ETx%20+%20b),%20w,%20u%20%5Cin%20%20%20%5Cmathbb%7BR%7D%5Ed,%20b%20%5Cin%20%5Cmathbb%7BR%7D%0A"></p>
+<p><img src="https://latex.codecogs.com/png.latex?w"> and <img src="https://latex.codecogs.com/png.latex?b"> define the hyperplane and u specifies the direction and strength of the expansion. I’ll show a visualization of just one layer of that below.</p>
+<p>If you’re more used to working with neural nets, you might wonder why we choose the non-linearity <img src="https://latex.codecogs.com/png.latex?tanh"> here, which generally isn’t as popular as something like <img src="https://latex.codecogs.com/png.latex?relu"> or it’s variants in more recent years due to it’s more unstable gradient flows. As the authors show in appendix <img src="https://latex.codecogs.com/png.latex?A.1">, functions like the above aren’t actually always invertible, and choosing <img src="https://latex.codecogs.com/png.latex?tanh"> allows them to impose some constraints that make things reliably invertible. See the Appendix for more details about how that works, or take a careful look at Edvard’s implementation of the single function below.</p>
+<p>There isn’t that much that’s new conceptually in this PyTorch code; we’re defining the layer as a stackable module, which provides torch what it needs to calculate both the forward and backward pass of an arbitrary number of layers.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;"># From https://github.com/e-hulten/planar-flows/blob/master/planar_transform.py</span></span>
+<span id="cb3-2"></span>
+<span id="cb3-3"><span class="kw" style="color: #003B4F;">class</span> PlanarTransform(nn.Module):</span>
+<span id="cb3-4">  <span class="co" style="color: #5E5E5E;">"""Implementation of the invertible transformation used in planar flow:</span></span>
+<span id="cb3-5"><span class="co" style="color: #5E5E5E;">      f(z) = z + u * h(dot(w.T, z) + b)</span></span>
+<span id="cb3-6"><span class="co" style="color: #5E5E5E;">  See Section 4.1 in https://arxiv.org/pdf/1505.05770.pdf. </span></span>
+<span id="cb3-7"><span class="co" style="color: #5E5E5E;">  """</span></span>
+<span id="cb3-8"></span>
+<span id="cb3-9">  <span class="kw" style="color: #003B4F;">def</span> <span class="fu" style="color: #4758AB;">__init__</span>(<span class="va" style="color: #111111;">self</span>, dim: <span class="bu" style="color: null;">int</span> <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">2</span>):</span>
+<span id="cb3-10">      <span class="co" style="color: #5E5E5E;">"""Initialise weights and bias.</span></span>
+<span id="cb3-11"><span class="co" style="color: #5E5E5E;">      </span></span>
+<span id="cb3-12"><span class="co" style="color: #5E5E5E;">      Args:</span></span>
+<span id="cb3-13"><span class="co" style="color: #5E5E5E;">          dim: Dimensionality of the distribution to be estimated.</span></span>
+<span id="cb3-14"><span class="co" style="color: #5E5E5E;">      """</span></span>
+<span id="cb3-15">      <span class="bu" style="color: null;">super</span>().<span class="fu" style="color: #4758AB;">__init__</span>()</span>
+<span id="cb3-16">      <span class="va" style="color: #111111;">self</span>.w <span class="op" style="color: #5E5E5E;">=</span> nn.Parameter(torch.randn(<span class="dv" style="color: #AD0000;">1</span>, dim).normal_(<span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">0.1</span>))</span>
+<span id="cb3-17">      <span class="va" style="color: #111111;">self</span>.b <span class="op" style="color: #5E5E5E;">=</span> nn.Parameter(torch.randn(<span class="dv" style="color: #AD0000;">1</span>).normal_(<span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">0.1</span>))</span>
+<span id="cb3-18">      <span class="va" style="color: #111111;">self</span>.u <span class="op" style="color: #5E5E5E;">=</span> nn.Parameter(torch.randn(<span class="dv" style="color: #AD0000;">1</span>, dim).normal_(<span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">0.1</span>))</span>
+<span id="cb3-19"></span>
+<span id="cb3-20">  <span class="kw" style="color: #003B4F;">def</span> forward(<span class="va" style="color: #111111;">self</span>, z: Tensor) <span class="op" style="color: #5E5E5E;">-&gt;</span> Tensor:</span>
+<span id="cb3-21">      <span class="cf" style="color: #003B4F;">if</span> torch.mm(<span class="va" style="color: #111111;">self</span>.u, <span class="va" style="color: #111111;">self</span>.w.T) <span class="op" style="color: #5E5E5E;">&lt;</span> <span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>:</span>
+<span id="cb3-22">          <span class="va" style="color: #111111;">self</span>.get_u_hat()</span>
+<span id="cb3-23"></span>
+<span id="cb3-24">      <span class="cf" style="color: #003B4F;">return</span> z <span class="op" style="color: #5E5E5E;">+</span> <span class="va" style="color: #111111;">self</span>.u <span class="op" style="color: #5E5E5E;">*</span> nn.Tanh()(torch.mm(z, <span class="va" style="color: #111111;">self</span>.w.T) <span class="op" style="color: #5E5E5E;">+</span> <span class="va" style="color: #111111;">self</span>.b)</span>
+<span id="cb3-25"></span>
+<span id="cb3-26">  <span class="kw" style="color: #003B4F;">def</span> log_det_J(<span class="va" style="color: #111111;">self</span>, z: Tensor) <span class="op" style="color: #5E5E5E;">-&gt;</span> Tensor:</span>
+<span id="cb3-27">      <span class="cf" style="color: #003B4F;">if</span> torch.mm(<span class="va" style="color: #111111;">self</span>.u, <span class="va" style="color: #111111;">self</span>.w.T) <span class="op" style="color: #5E5E5E;">&lt;</span> <span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>:</span>
+<span id="cb3-28">          <span class="va" style="color: #111111;">self</span>.get_u_hat()</span>
+<span id="cb3-29">      a <span class="op" style="color: #5E5E5E;">=</span> torch.mm(z, <span class="va" style="color: #111111;">self</span>.w.T) <span class="op" style="color: #5E5E5E;">+</span> <span class="va" style="color: #111111;">self</span>.b</span>
+<span id="cb3-30">      psi <span class="op" style="color: #5E5E5E;">=</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="op" style="color: #5E5E5E;">-</span> nn.Tanh()(a) <span class="op" style="color: #5E5E5E;">**</span> <span class="dv" style="color: #AD0000;">2</span>) <span class="op" style="color: #5E5E5E;">*</span> <span class="va" style="color: #111111;">self</span>.w</span>
+<span id="cb3-31">      abs_det <span class="op" style="color: #5E5E5E;">=</span> (<span class="dv" style="color: #AD0000;">1</span> <span class="op" style="color: #5E5E5E;">+</span> torch.mm(<span class="va" style="color: #111111;">self</span>.u, psi.T)).<span class="bu" style="color: null;">abs</span>()</span>
+<span id="cb3-32">      log_det <span class="op" style="color: #5E5E5E;">=</span> torch.log(<span class="fl" style="color: #AD0000;">1e-4</span> <span class="op" style="color: #5E5E5E;">+</span> abs_det)</span>
+<span id="cb3-33"></span>
+<span id="cb3-34">      <span class="cf" style="color: #003B4F;">return</span> log_det</span>
+<span id="cb3-35"></span>
+<span id="cb3-36">  <span class="kw" style="color: #003B4F;">def</span> get_u_hat(<span class="va" style="color: #111111;">self</span>) <span class="op" style="color: #5E5E5E;">-&gt;</span> <span class="va" style="color: #111111;">None</span>:</span>
+<span id="cb3-37">      <span class="co" style="color: #5E5E5E;">"""Enforce w^T u &gt;= -1. When using h(.) = tanh(.), this is a sufficient condition </span></span>
+<span id="cb3-38"><span class="co" style="color: #5E5E5E;">      for invertibility of the transformation f(z). See Appendix A.1.</span></span>
+<span id="cb3-39"><span class="co" style="color: #5E5E5E;">      """</span></span>
+<span id="cb3-40">      wtu <span class="op" style="color: #5E5E5E;">=</span> torch.mm(<span class="va" style="color: #111111;">self</span>.u, <span class="va" style="color: #111111;">self</span>.w.T)</span>
+<span id="cb3-41">      m_wtu <span class="op" style="color: #5E5E5E;">=</span> <span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span> <span class="op" style="color: #5E5E5E;">+</span> torch.log(<span class="dv" style="color: #AD0000;">1</span> <span class="op" style="color: #5E5E5E;">+</span> torch.exp(wtu))</span>
+<span id="cb3-42">      <span class="va" style="color: #111111;">self</span>.u.data <span class="op" style="color: #5E5E5E;">=</span> (</span>
+<span id="cb3-43">          <span class="va" style="color: #111111;">self</span>.u <span class="op" style="color: #5E5E5E;">+</span> (m_wtu <span class="op" style="color: #5E5E5E;">-</span> wtu) <span class="op" style="color: #5E5E5E;">*</span> <span class="va" style="color: #111111;">self</span>.w <span class="op" style="color: #5E5E5E;">/</span> torch.norm(<span class="va" style="color: #111111;">self</span>.w, p<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">2</span>, dim<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>) <span class="op" style="color: #5E5E5E;">**</span> <span class="dv" style="color: #AD0000;">2</span></span>
+<span id="cb3-44">      )</span></code></pre></div>
+</div>
+<p>Where things will start to get exciting is multiple layers of the flow; here’s how we can make an abstraction that allows us to stack up <img src="https://latex.codecogs.com/png.latex?K"> layers of the flow to control the flexibility of our approximation.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;">class</span> PlanarFlow(nn.Module):</span>
+<span id="cb4-2">    <span class="kw" style="color: #003B4F;">def</span> <span class="fu" style="color: #4758AB;">__init__</span>(<span class="va" style="color: #111111;">self</span>, dim: <span class="bu" style="color: null;">int</span> <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">2</span>, K: <span class="bu" style="color: null;">int</span> <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">6</span>):</span>
+<span id="cb4-3">        <span class="co" style="color: #5E5E5E;">"""Make a planar flow by stacking planar transformations in sequence.</span></span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="co" style="color: #5E5E5E;">        Args:</span></span>
+<span id="cb4-6"><span class="co" style="color: #5E5E5E;">            dim: Dimensionality of the distribution to be estimated.</span></span>
+<span id="cb4-7"><span class="co" style="color: #5E5E5E;">            K: Number of transformations in the flow. </span></span>
+<span id="cb4-8"><span class="co" style="color: #5E5E5E;">        """</span></span>
+<span id="cb4-9">        <span class="bu" style="color: null;">super</span>().<span class="fu" style="color: #4758AB;">__init__</span>()</span>
+<span id="cb4-10">        <span class="va" style="color: #111111;">self</span>.layers <span class="op" style="color: #5E5E5E;">=</span> [PlanarTransform(dim) <span class="cf" style="color: #003B4F;">for</span> _ <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(K)]</span>
+<span id="cb4-11">        <span class="va" style="color: #111111;">self</span>.model <span class="op" style="color: #5E5E5E;">=</span> nn.Sequential(<span class="op" style="color: #5E5E5E;">*</span><span class="va" style="color: #111111;">self</span>.layers)</span>
+<span id="cb4-12"></span>
+<span id="cb4-13">    <span class="kw" style="color: #003B4F;">def</span> forward(<span class="va" style="color: #111111;">self</span>, z: Tensor) <span class="op" style="color: #5E5E5E;">-&gt;</span> Tuple[Tensor, <span class="bu" style="color: null;">float</span>]:</span>
+<span id="cb4-14">        log_det_J <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span></span>
+<span id="cb4-15"></span>
+<span id="cb4-16">        <span class="cf" style="color: #003B4F;">for</span> layer <span class="kw" style="color: #003B4F;">in</span> <span class="va" style="color: #111111;">self</span>.layers:</span>
+<span id="cb4-17">            log_det_J <span class="op" style="color: #5E5E5E;">+=</span> layer.log_det_J(z)</span>
+<span id="cb4-18">            z <span class="op" style="color: #5E5E5E;">=</span> layer(z)</span>
+<span id="cb4-19"></span>
+<span id="cb4-20">        <span class="cf" style="color: #003B4F;">return</span> z, log_det_J</span></code></pre></div>
+</div>
+<p>Let’s run this for a single layer to introduce the training loop, and build some intuition on the planar flow.</p>
+<p>The hyperparameter names here should be fairly intuitive, but it’s worth pointing out that the batch size, learning rate (<code>lr</code>), and choice of Adam as an optimizer are all pretty basic reasonable first tries, but something you’d want to consider tuning in a more complicated context- we inherit that level of fiddly-ness when we choose to approach VI using normalizing flows. Also, note that I’m hiding setting up the plot code since it doesn’t add anything to the intuition here.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
+<span id="cb5-2">target_distr <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">"ring"</span>  <span class="co" style="color: #5E5E5E;"># U_1, U_2, U_3, U_4, ring</span></span>
+<span id="cb5-3">flow_length <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb5-4">dim <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">2</span></span>
+<span id="cb5-5">num_batches <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">20000</span></span>
+<span id="cb5-6">batch_size <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">128</span></span>
+<span id="cb5-7">lr <span class="op" style="color: #5E5E5E;">=</span> <span class="fl" style="color: #AD0000;">6e-4</span></span>
+<span id="cb5-8">axlim <span class="op" style="color: #5E5E5E;">=</span> xlim <span class="op" style="color: #5E5E5E;">=</span> ylim <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">7</span>  <span class="co" style="color: #5E5E5E;"># 5 for U_1 to U_4, 7 for ring</span></span>
+<span id="cb5-9"><span class="co" style="color: #5E5E5E;"># ------------------------------------</span></span>
+<span id="cb5-10"></span>
+<span id="cb5-11">density <span class="op" style="color: #5E5E5E;">=</span> TargetDistribution(target_distr)</span>
+<span id="cb5-12">model <span class="op" style="color: #5E5E5E;">=</span> PlanarFlow(dim, K<span class="op" style="color: #5E5E5E;">=</span>flow_length)</span>
+<span id="cb5-13">bound <span class="op" style="color: #5E5E5E;">=</span> VariationalLoss(density)</span>
+<span id="cb5-14">optimiser <span class="op" style="color: #5E5E5E;">=</span> torch.optim.Adam(model.parameters(), lr<span class="op" style="color: #5E5E5E;">=</span>lr)</span>
+<span id="cb5-15"></span>
+<span id="cb5-16"><span class="co" style="color: #5E5E5E;"># Train model.</span></span>
+<span id="cb5-17"><span class="cf" style="color: #003B4F;">for</span> batch_num <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="dv" style="color: #AD0000;">1</span>, num_batches <span class="op" style="color: #5E5E5E;">+</span> <span class="dv" style="color: #AD0000;">1</span>):</span>
+<span id="cb5-18">    <span class="co" style="color: #5E5E5E;"># Get batch from N(0,I).</span></span>
+<span id="cb5-19">    batch <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(size<span class="op" style="color: #5E5E5E;">=</span>(batch_size, <span class="dv" style="color: #AD0000;">2</span>)).normal_(mean<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>, std<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb5-20">    <span class="co" style="color: #5E5E5E;"># Pass batch through flow.</span></span>
+<span id="cb5-21">    zk, log_jacobians <span class="op" style="color: #5E5E5E;">=</span> model(batch)</span>
+<span id="cb5-22">    </span>
+<span id="cb5-23">    <span class="co" style="color: #5E5E5E;"># Compute loss under target distribution.</span></span>
+<span id="cb5-24">    loss <span class="op" style="color: #5E5E5E;">=</span> bound(batch, zk, log_jacobians)</span>
+<span id="cb5-25"></span>
+<span id="cb5-26">    optimiser.zero_grad()</span>
+<span id="cb5-27">    loss.backward()</span>
+<span id="cb5-28">    optimiser.step()</span>
+<span id="cb5-29"></span>
+<span id="cb5-30">    <span class="cf" style="color: #003B4F;">if</span> batch_num <span class="op" style="color: #5E5E5E;">%</span> <span class="dv" style="color: #AD0000;">100</span> <span class="op" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">0</span>:</span>
+<span id="cb5-31">        <span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f"(batch_num </span><span class="sc" style="color: #5E5E5E;">{</span>batch_num<span class="sc" style="color: #5E5E5E;">:05d}</span><span class="ss" style="color: #20794D;">/</span><span class="sc" style="color: #5E5E5E;">{</span>num_batches<span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">) loss: </span><span class="sc" style="color: #5E5E5E;">{</span>loss<span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">"</span>)</span>
+<span id="cb5-32">        </span>
+<span id="cb5-33"></span>
+<span id="cb5-34">    <span class="cf" style="color: #003B4F;">if</span> batch_num <span class="op" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">1</span> <span class="kw" style="color: #003B4F;">or</span> batch_num <span class="op" style="color: #5E5E5E;">%</span> <span class="dv" style="color: #AD0000;">100</span> <span class="op" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">0</span>:</span>
+<span id="cb5-35">        <span class="co" style="color: #5E5E5E;"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
+<span id="cb5-36">        plot_training(model, flow_length, batch_num, lr, axlim)</span></code></pre></div>
+</div>
+<p>At each iteration, we pass the normal draws thorugh the flow, calculate the loss, and propagate that loss backward through the flow to train it using gradient descent.</p>
+<p>Here’s a gif<sup>6</sup> of what that looks like over the course of training. With just a single layer of planar flow of course, this isn’t expressive enough to capture the full density, but we can see why this approach has some promise- it’s learning to cover the target density, rather than us having to get creative in specifying a base density that does this.</p>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/1_layer.gif" class="img-fluid" alt="Maximally engineered two biomodal"></p>
+<p>Let’s try a more serious attempt, with a depth of 32:</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
+<span id="cb6-2">target_distr <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">"ring"</span>  <span class="co" style="color: #5E5E5E;"># U_1, U_2, U_3, U_4, ring</span></span>
+<span id="cb6-3">flow_length <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">32</span></span>
+<span id="cb6-4">dim <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">2</span></span>
+<span id="cb6-5">num_batches <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">20000</span></span>
+<span id="cb6-6">batch_size <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">128</span></span>
+<span id="cb6-7">lr <span class="op" style="color: #5E5E5E;">=</span> <span class="fl" style="color: #AD0000;">6e-4</span></span>
+<span id="cb6-8">axlim <span class="op" style="color: #5E5E5E;">=</span> xlim <span class="op" style="color: #5E5E5E;">=</span> ylim <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">7</span>  <span class="co" style="color: #5E5E5E;"># 5 for U_1 to U_4, 7 for ring</span></span>
+<span id="cb6-9"><span class="co" style="color: #5E5E5E;"># ------------------------------------</span></span>
+<span id="cb6-10"></span>
+<span id="cb6-11">density <span class="op" style="color: #5E5E5E;">=</span> TargetDistribution(target_distr)</span>
+<span id="cb6-12">model <span class="op" style="color: #5E5E5E;">=</span> PlanarFlow(dim, K<span class="op" style="color: #5E5E5E;">=</span>flow_length)</span>
+<span id="cb6-13">bound <span class="op" style="color: #5E5E5E;">=</span> VariationalLoss(density)</span>
+<span id="cb6-14">optimiser <span class="op" style="color: #5E5E5E;">=</span> torch.optim.Adam(model.parameters(), lr<span class="op" style="color: #5E5E5E;">=</span>lr)</span>
+<span id="cb6-15"></span>
+<span id="cb6-16"><span class="co" style="color: #5E5E5E;"># Train model.</span></span>
+<span id="cb6-17"><span class="cf" style="color: #003B4F;">for</span> batch_num <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="dv" style="color: #AD0000;">1</span>, num_batches <span class="op" style="color: #5E5E5E;">+</span> <span class="dv" style="color: #AD0000;">1</span>):</span>
+<span id="cb6-18">    <span class="co" style="color: #5E5E5E;"># Get batch from N(0,I).</span></span>
+<span id="cb6-19">    batch <span class="op" style="color: #5E5E5E;">=</span> torch.zeros(size<span class="op" style="color: #5E5E5E;">=</span>(batch_size, <span class="dv" style="color: #AD0000;">2</span>)).normal_(mean<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">0</span>, std<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb6-20">    <span class="co" style="color: #5E5E5E;"># Pass batch through flow.</span></span>
+<span id="cb6-21">    zk, log_jacobians <span class="op" style="color: #5E5E5E;">=</span> model(batch)</span>
+<span id="cb6-22">    </span>
+<span id="cb6-23">    <span class="co" style="color: #5E5E5E;"># Compute loss under target distribution.</span></span>
+<span id="cb6-24">    loss <span class="op" style="color: #5E5E5E;">=</span> bound(batch, zk, log_jacobians)</span>
+<span id="cb6-25"></span>
+<span id="cb6-26">    optimiser.zero_grad()</span>
+<span id="cb6-27">    loss.backward()</span>
+<span id="cb6-28">    optimiser.step()</span>
+<span id="cb6-29"></span>
+<span id="cb6-30">    <span class="cf" style="color: #003B4F;">if</span> batch_num <span class="op" style="color: #5E5E5E;">%</span> <span class="dv" style="color: #AD0000;">100</span> <span class="op" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">0</span>:</span>
+<span id="cb6-31">        <span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f"(batch_num </span><span class="sc" style="color: #5E5E5E;">{</span>batch_num<span class="sc" style="color: #5E5E5E;">:05d}</span><span class="ss" style="color: #20794D;">/</span><span class="sc" style="color: #5E5E5E;">{</span>num_batches<span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">) loss: </span><span class="sc" style="color: #5E5E5E;">{</span>loss<span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">"</span>)</span>
+<span id="cb6-32">        <span class="co" style="color: #5E5E5E;">#print(log_jacobians)</span></span>
+<span id="cb6-33"></span>
+<span id="cb6-34">    <span class="cf" style="color: #003B4F;">if</span> batch_num <span class="op" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">1</span> <span class="kw" style="color: #003B4F;">or</span> batch_num <span class="op" style="color: #5E5E5E;">%</span> <span class="dv" style="color: #AD0000;">100</span> <span class="op" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">0</span>:</span>
+<span id="cb6-35">        <span class="co" style="color: #5E5E5E;"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
+<span id="cb6-36">        plot_training(model, flow_length, batch_num, lr, axlim)</span></code></pre></div>
+</div>
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/32_layer.gif" class="img-fluid" alt="An actually useful normalizing flow"></p>
+<p>Now we’ve got it! With this planar flow, we’ve transformed our base normal into a pretty complex (for 2-D) distribution, cool!</p>
+<p>This took about 20 minutes to train, so this is adding some considerable time to our VI workflow, but on the other hand, we’re not spending the human time needed to figure out what weird base density could be fitted to look like this, which is a win. Also worth pointing out here is that we started with a simple example for illustration purposes, so if we did have something much more complicated or high dimensional to fit, we’d start to see the scalability of normalizing flows start to shine more.</p>
+<p>Planar flows are a great learning tool, but in reality they aren’t a great choice once we get outside relatively low-dimensional examples. See <a href="https://arxiv.org/abs/2006.00392">Kong and Chadhuri, (2020)</a> if you want more mathematical rigor, but intuitively, expansion or compression around a hyperplane doesn’t scale to high dimensions well given the operation is pretty simple. We can get around this partially by making the flow deeper, but that introduces its own problems, namely that very deep flows can struggle to fit given the somewhat artificial constraints imposed in computing the log determinant of the Jacobian (implemented in <code>get_u_hat</code> above) to ensure invertability. Finally, there are flows developed since the original normalizing flows paper that both are more expressive and have cheaper to compute transformations and log determinants of the Jacobian- let’s turn to those now.</p>
+</section>
+<section id="what-more-complicated-flows-look-like" class="level1">
+<h1>What more complicated Flows look like</h1>
+<p>More complex flows are an active area of research, and I won’t attempt to talk through the whole zoo- I’d recommend either Lilian Weng’s <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">blog post</a>, or <a href="https://arxiv.org/abs/1908.09257">Kobyzev et al.&nbsp;(2020)</a> as good starting points for seeing the full range of available flows.</p>
+<p>Instead, I’ll introduce just a single more complex flow, RealNVP, introduced in <a href="https://arxiv.org/abs/1605.08803">Dinh et al.&nbsp;(2017)</a>. This is a good example both because the flow is shown to be robustly good for high dimensional variational inference tasks in review papers like <a href="https://arxiv.org/abs/2103.01085">Dhaka et al.&nbsp;(2021)</a> and <a href="https://arxiv.org/abs/2006.10343">Agrawal et al.&nbsp;(2020)</a>, and because it illustrates some generalizable ideas about flow design.</p>
+<p>Dinh et al.&nbsp;start the RealNVP paper by noting some goals: they want a Jacobian that is <em>triangular</em>, because this makes computing the determinant incredibly cheap (it’s just the product of the diagonal terms). Second, they want a transformation that’s simple to invert, but complex via inducing interdependencies between different parts of the data.</p>
+<p>To do both of these at once, the key insight the authors come to is the idea of a <em>coupling layer</em>, where if the layer is <img src="https://latex.codecogs.com/png.latex?D">-dimensional, the first half of the dimensions <img src="https://latex.codecogs.com/png.latex?1:d"> remain unchanged, and <img src="https://latex.codecogs.com/png.latex?d+1:D"> are transformed as complex function of the first half:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0Ay_%7B1:d%7D%20&amp;=%20x_%7B1:d%7D%5C%5C%0Ay_%7Bd+1:D%7D%20&amp;=%20x_%7B1:d%7D%20%5Codot%20exp(s(x_%7B1:d%7D))%20+%20t(x_%7B1:d%7D)%0A%5Cend%7Balign%7D%0A"></p>
+<p>Where s and t are scaling and transformation functions from <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5Ed%20%5Crightarrow%20%5Cmathbb%7BR%7D%5E%7BD-d%7D">, and <img src="https://latex.codecogs.com/png.latex?%5Codot"> is the Hadamard (element-wise) product. Visually, at each layer:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/real_nvp_illustration.png" class="img-fluid figure-img" alt="transforming half of the dimensions as a function of the other half"></p>
+<p></p><figcaption class="figure-caption">Figure credit due to <a href="https://blog.evjang.com/2018/01/nf2.html">Eric Jang</a>; he uses the notation <img src="https://latex.codecogs.com/png.latex?%5Calpha"> and <img src="https://latex.codecogs.com/png.latex?%5Cmu"> instead of <img src="https://latex.codecogs.com/png.latex?s"> and <img src="https://latex.codecogs.com/png.latex?t"></figcaption><p></p>
+</figure>
+</div>
+<p>This has a lot of really appealing properties. First, this has a triangular Jacobian:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20x%5ET%7D=%5Cleft%5B%5Cbegin%7Barray%7D%7Bcc%7D%5Cmathbb%7BI%7D_d%20&amp;%200%20%5C%5C%20%5Cfrac%7B%5Cpartial%20y_%7Bd+1:%20D%7D%7D%7B%5Cpartial%20x_%7B1:%20d%7D%5ET%7D%20&amp;%20%5Coperatorname%7Bdiag%7D%5Cleft(%5Cexp%20%5Cleft%5Bs%5Cleft(x_%7B1:%20d%7D%5Cright)%5Cright%5D%5Cright)%5Cend%7Barray%7D%5Cright%5D%0A"></p>
+<p>which means that we can really efficiently compute the determinant as <img src="https://latex.codecogs.com/png.latex?%5Cexp%20%5Cleft%5B%5Csum_j%20s%5Cleft(x_%7B1:%20d%7D%5Cright)_j%5Cright%5D">. For a sense of scale, with no specific structure to exploit, calculating the determinant is roughly <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BO%7D(n%5E3)"> or a little better<sup>7</sup>, but for triangular matrices the same operation takes just <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BO%7D(n)">; that’s a massive speedup!</p>
+<p>Another nice characteristic here is that we don’t need to compute the Jacobian of <img src="https://latex.codecogs.com/png.latex?s"> or <img src="https://latex.codecogs.com/png.latex?t"> in computing the determinant of the above Jacobian, so <img src="https://latex.codecogs.com/png.latex?s"> and <img src="https://latex.codecogs.com/png.latex?t"> are much easier to make quite complex. Contrast this with the planar flow, where we needed to use a specific (tanh) non-linearity, and impose somewhat arbitrary constraints to ensure invertability at all, let alone easy, fast invertability. With a realNVP flow constructed out of many such coupling layers, it’s easy to throw in a lot of improvements that make training large neural networks much more reliable, like batch normalization, weight normalization, and architectures like residual connections.</p>
+<p>As a last appealing property here, realize this can be really expressive: by varying at each layer which dimensions <img src="https://latex.codecogs.com/png.latex?d"> are held constant and which are transformed, we can build up quite complex interrelationships between different dimensions over the flow. This can be done simply at random, or perhaps even using structure of the problem to decide how to partition the dimensions. For example, Dinh et al.&nbsp;provide an example on image data where a checkerboard pattern is used to structure the partitions. Kingma and Dhariwal take this further with <a href="https://arxiv.org/abs/1807.03039">Glow (2018)</a>, a flow using 1x1 convolutions. Again, it’s really nice we don’t need the Jacobian of <img src="https://latex.codecogs.com/png.latex?s"> and <img src="https://latex.codecogs.com/png.latex?t">; they can have arbitrarily complex structure and we don’t need pay the computational cost of computing their Jacobians.</p>
+<p>It doesn’t add that much intuition to see another flow in code, so I’ll hold off on showing off the implementation of RealNVP for another post or two when I return to fitting our MRP model better using all the tools we’ve built up.</p>
+<p>Like I said at the start of this section, there are tons and tons of possible flow structures that get more computationally complex in exchange for expressiveness. RealNVP is a great start though, and for many variational inference problems provides the amount of expressiveness we need. It also illustrates a lot of the core strategy for building further flow structure well:</p>
+<ol type="1">
+<li>Make the log determinant of the Jacobian fast to calculate.</li>
+<li>Impose structure such that calculating the log determinant of the Jacobian isn’t entangled with your source of learnable complexity; this allows expressiveness not fitting restrictions to guide what’s implemented.</li>
+<li>Leverage tools for scalable, stable neural networks, from batch norm to architecture choices like residual connections to GPU compute.</li>
+</ol>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>Let’s take stock of how normalizing flows continue our project of extending vanilla variational inference. Normalizing flows allow us to learn the variational family rather than iterating through a bunch of base densities by hand until one works, and can do so for much more complex posteriors than any of the simple choices like a mean-field or full-rank gaussian we’ve seen so far. This is both a gain of functionality (we can now fit posteriors with VI that we absolutely couldn’t before), and a gain of convenience (the workflow for “make my neural network expressive” is much, much more convenient than the one where the analyst tries to find or make increasingly weird distributions themselves).</p>
+<p>Of course, this adds compute time, and a requirement to start understanding neural network implementation choices reasonably well. This isn’t a free lunch- even the simple planar flow on a toy example above took about 20 minutes to fit on my laptop, and having to understand neural nets well to fit a Bayesian model feels kind of silly. Still though, in the telling of review papers like <a href="https://arxiv.org/abs/2103.01085">Dhaka et al.&nbsp;(2021)</a> and <a href="https://arxiv.org/abs/2006.10343">Agrawal et al.&nbsp;(2020)</a>, a basic RealNVP flow is a serious improvement for many complex posterior distributions at fairly palatable run times. This is a pretty good tradeoff for many realistic models, and it’s for that reason that normalizing flows are an increasingly popular part of the variational inference toolbox.</p>
+<p>Like with alternative optimization objectives or the various uses of (Pareto smoothed) importance sampling from the last post, normalizing flows give us tools to fit a wider range of models with variational inference, and do so more robustly and conveniently. This can come with it’s own problems, but these trades are often worth it. In the next post, we’ll add a final set of tools to our VI toolbox: robust diagnostics to know if our approximation is good or not.</p>
+<p>Thanks for reading. The code for this post can be found <a href="https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt5/variational_mrp_pt5.qmd">here</a>.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>It also almost has a bit of “no brain no pain” ML guy energy, in the sense that we’re really pulling out the biggest algorithm possible. It really is a funny trajectory to me to go from “I’d like to still be Bayesian, but avoid MCMC because it’s slow” to “screw subtle design, let’s throw a NN at it”.↩︎</p></li>
+<li id="fn2"><p>This is mostly a joke, but it really is a tremendous convenience that there’s such a straight forward knob to turn for “expressivity” in this context. We’ll get into the ways that isn’t completely true soon, but NNs provide fantastic convenience in terms of workflow for improving model flexibility.↩︎</p></li>
+<li id="fn3"><p>You can see it in the original Normalizing Flows paper linked above, or combined with a nice matrix calc review by <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">Lilian Weng</a>. As a more general note, since this is a common topic on a few different talented people’s blogs, I’ll try to focus on covering material I think I can provide more intuition for, or that are most relevant for variational inference.↩︎</p></li>
+<li id="fn4"><p>A great example of this is Lilian Weng’s <a href="https://lilianweng.github.io/posts/2018-10-13-flow-models/">NF walkthrough</a> which I recommended above- It has a fantastic review of the needed linear algebra and covers a lot of different flow types, but is a bit overly general about what properties are most desirable in a flow, and is therefore initially a bit fuzzy on the value different flows have.↩︎</p></li>
+<li id="fn5"><p>Deriving precisely how this works would take us too far afield, but see <a href="https://arxiv.org/abs/1908.09257">Kobyzev et al.&nbsp;(2020)</a> if you’re interested. It’s a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus different notations and framings that they very successfully bridge.↩︎</p></li>
+<li id="fn6"><p>Depending on your browser settings you may need to refresh the page here to watch it run.↩︎</p></li>
+<li id="fn7"><p>Ok fine, you probably get that down to <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BO%7D(n%5E%7B2.8...%7D)"> using <a href="https://en.wikipedia.org/wiki/Strassen_algorithm">Strassen</a> which is implemented essentially everywhere that matters.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Andy Timm},
+  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
+    {Distributions}},
+  date = {2023-06-11},
+  url = {https://andytimm.github.io/variational_mrp_pt5.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
+Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> June 11, 2023. <a href="https://andytimm.github.io/variational_mrp_pt5.html">https://andytimm.github.io/variational_mrp_pt5.html</a>.
+</div></div></section></div> ]]></description>
+  <category>MRP</category>
+  <category>Variational Inference</category>
+  <category>Normalizing Flows</category>
+  <guid>https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html</guid>
+  <pubDate>Sun, 11 Jun 2023 04:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/Variational MRP Pt5/images/32_layer.gif" medium="image" type="image/gif"/>
+</item>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>
   <dc:creator>Andy Timm</dc:creator>

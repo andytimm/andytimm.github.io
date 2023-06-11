@@ -3,7 +3,7 @@ layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 5- Normalizing Flows
 date: 2023-06-11
-draft: True
+draft: False
 image: images/32_layer.gif
 categories:
   - MRP
