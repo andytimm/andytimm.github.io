@@ -103,7 +103,7 @@ the "backward" or "normalizing" direction as towards the base density.
 
 ![Image Credit to [Simon Boehm](https://siboehm.com/articles/19/normalizing-flow-network) here](images/normalizing-flow.png)
 
-If we have a random variable $z$, with distribution $q(x)$, some function $f$ with an inverse
+If we have a random variable $x$, with distribution $q(x)$, some function $f$ with an inverse
 $f^{-1} = g, g \circ f(x) = x$, then the distribution of the result of
 one iteration of x through, $q^\prime(x)$ is:
 
@@ -114,7 +114,7 @@ I won't derive this identity[^3], but it follows from the chain rule and the
  properties of Jacobians of invertible functions.
 
 The real power comes in here when we see that these transformations stack. If
-we've got a chain of transformations (e.g. $f_K(...(f_2f_1(x))$:
+we've got a chain of transformations (e.g. $f_K(...(f_2(f_1(x))))$:
 
 $$
 x_K = f(x) \circ ... \circ f_2 \circ f_1(x_0)
@@ -134,7 +134,7 @@ an expressive model.
 
 One source of confusion when I was learning about normalizing flows for
 variational inference was that variational inference makes up a fairly
-small proportion of the use cases for normalizing flows, and thus the academic
+small proportion of use cases, and thus the academic
 literature and online discussion. More common applications include density estimation, image generation,
 representation learning, and reinforcement learning. In addition to making specifically applicable
 discussions harder to find, often resources will make strong claims about properties of a given
@@ -369,8 +369,8 @@ describe a single layer of the flow, then we'll show structure to stack
 the flow in layers.
 
 Our first flow we look at will be the **planar flow** from the original
-Normalizing Flows for variational Inference paper mentioned above. The name
-comes from how the function defines a (hyper)plane, and compress or expand
+Normalizing Flows for Variational Inference paper mentioned above. The name
+comes from how the function defines a (hyper)plane, and compresses or expand
 the density around it:
 
 $$
@@ -382,12 +382,14 @@ of the expansion. I'll show a visualization of just one layer of that below.
 
 If you're more used to working with neural nets, you might wonder why we
 choose the non-linearity $tanh$ here, which generally isn't as popular as something
-like $relu$ or it's variants in more recent years due to it's more unstable
+like $ReLU$ or its variants in more recent years due to it's more unstable
 gradient flows. As the authors show in appendix $A.1$, functions like the
 above aren't actually always invertible, and choosing $tanh$ allows them
-to impose some constraints that make things reliably invertible. See the Appendix
+to impose some constraints that make things reliably invertible. See the appendix
 for more details about how that works, or take a careful look at Edvard's
-implementation of the single function below.
+implementation of the single function below. Realize this sort of constitutes
+a workaround; ideally we wouldn't have to force constraints like this for
+our flow to work.
 
 There isn't that much that's new conceptually in this PyTorch code; we're
 defining the layer as a stackable module, which provides torch what it
@@ -763,7 +765,7 @@ Planar flows are a great learning tool, but in reality they aren't a great
 choice once we get outside relatively low-dimensional examples. See [Kong and Chadhuri, (2020)](https://arxiv.org/abs/2006.00392) if you want more mathematical rigor, but intuitively,
 expansion or compression around a hyperplane doesn't scale to high dimensions well
 given the operation is pretty simple. We can get around this partially by
-making the flow deeper, but that introduces its own problems, namely that very deep
+making the flow deeper, but that introduces its own problems. Very deep planar
 flows can struggle to fit given the somewhat artificial constraints imposed in computing the log determinant of the Jacobian (implemented in `get_u_hat` above) to ensure invertability. Finally,
 there are flows developed since the original normalizing flows paper
 that both are more expressive and have cheaper to compute transformations
@@ -841,14 +843,14 @@ Like I said at the start of this section, there are tons and tons of possible fl
 structures that get more computationally complex in exchange for expressiveness. RealNVP
 is a great start though, and for many variational inference problems provides
 the amount of expressiveness we need. It also
-illustrates a lot of the core strategy for building further flow structure well:
+illustrates a lot of the core strategy for building flow structures well:
 
 1. Make the log determinant of the Jacobian fast to calculate.
 2. Impose structure such that calculating the log determinant of the Jacobian
 isn't entangled with your source of learnable complexity; this allows expressiveness
 not fitting restrictions to guide what's implemented.
 3. Leverage tools for scalable, stable neural networks, from batch norm to
-architecture choices like residual connections to GPU compute.
+architecture choices like residual connections to GPU computing speed ups.
 
 # Conclusion 
 
