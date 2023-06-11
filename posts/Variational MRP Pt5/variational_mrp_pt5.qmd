@@ -773,7 +773,7 @@ simple to invert, but complex via inducing interdependencies between different
 parts of the data.
 
 To do both of these at once, the key insight the authors come to is the idea
-of a *coupling flow*, where if the flow is $D$-dimensional, the first half of the dimensions $1:d$
+of a *coupling layer*, where if the layer is $D$-dimensional, the first half of the dimensions $1:d$
 remain unchanged, and $d+1:D$ are transformed as complex function of the first half:
 
 $$
@@ -788,9 +788,55 @@ and $\odot$ is the Hadamard (element-wise) product. Visually, at each layer:
 
 ![Figure credit due to [Eric Jang](https://blog.evjang.com/2018/01/nf2.html); he uses the notation $\alpha$ and $\mu$ instead of $s$ and $t$](images/real_nvp_illustration.png){fig-alt="transforming half of the dimensions as a function of the other half"}
 
-This has a lot of really appealing properties. First, this
+This has a lot of really appealing properties. First, this has a triangular Jacobian:
+
+$$
+\frac{\partial y}{\partial x^T}=\left[\begin{array}{cc}\mathbb{I}_d & 0 \\ \frac{\partial y_{d+1: D}}{\partial x_{1: d}^T} & \operatorname{diag}\left(\exp \left[s\left(x_{1: d}\right)\right]\right)\end{array}\right]
+$$
+
+which means that we can really efficiently compute the determinant as $\exp \left[\sum_j s\left(x_{1: d}\right)_j\right]$. For a sense of scale, with no specific structure to exploit,
+calculating the determinant is roughly $\mathcal{O}(n^3)$ or a little better[^6],
+but for triangular matrices the same operation takes just $\mathcal{O}(n)$; that's
+a massive speedup!
+
+Another nice characteristic here is that we don't need to compute the Jacobian
+of $s$ or $t$ in computing the determinant of the above Jacobian, so $s$ and $t$
+are much easier to make quite complex. Contrast this with the planar flow, where
+we needed to use a specific (tanh) non-linearity, and impose somewhat arbitrary
+constraints to ensure invertability at all, let alone easy, fast invertability. With
+a realNVP flow constructed out of many such coupling layers, it's easy to throw
+in a lot of improvements that make training large neural networks much more reliable,
+like batch normalization, weight normalization, and architectures like residual
+connections.
+
+As a last appealing property here, realize this can be really expressive: by varying at each
+layer which dimensions $d$ are held constant and which are transformed, we can
+build up quite complex interrelationships between different dimensions over the flow. This
+can be done simply at random, or perhaps even using structure of the problem to
+decide how to partition the dimensions. For example, Dinh et al. provide an
+example on image data where a checkerboard pattern is used to structure the partitions. Kingma and Dhariwal take this further with [Glow (2018)](https://arxiv.org/abs/1807.03039), a flow using 1x1 convolutions. Again, it's really nice we don't need the Jacobian of $s$ and $t$; they can have arbitrarily complex structure and we
+don't need pay the computational cost of computing their Jacobians.
+
+It doesn't add that much intuition to see another flow in code, so I'll hold
+off on showing off the implementation of RealNVP for another post or two when
+I return to fitting our MRP model better using all the tools we've built up.
+
+Like I said at the start of this section, there are tons and tons of possible flow
+structures that get more computationally complex in exchange for expressiveness. RealNVP
+is a great start though, and for many variational inference problems provides
+the amount of expressiveness we need. It also
+illustrates a lot of the core strategy for building further flow structure well:
+
+1. Make the log determinant of the Jacobian fast to calculate.
+2. Impose structure such that calculating the log determinant of the Jacobian
+isn't entangled with your source of learnable complexity; this allows expressiveness
+not fitting restrictions to guide what's implemented.
+3. Leverage tools for scalable, stable neural networks, from batch norm to
+architecture choices like residual connections to GPU compute.
 
 # Conclusion 
+
+
 
 [^1]: It also almost has a bit of "no brain no pain" ML guy energy, in the sense
 that we're really pulling out the biggest algorithm possible. It really is a funny
@@ -813,3 +859,6 @@ have.
 [^5]: Deriving precisely how this works would take us too far afield, but see [Kobyzev et
 al. (2020)](https://arxiv.org/abs/1908.09257) if you're interested. It's a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus
 different notations and framings that they very successfully bridge.
+[^6]: Ok fine, you probably get that down to $\mathcal{O}(n^{2.8...})$ using
+[Strassen](https://en.wikipedia.org/wiki/Strassen_algorithm) which is implemented
+essentially everywhere that matters.
