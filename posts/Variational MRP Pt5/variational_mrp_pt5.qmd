@@ -2,7 +2,7 @@
 layout: post
 title: Variational Inference for MRP with Reliable Posterior Distributions
 subtitle: Part 5- Normalizing Flows
-date: 2023-05-27
+date: 2023-06-11
 draft: True
 image: images/32_layer.gif
 categories:
@@ -13,7 +13,7 @@ categories:
    
 This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
 
-The general structure for this post and the around it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
+The general structure for this post and the posts around it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
 
 In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt4/variational_mrp_4.html) we saw a variety of different ways importance sampling can be used to improve VI and make it more robust, from defining a tighter bound to optimize in the importance weighted ELBO, to weighting $q(x)$ samples together efficiently to look more like $p(x)$, to combining entirely different variational approximations together to cover different parts of the posterior with multiple importance sampling.
 
@@ -74,7 +74,7 @@ all- if we can make things work with a problem-adapted version of mean-field wit
 some structure based on the knowledge of a specific problem we have, that sounds
 like it gets time consuming fast. If I'm going to have
 to find a particular, problem-specific solution each time I want to use variational
-inference, that feels fragile and fiddly as well- that's a poor user experience.
+inference, that feels fragile and fiddly.
 
 The novel idea with normalizing flows is that we'll start with a simple base
 density like a normal distribution that is easy to sample from, but instead of only optimizing the parameters
@@ -82,11 +82,11 @@ of that normal distribution, we'll also use the training on our ELBO or
 other objective to learn a transformation that reshapes that normal distribution to
 look like our posterior. By having that transforming component be partially
 composed of a neural network,
-we give ourselves access to an incredibly expressive, automatically problem adaptive,
+we give ourselves access to an incredibly expressive, problem adaptive,
 and heavily scalable variant of variational inference that is quite
 widely used.
 
-And if the approximation isn't expressive enough? Deep Learning researchers have
+And if the approximation isn't expressive enough? Deep learning researchers have
 an unfussy, general purpose innovation for that: MORE LAYERS![^2]
 
 ![](images/more_layers.png){fig-alt="Wow such estimator, very deep"}
@@ -103,18 +103,18 @@ the "backward" or "normalizing" direction as towards the base density.
 
 ![Image Credit to [Simon Boehm](https://siboehm.com/articles/19/normalizing-flow-network) here](images/normalizing-flow.png)
 
-If we have a random variable $x$, with distribution $q(x)$, some function $f$ with an inverse
+If we have a random variable $z$, with distribution $q(x)$, some function $f$ with an inverse
 $f^{-1} = g, g \circ f(x) = x$, then the distribution of the result of
 one iteration of x through, $q^\prime(x)$ is:
 
 $$
-q\prime(z) = q(x) \lvert det \frac{\partial f^{-1}}{\partial x^\prime} \rvert = q(x) \lvert \frac{\partial f}{\partial x} \rvert^{-1}
+q\prime(x) = q(x) \lvert det \frac{\partial f^{-1}}{\partial x^\prime} \rvert = q(x) \lvert \frac{\partial f}{\partial x} \rvert^{-1}
 $$
 I won't derive this identity[^3], but it follows from the chain rule and the
  properties of Jacobians of invertible functions.
 
 The real power comes in here when we see that these transformations stack. If
-we've got a chain of transformations (eg $f_K(...(f_2f_1(x))$:
+we've got a chain of transformations (e.g. $f_K(...(f_2f_1(x))$:
 
 $$
 x_K = f(x) \circ ... \circ f_2 \circ f_1(x_0)
@@ -130,7 +130,7 @@ Neat, and surprisingly simple! If the terms above are all easy to calculate,
 we can very efficiently stack a bunch of these transformations and make
 an expressive model.
 
-## Normalizing Flows for variational inference versus other applications
+## Normalizing flows for variational inference versus other applications
 
 One source of confusion when I was learning about normalizing flows for
 variational inference was that variational inference makes up a fairly
@@ -165,14 +165,14 @@ of the data, and maximize it to improve the model[^5]. The need for an expressiv
 transformation of densities unite these two cases, but the goal is quite different!
 
 This level of goal disagreement also shows it face in what direction papers
-choose to call forward: Most papers outside of variational inference applications consider forward to be the opposite of what I do here, the direction towards
-the base density, the "normalizing" direction. 
+choose to call forward: Most papers outside of variational inference applications consider forward to be the opposite of what I do here. For them, "forward" is the direction towards
+the base density, the normalizing direction. 
 
 For our use, hopefully this short digression has clarified which operations we need to be
 fast versus just exist. If you dive deeper into
 further work on normalizing flows, hopefully recognizing there are two
-different ways to point this thing helps you more quickly orient yourself
-to how other work describe flows.
+different ways to consider forward helps you more quickly orient yourself
+to how other work describes flows.
 
 # How to train your neural net
 
@@ -180,12 +180,12 @@ Now, let's turn to how we actually fit a normalizing flow. Since this would be a
 hard to grok a code presentation if I took advantage of the full flexibility and abstraction that
 something like [`vistan`](https://github.com/abhiagwl/vistan/tree/master) provides, before
 heading into general purpose tools I'll talk through a bit more explicit implementation
-of a simpler flow called a planar flow `PyTorch` for illustration. Rather than
-reinventing the wheel, I'll leverage Edvard Hulten's implementation [here](https://github.com/e-hulten/planar-flows).
+of a simpler flow called a planar flow in `PyTorch` for illustration. Rather than
+reinventing the wheel, I'll leverage Edvard Hulten's great implementation [here](https://github.com/e-hulten/planar-flows).
 
 In this section,
 I'll define conceptually how we're fitting the model, and build out a fun
-target distribution and loss`- since I expect many people reading
+target distribution and loss- since I expect many people reading
 this may moderately new to PyTorch, I'll explain in detail
 than normal what each operation is doing and why we need it.
 
@@ -215,7 +215,7 @@ so let's use this ring shaped density.
 ![](images/ring_true_density.png){fig-alt="Wow such estimator, very deep"}
 
 This is a solid starting example in that this'd be quite
-hard to fit with a normal variational family, but it's pretty easy to define in PyTorch as well:
+hard to fit with a mean-field normal variational family, but it's pretty easy to define in PyTorch as well:
 
 ```{python}
 # https://github.com/e-hulten/planar-flows/blob/master/target_distribution.py
@@ -387,7 +387,12 @@ gradient flows. As the authors show in appendix $A.1$, functions like the
 above aren't actually always invertible, and choosing $tanh$ allows them
 to impose some constraints that make things reliably invertible. See the Appendix
 for more details about how that works, or take a careful look at Edvard's
-implementation of the single function below:
+implementation of the single function below.
+
+There isn't that much that's new conceptually in this PyTorch code; we're
+defining the layer as a stackable module, which provides torch what it
+needs to calculate both the forward and backward pass of an arbitrary
+number of layers.
 
 ```{python}
 # From https://github.com/e-hulten/planar-flows/blob/master/planar_transform.py
@@ -464,7 +469,14 @@ class PlanarFlow(nn.Module):
 ```
 
 Let's run this for a single layer to introduce the training loop, and build some
-intuition on the planar flow. Note that I'm hiding setting up the plot code.
+intuition on the planar flow. 
+
+The hyperparameter names here should be fairly intuitive, but it's worth pointing
+out that the batch size, learning rate (`lr`), and choice of Adam as an optimizer are
+all pretty basic reasonable first tries, but something you'd want to consider tuning
+in a more complicated context- we inherit that level of fiddly-ness when we choose
+to approach VI using normalizing flows. Also, note that I'm hiding setting up the plot code
+since it doesn't add anything to the intuition here.
 
 ```{python}
 #| echo: False
@@ -674,14 +686,18 @@ for batch_num in range(1, num_batches + 1):
 
     if batch_num % 100 == 0:
         print(f"(batch_num {batch_num:05d}/{num_batches}) loss: {loss}")
-        #print(log_jacobians)
+        
 
     if batch_num == 1 or batch_num % 100 == 0:
         # Save plots during training. Plots are saved to the 'train_plots' folder.
         plot_training(model, flow_length, batch_num, lr, axlim)
 ```
  
-Here's a gif of what that looks like over the course of training. With just a single
+At each iteration, we pass the normal draws thorugh the flow, calculate the loss,
+and propagate that loss backward through the flow to train it using gradient
+descent.
+
+Here's a gif[^6] of what that looks like over the course of training. With just a single
 layer of planar flow of course, this isn't expressive enough to capture the full density, but we can see why
 this approach has some promise- it's learning to cover the target density, rather
 than us having to get creative in specifying a base density that does this.
@@ -749,8 +765,8 @@ expansion or compression around a hyperplane doesn't scale to high dimensions we
 given the operation is pretty simple. We can get around this partially by
 making the flow deeper, but that introduces its own problems, namely that very deep
 flows can struggle to fit given the somewhat artificial constraints imposed in computing the log determinant of the Jacobian (implemented in `get_u_hat` above) to ensure invertability. Finally,
-there are just flows developed since the original normalizing flows paper
-that both are more expressive, and have cheaper to compute transformations
+there are flows developed since the original normalizing flows paper
+that both are more expressive and have cheaper to compute transformations
 and log determinants of the Jacobian- let's turn to those now.
 
 # What more complicated Flows look like
@@ -795,7 +811,7 @@ $$
 $$
 
 which means that we can really efficiently compute the determinant as $\exp \left[\sum_j s\left(x_{1: d}\right)_j\right]$. For a sense of scale, with no specific structure to exploit,
-calculating the determinant is roughly $\mathcal{O}(n^3)$ or a little better[^6],
+calculating the determinant is roughly $\mathcal{O}(n^3)$ or a little better[^7],
 but for triangular matrices the same operation takes just $\mathcal{O}(n)$; that's
 a massive speedup!
 
@@ -838,7 +854,7 @@ architecture choices like residual connections to GPU compute.
 
 Let's take stock of how normalizing flows continue our project of extending vanilla variational inference.
 Normalizing flows allow us to learn the variational family rather than iterating
-through a bunch of base densities until one works, and can do so for much
+through a bunch of base densities by hand until one works, and can do so for much
 more complex posteriors than any of the simple choices like a mean-field or
 full-rank gaussian we've seen so far. This is both a gain of functionality (we
 can now fit posteriors with VI that we absolutely couldn't before),
@@ -846,7 +862,7 @@ and a gain of convenience (the workflow for "make my neural network expressive" 
 more convenient than the one where the analyst tries to find or make increasingly weird distributions themselves).
 
 Of course, this adds compute time, and a requirement to start understanding neural network
-implementation choices well. This isn't a free lunch- even the simple planar flow
+implementation choices reasonably well. This isn't a free lunch- even the simple planar flow
 on a toy example above took about 20 minutes to fit on my laptop, and having to
 understand neural nets well to fit a Bayesian model feels kind of silly. Still though,
 in the telling of review papers like [Dhaka et al. (2021)](https://arxiv.org/abs/2103.01085) and [Agrawal et al. (2020)](https://arxiv.org/abs/2006.10343), a basic RealNVP flow is a serious
@@ -876,14 +892,15 @@ combined with a nice matrix calc review by [Lilian Weng](https://lilianweng.gith
 people's blogs, I'll try to focus on covering material I think I can provide
 more intuition for, or that are most relevant for variational inference.
 [^4]: A great example of this is Lilian Weng's [NF walkthrough](https://lilianweng.github.io/posts/2018-10-13-flow-models/) which
-I reccomended above- It
+I recommended above- It
 has a fantastic review of the needed linear algebra and covers a lot of different
 flow types, but is a bit overly general about what properties are most desirable
-in a flow, and therefore initially a bit fuzzy on the value different flows
+in a flow, and is therefore initially a bit fuzzy on the value different flows
 have.
 [^5]: Deriving precisely how this works would take us too far afield, but see [Kobyzev et
 al. (2020)](https://arxiv.org/abs/1908.09257) if you're interested. It's a great review paper that does a lot of work to recognize there are multiple different possible applications of normalizing flows, and thus
 different notations and framings that they very successfully bridge.
-[^6]: Ok fine, you probably get that down to $\mathcal{O}(n^{2.8...})$ using
+[^6]: Depending on your browser settings you may need to refresh the page here to watch it run.
+[^7]: Ok fine, you probably get that down to $\mathcal{O}(n^{2.8...})$ using
 [Strassen](https://en.wikipedia.org/wiki/Strassen_algorithm) which is implemented
 essentially everywhere that matters.
