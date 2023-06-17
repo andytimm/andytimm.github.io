@@ -206,9 +206,14 @@ ul.task-list li input[type="checkbox"] {
 </ol>
 <section id="looking-at-our-loss-function" class="level1">
 <h1>Looking at our loss function</h1>
+<p>One logical place to start with diagnostics is to discuss what we can and can’t infer from our optimization objectives like an ELBO or CUBO.</p>
+<p>In training a model with variational inference some common stopping rule choices are either to just run optimization for a fixed number of iterations, or to stop when relative changes in the loss have slowed, indicating convergence of the optimization to a local minimum. So we can at least look at changes in the ELBO/CUBO/other loss to know if our approximation has hit a local minimum yet.</p>
+<p>Unfortunately, that’s about all monitoring the loss can tell us. Recall that An unknown, multiplicative constant exists in <span class="math inline">p(z,x) \propto p(z|x)</span> that changes as reparameterize our model; thus, we can’t compare two different models on the same objective and expect their ELBO or similar loss values to be comparable. So the typical ML strategy of “which model achieves lower loss” is pretty much out here.</p>
+<p>Also, the loss values themselves aren’t particularly meaningful: there’s no way to interpret a given ELBO as indicating a good approximation, for example. This generally stems from our bounds being bounds, not directly optimizing the quantity we want to optimize. While they’re definitely degenerate cases, there are even some fun counter examples I’ll show in a second where you can make the ELBO/CUBO arbitrarily low, while still allowing a mean or standard deviation to be arbitrarily wrong!</p>
 </section>
 <section id="the-majesty-of-hatk" class="level1">
 <h1>The majesty of <span class="math inline">\hat{k}</span></h1>
+<p>So</p>
 </section>
 <section id="wasserstein-bounds" class="level1">
 <h1>Wasserstein Bounds</h1>

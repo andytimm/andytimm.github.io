@@ -39,7 +39,32 @@ The rough plan for the series is as follows:
 
 # Looking at our loss function
 
+One logical place to start with diagnostics is to discuss what we can and can't
+infer from our optimization objectives like an ELBO or CUBO.
+
+In training a model with variational inference some common stopping rule choices
+are either to just run optimization for a fixed number of iterations, or to
+stop when relative changes in the loss have slowed, indicating convergence of
+the optimization to a local minimum. So we can at least look at changes in
+the ELBO/CUBO/other loss to know if our approximation has hit a local minimum yet.
+
+Unfortunately, that's about all monitoring the loss can tell us. Recall that An unknown,
+multiplicative constant exists in $p(z,x) \propto p(z|x)$ that changes as
+reparameterize our model; thus, we can't compare two different models on the
+same objective and expect their ELBO or similar loss values to be comparable. So
+the typical ML strategy of "which model achieves lower loss" is pretty much
+out here.
+
+Also, the loss values themselves aren't particularly meaningful: there's no
+way to interpret a given ELBO as indicating a good approximation, for example. This
+generally stems from our bounds being bounds, not directly optimizing the quantity
+we want to optimize. While they're definitely degenerate cases, there are even some
+fun counter examples I'll show in a second where you can make the ELBO/CUBO arbitrarily low, while
+still allowing a mean or standard deviation to be arbitrarily wrong!
+
 # The majesty of $\hat{k}$
+
+So
 
 # Wasserstein Bounds
 
