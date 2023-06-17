@@ -1,0 +1,52 @@
+---
+layout: post
+title: Variational Inference for MRP with Reliable Posterior Distributions
+subtitle: Part 6- Diagnostics
+date: 2023-06-17
+draft: True
+categories:
+  - MRP
+  - Variational Inference
+  - Diagnostics
+---
+   
+   
+This is section 6 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. 
+
+The general structure for this post and the posts around it will be to describe a problem with VI, and then describe how that problem can be fixed to some degree. Collectively, all the small improvements in these four posts will go a long way towards more robust variational inference. I'll also have a grab bag at the end of other interesting ideas from the literature I think are cool, but maybe not as important or interesting to me as the 3 below.
+
+In the [last post](https://andytimm.github.io/posts/Variational%20MRP%20Pt5/variational_mrp_5.html) we looked at normalizing flows, a way to leverage neural networks to learn significantly
+more expressive variational families in a way that adapt to specific problems.
+
+In this post, we'll explore different diagnostics for variational inference,
+ranging from simple statistics that are easy to calculate as we fit our approximation to solving the problem
+in parallel with MCMC to compare and contrast. Some recurring themes will be 
+aiming to be precise about what constitutes failure under each diagnostic tool,
+and providing intuition building examples where each diagnostic will fail to
+do anything useful. While no single diagnostic provides strong guarantees of
+variational inference's correctness on their own, taken together the tools
+in this post broaden our ability to know when our models fall short.
+
+The rough plan for the series is as follows:
+
+1.  Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
+3.  Problem 1: KL-D prefers exclusive solutions; are there alternatives?
+4.  Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?
+5.  Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?
+6.  **(This post)** Problem 4: How can we know when VI is wrong? Are there useful error bounds?
+7.  Putting the workflow all together
+
+# Looking at our loss function
+
+# The majesty of $\hat{k}$
+
+# Wasserstein Bounds
+
+# MCMC based diagnostics; what's old is new again
+
+## MCMC can be practically useful even when slow
+
+## TADDAA
+
+# Diagnostics that don't spark joy
