@@ -240,15 +240,17 @@ the most complicated posteriors, we should expect to spend a lot of time in this
 feeling of "some parts of the posterior may be good enough", so this is a useful
 trap to know about.
 
-...Let's step back for a second. Since I introduced PSIS with a bunch of cases
+...Let's step back for a second. Since I introduced $\hat{k}$ as a diagnostic with a bunch of cases
 where it falls short in surprising ways, I do want to emphasize it is a very useful *heuristic* diagnostic tool
 in general. Large $\hat{k}$ tells you something is very likely wrong with your joint posterior,
 and that's generally practically helpful information. Where we need to be cautious
 is in inferring whether the wrongness $\hat{k}$ picks up on is something we care about,
-and also in remembering that low $\hat{k}$ doesn't provide gaurantees of correctness.
+and also in remembering that low $\hat{k}$ doesn't provide guarantees of correctness.
 
 
 # Wasserstein Bounds
+
+[Huggins et al. (2020)](https://arxiv.org/abs/1910.04102) propose a 
 
 # MCMC based diagnostics; what's old is new again
 
