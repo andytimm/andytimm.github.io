@@ -251,53 +251,67 @@ and also in remembering that low $\hat{k}$ doesn't provide guarantees of correct
 # Wasserstein Bounds
 
 So we've seen some limitations of using our objectives and $\hat{k}$ as
-diagnostics. Let's break out some fun counterexamples to really drive home the
-need for a bound that actually makes guarantees on errors of summaries we care about
+diagnostics. Let's break out some fun propositions and examples from [Huggins et al. (2020)](https://arxiv.org/abs/1910.04102) to really drive home the
+need for a bound that actually makes guarantees on errors of posterior summaries we care about
 like means and variances.
 
-::: columns
-::: {.column width="50%"}
-### **Proposition 3.1**
+----
 
-*(Arbitrarily Poor Mean Approximation):* For any t > 0, there exist (A) one dimensional,
+### **Proposition 3.1 (Arbitrarily Poor Mean Approximation):**
+
+For any t > 0, there exist (A) one dimensional,
 unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)$ < 0.9 and $\left(m_{q}-m_p\right)^2>t \sigma_p^2$, and $(B)$ one-dimensional, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p) < 0.3$ and $\left(m_{q}-m_p\right)^2>t \sigma_{q}^2$.
 
+### **Proposition 3.2 (Arbitrarily Poor variance Approximation):**
+For any $t \in(1, \infty]$, there exist one-dimensional, mean-zero, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)<0.12$ but $\sigma_p^2 \geq t \sigma_{q}^2$.
 
-:::
+----
 
-::: {.column width="50%"}
+So, these have some fairly scary names, huh? We can make the KL divergence pretty
+small, but have arbitrarily bad mean and variance approximation. How to do this? Given
+the examples here have to be unimodal and 1-D, they can't be that, that weird,
+right?
 
-### **Proposition 3.2**
+----
 
-*(Arbitrarily Poor variance Approximation):*  For any $t \in(1, \infty]$, there exist one-dimensional, mean-zero, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)<0.12$ but $\sigma_p^2 \geq t \sigma_{q}^2$.
-:::
+### **Proposition 3.1 Example**
 
-:::
+Let Weibull $(k, 1)$ denote the Weibull distribution with shape $k>0$ and scale 1. For (A), for any $t>0$, we can choose $k=k(t), p=\operatorname{Weibull}(k, 1)$, and $q= \operatorname{Weibull}(k / 2,1)$, where $k(t) \searrow 0$ as $t \rightarrow \infty$. We can just exchange the two distributions for (B).
 
-::: columns
-::: {.column width="50%"}
-### **Proposition 3.1**
+### **Proposition 3.2 Example**
 
-*(Arbitrarily Poor Mean Approximation):* For any t > 0, there exist (A) one dimensional,
-unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)$ < 0.9 and $\left(m_{q}-m_p\right)^2>t \sigma_p^2$, and $(B)$ one-dimensional, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p) < 0.3$ and $\left(m_{q}-m_p\right)^2>t \sigma_{q}^2$.
+For any $t>0$ we let $h=h(t), p=\mathcal{T}_h$ (standard $t$ distribution with $h$ degrees of freedom), and $q=\mathcal{N}(0,1)$ (standard Gaussian), where $h(t) \searrow 2$ as $t \rightarrow \infty$.
+
+----
+
+I won't show it here, but the Huggins et al. paper provides a similar proposition
+and example for $\chi^2$ divergences and the CUBO bound we discussed earlier in the
+series, and the example has pretty much the same form.
+
+Whenever presented with a "counterexample" to things working properly like this, it's worth asking how broad
+the case's applicability is: often counterexamples reside in the land of extremes,
+and we should be cautious in interpreting the result's negative implications too broadly. There's certainly
+some of that going on here, in the sense that usually a lower ELBO/CUBO will give some (if not perfect)
+traction in improving our posterior estimates of mean and variance. The intuitive point here though is that **the
+bounds we optimize give no rigorous guarantees of posterior summaries we care about**, even in the loosest
+sense. 
 
 
-:::
+To get some better guarantees like this, [Huggins et al. (2020)](https://arxiv.org/abs/1910.04102) propose bounds on
+the the mean and uncertainty estimates that arise from variational inference, which
+leverage the Wasserstein distance. In addition to providing actual[^1] bounds
+on quantities we care about, these bounds come at very reasonable computational
+cost, as they are readily computable from the bounds we already have (ELBO and CUBO) plus
+some additional Monte Carlo estimation and quick analytic calculation.
 
-::: {.column width="50%"}
+Let's first discuss what the Wasserstein distance is, and then discuss the
+fairly involved path from our existing estimates to actually calculating the
+bounds.
 
-### **Proposition 3.2**
 
-*(Arbitrarily Poor variance Approximation):*  For any $t \in(1, \infty]$, there exist one-dimensional, mean-zero, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)<0.12$ but $\sigma_p^2 \geq t \sigma_{q}^2$.
-:::
+## What's a Wassterstein?
 
-:::
-
-In more detail, let Weibull $(k, 1)$ denote the Weibull distribution with shape $k>0$ and scale 1. For (A), for any $t>0$, we can choose $k=k(t), \pi=\operatorname{Weibull}(k, 1)$, and $\hat{\pi}=$ Weibull $(k / 2,1)$, where $k(t) \searrow 0$ as $t \rightarrow \infty$. We exchange the two distributions for (B).
-
-Here, for any $t>0$ we let $h=h(t), \pi=\mathcal{T}_h$ (standard $t$ distribution with $h$ degrees of freedom), and $\hat{\pi}=\mathcal{N}(0,1)$ (standard Gaussian), where $h(t) \searrow 2$ as $t \rightarrow \infty$., and (B)  
-
-[Huggins et al. (2020)](https://arxiv.org/abs/1910.04102) propose a bound
+## Bounds of Bounds via... Bounds!
 
 ## So what's the bad news about this diagnostic?
 
@@ -310,3 +324,5 @@ Here, for any $t>0$ we let $h=h(t), \pi=\mathcal{T}_h$ (standard $t$ distributio
 ## TADDAA
 
 # Diagnostics that don't spark joy
+
+[^1]: Alternatively, *not arbitrarily wrong*.

@@ -244,6 +244,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a>
   <ul>
+  <li><a href="#proposition-3.1-arbitrarily-poor-mean-approximation" id="toc-proposition-3.1-arbitrarily-poor-mean-approximation" class="nav-link" data-scroll-target="#proposition-3.1-arbitrarily-poor-mean-approximation"><strong>Proposition 3.1 (Arbitrarily Poor Mean Approximation):</strong></a></li>
+  <li><a href="#proposition-3.2-arbitrarily-poor-variance-approximation" id="toc-proposition-3.2-arbitrarily-poor-variance-approximation" class="nav-link" data-scroll-target="#proposition-3.2-arbitrarily-poor-variance-approximation"><strong>Proposition 3.2 (Arbitrarily Poor variance Approximation):</strong></a></li>
+  <li><a href="#proposition-3.1-example" id="toc-proposition-3.1-example" class="nav-link" data-scroll-target="#proposition-3.1-example"><strong>Proposition 3.1 Example</strong></a></li>
+  <li><a href="#proposition-3.2-example" id="toc-proposition-3.2-example" class="nav-link" data-scroll-target="#proposition-3.2-example"><strong>Proposition 3.2 Example</strong></a></li>
+  <li><a href="#whats-a-wassterstein" id="toc-whats-a-wassterstein" class="nav-link" data-scroll-target="#whats-a-wassterstein">What’s a Wassterstein?</a></li>
+  <li><a href="#bounds-of-bounds-via-bounds" id="toc-bounds-of-bounds-via-bounds" class="nav-link" data-scroll-target="#bounds-of-bounds-via-bounds">Bounds of Bounds via… Bounds!</a></li>
   <li><a href="#so-whats-the-bad-news-about-this-diagnostic" id="toc-so-whats-the-bad-news-about-this-diagnostic" class="nav-link" data-scroll-target="#so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</a></li>
   </ul></li>
   <li><a href="#mcmc-based-diagnostics-whats-old-is-new-again" id="toc-mcmc-based-diagnostics-whats-old-is-new-again" class="nav-link" data-scroll-target="#mcmc-based-diagnostics-whats-old-is-new-again">MCMC based diagnostics; what’s old is new again</a>
@@ -387,36 +393,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="wasserstein-bounds" class="level1">
 <h1>Wasserstein Bounds</h1>
-<p>So we’ve seen some limitations of using our objectives and <span class="math inline">\hat{k}</span> as diagnostics. Let’s break out some fun counterexamples to really drive home the need for a bound that actually makes guarantees on errors of summaries we care about like means and variances.</p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<section id="proposition-3.1" class="level3">
-<h3 class="anchored" data-anchor-id="proposition-3.1"><strong>Proposition 3.1</strong></h3>
-<p><em>(Arbitrarily Poor Mean Approximation):</em> For any t &gt; 0, there exist (A) one dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)</span> &lt; 0.9 and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_p^2</span>, and <span class="math inline">(B)</span> one-dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p) &lt; 0.3</span> and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_{q}^2</span>.</p>
+<p>So we’ve seen some limitations of using our objectives and <span class="math inline">\hat{k}</span> as diagnostics. Let’s break out some fun propositions and examples from <a href="https://arxiv.org/abs/1910.04102">Huggins et al.&nbsp;(2020)</a> to really drive home the need for a bound that actually makes guarantees on errors of posterior summaries we care about like means and variances.</p>
+<hr>
+<section id="proposition-3.1-arbitrarily-poor-mean-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.1-arbitrarily-poor-mean-approximation"><strong>Proposition 3.1 (Arbitrarily Poor Mean Approximation):</strong></h3>
+<p>For any t &gt; 0, there exist (A) one dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)</span> &lt; 0.9 and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_p^2</span>, and <span class="math inline">(B)</span> one-dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p) &lt; 0.3</span> and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_{q}^2</span>.</p>
 </section>
-</div><div class="column" style="width:50%;">
-<section id="proposition-3.2" class="level3">
-<h3 class="anchored" data-anchor-id="proposition-3.2"><strong>Proposition 3.2</strong></h3>
-<p><em>(Arbitrarily Poor variance Approximation):</em> For any <span class="math inline">t \in(1, \infty]</span>, there exist one-dimensional, mean-zero, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)&lt;0.12</span> but <span class="math inline">\sigma_p^2 \geq t \sigma_{q}^2</span>.</p>
+<section id="proposition-3.2-arbitrarily-poor-variance-approximation" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.2-arbitrarily-poor-variance-approximation"><strong>Proposition 3.2 (Arbitrarily Poor variance Approximation):</strong></h3>
+<p>For any <span class="math inline">t \in(1, \infty]</span>, there exist one-dimensional, mean-zero, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)&lt;0.12</span> but <span class="math inline">\sigma_p^2 \geq t \sigma_{q}^2</span>.</p>
+<hr>
+<p>So, these have some fairly scary names, huh? We can make the KL divergence pretty small, but have arbitrarily bad mean and variance approximation. How to do this? Given the examples here have to be unimodal and 1-D, they can’t be that, that weird, right?</p>
+<hr>
 </section>
-</div>
-</div>
-<div class="columns">
-<div class="column" style="width:50%;">
-<section id="proposition-3.1-1" class="level3">
-<h3 class="anchored" data-anchor-id="proposition-3.1-1"><strong>Proposition 3.1</strong></h3>
-<p><em>(Arbitrarily Poor Mean Approximation):</em> For any t &gt; 0, there exist (A) one dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)</span> &lt; 0.9 and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_p^2</span>, and <span class="math inline">(B)</span> one-dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p) &lt; 0.3</span> and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_{q}^2</span>.</p>
+<section id="proposition-3.1-example" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.1-example"><strong>Proposition 3.1 Example</strong></h3>
+<p>Let Weibull <span class="math inline">(k, 1)</span> denote the Weibull distribution with shape <span class="math inline">k&gt;0</span> and scale 1. For (A), for any <span class="math inline">t&gt;0</span>, we can choose <span class="math inline">k=k(t), p=\operatorname{Weibull}(k, 1)</span>, and <span class="math inline">q= \operatorname{Weibull}(k / 2,1)</span>, where <span class="math inline">k(t) \searrow 0</span> as <span class="math inline">t \rightarrow \infty</span>. We can just exchange the two distributions for (B).</p>
 </section>
-</div><div class="column" style="width:50%;">
-<section id="proposition-3.2-1" class="level3">
-<h3 class="anchored" data-anchor-id="proposition-3.2-1"><strong>Proposition 3.2</strong></h3>
-<p><em>(Arbitrarily Poor variance Approximation):</em> For any <span class="math inline">t \in(1, \infty]</span>, there exist one-dimensional, mean-zero, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)&lt;0.12</span> but <span class="math inline">\sigma_p^2 \geq t \sigma_{q}^2</span>.</p>
+<section id="proposition-3.2-example" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.2-example"><strong>Proposition 3.2 Example</strong></h3>
+<p>For any <span class="math inline">t&gt;0</span> we let <span class="math inline">h=h(t), p=\mathcal{T}_h</span> (standard <span class="math inline">t</span> distribution with <span class="math inline">h</span> degrees of freedom), and <span class="math inline">q=\mathcal{N}(0,1)</span> (standard Gaussian), where <span class="math inline">h(t) \searrow 2</span> as <span class="math inline">t \rightarrow \infty</span>.</p>
+<hr>
+<p>I won’t show it here, but the Huggins et al.&nbsp;paper provides a similar proposition and example for <span class="math inline">\chi^2</span> divergences and the CUBO bound we discussed earlier in the series, and the example has pretty much the same form.</p>
+<p>Whenever presented with a “counterexample” to things working properly like this, it’s worth asking how broad the case’s applicability is: often counterexamples reside in the land of extremes, and we should be cautious in interpreting the result’s negative implications too broadly. There’s certainly some of that going on here, in the sense that usually a lower ELBO/CUBO will give some (if not perfect) traction in improving our posterior estimates of mean and variance. The intuitive point here though is that <strong>the bounds we optimize give no rigorous guarantees of posterior summaries we care about</strong>, even in the loosest sense.</p>
+<p>To get some better guarantees like this, <a href="https://arxiv.org/abs/1910.04102">Huggins et al.&nbsp;(2020)</a> propose bounds on the the mean and uncertainty estimates that arise from variational inference, which leverage the Wasserstein distance. In addition to providing actual<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> bounds on quantities we care about, these bounds come at very reasonable computational cost, as they are readily computable from the bounds we already have (ELBO and CUBO) plus some additional Monte Carlo estimation and quick analytic calculation.</p>
+<p>Let’s first discuss what the Wasserstein distance is, and then discuss the fairly involved path from our existing estimates to actually calculating the bounds.</p>
 </section>
-</div>
-</div>
-<p>In more detail, let Weibull <span class="math inline">(k, 1)</span> denote the Weibull distribution with shape <span class="math inline">k&gt;0</span> and scale 1. For (A), for any <span class="math inline">t&gt;0</span>, we can choose <span class="math inline">k=k(t), \pi=\operatorname{Weibull}(k, 1)</span>, and <span class="math inline">\hat{\pi}=</span> Weibull <span class="math inline">(k / 2,1)</span>, where <span class="math inline">k(t) \searrow 0</span> as <span class="math inline">t \rightarrow \infty</span>. We exchange the two distributions for (B).</p>
-<p>Here, for any <span class="math inline">t&gt;0</span> we let <span class="math inline">h=h(t), \pi=\mathcal{T}_h</span> (standard <span class="math inline">t</span> distribution with <span class="math inline">h</span> degrees of freedom), and <span class="math inline">\hat{\pi}=\mathcal{N}(0,1)</span> (standard Gaussian), where <span class="math inline">h(t) \searrow 2</span> as <span class="math inline">t \rightarrow \infty</span>., and (B)</p>
-<p><a href="https://arxiv.org/abs/1910.04102">Huggins et al.&nbsp;(2020)</a> propose a bound</p>
+<section id="whats-a-wassterstein" class="level2">
+<h2 class="anchored" data-anchor-id="whats-a-wassterstein">What’s a Wassterstein?</h2>
+</section>
+<section id="bounds-of-bounds-via-bounds" class="level2">
+<h2 class="anchored" data-anchor-id="bounds-of-bounds-via-bounds">Bounds of Bounds via… Bounds!</h2>
+</section>
 <section id="so-whats-the-bad-news-about-this-diagnostic" class="level2">
 <h2 class="anchored" data-anchor-id="so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</h2>
 </section>
@@ -436,7 +444,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Alternatively, <em>not arbitrarily wrong</em>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
