@@ -242,7 +242,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#problem-case-2-hatk-is-a-local-diagnostic" id="toc-problem-case-2-hatk-is-a-local-diagnostic" class="nav-link" data-scroll-target="#problem-case-2-hatk-is-a-local-diagnostic">Problem Case 2: <span class="math inline">\hat{k}</span> is a local diagnostic</a></li>
   <li><a href="#problem-case-3-hatk-is-a-joint-posterior-level-tool" id="toc-problem-case-3-hatk-is-a-joint-posterior-level-tool" class="nav-link" data-scroll-target="#problem-case-3-hatk-is-a-joint-posterior-level-tool">Problem Case 3: <span class="math inline">\hat{k}</span> is a joint posterior level tool</a></li>
   </ul></li>
-  <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a></li>
+  <li><a href="#wasserstein-bounds" id="toc-wasserstein-bounds" class="nav-link" data-scroll-target="#wasserstein-bounds">Wasserstein Bounds</a>
+  <ul>
+  <li><a href="#so-whats-the-bad-news-about-this-diagnostic" id="toc-so-whats-the-bad-news-about-this-diagnostic" class="nav-link" data-scroll-target="#so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</a></li>
+  </ul></li>
   <li><a href="#mcmc-based-diagnostics-whats-old-is-new-again" id="toc-mcmc-based-diagnostics-whats-old-is-new-again" class="nav-link" data-scroll-target="#mcmc-based-diagnostics-whats-old-is-new-again">MCMC based diagnostics; what’s old is new again</a>
   <ul>
   <li><a href="#mcmc-can-be-practically-useful-even-when-slow" id="toc-mcmc-can-be-practically-useful-even-when-slow" class="nav-link" data-scroll-target="#mcmc-can-be-practically-useful-even-when-slow">MCMC can be practically useful even when slow</a></li>
@@ -384,7 +387,39 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="wasserstein-bounds" class="level1">
 <h1>Wasserstein Bounds</h1>
-<p><a href="https://arxiv.org/abs/1910.04102">Huggins et al.&nbsp;(2020)</a> propose a</p>
+<p>So we’ve seen some limitations of using our objectives and <span class="math inline">\hat{k}</span> as diagnostics. Let’s break out some fun counterexamples to really drive home the need for a bound that actually makes guarantees on errors of summaries we care about like means and variances.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<section id="proposition-3.1" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.1"><strong>Proposition 3.1</strong></h3>
+<p><em>(Arbitrarily Poor Mean Approximation):</em> For any t &gt; 0, there exist (A) one dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)</span> &lt; 0.9 and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_p^2</span>, and <span class="math inline">(B)</span> one-dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p) &lt; 0.3</span> and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_{q}^2</span>.</p>
+</section>
+</div><div class="column" style="width:50%;">
+<section id="proposition-3.2" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.2"><strong>Proposition 3.2</strong></h3>
+<p><em>(Arbitrarily Poor variance Approximation):</em> For any <span class="math inline">t \in(1, \infty]</span>, there exist one-dimensional, mean-zero, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)&lt;0.12</span> but <span class="math inline">\sigma_p^2 \geq t \sigma_{q}^2</span>.</p>
+</section>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<section id="proposition-3.1-1" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.1-1"><strong>Proposition 3.1</strong></h3>
+<p><em>(Arbitrarily Poor Mean Approximation):</em> For any t &gt; 0, there exist (A) one dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)</span> &lt; 0.9 and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_p^2</span>, and <span class="math inline">(B)</span> one-dimensional, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p) &lt; 0.3</span> and <span class="math inline">\left(m_{q}-m_p\right)^2&gt;t \sigma_{q}^2</span>.</p>
+</section>
+</div><div class="column" style="width:50%;">
+<section id="proposition-3.2-1" class="level3">
+<h3 class="anchored" data-anchor-id="proposition-3.2-1"><strong>Proposition 3.2</strong></h3>
+<p><em>(Arbitrarily Poor variance Approximation):</em> For any <span class="math inline">t \in(1, \infty]</span>, there exist one-dimensional, mean-zero, unimodal distributions <span class="math inline">q</span> and <span class="math inline">p</span> such that <span class="math inline">\mathrm{KL}(q \mid p)&lt;0.12</span> but <span class="math inline">\sigma_p^2 \geq t \sigma_{q}^2</span>.</p>
+</section>
+</div>
+</div>
+<p>In more detail, let Weibull <span class="math inline">(k, 1)</span> denote the Weibull distribution with shape <span class="math inline">k&gt;0</span> and scale 1. For (A), for any <span class="math inline">t&gt;0</span>, we can choose <span class="math inline">k=k(t), \pi=\operatorname{Weibull}(k, 1)</span>, and <span class="math inline">\hat{\pi}=</span> Weibull <span class="math inline">(k / 2,1)</span>, where <span class="math inline">k(t) \searrow 0</span> as <span class="math inline">t \rightarrow \infty</span>. We exchange the two distributions for (B).</p>
+<p>Here, for any <span class="math inline">t&gt;0</span> we let <span class="math inline">h=h(t), \pi=\mathcal{T}_h</span> (standard <span class="math inline">t</span> distribution with <span class="math inline">h</span> degrees of freedom), and <span class="math inline">\hat{\pi}=\mathcal{N}(0,1)</span> (standard Gaussian), where <span class="math inline">h(t) \searrow 2</span> as <span class="math inline">t \rightarrow \infty</span>., and (B)</p>
+<p><a href="https://arxiv.org/abs/1910.04102">Huggins et al.&nbsp;(2020)</a> propose a bound</p>
+<section id="so-whats-the-bad-news-about-this-diagnostic" class="level2">
+<h2 class="anchored" data-anchor-id="so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</h2>
+</section>
 </section>
 <section id="mcmc-based-diagnostics-whats-old-is-new-again" class="level1">
 <h1>MCMC based diagnostics; what’s old is new again</h1>

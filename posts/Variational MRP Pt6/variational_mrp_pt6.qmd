@@ -250,7 +250,58 @@ and also in remembering that low $\hat{k}$ doesn't provide guarantees of correct
 
 # Wasserstein Bounds
 
-[Huggins et al. (2020)](https://arxiv.org/abs/1910.04102) propose a 
+So we've seen some limitations of using our objectives and $\hat{k}$ as
+diagnostics. Let's break out some fun counterexamples to really drive home the
+need for a bound that actually makes guarantees on errors of summaries we care about
+like means and variances.
+
+::: columns
+::: {.column width="50%"}
+### **Proposition 3.1**
+
+*(Arbitrarily Poor Mean Approximation):* For any t > 0, there exist (A) one dimensional,
+unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)$ < 0.9 and $\left(m_{q}-m_p\right)^2>t \sigma_p^2$, and $(B)$ one-dimensional, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p) < 0.3$ and $\left(m_{q}-m_p\right)^2>t \sigma_{q}^2$.
+
+
+:::
+
+::: {.column width="50%"}
+
+### **Proposition 3.2**
+
+*(Arbitrarily Poor variance Approximation):*  For any $t \in(1, \infty]$, there exist one-dimensional, mean-zero, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)<0.12$ but $\sigma_p^2 \geq t \sigma_{q}^2$.
+:::
+
+:::
+
+::: columns
+::: {.column width="50%"}
+### **Proposition 3.1**
+
+*(Arbitrarily Poor Mean Approximation):* For any t > 0, there exist (A) one dimensional,
+unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)$ < 0.9 and $\left(m_{q}-m_p\right)^2>t \sigma_p^2$, and $(B)$ one-dimensional, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p) < 0.3$ and $\left(m_{q}-m_p\right)^2>t \sigma_{q}^2$.
+
+
+:::
+
+::: {.column width="50%"}
+
+### **Proposition 3.2**
+
+*(Arbitrarily Poor variance Approximation):*  For any $t \in(1, \infty]$, there exist one-dimensional, mean-zero, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)<0.12$ but $\sigma_p^2 \geq t \sigma_{q}^2$.
+:::
+
+:::
+
+In more detail, let Weibull $(k, 1)$ denote the Weibull distribution with shape $k>0$ and scale 1. For (A), for any $t>0$, we can choose $k=k(t), \pi=\operatorname{Weibull}(k, 1)$, and $\hat{\pi}=$ Weibull $(k / 2,1)$, where $k(t) \searrow 0$ as $t \rightarrow \infty$. We exchange the two distributions for (B).
+
+Here, for any $t>0$ we let $h=h(t), \pi=\mathcal{T}_h$ (standard $t$ distribution with $h$ degrees of freedom), and $\hat{\pi}=\mathcal{N}(0,1)$ (standard Gaussian), where $h(t) \searrow 2$ as $t \rightarrow \infty$., and (B)  
+
+[Huggins et al. (2020)](https://arxiv.org/abs/1910.04102) propose a bound
+
+## So what's the bad news about this diagnostic?
+
+
 
 # MCMC based diagnostics; what's old is new again
 
