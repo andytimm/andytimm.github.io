@@ -449,11 +449,37 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 </tbody>
 </table>
-<p>So this is a nice improvement over the KL or <span class="math inline">\chi^2</span> divergences as far as an a diagnostic, since we have some guarantees of correctness where we had literally none. I’ll return to how tight these are bounds in practice in a bit, since that’s entangled with how we can actually estimate them in the variational inference use case.</p>
+<p>A similar type of result holds for the difference between expectations of any smooth function, so this result is somewhat extensible with additional work.</p>
+<p>This is a nice improvement over the KL or <span class="math inline">\chi^2</span> divergences as far as an a diagnostic, since we have some guarantees of correctness where we had literally none. I’ll return to how tight these are bounds in practice in a bit, since that’s entangled with how we can actually estimate them in the variational inference use case.</p>
 </section>
 <section id="bounds-of-bounds-via-bounds" class="level2">
 <h2 class="anchored" data-anchor-id="bounds-of-bounds-via-bounds">Bounds of Bounds via… Bounds!</h2>
-<p>One contribution of the Huggins at al.&nbsp;paper is the above result, but where things get even more impressive is that they find a reasonable and practical way to bound these quantities. It’s certainly not simple, but it</p>
+<p>One contribution of the Huggins at al.&nbsp;paper is the above result, but where things get even more impressive is that they find a reasonable and practical way to bound these quantities. It’s certainly not simple, but it works.</p>
+<p>Here’s the plan to get real bounds on our posterior summaries in full: 1. Use the ELBO and CUBO to to bound the KL and <span class="math inline">\chi^2</span> divergences. 2. Use tail properties of the distribution <span class="math inline">q</span> to get bounds on the Wasserstein distance through the KL and <span class="math inline">\chi^2</span> divergences. 3. Finally, bound posterior summaries using the Wasserstein bounds.</p>
+<p>That’s a lot of layers of bounding, and it’s reasonable to wonder why this is needed and whether the bounds are usefully tight after such transformations. One key reason this type of bounding is so involved is that we’re using a set of scale-invariant distances to bound a scale-dependent one- we need to incorporate some notion of scale into the bounding process to make it work.</p>
+<p>To do this, define the moment constants <span class="math inline">C_p^{\mathrm{PI}}(\xi)</span> and <span class="math inline">C_p^{\mathrm{EI}}(\xi)</span>. For <span class="math inline">p \geq 1</span>, <span class="math inline">\xi</span> is p-polynomially integrable if <span class="math display">
+C_p^{\mathrm{PI}}(\xi):=2 \inf _{\theta_0}\left\{\int\left\|\theta-\theta_0\right\|_2^p \xi(\mathrm{d} \theta)\right\}^{\frac{1}{p}}&lt;\infty
+</span> and that <span class="math inline">\xi</span> is p-exponentially integrable if <span class="math display">
+C_p^{\mathrm{EI}}(\xi):=2 \inf _{\theta_0, \epsilon&gt;0}\left[\frac{1}{\epsilon}\left\{\frac{3}{2}+\log \int e^{\epsilon\left\|\theta-\theta_0\right\|_2^p} \xi(\mathrm{d} \theta)\right\}\right]^{\frac{1}{p}}&lt;\infty
+</span></p>
+<p>Next, with the assumption that the variational approximation <span class="math inline">q</span> has polynomial (respectively, exponential) tails, our next result provides a bound on the <span class="math inline">p</span>-Wasserstein distance using the <span class="math inline">\chi^2</span>-divergence (respectively, the KL divergence).</p>
+<p>This is saying we require at least polynomial, and ideally exponential moments for <span class="math inline">q</span> and <span class="math inline">p</span>, which isn’t that strenuous of a requirement. Then:</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Proposition 4.2.</strong> If <span class="math inline">p</span> is absolutely continuous w.r.t to <span class="math inline">q</span> then <span class="math display">
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_{2 p}^{\mathrm{PI}}(\hat{\pi})\left[\exp \left\{\mathrm{D}_2(\pi \mid \hat{\pi})\right\}-1\right]^{\frac{1}{2 p}}
+</span> and <span class="math display">
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_p^{\mathrm{EI}}(\hat{\pi})\left[\mathrm{KL}(\pi \mid \hat{\pi})^{\frac{1}{p}}+\{\mathrm{KL}(\pi \mid \hat{\pi}) / 2\}^{\frac{1}{2 p}}\right]
+</span></td>
+</tr>
+</tbody>
+</table>
+<p>A reasonable question here: does using the KL and <span class="math inline">\chi^2</span> inherit KL/<span class="math inline">\chi^2</span> arbitrary wrongness? Nope! I won’t reproduce here, but the counter examples shown above for these divergences on their own no longer work to make our estimates arbitrarily wrong.</p>
+<p>Next step: how do we Use the ELBO and CUBO to bound the KL and <span class="math inline">\chi^2</span> terms in the proposition above above?</p>
 </section>
 <section id="so-whats-the-bad-news-about-this-diagnostic" class="level2">
 <h2 class="anchored" data-anchor-id="so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</h2>

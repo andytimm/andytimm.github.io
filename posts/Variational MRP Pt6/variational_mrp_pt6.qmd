@@ -369,7 +369,10 @@ If $\mathcal{W}_2(q, p) \leq \varepsilon$, then for $S := \sqrt{min (\left\|\Sig
 
 ----
 
-So this is a nice improvement over the KL or $\chi^2$ divergences as far as an
+A similar type of result holds for the difference between expectations of any smooth
+function, so this result is somewhat extensible with additional work.
+
+This is a nice improvement over the KL or $\chi^2$ divergences as far as an
 a diagnostic, since we have some guarantees of correctness where we had literally none. I'll return to how tight these are bounds in practice in a bit, since that's
 entangled with how we can actually estimate them in the variational inference use
 case.
@@ -379,7 +382,54 @@ case.
 
 One contribution of the Huggins at al. paper is the above result, but where
 things get even more impressive is that they find a reasonable and practical
-way to bound these quantities. It's certainly not simple, but it 
+way to bound these quantities. It's certainly not simple, but it works.
+
+Here's the plan to get real bounds on our posterior summaries in full:
+1. Use the ELBO and CUBO to to bound the KL and $\chi^2$ divergences.
+2. Use tail properties of the distribution $q$ to get bounds on the Wasserstein
+distance through the KL and $\chi^2$ divergences.
+3. Finally, bound posterior summaries using the Wasserstein bounds.
+
+That's a lot of layers of bounding, and it's reasonable to wonder why this is
+needed and whether the bounds are usefully tight after such transformations. One
+key reason this type of bounding is so involved is that we're using a set of
+scale-invariant distances to bound a scale-dependent one- we need to incorporate
+some notion of scale into the bounding process to make it work.
+
+To do this, define the moment constants $C_p^{\mathrm{PI}}(\xi)$ and $C_p^{\mathrm{EI}}(\xi)$. For $p \geq 1$, $\xi$ is p-polynomially integrable if
+$$
+C_p^{\mathrm{PI}}(\xi):=2 \inf _{\theta_0}\left\{\int\left\|\theta-\theta_0\right\|_2^p \xi(\mathrm{d} \theta)\right\}^{\frac{1}{p}}<\infty
+$$
+and that $\xi$ is p-exponentially integrable if
+$$
+C_p^{\mathrm{EI}}(\xi):=2 \inf _{\theta_0, \epsilon>0}\left[\frac{1}{\epsilon}\left\{\frac{3}{2}+\log \int e^{\epsilon\left\|\theta-\theta_0\right\|_2^p} \xi(\mathrm{d} \theta)\right\}\right]^{\frac{1}{p}}<\infty
+$$
+
+Next, with the assumption that the variational approximation $q$ has polynomial (respectively, exponential) tails, our next result provides a bound on the $p$-Wasserstein distance using the $\chi^2$-divergence (respectively, the KL divergence). 
+
+This is saying we require at least polynomial, and ideally exponential moments
+for $q$ and $p$, which isn't that strenuous of a requirement. Then:
+
+----
+**Proposition 4.2.** If $p$ is absolutely continuous w.r.t to $q$ then
+$$
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_{2 p}^{\mathrm{PI}}(\hat{\pi})\left[\exp \left\{\mathrm{D}_2(\pi \mid \hat{\pi})\right\}-1\right]^{\frac{1}{2 p}}
+$$
+and
+$$
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_p^{\mathrm{EI}}(\hat{\pi})\left[\mathrm{KL}(\pi \mid \hat{\pi})^{\frac{1}{p}}+\{\mathrm{KL}(\pi \mid \hat{\pi}) / 2\}^{\frac{1}{2 p}}\right]
+$$
+
+-----
+
+A reasonable question here: does using the KL and $\chi^2$ inherit KL/$\chi^2$
+arbitrary wrongness? Nope! I won't reproduce here, but the counter examples
+shown above for these divergences on their own no longer work to make our
+estimates arbitrarily wrong.
+
+Next step: how do we Use the ELBO and CUBO to bound the KL and $\chi^2$ terms in the proposition above above?
+
+
 
 ## So what's the bad news about this diagnostic?
 
