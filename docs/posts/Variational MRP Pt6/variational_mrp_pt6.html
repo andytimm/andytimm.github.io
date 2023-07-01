@@ -470,7 +470,7 @@ C_p^{\mathrm{EI}}(\xi):=2 \inf _{\theta_0, \epsilon&gt;0}\left[\frac{1}{\epsilon
 </colgroup>
 <tbody>
 <tr class="odd">
-<td><strong>Proposition 4.2.</strong> If <span class="math inline">p</span> is absolutely continuous w.r.t to <span class="math inline">q</span> then <span class="math display">
+<td><strong>Proposition 4.2.</strong> If <span class="math inline">p</span> is absolutely continuous w.r.t. to <span class="math inline">q</span> then <span class="math display">
 \mathcal{W}_p(\hat{\pi}, \pi) \leq C_{2 p}^{\mathrm{PI}}(\hat{\pi})\left[\exp \left\{\mathrm{D}_2(\pi \mid \hat{\pi})\right\}-1\right]^{\frac{1}{2 p}}
 </span> and <span class="math display">
 \mathcal{W}_p(\hat{\pi}, \pi) \leq C_p^{\mathrm{EI}}(\hat{\pi})\left[\mathrm{KL}(\pi \mid \hat{\pi})^{\frac{1}{p}}+\{\mathrm{KL}(\pi \mid \hat{\pi}) / 2\}^{\frac{1}{2 p}}\right]
@@ -480,6 +480,33 @@ C_p^{\mathrm{EI}}(\xi):=2 \inf _{\theta_0, \epsilon&gt;0}\left[\frac{1}{\epsilon
 </table>
 <p>A reasonable question here: does using the KL and <span class="math inline">\chi^2</span> inherit KL/<span class="math inline">\chi^2</span> arbitrary wrongness? Nope! I won’t reproduce here, but the counter examples shown above for these divergences on their own no longer work to make our estimates arbitrarily wrong.</p>
 <p>Next step: how do we Use the ELBO and CUBO to bound the KL and <span class="math inline">\chi^2</span> terms in the proposition above above?</p>
+<p>We first define for any distribution <span class="math inline">\eta</span>:</p>
+<p><span class="math display">
+\mathrm{H}_\alpha(\xi, \eta):=\frac{\alpha}{\alpha-1}\left\{\operatorname{CUBO}_\alpha(\xi)-\operatorname{ELBO}(\eta)\right\}
+</span></p>
+<p>Then we get:</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Lemma 4.5.</strong> For any distribution <span class="math inline">\eta</span> such that <span class="math inline">p</span> is absolutely continuous w.r.t. <span class="math inline">\eta</span>- <span class="math display">
+\mathrm{KL}(\pi \mid \hat{\pi}) \leq \mathrm{D}_\alpha(\pi \mid \hat{\pi}) \leq \mathrm{H}_\alpha(\hat{\pi}, \eta)
+</span></td>
+</tr>
+</tbody>
+</table>
+<p>By combining the lemma above and proposition from 4.2 earlier, we can bound the Wasserstein distance finally! To do this, we need all of <span class="math inline">C_p^{\mathrm{PI}}(\xi)</span>, <span class="math inline">C_p^{\mathrm{EI}}(\xi)</span>, CUBO, and ELBO. All of these are efficiently calculable much of the time (we’ll get to when it’s not soon), and largely result from things we were already calculating as promised. Great! Our combined result:</p>
+<hr>
+<p><strong>Theorem 4.6.</strong> For any <span class="math inline">p \geq 1</span> and any distribution <span class="math inline">\eta</span>, if <span class="math inline">\pi</span> is absolutely continuous w.r.t. <span class="math inline">\hat{\pi}</span>, then <span class="math display">
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_{2 p}^{\mathrm{PI}}(\hat{\pi})\left[\exp \left\{\mathrm{H}_2(\hat{\pi}, \eta)\right\}-1\right]^{\frac{1}{2 p}}
+</span> and <span class="math display">
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_p^{\mathrm{EI}}(\hat{\pi})\left[\mathrm{H}_2(\hat{\pi}, \eta)^{\frac{1}{p}}+\left\{\mathrm{H}_2(\hat{\pi}, \eta) / 2\right\}^{\frac{1}{2 p}}\right] .
+</span></p>
+<hr>
+<p>This was a very, very long derivation, but hopefully it gave you a better feel for the limitations of our normal divergences in variation inference.</p>
+<p>Stepping back, these results give us some pretty easy to calculate ways to easily check when</p>
 </section>
 <section id="so-whats-the-bad-news-about-this-diagnostic" class="level2">
 <h2 class="anchored" data-anchor-id="so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</h2>

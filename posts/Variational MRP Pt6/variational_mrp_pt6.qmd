@@ -411,7 +411,7 @@ This is saying we require at least polynomial, and ideally exponential moments
 for $q$ and $p$, which isn't that strenuous of a requirement. Then:
 
 ----
-**Proposition 4.2.** If $p$ is absolutely continuous w.r.t to $q$ then
+**Proposition 4.2.** If $p$ is absolutely continuous w.r.t. to $q$ then
 $$
 \mathcal{W}_p(\hat{\pi}, \pi) \leq C_{2 p}^{\mathrm{PI}}(\hat{\pi})\left[\exp \left\{\mathrm{D}_2(\pi \mid \hat{\pi})\right\}-1\right]^{\frac{1}{2 p}}
 $$
@@ -429,6 +429,45 @@ estimates arbitrarily wrong.
 
 Next step: how do we Use the ELBO and CUBO to bound the KL and $\chi^2$ terms in the proposition above above?
 
+We first define for any distribution $\eta$:
+
+$$
+\mathrm{H}_\alpha(\xi, \eta):=\frac{\alpha}{\alpha-1}\left\{\operatorname{CUBO}_\alpha(\xi)-\operatorname{ELBO}(\eta)\right\}
+$$
+
+Then we get:
+
+----
+**Lemma 4.5.** For any distribution $\eta$ such that $p$ is absolutely continuous w.r.t.  $\eta$-
+$$
+\mathrm{KL}(\pi \mid \hat{\pi}) \leq \mathrm{D}_\alpha(\pi \mid \hat{\pi}) \leq \mathrm{H}_\alpha(\hat{\pi}, \eta)
+$$
+
+----
+
+By combining the lemma above and proposition from 4.2 earlier, we can bound the
+Wasserstein distance finally! To do this, we need all of $C_p^{\mathrm{PI}}(\xi)$, $C_p^{\mathrm{EI}}(\xi)$, CUBO, and ELBO. All of these are efficiently calculable
+much of the time (we'll get to when it's not soon), and largely result from
+things we were already calculating as promised. Great! Our combined result:
+
+----
+
+**Theorem 4.6.** For any $p \geq 1$ and any distribution $\eta$, if $\pi$ is absolutely continuous w.r.t. $\hat{\pi}$, then
+$$
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_{2 p}^{\mathrm{PI}}(\hat{\pi})\left[\exp \left\{\mathrm{H}_2(\hat{\pi}, \eta)\right\}-1\right]^{\frac{1}{2 p}}
+$$
+and
+$$
+\mathcal{W}_p(\hat{\pi}, \pi) \leq C_p^{\mathrm{EI}}(\hat{\pi})\left[\mathrm{H}_2(\hat{\pi}, \eta)^{\frac{1}{p}}+\left\{\mathrm{H}_2(\hat{\pi}, \eta) / 2\right\}^{\frac{1}{2 p}}\right] .
+$$
+
+-----
+
+This was a very, very long derivation, but hopefully it gave you a better feel
+for the limitations of our normal divergences in variation inference.
+
+Stepping back, these results give us some pretty easy to calculate ways to
+easily check when 
 
 
 ## So what's the bad news about this diagnostic?
