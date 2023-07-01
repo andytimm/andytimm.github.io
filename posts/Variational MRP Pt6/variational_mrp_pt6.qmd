@@ -333,12 +333,53 @@ amount of dirt/earth in pile $\xi(\theta)$ to make pile $\pi(\theta)$- hence the
 commonly used in several disciplines, the [Earthmovers Distance](https://en.wikipedia.org/wiki/Earth_mover%27s_distance).
 
 Let's say we have some non-negative cost function for moving mass from $\theta$ to $theta^{\prime}$,
-$c(theta,theta^{\prime})$. A single transport plan for moving from $\xi(x)$ to $\pi(x)$ is a function $\gamma(\xi, \pi)$ which describes the amount of mass to move at each point. If we assume $\gamma$ is a joint probability mass with marginals
-$\xi(x)$ and $\pi(x)$ [^3]
+$c(\theta,\theta^{\prime})$. A single transport plan for moving from $\xi(\theta)$ to $\pi(\theta^{\prime})$ is a function $\gamma(\xi, \pi)$ which describes the amount of mass to move at each point. If we assume $\gamma$ is a valid joint probability mass with marginals
+$\xi\theta)$ and $\pi(\theta^{prime})$ [^3], then the infinitesimal mass
+we transport from $\theta$ to $\theta{\prime}$ is $\gamma(\theta, \theta^{\prime}) d\theta d\theta^{\prime}$,
+with cost
 
+$$
+\int \int c(\theta,\theta^{\prime}) \gamma(\theta, \theta^{\prime}) d\theta d\theta^{\prime} = \int c(\theta,\theta^{\prime}) d \gamma(\theta,\theta^{\prime})
+$$
+
+Finally getting close to something that looks like our Wasserstein distance. There
+are many such plans, but the one we want, the solution to the optimal transport
+problem is the one with minimal cost out of all such plans. 
+
+One last point to cover to define this: what's our cost? If the cost here is
+the $p$-distance between our $\theta$s, then this is the p-Wassterstein distance.
+
+Why are some properties of this distance? I already mentioned a major downside (this looks nasty to estimate in general, and indeed it is). What are the upsides of
+this?
+
+Unlike the KL or $\chi^2$ divergences we've looked at before, the Wasserstein
+distance takes into account the metric on the underlying space! Let's unpack
+that by again drawing on the optimal transport problem for intuition.  The Wasserstein distance takes into account not only the differences in the values or probabilities assigned to different points in the distributions but also the actual "spatial"[^4] arrangement of those points. 
+
+This is a incredibly property because the summary of the posterior we care about
+in general also rely on the underlying metric. This is basically how the arbitrarily
+poor mean and variance examples above work; they exploit the lack of use of
+an underlying metric. That allows Huggins et al. to derive one of the key
+results of the paper
+
+----
+**Theorem 3.4.** If $\mathcal{W}_1(q, p) \leq \varepsilon$ or $\mathcal{W}_2(q, p) \leq \varepsilon$, then $\left\|m_{q}-m_p\right\|_2 \leq \varepsilon$ and $\max _i\left|\mathrm{MAD}_{q, i}-\mathrm{MAD}_{p, i}\right| \leq 2 \varepsilon$.
+
+If $\mathcal{W}_2(q, p) \leq \varepsilon$, then for $S := \sqrt{min (\left\|\Sigma_{q}\right\|_2, \left\|\Sigma_p\right\|_2)}$ $\max _i\left|\sigma_{q, i}-\sigma_{p, i}\right| \leq \varepsilon$ and $\left\|\Sigma_{q}-\Sigma_p\right\|_2<2 \varepsilon(S+\varepsilon)$.
+
+----
+
+So this is a nice improvement over the KL or $\chi^2$ divergences as far as an
+a diagnostic, since we have some guarantees of correctness where we had literally none. I'll return to how tight these are bounds in practice in a bit, since that's
+entangled with how we can actually estimate them in the variational inference use
+case.
 
 
 ## Bounds of Bounds via... Bounds!
+
+One contribution of the Huggins at al. paper is the above result, but where
+things get even more impressive is that they find a reasonable and practical
+way to bound these quantities. It's certainly not simple, but it 
 
 ## So what's the bad news about this diagnostic?
 
@@ -360,4 +401,12 @@ inference. I haven't looked back at this literature in a few years, but
 [Srivastava et al. (2018)](https://arxiv.org/abs/1508.05880) is at least
 a starting point in this literature if you're interested.
 [^3]: For further intuition, think about how this requirement maps onto our earth
-moving scenario. Integrating $\gamma$ with respect to $\theta^\prime$ gives
+moving scenario. Integrating $\gamma$ with respect to $\theta^\prime$ (marginalizing) gives $\xi\theta)$- physically, this means that the earth moved
+from point x needs to be equal to the amount starting there. The opposite
+marginalization gives $\pi(\theta^\prime)$ as you'd expect. Hopefully the
+physical intuition of the constraints that come with this being a valid probability
+distribution make sense here; visually: 
+![](1024px-Transport-plan.png){By Lambdabadger - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=64872543}
+[^4]: This is imprecise, but hopefully this conveys the intuition well here:
+we want a distance measure that takes into account the distance between the points
+and how they need to be arranged to form one another, not just the values themselves.
