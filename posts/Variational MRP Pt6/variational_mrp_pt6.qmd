@@ -334,7 +334,7 @@ commonly used in several disciplines, the [Earthmovers Distance](https://en.wiki
 
 Let's say we have some non-negative cost function for moving mass from $\theta$ to $theta^{\prime}$,
 $c(\theta,\theta^{\prime})$. A single transport plan for moving from $\xi(\theta)$ to $\pi(\theta^{\prime})$ is a function $\gamma(\xi, \pi)$ which describes the amount of mass to move at each point. If we assume $\gamma$ is a valid joint probability mass with marginals
-$\xi\theta)$ and $\pi(\theta^{prime})$ [^3], then the infinitesimal mass
+$\xi\theta)$ and $\pi(\theta^{\prime})$ [^3], then the infinitesimal mass
 we transport from $\theta$ to $\theta{\prime}$ is $\gamma(\theta, \theta^{\prime}) d\theta d\theta^{\prime}$,
 with cost
 
@@ -349,14 +349,14 @@ problem is the one with minimal cost out of all such plans.
 One last point to cover to define this: what's our cost? If the cost here is
 the $p$-distance between our $\theta$s, then this is the p-Wassterstein distance.
 
-Why are some properties of this distance? I already mentioned a major downside (this looks nasty to estimate in general, and indeed it is). What are the upsides of
+What are some properties of this distance? I already mentioned a major downside (this looks nasty to estimate in general, and indeed it is). What are the upsides of
 this?
 
 Unlike the KL or $\chi^2$ divergences we've looked at before, the Wasserstein
 distance takes into account the metric on the underlying space! Let's unpack
 that by again drawing on the optimal transport problem for intuition.  The Wasserstein distance takes into account not only the differences in the values or probabilities assigned to different points in the distributions but also the actual "spatial"[^4] arrangement of those points. 
 
-This is a incredibly property because the summary of the posterior we care about
+This is a incredibly useful property because the summaries of the posterior we care about
 in general also rely on the underlying metric. This is basically how the arbitrarily
 poor mean and variance examples above work; they exploit the lack of use of
 an underlying metric. That allows Huggins et al. to derive one of the key
@@ -385,6 +385,7 @@ things get even more impressive is that they find a reasonable and practical
 way to bound these quantities. It's certainly not simple, but it works.
 
 Here's the plan to get real bounds on our posterior summaries in full:
+
 1. Use the ELBO and CUBO to to bound the KL and $\chi^2$ divergences.
 2. Use tail properties of the distribution $q$ to get bounds on the Wasserstein
 distance through the KL and $\chi^2$ divergences.
@@ -422,12 +423,12 @@ $$
 
 -----
 
-A reasonable question here: does using the KL and $\chi^2$ inherit KL/$\chi^2$
-arbitrary wrongness? Nope! I won't reproduce here, but the counter examples
+A reasonable question here: does using the KL and $\chi^2$ as part of building the bounds inherit KL/$\chi^2$'s
+arbitrarily poor posterior summaries? Nope! I won't reproduce here, but the counter examples
 shown above for these divergences on their own no longer work to make our
 estimates arbitrarily wrong.
 
-Next step: how do we Use the ELBO and CUBO to bound the KL and $\chi^2$ terms in the proposition above above?
+Next step: how do we use the ELBO and CUBO to bound the KL and $\chi^2$ terms in the proposition above above?
 
 We first define for any distribution $\eta$:
 
@@ -463,11 +464,11 @@ $$
 
 -----
 
-This was a very, very long derivation, but hopefully it gave you a better feel
-for the limitations of our normal divergences in variation inference.
+This was a very, very long derivation, but hopefully walking through why we would want a distance with a sense of scale gives you a better feel
+for the limitations of our normal divergences used for optimization in variation inference.
 
 Stepping back, these results give us some pretty easy to calculate ways to
-easily check when 
+easily check some overall summaries of 
 
 
 ## So what's the bad news about this diagnostic?
@@ -490,10 +491,10 @@ inference. I haven't looked back at this literature in a few years, but
 [Srivastava et al. (2018)](https://arxiv.org/abs/1508.05880) is at least
 a starting point in this literature if you're interested.
 [^3]: For further intuition, think about how this requirement maps onto our earth
-moving scenario. Integrating $\gamma$ with respect to $\theta^\prime$ (marginalizing) gives $\xi\theta)$- physically, this means that the earth moved
+moving scenario. Integrating $\gamma$ with respect to $\theta^\prime$ (marginalizing) gives $\xi(\theta)$- physically, this means that the earth moved
 from point x needs to be equal to the amount starting there. The opposite
 marginalization gives $\pi(\theta^\prime)$ as you'd expect. Hopefully the
-physical intuition of the constraints that come with this being a valid probability
+physical intuition of the constraints that come with this being a valid joint probability
 distribution make sense here; visually: 
 ![](1024px-Transport-plan.png){By Lambdabadger - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=64872543}
 [^4]: This is imprecise, but hopefully this conveys the intuition well here:
