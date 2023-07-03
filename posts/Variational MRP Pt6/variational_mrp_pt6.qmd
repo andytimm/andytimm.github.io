@@ -464,15 +464,40 @@ $$
 
 -----
 
-This was a very, very long derivation, but hopefully walking through why we would want a distance with a sense of scale gives you a better feel
-for the limitations of our normal divergences used for optimization in variation inference.
+This basically completes the process, other than some discussion of how to
+actually compute the quantities needed for the bounds above. The ELBO
+and CUBO we can compute as introduced previously in the series. 
 
-Stepping back, these results give us some pretty easy to calculate ways to
-easily check some overall summaries of 
+They have a good practical suggestion for a workflow given their bounds rely
+on CUBO, and thus on Monte Carlo estimation[^5]. Before proceeding any further
+with a VI approximation, they suggest using $\hat{k} < .7$ as an initial
+diagnostic of the approximation, before calculating their bounds or leveraging
+importance sampling or PSIS to improve the estimate. Their point is that if
+$\hat{k}$ is high, the Monte Carlo work involved in generating their bounds will
+be unreliable at reasonable sample sizes, and thus you won't be able to gaurantee
+the bounds are useful.
+
+A final computational point you may be wondering about is how to calculate the
+moment constants, $C_p^{\mathrm{PI}}(\xi)$ and $C_p^{\mathrm{EI}}(\xi)$. They
+provide a helpful example showing how to do this when $q$ is a T distribution,
+and so the moments used are analytically calculable. What about when this isn't
+possible? They suggest one can reasonably do this by fixing $\epsilon$ and $\theta_0$ (for example, setting $\theta_0$ at the mean of the distribution), and 
+sampling from $q$, which seems reasonable on a bit of reflection. The main reason this is worth bringing up: you don't need a $q$ with easy to calculate moments
+to make this work, which was a worry when I first saw the moment constants.
+
+So the final, combined workflow[^6] they suggest is:
+![](algo.png){Bayesians love a workflow!}
+
+
+This was a very, very long derivation, but hopefully walking through why we would want a distance with a sense of scale and how to calculate it gives you a better feel
+for the limitations of our normal divergences used for optimization in variation inference.
 
 
 ## So what's the bad news about this diagnostic?
 
+While these bounds are genuinely useful, let's talk through some caveats and limitations of this diagnostic tool.
+
+First, we should discuss that the 
 
 
 # MCMC based diagnostics; what's old is new again
@@ -500,3 +525,8 @@ distribution make sense here; visually:
 [^4]: This is imprecise, but hopefully this conveys the intuition well here:
 we want a distance measure that takes into account the distance between the points
 and how they need to be arranged to form one another, not just the values themselves.
+[^5]: See post 3 in the series if you want more of an introduction to this point, but the CUBO bound requires Monte Carlo (not MCMC) to calculate, which isn't
+a huge computational cost when the approximation is good, but can quickly become unworkable or at least
+computationally tedious with bad or middling choice of variational
+families.
+[^6]: Bayesians love a good workflow.
