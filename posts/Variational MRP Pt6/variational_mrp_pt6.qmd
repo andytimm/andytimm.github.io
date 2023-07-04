@@ -584,14 +584,57 @@ Blue Rose Research's Bayesian models which they scale to hundreds of millions of
 ## TADDAA
 
 A final newer and more efficient way to gut check VI with MCMC is through [Wang et al. (2023)](https://arxiv.org/abs/2302.12419)'s TArgeted Diagnostic for Distribution
-Approximation Accuracy algorithm, or TADDAA[^8]. They have two main motivations
+Approximation Accuracy algorithm, or TADDAA[^8]. TADDAA provides a relatively compute efficient way to bound the error of VI via MCMC. They have two main motivations
 for this paper: first, that many existing VI diagnostics penalize approximations
 that are bad in any way, not necessarily just the ways you care about most (hence, TArgeted). Realistically, for complex models, it's not a question of *if* a variational approximations are worse than MCMC, it's a question of *how*. Second, they note that the Wasserstein bounds we discussed earlier are often
 so loose as to be impractical. Again, true.
 
+These are both sensible points, but both are really properties of MCMC, not their
+algorithm, so the real juice in the paper is how they bound the error efficiently. Their strategy is to fit a variational inference model, draw values, and then start many short chains of MCMC at those points. If the variational approximation to the
+target distribution is good, we shouldn't expect the MCMC running for a while
+to change much- the points should already be in highly plausible parts of 
+parameter space. If the approximation is less good, then if the MCMC is setup
+well, the chains should move towards more correct values. Even if the chains
+don't reach stationarity, this can be used to provide a lower bound on the
+amount of approximation error a variational approximation has.
 
+Before I discuss a few technical details, visually the idea is:
 
+![](taddaa cartoon.png){width=80%}
 
+If things aren't too poorly setup for MCMC, we can reasonably assume that
+the blue distribution will be between the red one and the (black) true posterior. Neat!
+
+In practice, this can work pretty well as you'd expect, and provides much tighter
+bounds than Wasserstein bounds given it's a flavor of MCMC. Repeating the plot example I used earlier, notice
+how much closer the solid lines from the TADDAA bounds are to the dashed ones (ground truth) than the stars (denoting Wasserstein bounds):
+
+![](funnel_example.png){width=60%}
+
+I won't wade too, too far into implementation details here as there a lot of them,
+but I do want to give enough information to discuss compute cost legibly. A first
+point worth raising is that "how many chains/iterations do I need" is shown by
+the paper to be a function of the accuracy you want on the bound, using some
+results from Bhatia et al. (2022)- this adaptivity and ability to calculate what number of iterations you need ahead of time is convenient. Second, they're
+using a lot of fairly sophisticated techniques in MCMC all together to make this
+efficient- strong sampling algorithms like MALA/HMC/HMC, preconditioning, and inter-chain adaptation (INCA) to adapt proposal parameters across the chains
+together. That's both a great thing (this paper taught me about several new techniques around MCMC
+I didn't previously know), and a bad one (to implement this for broader use there
+is a LOT of work to implement TADDAA efficiently[^9]).
+
+In their tests, all of this heavy machinery buys them some fairly impressive speed:
+implementing TADDAA takes from 2-18% of the gradient evaluations that the actual
+variational approximation takes. It's a little opaque to be how exactly that
+translates into wall time- on the one hand the many little chains are parallizeable, on the other if the number of the iterations is large that'd be the major driver
+of actual time this takes to run. Still, give it's never several times VI's compute like MCMC would be in
+their tests, this seems pretty promising.
+
+This paper is only a few months old, so I should be clear I've only had a bit
+of time to digest and play with the algorithm. If a more robust implementation
+became available, and the computational efficiencies they suggest are real
+for complex posteriors too, then this will be a fantastic new tool. As is,
+the time to set this up isn't worth the effort versus letting simpler MCMC
+comparisons run for longer.
 
 # Diagnostics that don't spark joy
 
@@ -625,4 +668,9 @@ our approximation is collapsing to weird point estimates like we saw
 in some poorly fit examples earlier in the series.
 [^8]: Fun fact: a key algorithmic detail here is any software implementation
 of TADDAA is that it must print "taddaa!" upon completing. Without this,
-users will lack a sense of magic or wonder that the algorithm otherwise produces.
+users will lack a sense of magic or wonder that the algorithm otherwise 
+[^9]: They provide an implementation and replication materials here: https://github.com/TARPS-group/TADDAA. But from my early looks at this,
+this is more what's needed to make the paper reproducible than a robust
+suite of tools for using TADDAA fully. It's worth pointing out this
+is a major downside, since the other metrics I discuss all have pretty
+easy to use tools which implement them for general models at this point.
