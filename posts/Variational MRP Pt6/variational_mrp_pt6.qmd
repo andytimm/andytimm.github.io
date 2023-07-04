@@ -531,16 +531,74 @@ so in that sense this is a big step forward, even if they are loose.
 
 # MCMC based diagnostics; what's old is new again
 
+So $\hat{k}$ and Wasserstein bounds are both useful, but don't tell us
+nearly as much as we really want to know, or do it as reliably as we'd hope.
+When the show isn't going well, play the greatest hits: can we go back to using MCMC?
+
+...Ok yeah, this feels like a bit of moving the goalposts, and in some sense it is. I motivated this whole series by saying I have models I'd like to fit where MCMC was impractically slow. But if you really want your variational approximation to
+look like what MCMC gives you, and do it over some summary of the posterior
+that isn't a top-level mean, variance, or other simple summary, it may be
+the only responsible thing to do to break out your markov chains again. And things aren't as bad
+as they sound here; there are a couple of ways to sanity check your VI
+with MCMC without committing to days of runtime.
+
 ## MCMC can be practically useful even when it's slow
 
+Probably the most obvious way to use MCMC to sanity check variational inference
+is to not sanity check every model, just the occasional one. For example, say
+I was going to fit something like our MRP model to a running poll, and re-run
+the inferences weekly or daily. We can pretty reasonably make the leap from
+assuming if the variational approximation compares favorably to MCMC in the
+first such fit, the subsequent ones will also fit alright given the underlying
+data does fundamentally change in some way. 
+
+This is a pretty practical way to get the benefits of VI with the comfort
+MCMC gives you, as long as MCMC fits in a manageable time window. It's just important to make sure to set up a realistic process where you spot check the occasional fit along the way, or perhaps retest
+with MCMC for other questions or shifts in the respondent pool that might
+plausibly break your model. This is the best strategy I've found for
+validating variational inference so far; even if an MCMC run can take a week or
+more, as long as it only has to happen once in a while that's a totally
+reasonable price of admission.
+
+## Giving MCMC an environment to succeed
+
+...But what if you're using variational inference because MCMC will not finish
+at all? This is totally possible if you have millions of
+data points, and/or a complex model to estimate. In this case, you may need
+to give MCMC a good environment to succeed in.
+
+A simple way to do this is to subsample the full data if that's the choking point. For example, if I have a model that I want to use variational inference to fit
+on millions of rows, I can reasonably infer most of the time that 100k observations
+will still tell me at least something useful. By fitting the subsampled data
+with both MCMC and variational inference, we can make sure that at least at
+that scale the fits align.
+
+Another, more challenging, but perhaps more efficient way to test when MCMC
+is unworkably slow on the full data is through data simulation. By simulating data
+that contains some of the core features I'm hoping my model will understand,
+and only simulating a moderate amount of it, I can see if VI can capture those
+features the same way MCMC can. For example, if I think understanding immigration survey question responses is a complex interaction of race, education, and location, I can simulate data which has the patterns I believe exist, and see if VI does meaningfully worse than VI for that covariance structure in the model. This approach or something close to it is something mentioned by David
+Shor in several of his [talks](https://www.youtube.com/watch?v=maddf8Emzds) about
+Blue Rose Research's Bayesian models which they scale to hundreds of millions of observations.
+
 ## TADDAA
+
+A final newer and more efficient way to gut check VI with MCMC is through [Wang et al. (2023)](https://arxiv.org/abs/2302.12419)'s TArgeted Diagnostic for Distribution
+Approximation Accuracy algorithm, or TADDAA[^8]. They have two main motivations
+for this paper: first, that many existing VI diagnostics penalize approximations
+that are bad in any way, not necessarily just the ways you care about most (hence, TArgeted). Realistically, for complex models, it's not a question of *if* a variational approximations are worse than MCMC, it's a question of *how*. Second, they note that the Wasserstein bounds we discussed earlier are often
+so loose as to be impractical. Again, true.
+
+
+
+
 
 # Diagnostics that don't spark joy
 
 [^1]: Alternatively, *not arbitrarily wrong*.
 [^2]: No, we're not winding up to define another bound like the CUBO or ELBO and optimize it like you might think. There's an interesting little sub-literature on making calculating
 the Wasserstein distance (really, approximations of it) efficiently enough
-that we could use it for scalable bayesian inference tasks like variational
+that we could use it for scalable Bayesian inference tasks like variational
 inference. I haven't looked back at this literature in a few years, but
 [Srivastava et al. (2018)](https://arxiv.org/abs/1508.05880) is at least
 a starting point in this literature if you're interested.
@@ -563,4 +621,8 @@ families.
 and collapse quite hard. Let's say I fit a simpler model to our mrp survey
 example first; a lot of reasonable (even non-Bayesian) models will probably
 have a topline margin of errors of a couple percentage points. If the bounds on that was something like .0005% or so, that provides realistically useful news that
-our approximation is falling apart. 
+our approximation is collapsing to weird point estimates like we saw
+in some poorly fit examples earlier in the series.
+[^8]: Fun fact: a key algorithmic detail here is any software implementation
+of TADDAA is that it must print "taddaa!" upon completing. Without this,
+users will lack a sense of magic or wonder that the algorithm otherwise produces.
