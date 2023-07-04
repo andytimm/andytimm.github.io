@@ -509,8 +509,25 @@ need to change your variational family anyway if the $\hat{k}$ for the
 CUBO optimized approximation is greater than .7.
 
 The second issue here is tightness of the bounds. As you might expect, the whole
-"bounds via bounds of bounds" thing can result
+"bounds via bounds of bounds" thing can result in fairly loose bounding behavior.
+Wang et al. (2023) show some informative examples where the bounds are anywhere
+from 10-1000x (!) too conservative. For example, here's an example of theirs over Neal's funnel:
 
+![](funnel_example.png){width=60%}
+
+The $W^2$ based bounds (stars) here are 10-100x times too large compared to
+the true values (dashed lines). In my experience, this example and others from the paper aren't pathological
+examples- the bounds are frequently this loose, especially for high dimensional
+and complex posteriors. Exactly what drives the achieved tightness of the bounds
+is fairly opaque to me; there are several stages of bounds, and it's not really been
+possible to pinpoint the (a?) source of problems when the bounds are particularly
+loose.
+
+However, this isn't to say the bounds aren't useful, far from it. In practice, especially on variance or covariance parameters, when things go off the rails, they often *really go off the rails*.
+If your variational family is nowhere near up to fitting a model, knowing you're not within a few
+OOMs of reasonable values can actually be pretty helpful[^7]. Also, these bounds
+provide some rigorous sense of approximation error where we previously had none,
+so in that sense this is a big step forward, even if they are loose.
 
 # MCMC based diagnostics; what's old is new again
 
@@ -542,3 +559,8 @@ a huge computational cost when the approximation is good, but can quickly become
 computationally tedious with bad or middling choice of variational
 families.
 [^6]: Bayesians love a good workflow.
+[^7]: More specifically, a common pattern is the variance estimates collapse,
+and collapse quite hard. Let's say I fit a simpler model to our mrp survey
+example first; a lot of reasonable (even non-Bayesian) models will probably
+have a topline margin of errors of a couple percentage points. If the bounds on that was something like .0005% or so, that provides realistically useful news that
+our approximation is falling apart. 
