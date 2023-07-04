@@ -486,7 +486,8 @@ sampling from $q$, which seems reasonable on a bit of reflection. The main reaso
 to make this work, which was a worry when I first saw the moment constants.
 
 So the final, combined workflow[^6] they suggest is:
-![](algo.png){Bayesians love a workflow!}
+
+![Bayesians love a workflow!](algo.png){width=50%}
 
 
 This was a very, very long derivation, but hopefully walking through why we would want a distance with a sense of scale and how to calculate it gives you a better feel
@@ -497,12 +498,23 @@ for the limitations of our normal divergences used for optimization in variation
 
 While these bounds are genuinely useful, let's talk through some caveats and limitations of this diagnostic tool.
 
-First, we should discuss that the 
+First, the bound really only is trustworthy when we can reliably
+estimate the CUBO, as I discussed above. Fortunately, as Higgins et al. note,
+we have an affordable way to check this in $\hat{k}$. Of course, we then
+take on the responsibility of finding a solution where we can trust $\hat{k}$, one which doesn't fall into any of the blind spots the algorithm has that I discussed above. If we want to leverage
+the bounds, we're also sort of forced to find a variational family that works well with
+the CUBO bound, even if an ELBO-based solution might work better. None of this
+is insurmountable, and much of the time my experience is that you probably
+need to change your variational family anyway if the $\hat{k}$ for the
+CUBO optimized approximation is greater than .7.
+
+The second issue here is tightness of the bounds. As you might expect, the whole
+"bounds via bounds of bounds" thing can result
 
 
 # MCMC based diagnostics; what's old is new again
 
-## MCMC can be practically useful even when slow
+## MCMC can be practically useful even when it's slow
 
 ## TADDAA
 

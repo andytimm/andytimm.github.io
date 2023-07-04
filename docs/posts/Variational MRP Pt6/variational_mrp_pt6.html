@@ -254,7 +254,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#mcmc-based-diagnostics-whats-old-is-new-again" id="toc-mcmc-based-diagnostics-whats-old-is-new-again" class="nav-link" data-scroll-target="#mcmc-based-diagnostics-whats-old-is-new-again">MCMC based diagnostics; what’s old is new again</a>
   <ul>
-  <li><a href="#mcmc-can-be-practically-useful-even-when-slow" id="toc-mcmc-can-be-practically-useful-even-when-slow" class="nav-link" data-scroll-target="#mcmc-can-be-practically-useful-even-when-slow">MCMC can be practically useful even when slow</a></li>
+  <li><a href="#mcmc-can-be-practically-useful-even-when-its-slow" id="toc-mcmc-can-be-practically-useful-even-when-its-slow" class="nav-link" data-scroll-target="#mcmc-can-be-practically-useful-even-when-its-slow">MCMC can be practically useful even when it’s slow</a></li>
   <li><a href="#taddaa" id="toc-taddaa" class="nav-link" data-scroll-target="#taddaa">TADDAA</a></li>
   </ul></li>
   <li><a href="#diagnostics-that-dont-spark-joy" id="toc-diagnostics-that-dont-spark-joy" class="nav-link" data-scroll-target="#diagnostics-that-dont-spark-joy">Diagnostics that don’t spark joy</a></li>
@@ -513,19 +513,26 @@ C_p^{\mathrm{EI}}(\xi):=2 \inf _{\theta_0, \epsilon&gt;0}\left[\frac{1}{\epsilon
 <p>This basically completes the process, other than some discussion of how to actually compute the quantities needed for the bounds above. The ELBO and CUBO we can compute as introduced previously in the series.</p>
 <p>They have a good practical suggestion for a workflow given their bounds rely on CUBO, and thus on Monte Carlo estimation<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. Before proceeding any further with a VI approximation, they suggest using <span class="math inline">\hat{k} &lt; .7</span> as an initial diagnostic of the approximation, before calculating their bounds or leveraging importance sampling or PSIS to improve the estimate. Their point is that if <span class="math inline">\hat{k}</span> is high, the Monte Carlo work involved in generating their bounds will be unreliable at reasonable sample sizes, and thus you won’t be able to gaurantee the bounds are useful.</p>
 <p>A final computational point you may be wondering about is how to calculate the moment constants, <span class="math inline">C_p^{\mathrm{PI}}(\xi)</span> and <span class="math inline">C_p^{\mathrm{EI}}(\xi)</span>. They provide a helpful example showing how to do this when <span class="math inline">q</span> is a T distribution, and so the moments used are analytically calculable. What about when this isn’t possible? They suggest one can reasonably do this by fixing <span class="math inline">\epsilon</span> and <span class="math inline">\theta_0</span> (for example, setting <span class="math inline">\theta_0</span> at the mean of the distribution), and sampling from <span class="math inline">q</span>, which seems reasonable on a bit of reflection. The main reason this is worth bringing up: you don’t need a <span class="math inline">q</span> with easy to calculate moments to make this work, which was a worry when I first saw the moment constants.</p>
-<p>So the final, combined workflow<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> they suggest is: <img src="algo.png" class="img-fluid">{Bayesians love a workflow!}</p>
+<p>So the final, combined workflow<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> they suggest is:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="algo.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<p></p><figcaption class="figure-caption">Bayesians love a workflow!</figcaption><p></p>
+</figure>
+</div>
 <p>This was a very, very long derivation, but hopefully walking through why we would want a distance with a sense of scale and how to calculate it gives you a better feel for the limitations of our normal divergences used for optimization in variation inference.</p>
 </section>
 <section id="so-whats-the-bad-news-about-this-diagnostic" class="level2">
 <h2 class="anchored" data-anchor-id="so-whats-the-bad-news-about-this-diagnostic">So what’s the bad news about this diagnostic?</h2>
 <p>While these bounds are genuinely useful, let’s talk through some caveats and limitations of this diagnostic tool.</p>
-<p>First, we should discuss that the</p>
+<p>First, the bound really only is trustworthy when we can reliably estimate the CUBO, as I discussed above. Fortunately, as Higgins et al.&nbsp;note, we have an affordable way to check this in <span class="math inline">\hat{k}</span>. Of course, we then take on the responsibility of finding a solution where we can trust <span class="math inline">\hat{k}</span>, one which doesn’t fall into any of the blind spots the algorithm has that I discussed above. If we want to leverage the bounds, we’re also sort of forced to find a variational family that works well with the CUBO bound, even if an ELBO-based solution might work better. None of this is insurmountable, and much of the time my experience is that you probably need to change your variational family anyway if the <span class="math inline">\hat{k}</span> for the CUBO optimized approximation is greater than .7.</p>
+<p>The second issue here is tightness of the bounds. As you might expect, the whole “bounds via bounds of bounds” thing can result</p>
 </section>
 </section>
 <section id="mcmc-based-diagnostics-whats-old-is-new-again" class="level1">
 <h1>MCMC based diagnostics; what’s old is new again</h1>
-<section id="mcmc-can-be-practically-useful-even-when-slow" class="level2">
-<h2 class="anchored" data-anchor-id="mcmc-can-be-practically-useful-even-when-slow">MCMC can be practically useful even when slow</h2>
+<section id="mcmc-can-be-practically-useful-even-when-its-slow" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc-can-be-practically-useful-even-when-its-slow">MCMC can be practically useful even when it’s slow</h2>
 </section>
 <section id="taddaa" class="level2">
 <h2 class="anchored" data-anchor-id="taddaa">TADDAA</h2>
