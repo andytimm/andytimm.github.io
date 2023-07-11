@@ -263,7 +263,7 @@ like means and variances.
 For any t > 0, there exist (A) one dimensional,
 unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)$ < 0.9 and $\left(m_{q}-m_p\right)^2>t \sigma_p^2$, and $(B)$ one-dimensional, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p) < 0.3$ and $\left(m_{q}-m_p\right)^2>t \sigma_{q}^2$.
 
-### **Proposition 3.2 (Arbitrarily Poor variance Approximation):**
+### **Proposition 3.2 (Arbitrarily Poor Variance Approximation):**
 For any $t \in(1, \infty]$, there exist one-dimensional, mean-zero, unimodal distributions $q$ and $p$ such that $\mathrm{KL}(q \mid p)<0.12$ but $\sigma_p^2 \geq t \sigma_{q}^2$.
 
 ----
@@ -275,7 +275,7 @@ right?
 
 ----
 
-### **Proposition 3.1 Exampl:e**
+### **Proposition 3.1 Example:**
 
 Let Weibull $(k, 1)$ denote the Weibull distribution with shape $k>0$ and scale 1. For (A), for any $t>0$, we can choose $k=k(t), p=\operatorname{Weibull}(k, 1)$, and $q= \operatorname{Weibull}(k / 2,1)$, where $k(t) \searrow 0$ as $t \rightarrow \infty$. We can just exchange the two distributions for (B).
 
@@ -312,11 +312,11 @@ bounds.
 
 ## What's a Wassterstein?
 
-The $p$-Wasserstein distance between $\xi$ and $p$ is
+The $p$-Wasserstein distance between $\xi$ and $\pi$ is
 $$
 \mathcal{W}_p(\xi, p):=\inf _{\gamma \in \Gamma(\xi, p)}\left\{\int\left\|\theta-\theta^{\prime}\right\|_2^p \gamma\left(\mathrm{d} \theta, \mathrm{d} \theta^{\prime}\right)\right\}^{1 / p}
 $$
-where $\Gamma(\xi, p)$ is the set of couplings between $\xi$ and $p$.
+where $\Gamma(\xi, p)$ is the set of couplings between $\xi$ and $\pi$.
 
 As a quick note on notation, I'm overloading $p$ here a bit; given I've used
 $p$ for our target posterior all series, I'm not going to switch that now, and
@@ -334,12 +334,12 @@ A good way to start unpacking this is to consider the optimal transport
 problem. Given some probability mass $\xi(\theta)$ on a space $X$, we wish to transport
 it such that it is transformed into the distribution $p(\theta)$. To provide
 physical intuition, this is often formulated as a problem of moving an equal
-amount of dirt/earth in pile $\xi(\theta)$ to make pile $p(\theta)$- hence the name
+amount of dirt/earth in pile $\xi(\theta)$ to make pile $\pi(\theta)$- hence the name
 commonly used in several disciplines, the [Earthmovers Distance](https://en.wikipedia.org/wiki/Earth_mover%27s_distance).
 
 Let's say we have some non-negative cost function for moving mass from $\theta$ to $\theta^{\prime}$,
-$c(\theta,\theta^{\prime})$. A single transport plan for moving from $\xi(\theta)$ to $p(\theta^{\prime})$ is a function $\gamma(\xi, p)$ which describes the amount of mass to move at each point. If we assume $\gamma$ is a valid joint probability mass with marginals
-$\xi\theta)$ and $p(\theta^{\prime})$ [^3], then the infinitesimal mass
+$c(\theta,\theta^{\prime})$. A single transport plan for moving from $\xi(\theta)$ to $p(\theta^{\prime})$ is a function $\gamma(\xi, \pi)$ which describes the amount of mass to move at each point. If we assume $\gamma$ is a valid joint probability mass with marginals
+$\xi\theta)$ and $\pi(\theta^{\prime})$ [^3], then the infinitesimal mass
 we transport from $\theta$ to $\theta{\prime}$ is $\gamma(\theta, \theta^{\prime}) d\theta d\theta^{\prime}$,
 with cost
 
@@ -370,7 +370,7 @@ results of the paper
 ----
 **Theorem 3.4.** If $\mathcal{W}_1(q, p) \leq \varepsilon$ or $\mathcal{W}_2(q, p) \leq \varepsilon$, then $\left\|m_{q}-m_p\right\|_2 \leq \varepsilon$ and $\max _i\left|\mathrm{MAD}_{q, i}-\mathrm{MAD}_{p, i}\right| \leq 2 \varepsilon$.
 
-If $\mathcal{W}_2(q, p) \leq \varepsilon$, then for $S := \sqrt{min (\left\|\Sigma_{q}\right\|_2, \left\|\Sigma_p\right\|_2)}$ $\max _i\left|\sigma_{q, i}-\sigma_{p, i}\right| \leq \varepsilon$ and $\left\|\Sigma_{q}-\Sigma_p\right\|_2<2 \varepsilon(S+\varepsilon)$.
+If $\mathcal{W}_2(q, p) \leq \varepsilon$, then for $S := \sqrt{min (\left\|\Sigma_{q}\right\|_2, \left\|\Sigma_p\right\|_2)}$, $\max _i\left|\sigma_{q, i}-\sigma_{p, i}\right| \leq \varepsilon$ and $\left\|\Sigma_{q}-\Sigma_p\right\|_2<2 \varepsilon(S+\varepsilon)$.
 
 ----
 
@@ -656,9 +656,9 @@ shows, there are a lot of ways to make that validation price cheaper, from
 only testing one in several runs in a family of model, to using synthetic data to check
 results align between MCMC and VI at lower N sizes, to exploring new tools like TADDAA.
 
-This post concludes my theoryposting streak; in the next post we'll see if
+This post concludes my theoryposting streak. In the next post we'll see if
 all the improvements to variational inference we've worked through in the past
-few posts buy us a better end product; we'll return to trying to fit our MRP
+few posts buy us a better end product. We'll finally return to trying to fit our MRP
 model better.
 
 Thanks for reading. The code for this post can be found [here](https://github.com/andytimm/andytimm.github.io/blob/main/posts/Variational%20MRP%20Pt6/variational_mrp_pt6.qmd).
@@ -673,7 +673,7 @@ a starting point in this literature if you're interested.
 [^3]: For further intuition, think about how this requirement maps onto our earth
 moving scenario. Integrating $\gamma$ with respect to $\theta^\prime$ (marginalizing) gives $\xi(\theta)$- physically, this means that the earth moved
 from point x needs to be equal to the amount starting there. The opposite
-marginalization gives $p(\theta^\prime)$ as you'd expect. Hopefully the
+marginalization gives $\pi(\theta^\prime)$ as you'd expect. Hopefully the
 physical intuition of the constraints that come with this being a valid joint probability
 distribution make sense here; visually: 
 ![](1024px-Transport-plan.png){By Lambdabadger - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=64872543}
