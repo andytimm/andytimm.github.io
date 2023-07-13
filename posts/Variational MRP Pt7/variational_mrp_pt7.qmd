@@ -1,0 +1,54 @@
+---
+layout: post
+title: Variational Inference for MRP with Reliable Posterior Distributions
+subtitle: Part 7- Putting it all together
+date: 2023-07-12
+draft: True
+categories:
+  - MRP
+  - Variational Inference
+---
+
+```{python}
+import pystan
+import vistan
+```
+
+```{python}
+model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
+model = pystan.StanModel(model_code=model_code)
+y = model.sampling().extract()['y']
+y.mean()
+```
+
+
+```{python}
+# installation: pip install vistan
+import vistan
+import numpy as np
+import scipy
+
+code = """
+data {
+  int<lower=0> N;
+  int<lower=0, upper=1> x[N];
+}
+parameters {
+  real<lower=0,upper=1> p;
+}
+
+model {
+  p ~ beta(1,1);
+  x ~ bernoulli(p);
+}
+"""
+data = {"N":5, "x":[0,1,0,0,0]}
+
+for r in ['meanfield', 'flows']:
+  algo = vistan.recipe(r) # runs Meanfield VI by default
+  posterior = algo(code, data)
+  samples = posterior.sample(100)
+  
+
+points = np.arange (0, 1, .01)
+```
