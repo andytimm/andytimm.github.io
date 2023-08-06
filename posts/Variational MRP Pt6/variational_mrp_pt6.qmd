@@ -131,7 +131,7 @@ mixture <- data.frame(normals = c(rnorm(1000,3,1),rnorm(1000,15,2)),
 ```{r}
 mixture %>% ggplot(aes(x = normals)) +
   geom_density(aes(x = normals), color = "red") +
-  geom_density(aes(x = mean_seeking_kl), color = "green") + ggtitle("The green approxmiation is great for IS, terrible on it's own") +
+  geom_density(aes(x = mean_seeking_kl), color = "green") + ggtitle("The green approximation is great for IS, terrible on its own") +
   xlab("")
 ```
 
@@ -555,7 +555,7 @@ I was going to fit something like our MRP model to a running poll, and re-run
 the inferences weekly or daily. We can pretty reasonably make the leap from
 assuming if the variational approximation compares favorably to MCMC in the
 first such fit, the subsequent ones will also fit alright given the underlying
-data does fundamentally change in some way. 
+data doesn't fundamentally change in some way. 
 
 This is a pretty practical way to get the benefits of VI with the comfort
 MCMC gives you, as long as MCMC fits in a manageable time window. It's just important to make sure to set up a realistic process where you spot check the occasional fit along the way, or perhaps retest
