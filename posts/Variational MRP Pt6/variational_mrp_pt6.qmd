@@ -89,7 +89,7 @@ showed that for a given accuracy, how big our number of samples $S$ needs to be 
 more broadly depends on how close $q(x)$ is to $p(x)$ in KL distance- we need to
 satisfy $log(S) \geq \mathbb{E}_{\theta \sim q(x)}[r(\theta)log(r(\theta))]$ to
 get reasonable accuracy. So a good $\hat{k}$ indicates importance sampling is
-feasible, which in tern indicates that $q(x)$ is likely close to $p(x)$ in KL Divergence- exactly what we're hoping to get at!
+feasible, which in turn indicates that $q(x)$ is likely close to $p(x)$ in KL Divergence- exactly what we're hoping to get at!
 
 Fleshing out the use of $\hat{k}$ as a VI diagnostic was done by [Yao et al. (2018)](https://arxiv.org/abs/1802.02538),
 who generally show that high values of $\hat{k}$ do generally map onto posterior approximations

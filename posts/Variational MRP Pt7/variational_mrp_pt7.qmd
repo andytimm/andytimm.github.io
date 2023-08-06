@@ -10,10 +10,6 @@ categories:
 ---
 
 ```{python}
-import os
-print(os.getenv("QUARTO_PYTHON"))
-```
-```{python}
 import pystan
 import vistan
 ```
