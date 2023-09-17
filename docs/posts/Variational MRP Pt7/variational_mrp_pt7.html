@@ -263,8 +263,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
 <li>Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?</li>
 <li>Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?</li>
-<li><strong>(This post)</strong> Problem 4: How can we know when VI is wrong? Are there useful error bounds?</li>
-<li>Putting it all together</li>
+<li>Problem 4: How can we know when VI is wrong? Are there useful error bounds?</li>
+<li><strong>(This post)</strong>: Putting it all together</li>
 </ol>
 <section id="cutting-to-the-chase" class="level1">
 <h1>Cutting to the chase</h1>
@@ -281,7 +281,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>How it works</h1>
 <p>So the caption above gives some hint, but what all is in this model?</p>
 <p>To fit this variational approximation, I’m using Agrawal, Domke, and Sheldon’s <a href="https://github.com/abhiagwl/vistan/tree/master">vistan</a>, which is a companion python package to their great paper <a href="https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf">Advances In Black-Box VI</a>.</p>
-<p>Here’s a separate repository with full setup details, but for purposes of this post, I’ll just reference the parameters of the main setup function here:</p>
+<p>For purposes of this post, I’ll just reference the parameters of the main setup function here:</p>
 <div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>vistan.algorithm(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    vi_family <span class="op">=</span> <span class="st">"rnvp"</span>,</span>
@@ -359,6 +359,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><strong>Pathfinder:</strong> Coming soon to <code>brms</code> and Stan in general, <a href="https://arxiv.org/pdf/2108.03782.pdf">Pathfinder</a> is an attempt at a variational inference algorithm by Lu Zhang, Andrew Gelman, Aki Vehtari, and Bob Carpenter<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. It uses a quasi-Newtonian optimization algorithm, and then samples from (a MIS combination of) Gaussian approximations along the optimization. There’s a ton of clever work here to make this incredibly fast, and comparatively parallel to other variational algorithms. For even moderately complex posteriors, it’s blazingly fast, and quite accurate. My only problem with it is that for more challenging posteriors, I’ve found it a little limited: it doesn’t seem to have the representation capacity possible with normalizing flows, which unfortunately is necessary for most of the non-blog-post-series-examples applications I use VI for. Like so many papers with these authors though, there’s a ton here that’s deeply insightful and more broadly applicable knowledge here, even if you need normalizing flows for your work.</p>
 <p><strong>Boosting Variational Inference:</strong> Given how dominant boosting based algorithms are in basic machine learning, applying boosting to variational inference definitely had my attention when I first saw papers like <a href="https://arxiv.org/abs/1906.01235?utm_source=pocket_saves">Universal Boosting Variational Inference</a>. What’s weird about this strain of papers though is that there don’t see to be any public replication materials that sufficiently implement this for me to test it out, and there are no comparative bake off versus other serious, modern variational inference algorithms I can find.</p>
 <p>This may be a lack of familiarity on my part (and I’m most uncertain about boosting VI of everything I’ve discussed in this series), but the vibes of this sub-literature feel off to me. Why is no one releasing a public, serious implementation of this<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>? If the authors claims about performance and ease of use are true, this pattern of “lots of papers, little code” is even weirder. Again, I’m super uncertain here, but after investing some time to dig here, this corner of the variational inference literature is surprisingly hard to engage with, and so I haven’t really made the time yet.</p>
+<p>Thanks for reading this series, writing it as I learned more and more about variational inference has been incredibly helpful. I hope to re-visit in the future and clean up some of the writing and notation.</p>
 
 
 </section>

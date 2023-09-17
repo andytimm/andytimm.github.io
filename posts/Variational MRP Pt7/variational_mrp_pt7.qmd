@@ -23,8 +23,8 @@ The other posts in the series are:
 3.  Problem 1: KL-D prefers exclusive solutions; are there alternatives?
 4.  Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?
 5.  Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?
-6.  **(This post)** Problem 4: How can we know when VI is wrong? Are there useful error bounds?
-7.  Putting it all together
+6.  Problem 4: How can we know when VI is wrong? Are there useful error bounds?
+7.  **(This post)**: Putting it all together
 
 # Cutting to the chase
 
@@ -71,7 +71,7 @@ So the caption above gives some hint, but what all is in this model?
 To fit this variational approximation, I'm using Agrawal, Domke, and Sheldon's [vistan](https://github.com/abhiagwl/vistan/tree/master), which is a companion
 python package to their great paper [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf).
 
-Here's a separate repository with full setup details, but for purposes of this post, I'll
+For purposes of this post, I'll
 just reference the parameters of the main setup function here:
 
 ```{python}
@@ -273,6 +273,10 @@ feel off to me. Why is no one releasing a public, serious implementation of this
 If the authors claims about performance and ease of use are true, this pattern of "lots of papers, little code" is even weirder. Again, I'm super uncertain here, but after
 investing some time to dig here, this corner of the variational inference literature
 is surprisingly hard to engage with, and so I haven't really made the time yet.
+
+Thanks for reading this series, writing it as I learned more and more about
+variational inference has been incredibly helpful. I hope to re-visit in the
+future and clean up some of the writing and notation. 
 
 [^1]: This is still not a "good" (< .7) $\hat{k}$, but as we saw in the last post,
 $\hat{k}$ is not a infallible metric, especially if you are interested in just
