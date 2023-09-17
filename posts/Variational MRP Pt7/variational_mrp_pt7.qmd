@@ -32,7 +32,7 @@ The other posts in the series are:
 To cut to the chase, the new and improved variational approximation is looking
 pretty, pretty good!
 
-Like with the simpler meanfield and fullrank models from earlier in the series, this has the medians basically correct, but we also have reasonable uncertainty estimation too. First, the
+Like with the simpler mean-field and full-rank models from earlier in the series, this has the medians basically correct, but we also have reasonable uncertainty estimation too. First, the
 state distributions are much more smooth and unimodal- no more "lumpy" distributions
 with odd spikes of probability that make no sense as a model of public opinion. Further,
 the approximation is more consistent: while there's still some variation state
