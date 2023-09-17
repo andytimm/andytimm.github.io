@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.475">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2023-07-12">
+
+<title>Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
+<meta property="og:description" content="Part 7- Putting it all together">
+<meta property="og:site-name" content="Andy Timm">
+<meta name="twitter:title" content="Andy Timm - Variational Inference for MRP with Reliable Posterior Distributions">
+<meta name="twitter:description" content="Part 7- Putting it all together">
+<meta name="twitter:creator" content="@andy_timm">
+<meta name="twitter:site" content="@andy_timm">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andy Timm</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html">
+ <span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html">
+ <span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Rarely Updated Blog</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Variational Inference for MRP with Reliable Posterior Distributions</h1>
+            <p class="subtitle lead">Part 7- Putting it all together</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">MRP</div>
+                <div class="quarto-category">Variational Inference</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Andy Timm </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 12, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#cutting-to-the-chase" id="toc-cutting-to-the-chase" class="nav-link active" data-scroll-target="#cutting-to-the-chase">Cutting to the chase</a></li>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a></li>
+  <li><a href="#what-i-might-change-next-or-in-other-scenarios" id="toc-what-i-might-change-next-or-in-other-scenarios" class="nav-link" data-scroll-target="#what-i-might-change-next-or-in-other-scenarios">What I might change next or in other scenarios</a></li>
+  <li><a href="#other-things-i-didnt-cover" id="toc-other-things-i-didnt-cover" class="nav-link" data-scroll-target="#other-things-i-didnt-cover">Other things I didn’t cover</a></li>
+  <li><a href="#cleaned-up-files-to-reproduce" id="toc-cleaned-up-files-to-reproduce" class="nav-link" data-scroll-target="#cleaned-up-files-to-reproduce">Cleaned up files to reproduce</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>This is the final post in my series about using Variational Inference to speed up complex Bayesian models, such as Multilevel Regression and Poststratification. Ideally, we want to do this without the approximation being of hilariously poor quality.</p>
+<p>The last few posts in the series have explored several different major advances in black box variational inference. This post puts a bunch of these tools together to build a pretty decent approximation that runs ~5x faster than MCMC, and points to some other advances in BBVI I haven’t had time to cover in the series.</p>
+<p>The other posts in the series are:</p>
+<ol type="1">
+<li>Introducing the Problem- Why is VI useful, why VI can produce spherical cows</li>
+<li>How far does iteration on classic VI algorithms like mean-field and full-rank get us?</li>
+<li>Problem 1: KL-D prefers exclusive solutions; are there alternatives?</li>
+<li>Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?</li>
+<li>Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?</li>
+<li><strong>(This post)</strong> Problem 4: How can we know when VI is wrong? Are there useful error bounds?</li>
+<li>Putting it all together</li>
+</ol>
+<section id="cutting-to-the-chase" class="level1">
+<h1>Cutting to the chase</h1>
+<p><img src="plots/CI_plot.png" class="img-fluid" style="width:100.0%"></p>
+<p>To cut to the chase, the new and improved variational approximation is looking pretty, pretty good!</p>
+<p>Like with the simpler meanfield and fullrank models from earlier in the series, this has the medians basically correct, but we also have reasonable uncertainty estimation too. First, the state distributions are much more smooth and unimodal- no more “lumpy” distributions with odd spikes of probability that make no sense as a model of public opinion. Further, the approximation is more consistent: while there’s still some variation state to state in how closely VI matches MCMC, pretty much all states are reasonable.</p>
+<p>Certainly, we’re still to some degree understating the full size of MCMC’s credible interval. Considering this model runs in an hour and change versus MCMC’s 8 hours on 60,000 datapoints (!), this feels pretty acceptable. As I’ll write a bit more about later, there are a few ways to trade compute and/or time to fill out the CI’s as well.</p>
+<p>Last time we look at a variational approximation in post 2, we found a dot plot was a significantly more exacting standard which made it clear how bad the first try at VI in the series was. How does that look here?</p>
+<p><img src="plots/dot_plot.png" class="img-fluid" style="width:100.0%"></p>
+<p>Again, pretty solid- no more weird spikes, and the concentration of mass looks pretty comparable (if a bit compressed) versus MCMC. VI is now much more uncertain about the same states as MCMC, and no longer shows any signs of degenerate optimization to fit data points. Nice!</p>
+<p>Finally, how are the diagnostics we learned in the last point? The <span class="math inline">\hat{k}</span> is .9, which is at least much improved<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. The approximation is good enough that the Wasserstein bounds aren’t tight enough to inform us much about any issues<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+</section>
+<section id="how-it-works" class="level1">
+<h1>How it works</h1>
+<p>So the caption above gives some hint, but what all is in this model?</p>
+<p>To fit this variational approximation, I’m using Agrawal, Domke, and Sheldon’s <a href="https://github.com/abhiagwl/vistan/tree/master">vistan</a>, which is a companion python package to their</p>
+</section>
+<section id="what-i-might-change-next-or-in-other-scenarios" class="level1">
+<h1>What I might change next or in other scenarios</h1>
+</section>
+<section id="other-things-i-didnt-cover" class="level1">
+<h1>Other things I didn’t cover</h1>
+<p>(optimization, better gradients, pathfinder, DIS IKLD)</p>
+</section>
+<section id="cleaned-up-files-to-reproduce" class="level1">
+<h1>Cleaned up files to reproduce</h1>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>This is still not a “good” (&lt; .7) <span class="math inline">\hat{k}</span>, but as we saw in the last post, <span class="math inline">\hat{k}</span> is not a infallible metric, especially if you are interested in just a summary or two of the posterior where any defects it suggests may not be relevant. My guess is that to get <span class="math inline">\hat{k}</span> down, we’d need to move much further along in fully fleshing out the tails of the approximation, but even then we might still have issues given the dimensionality of this posterior.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This happens to me a lot, where these bounds don’t really tell me anything unless a model won’t even pass a basic smell test. If you have some counterexamples, I’d love to see them!<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Andy Timm},
+  title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
+    {Distributions}},
+  date = {2023-07-12},
+  url = {https://andytimm.github.io/variational_mrp_pt7.html},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas" role="doc-biblioentry">
+Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> July 12, 2023. <a href="https://andytimm.github.io/variational_mrp_pt7.html">https://andytimm.github.io/variational_mrp_pt7.html</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

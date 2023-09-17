@@ -28,9 +28,43 @@ The other posts in the series are:
 
 # Cutting to the chase
 
+![](plots/CI_plot.png){width=100%}
 
+To cut to the chase, the new and improved variational approximation is looking
+pretty, pretty good!
+
+Like with the simpler meanfield and fullrank models from earlier in the series, this has the medians basically correct, but we also have reasonable uncertainty estimation too. First, the
+state distributions are much more smooth and unimodal- no more "lumpy" distributions
+with odd spikes of probability that make no sense as a model of public opinion. Further,
+the approximation is more consistent: while there's still some variation state
+to state in how closely VI matches MCMC, pretty much all states are reasonable.
+
+Certainly, we're still to some degree understating the full size of MCMC's
+credible interval. Considering this model runs in an hour and change versus
+MCMC's 8 hours on 60,000 datapoints (!), this feels pretty acceptable. As I'll write
+a bit more about later, there are a few ways to trade compute and/or time to
+fill out the CI's as well.
+
+Last time we look at a variational approximation in post 2, we found a dot plot
+was a significantly more exacting standard which made it clear how bad the
+first try at VI in the series was. How does that look here?
+
+![](plots/dot_plot.png){width=100%}
+
+Again, pretty solid- no more weird spikes, and the concentration of mass
+looks pretty comparable (if a bit compressed) versus MCMC. VI is now much more
+uncertain about the same states as MCMC, and no longer shows any signs of degenerate
+optimization to fit data points. Nice!
+
+Finally, how are the diagnostics we learned in the last point? The $\hat{k}$ is .9, which is at least much improved[^1]. The approximation is good enough that the Wasserstein
+bounds aren't tight enough to inform us much about any issues[^2].
 
 # How it works
+
+So the caption above gives some hint, but what all is in this model?
+
+To fit this variational approximation, I'm using Agrawal, Domke, and Sheldon's [vistan](https://github.com/abhiagwl/vistan/tree/master), which is a companion
+python package to their 
 
 # What I might change next or in other scenarios
 
@@ -39,3 +73,13 @@ The other posts in the series are:
 (optimization, better gradients, pathfinder, DIS IKLD)
 
 # Cleaned up files to reproduce
+
+[^1]: This is still not a "good" (< .7) $\hat{k}$, but as we saw in the last post,
+$\hat{k}$ is not a infallible metric, especially if you are interested in just
+a summary or two of the posterior where any defects it suggests may not be relevant.
+My guess is that to get $\hat{k}$ down, we'd need to move much further along
+in fully fleshing out the tails of the approximation, but even then we might
+still have issues given the dimensionality of this posterior.
+[^2]: This happens to me a lot, where these bounds don't really tell me anything
+unless a model won't even pass a basic smell test. If you have some counterexamples,
+I'd love to see them!
