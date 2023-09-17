@@ -89,7 +89,7 @@ vistan.algorithm(
     optimizer = 'adam',
     M_iw_train = 1,
     M_iw_sample = 10,
-    grad_estimator = "DReG",
+    grad_estimator = "STL",
     per_iter_sample_budget = 100,
     fix_sample_budget = True,
     evaluation_fn = "IWELBO",
@@ -142,9 +142,8 @@ at few different step sizes (in `step_size_exp_range`), selecting the best one v
 Agrawal et al.'s results see strong improvements for ~25-30% of models using this
 adjustment.
 
-Second, they use the `DReG` gradient estimator, which I'll link out to later, but
-is essentially a variant of the reparameterization trick gradient discussed in
-post 3 with improved variance, leading to faster convergence.
+Second, they use the [Sticking the Landing](https://arxiv.org/abs/1703.09194) `STL` gradient estimator, which I'll link out to later, but is essentially removing the score
+term from the gradient to reduce it's variance.
 
 A final optimization hyperparameter here is the number of iterations (both for that step search
 procedure and the final run)- I found `1000` was more than sufficient for optimization of
@@ -156,7 +155,7 @@ down to 500 leading to a heavily over-dispersed posterior.
 
 Since their paper is ultimately a bakeoff, Agrawal et al.'s paper touches on
 the theme of a sample budget again and again, and it's a great concept to consider
-here. Essentially, a computation budget is somewhat **fungible**: given an amount
+here. Essentially, a sample or  computation budget is somewhat **fungible**: given an amount
 of run time, compute available, etc, we can, for example, trade a larger 
 `max_iters` for using (more) importance weighted training, or use fewer iterations
 for (more) importance weighting our samples. 
@@ -178,8 +177,7 @@ The low hanging fruit here would be to use some combination of more samples and/
 more importance weighted samples per retained sample. In my testing this produces
 credible intervals about halfway between what I showed above and the MCMC ones, at
 the cost of another hour of runtime. It might be possible to go further than
-this and get closer to the MCMC interval, but once I was at doubling the run time
-that started to feel like cheating. For some applications though, that might be the
+this and get closer to the MCMC interval, but likely suffers from quite harsh diminishing returns. For some applications though, that might be the
 right trade off to make!
 
 As I already mentioned above, I didn't find much benefit from more training iterations,
@@ -196,11 +194,63 @@ A logical next question: for models in general, which situations suggest
 tweaking which hyperparameters? While this is a really hard question, I'll offer
 some tentative thoughts:
 
-**The model is compl**
+**The variational approximation is unable to represent the complexity of my model:** In this situation, I've had the best luck increasing the complexity of my normalizing flow. Just like increasing the number of transforms helped in our ring density approximation example in post 6, more transforms and/or a deeper neural net within each transformation seems to be
+the most straightforward way I've found to improve representation capacity of
+variational inference. For the most complex models, perhaps changing the
+flow type will be necessary or efficient, but I've had surprisingly good luck
+just scaling up RNVP.
+
+Like I mentioned above for this series' specific model, I've had pretty meh
+results with IW-Training. I've had 1-2 models actually really benefit, but it hurts
+as often as it helps it seems, so it's not something I reach for first anymore.
+
+**The approximation is close, but it misses some minor aspect the posterior:** In this
+type of situation, like the one above, adding more samples or using more importance
+weighting to produce the samples has worked well. In my experience, diminishing
+returns on the number of importance samples kick in faster than on the number
+of full model samples- I rarely see benefits beyond a couple hundred importance
+samples, but more draws often continues to provide benefits well into the thousands. Keep
+in mind that having trained a VI model, sampling is often orders of magnitude faster
+than MCMC: "just sample more" is much less time consuming advice to take than with MCMC.
+
+**I can't get the model to meaningfully converge:** This often looks like the
+result we got in the second post in the series with mean-field and full-rank
+Variational Inference. Like with that post, there's a variety of reasons this
+can happen. If you're using mean-field or full-rank for a complex model, there's
+a good chance you just need a normalizing flow or otherwise more complex approximating
+distribution to get any sort of useful convergence.
+
+If you're using something complex to make the approximation and you still see
+massively under/over-dispersed posteriors, then consider broadening the step size
+search, or grid searching a bit over the other Adam hyperparameters. Unlike
+with models based on deeper neural nets, I haven't ever really seen a variational
+approximation plateau on loss for a long time and make a breakthrough; it's pretty
+reasonable to trust early stopping and try to find something that actually
+gets optimization traction early on.
+
+**There's a whole part of the posterior entirely missing:** I've only really
+seen this with highly multi-modal posteriors, but sometimes a single ELBO based model
+will only meaningfully cover a single mode in a parameter you care about. In this
+case, I've found a few smaller models averaged/MIS'd together to be the simplest solution- a single
+model that covers all modes is often quite hard given the mode seeking behavior
+of the ELBO that I discussed in post 3. Trying a different loss here is an option,
+but for more complex posteriors, I often struggle to get convergence with
+the CUBO.
+
+This is by no means a authoritative list, but hopefully this set of suggestions
+for the most common issues I've had with variational inference in a variety
+of applied models is helpful. I'd also highly recommend the [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf) paper mentioned above for more practical guidance of this type.
 
 # Other things I didn’t cover
 
-(optimization, better gradients, pathfinder, DIS IKLD)
+Variational Inference is a decent sized research area, so I couldn't cover everything
+in this series. As a way to wrap up, I want to gesture at some other papers
+that are worthwhile, but weren't worth a full post in this series.
+
+**Better Optimization for Variational Inference:** Besides the work on step search
+in [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf), there are two really good papers on improving the underlying gradients we optimize on in
+variational inference. First, the [Sticking the Landing](https://arxiv.org/abs/1703.09194) gradient estimator removes the score term in the total gradient with respect
+to the variational parameters. The result is a still unbiased[^5]
 
 # Cleaned up files to reproduce
 
@@ -220,3 +270,7 @@ but it does make the sense in context of their bake off paper, where they want
 to maintain some sense of a fixed number of samples to keep comparisons fair.
 [^4]: `evaluation_fn = "IWELBO"` is just a quirk of their syntax, where with
 `M_iw_train = 1`, it's equivalent to not doing IW-weighted training at all.
+[^5]: See the paper for a longer explanation for why it's still unbiased, but
+essentially this term has expectation zero. for some samples it may not be zero,
+but it's sufficient for the unbiasedness of the broader gradient that it have
+expectation zero.
