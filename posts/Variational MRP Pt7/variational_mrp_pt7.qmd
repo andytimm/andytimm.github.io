@@ -250,9 +250,29 @@ that are worthwhile, but weren't worth a full post in this series.
 **Better Optimization for Variational Inference:** Besides the work on step search
 in [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf), there are two really good papers on improving the underlying gradients we optimize on in
 variational inference. First, the [Sticking the Landing](https://arxiv.org/abs/1703.09194) gradient estimator removes the score term in the total gradient with respect
-to the variational parameters. The result is a still unbiased[^5]
+to the variational parameters. The result is a still unbiased[^5], but lower
+variance gradient estimator which helps a lot with both normalizing flow and
+simpler approximation fitting. Second, for when using importance weighted training,
+there's the [doubly reparameterized gradient (DReG)](https://arxiv.org/abs/1810.04152) estimator, which is both lower variance and unbiased via a clever (second) application of the reparameterization trick.
 
-# Cleaned up files to reproduce
+
+**Pathfinder:** Coming soon to `brms` and Stan in general, [Pathfinder](https://arxiv.org/pdf/2108.03782.pdf) is an attempt at a variational
+inference algorithm by Lu Zhang, Andrew Gelman, Aki Vehtari, and Bob Carpenter[^6]. It uses a quasi-Newtonian optimization algorithm, and then samples from (a MIS combination of) Gaussian approximations along the optimization. There's a ton of clever work here to
+make this incredibly fast, and comparatively parallel to other variational algorithms. For even moderately complex posteriors, it's blazingly fast, and quite accurate. My only problem with it is that for more challenging posteriors, I've found it a little limited: it doesn't seem to have the representation capacity possible with normalizing flows, which unfortunately is
+necessary for most of the non-blog-post-series-examples applications I use VI for. Like so many papers with these authors though, there's a ton here that's deeply insightful and more broadly applicable knowledge here, even if you need normalizing flows for your work.
+
+**Boosting Variational Inference:** Given how dominant boosting based algorithms
+are in basic machine learning, applying boosting to variational inference definitely
+had my attention when I first saw papers like [Universal Boosting Variational Inference](https://arxiv.org/abs/1906.01235?utm_source=pocket_saves). What's
+weird about this strain of papers though is that there don't see to be any public
+replication materials that sufficiently implement this for me to test it out,
+and there are no comparative bake off versus other serious, modern variational inference algorithms I can find. 
+
+This may be a lack of familiarity on my part (and I'm most uncertain about boosting VI of everything I've discussed in this series), but the vibes of this sub-literature
+feel off to me. Why is no one releasing a public, serious implementation of this[^7]?
+If the authors claims about performance and ease of use are true, this pattern of "lots of papers, little code" is even weirder. Again, I'm super uncertain here, but after
+investing some time to dig here, this corner of the variational inference literature
+is surprisingly hard to engage with, and so I haven't really made the time yet.
 
 [^1]: This is still not a "good" (< .7) $\hat{k}$, but as we saw in the last post,
 $\hat{k}$ is not a infallible metric, especially if you are interested in just
@@ -274,3 +294,7 @@ to maintain some sense of a fixed number of samples to keep comparisons fair.
 essentially this term has expectation zero. for some samples it may not be zero,
 but it's sufficient for the unbiasedness of the broader gradient that it have
 expectation zero.
+[^6]: So many of Bayesian heroes in one place, usually a good
+sign.
+[^7]: Beyond this [toy example](https://pyro.ai/examples/boosting_bbvi.html) in Pyro,
+I can't find much. Again, prove me wrong if you know of something.
