@@ -22,6 +22,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -172,8 +235,15 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#cutting-to-the-chase" id="toc-cutting-to-the-chase" class="nav-link active" data-scroll-target="#cutting-to-the-chase">Cutting to the chase</a></li>
-  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a></li>
-  <li><a href="#what-i-might-change-next-or-in-other-scenarios" id="toc-what-i-might-change-next-or-in-other-scenarios" class="nav-link" data-scroll-target="#what-i-might-change-next-or-in-other-scenarios">What I might change next or in other scenarios</a></li>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a>
+  <ul>
+  <li><a href="#normalizing-flows" id="toc-normalizing-flows" class="nav-link" data-scroll-target="#normalizing-flows">Normalizing Flows</a></li>
+  <li><a href="#importance-sampling" id="toc-importance-sampling" class="nav-link" data-scroll-target="#importance-sampling">Importance Sampling</a></li>
+  <li><a href="#optimization" id="toc-optimization" class="nav-link" data-scroll-target="#optimization">Optimization</a></li>
+  <li><a href="#a-sample-budget" id="toc-a-sample-budget" class="nav-link" data-scroll-target="#a-sample-budget">A sample budget?</a></li>
+  </ul></li>
+  <li><a href="#what-i-might-change-next" id="toc-what-i-might-change-next" class="nav-link" data-scroll-target="#what-i-might-change-next">What I might change next</a></li>
+  <li><a href="#what-i-might-change-for-other-models" id="toc-what-i-might-change-for-other-models" class="nav-link" data-scroll-target="#what-i-might-change-for-other-models">What I might change for other models</a></li>
   <li><a href="#other-things-i-didnt-cover" id="toc-other-things-i-didnt-cover" class="nav-link" data-scroll-target="#other-things-i-didnt-cover">Other things I didn’t cover</a></li>
   <li><a href="#cleaned-up-files-to-reproduce" id="toc-cleaned-up-files-to-reproduce" class="nav-link" data-scroll-target="#cleaned-up-files-to-reproduce">Cleaned up files to reproduce</a></li>
   </ul>
@@ -206,15 +276,76 @@ ul.task-list li input[type="checkbox"] {
 <p>Last time we look at a variational approximation in post 2, we found a dot plot was a significantly more exacting standard which made it clear how bad the first try at VI in the series was. How does that look here?</p>
 <p><img src="plots/dot_plot.png" class="img-fluid" style="width:100.0%"></p>
 <p>Again, pretty solid- no more weird spikes, and the concentration of mass looks pretty comparable (if a bit compressed) versus MCMC. VI is now much more uncertain about the same states as MCMC, and no longer shows any signs of degenerate optimization to fit data points. Nice!</p>
-<p>Finally, how are the diagnostics we learned in the last point? The <span class="math inline">\hat{k}</span> is .9, which is at least much improved<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. The approximation is good enough that the Wasserstein bounds aren’t tight enough to inform us much about any issues<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>Finally, how are the diagnostics we learned in the last point? The <span class="math inline">\hat{k}</span> is .9, which is at least much improved<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. The approximation is good enough that the Wasserstein bounds aren’t tight enough to inform us much about any issues<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, although we should be a bit careful in trusting them giving that <span class="math inline">\hat{k}</span>. In one sense, none of the diagnostics here are “great”, but this is pretty typical of my experience with BBVI for non-trivial models. We’re almost always losing something from the true posterior, and these diagnostics are not sufficiently fine-grained to differentiate important from unimportant losses.</p>
 </section>
 <section id="how-it-works" class="level1">
 <h1>How it works</h1>
 <p>So the caption above gives some hint, but what all is in this model?</p>
-<p>To fit this variational approximation, I’m using Agrawal, Domke, and Sheldon’s <a href="https://github.com/abhiagwl/vistan/tree/master">vistan</a>, which is a companion python package to their</p>
+<p>To fit this variational approximation, I’m using Agrawal, Domke, and Sheldon’s <a href="https://github.com/abhiagwl/vistan/tree/master">vistan</a>, which is a companion python package to their great paper <a href="https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf">Advances In Black-Box VI</a>.</p>
+<p>Here’s a separate repository with full setup details, but for purposes of this post, I’ll just reference the parameters of the main setup function here:</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>vistan.algorithm(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    vi_family <span class="op">=</span> <span class="st">"rnvp"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    full_step_search <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    full_step_search_scaling <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    step_size_exp <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    step_size_exp_range <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>],</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    step_size_base <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    step_size_scale <span class="op">=</span> <span class="fl">4.0</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    max_iters <span class="op">=</span> <span class="dv">1000</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> <span class="st">'adam'</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    M_iw_train <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    M_iw_sample <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    grad_estimator <span class="op">=</span> <span class="st">"DReG"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    per_iter_sample_budget <span class="op">=</span> <span class="dv">100</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    fix_sample_budget <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    evaluation_fn <span class="op">=</span> <span class="st">"IWELBO"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    rnvp_num_transformations <span class="op">=</span>  <span class="dv">10</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    rnvp_num_hidden_units <span class="op">=</span>  <span class="dv">32</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    rnvp_num_hidden_layers <span class="op">=</span>  <span class="dv">2</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    rnvp_params_init_scale <span class="op">=</span>  <span class="fl">0.01</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s talk about:</p>
+<ol type="1">
+<li>Normalizing Flows</li>
+<li>Importance Sampling</li>
+<li>Optimization</li>
+<li>Sampling Budgets</li>
+</ol>
+<section id="normalizing-flows" class="level3">
+<h3 class="anchored" data-anchor-id="normalizing-flows">Normalizing Flows</h3>
+<p>First, this is using a <a href="https://arxiv.org/abs/1605.08803">Real NVP</a> normalizing flow, with a fairly small (<code>10</code>) number of transformation layers, each of which is using a pretty shallow neural net (<code>2 layers, 32 hidden units</code>). This helps make the approximating distribution complex enough to handle our model. I didn’t find much benefit from either adding more transform layers or making the neural nets deeper- that sort of makes sense, since the jump from mean-field or full-rank VI to using a normalizing flow at all is a fairly big one in terms of model representation capacity.</p>
 </section>
-<section id="what-i-might-change-next-or-in-other-scenarios" class="level1">
-<h1>What I might change next or in other scenarios</h1>
+<section id="importance-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="importance-sampling">Importance Sampling</h3>
+<p>Second, this is using importance sampling only at the sampling stage, and with just <code>10</code> IW samples per returned sample<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. I didn’t find much benefit from importance weighted training<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> here, although for relatively more complex models than this I’ve found it to sometimes matter. As a point of comparison, in their paper linked above, Agrawal et al.&nbsp;find that about 20% of models actually get <em>worse</em> with IW-Training, and only ~10% get improvements, although those improvements seem to be clustered in more complex models and can be fairly significant.</p>
+<p>At least for this particular model, using 10 importance samples per returned sample during provided most of the benefit of importance weighting, although pushing this higher to 100 or 200 helped fill out the outcome distribution’s tails a bit (more on this in a bit).</p>
+</section>
+<section id="optimization" class="level3">
+<h3 class="anchored" data-anchor-id="optimization">Optimization</h3>
+<p>Finally, many of the parameters here are about optimization, which we haven’t talked about in this series too much yet, despite it being critical to good performance.</p>
+<p>First, Agrawal et al.&nbsp;found that variational inference is reasonably sensitive to optimization hyperparameters like the step size the Adam optimizer uses- to handle this, they suggest initial runs at few different step sizes (in <code>step_size_exp_range</code>), selecting the best one via an ELBO average over the whole optimization trace. This model benefits quite a lot from this, and Agrawal et al.’s results see strong improvements for ~25-30% of models using this adjustment.</p>
+<p>Second, they use the <code>DReG</code> gradient estimator, which I’ll link out to later, but is essentially a variant of the reparameterization trick gradient discussed in post 3 with improved variance, leading to faster convergence.</p>
+<p>A final optimization hyperparameter here is the number of iterations (both for that step search procedure and the final run)- I found <code>1000</code> was more than sufficient for optimization of this model, with going up to 2000 iterations not getting us much benefit, but going down to 500 leading to a heavily over-dispersed posterior.</p>
+</section>
+<section id="a-sample-budget" class="level3">
+<h3 class="anchored" data-anchor-id="a-sample-budget">A sample budget?</h3>
+<p>Since their paper is ultimately a bakeoff, Agrawal et al.’s paper touches on the theme of a sample budget again and again, and it’s a great concept to consider here. Essentially, a computation budget is somewhat <strong>fungible</strong>: given an amount of run time, compute available, etc, we can, for example, trade a larger <code>max_iters</code> for using (more) importance weighted training, or use fewer iterations for (more) importance weighting our samples.</p>
+<p>How to best spend this budget is an open question and fairly model dependent- here, I decided not to present the best model I could possibly fit with variational inference, but the best one I could get to fit in ~1h. The point of this series is to fit something nearly as good fast, not a different, more complex way but also in 8h.</p>
+<p>Next, I’ll talk through some ideas for what could improve the model further at greater compute and wall time cost.</p>
+</section>
+</section>
+<section id="what-i-might-change-next" class="level1">
+<h1>What I might change next</h1>
+<p>The major shortfall of the current approximation (assuming we continue to mostly care about state level estimates) is the overly narrow credible intervals. If I did want to improve the accuracy of this model, what might I consider next?</p>
+<p>The low hanging fruit here would be to use some combination of more samples and/or more importance weighted samples per retained sample. In my testing this produces credible intervals about halfway between what I showed above and the MCMC ones, at the cost of another hour of runtime. It might be possible to go further than this and get closer to the MCMC interval, but once I was at doubling the run time that started to feel like cheating. For some applications though, that might be the right trade off to make!</p>
+<p>As I already mentioned above, I didn’t find much benefit from more training iterations, importance weighted training, or making the RNVP component deeper. Thus, if I wanted to really invest a lot of time to improve this further, my next step might be to consider fitting another model in parallel to ensemble with this one. For example, perhaps an objective like the CUBO that tends to emphasize coverage would be worth combining with this one either via multiple importance sampling or more simplistic model averaging.</p>
+</section>
+<section id="what-i-might-change-for-other-models" class="level1">
+<h1>What I might change for other models</h1>
+<p>A logical next question: for models in general, which situations suggest tweaking which hyperparameters? While this is a really hard question, I’ll offer some tentative thoughts:</p>
+<p><strong>The model is compl</strong></p>
 </section>
 <section id="other-things-i-didnt-cover" class="level1">
 <h1>Other things I didn’t cover</h1>
@@ -232,6 +363,8 @@ ul.task-list li input[type="checkbox"] {
 <ol>
 <li id="fn1"><p>This is still not a “good” (&lt; .7) <span class="math inline">\hat{k}</span>, but as we saw in the last post, <span class="math inline">\hat{k}</span> is not a infallible metric, especially if you are interested in just a summary or two of the posterior where any defects it suggests may not be relevant. My guess is that to get <span class="math inline">\hat{k}</span> down, we’d need to move much further along in fully fleshing out the tails of the approximation, but even then we might still have issues given the dimensionality of this posterior.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>This happens to me a lot, where these bounds don’t really tell me anything unless a model won’t even pass a basic smell test. If you have some counterexamples, I’d love to see them!<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The way <code>vistan</code> implements importance weighted sampling is to importance weight N candidate samples and select the highest weight. I’m unsure if this is an optimal procedure versus keeping all samples and applying the weights, but it does make the sense in context of their bake off paper, where they want to maintain some sense of a fixed number of samples to keep comparisons fair.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><code>evaluation_fn = "IWELBO"</code> is just a quirk of their syntax, where with <code>M_iw_train = 1</code>, it’s equivalent to not doing IW-weighted training at all.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Andy Timm},

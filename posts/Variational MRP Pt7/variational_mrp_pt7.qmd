@@ -57,16 +57,146 @@ uncertain about the same states as MCMC, and no longer shows any signs of degene
 optimization to fit data points. Nice!
 
 Finally, how are the diagnostics we learned in the last point? The $\hat{k}$ is .9, which is at least much improved[^1]. The approximation is good enough that the Wasserstein
-bounds aren't tight enough to inform us much about any issues[^2].
+bounds aren't tight enough to inform us much about any issues[^2], although
+we should be a bit careful in trusting them giving that $\hat{k}$. In one sense,
+none of the diagnostics here are "great", but this is pretty typical of my
+experience with BBVI for non-trivial models. We're almost always losing
+something from the true posterior, and these diagnostics are not sufficiently
+fine-grained to differentiate important from unimportant losses.
 
 # How it works
 
 So the caption above gives some hint, but what all is in this model?
 
 To fit this variational approximation, I'm using Agrawal, Domke, and Sheldon's [vistan](https://github.com/abhiagwl/vistan/tree/master), which is a companion
-python package to their 
+python package to their great paper [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf).
 
-# What I might change next or in other scenarios
+Here's a separate repository with full setup details, but for purposes of this post, I'll
+just reference the parameters of the main setup function here:
+
+```{python}
+#| eval: false
+
+vistan.algorithm(
+    vi_family = "rnvp",
+    full_step_search = True,
+    full_step_search_scaling = True,
+    step_size_exp = 0,
+    step_size_exp_range = [0, 1, 2, 3, 4],
+    step_size_base = 0.1,
+    step_size_scale = 4.0,
+    max_iters = 1000,
+    optimizer = 'adam',
+    M_iw_train = 1,
+    M_iw_sample = 10,
+    grad_estimator = "DReG",
+    per_iter_sample_budget = 100,
+    fix_sample_budget = True,
+    evaluation_fn = "IWELBO",
+    rnvp_num_transformations =  10,
+    rnvp_num_hidden_units =  32,
+    rnvp_num_hidden_layers =  2,
+    rnvp_params_init_scale =  0.01
+)
+```
+
+Let's talk about:
+
+1. Normalizing Flows
+2. Importance Sampling
+3. Optimization
+4. Sampling Budgets
+
+### Normalizing Flows
+
+First, this is using a [Real NVP](https://arxiv.org/abs/1605.08803) normalizing
+flow, with a fairly small (`10`) number of transformation layers, each of which is using
+a pretty shallow neural net (`2 layers, 32 hidden units`). This helps make the approximating distribution
+complex enough to handle our model. I didn't find much benefit from either
+adding more transform layers or making the neural nets deeper- that sort of makes
+sense, since the jump from mean-field or full-rank VI to using a normalizing
+flow at all is a fairly big one in terms of model representation capacity.
+
+### Importance Sampling
+
+Second, this is using importance sampling only at the sampling stage, and with
+just `10` IW samples per returned sample[^3]. I didn't find much benefit from
+importance weighted training[^4] here, although for relatively more complex models
+than this I've found it to sometimes matter. As a point of comparison, in their
+paper linked above, Agrawal et al. find that about 20% of models actually get
+*worse* with IW-Training, and only ~10% get improvements, although those improvements
+seem to be clustered in more complex models and can be fairly significant.
+
+At least for this particular model, using 10 importance samples per returned sample during provided most of the benefit of importance weighting, although pushing this
+higher to 100 or 200 helped fill out the outcome distribution's tails a bit (more on this in a bit).
+
+### Optimization
+
+Finally, many of the parameters here are about optimization, which we haven't
+talked about in this series too much yet, despite it being critical to good performance.
+
+First, Agrawal et al. found that variational
+inference is reasonably sensitive to optimization hyperparameters like the step
+size the Adam optimizer uses- to handle this, they suggest initial runs
+at few different step sizes (in `step_size_exp_range`), selecting the best one via an ELBO average over the whole optimization trace. This model benefits quite a lot from this, and
+Agrawal et al.'s results see strong improvements for ~25-30% of models using this
+adjustment.
+
+Second, they use the `DReG` gradient estimator, which I'll link out to later, but
+is essentially a variant of the reparameterization trick gradient discussed in
+post 3 with improved variance, leading to faster convergence.
+
+A final optimization hyperparameter here is the number of iterations (both for that step search
+procedure and the final run)- I found `1000` was more than sufficient for optimization of
+this model, with going up to 2000 iterations not getting us much benefit, but going
+down to 500 leading to a heavily over-dispersed posterior.
+
+
+### A sample budget?
+
+Since their paper is ultimately a bakeoff, Agrawal et al.'s paper touches on
+the theme of a sample budget again and again, and it's a great concept to consider
+here. Essentially, a computation budget is somewhat **fungible**: given an amount
+of run time, compute available, etc, we can, for example, trade a larger 
+`max_iters` for using (more) importance weighted training, or use fewer iterations
+for (more) importance weighting our samples. 
+
+How to best spend this budget
+is an open question and fairly model dependent- here, I decided not to present
+the best model I could possibly fit with variational inference, but the
+best one I could get to fit in ~1h. The point of this series is to fit something
+nearly as good fast, not a different, more complex way but also in 8h. 
+
+Next, I'll talk through some ideas for what could improve the model further
+at greater compute and wall time cost.
+
+# What I might change next
+
+The major shortfall of the current approximation (assuming we continue to mostly care about state level estimates) is the overly narrow credible intervals. If I did want to improve the accuracy of this model, what might I consider next?
+
+The low hanging fruit here would be to use some combination of more samples and/or
+more importance weighted samples per retained sample. In my testing this produces
+credible intervals about halfway between what I showed above and the MCMC ones, at
+the cost of another hour of runtime. It might be possible to go further than
+this and get closer to the MCMC interval, but once I was at doubling the run time
+that started to feel like cheating. For some applications though, that might be the
+right trade off to make!
+
+As I already mentioned above, I didn't find much benefit from more training iterations,
+importance weighted training, or making the RNVP component deeper. Thus, if
+I wanted to really invest a lot of time to improve this further, my next step
+might be to consider fitting another model in parallel to ensemble with this one.
+For example, perhaps an objective like the CUBO that tends to emphasize coverage
+would be worth combining with this one either via multiple importance sampling
+or more simplistic model averaging.
+
+# What I might change for other models
+
+A logical next question: for models in general, which situations suggest
+tweaking which hyperparameters? While this is a really hard question, I'll offer
+some tentative thoughts:
+
+**The model is compl**
 
 # Other things I didn’t cover
 
@@ -83,3 +213,10 @@ still have issues given the dimensionality of this posterior.
 [^2]: This happens to me a lot, where these bounds don't really tell me anything
 unless a model won't even pass a basic smell test. If you have some counterexamples,
 I'd love to see them!
+[^3]: The way `vistan` implements importance weighted sampling is to importance
+weight N candidate samples and select the highest weight. I'm unsure if this
+is an optimal procedure versus keeping all samples and applying the weights,
+but it does make the sense in context of their bake off paper, where they want
+to maintain some sense of a fixed number of samples to keep comparisons fair.
+[^4]: `evaluation_fn = "IWELBO"` is just a quirk of their syntax, where with
+`M_iw_train = 1`, it's equivalent to not doing IW-weighted training at all.
