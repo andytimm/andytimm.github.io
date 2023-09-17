@@ -9,45 +9,16 @@ categories:
   - Variational Inference
 ---
 
-```{python}
-import pystan
-import vistan
-```
+Intro
 
-```{python}
-model_code = 'parameters {real y;} model {y ~ normal(0,1);}'
-model = pystan.StanModel(model_code=model_code,verbose = True)
-y = model.sampling().extract()['y']
-y.mean()
-```
+# Cutting to the chase
 
+# How it works
 
-```{python}
-import vistan 
-#import matplotlib.pyplot as plt
-import numpy as np 
-import scipy
-code = """
-data {
-    int<lower=0> N;
-    int<lower=0,upper=1> x[N];
-}
-parameters {
-    real<lower=0,upper=1> p;
-}
-model {
-    p ~ beta(1,1);
-    x ~ bernoulli(p);
-}
-"""
-data = {"N":5, "x":[0,1,0,0,0]}
-algo = vistan.recipe() # runs Meanfield VI by default
-posterior = algo(code, data) 
-samples = posterior.sample(100000)
+# What I might change next or in other scenarios
 
-#points = np.arange(0,1,.01)
-#plt.hist(samples['p'], 200, density = True, histtype = 'step')
-#plt.plot(points,scipy.stats.beta(2,5).pdf(points),label='True Posterior')
-#plt.legend()
-#plt.show()
-```
+# Other things I didn’t cover
+
+(optimization, better gradients, pathfinder, DIS IKLD)
+
+# Cleaned up files to reproduce
