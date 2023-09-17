@@ -9,9 +9,26 @@ categories:
   - Variational Inference
 ---
 
-Intro
+This is the final post in my series about using Variational Inference to speed up complex Bayesian models, such as Multilevel Regression and Poststratification. Ideally, we want to do this without the approximation being of hilariously poor quality.
+
+The last few posts in the series have explored several different major advances
+in black box variational inference. This post puts a bunch of these tools together
+to build a pretty decent approximation that runs ~5x faster than MCMC, and points
+to some other advances in BBVI I haven't had time to cover in the series.
+
+The other posts in the series are:
+
+1.  Introducing the Problem- Why is VI useful, why VI can produce spherical cows
+2.  How far does iteration on classic VI algorithms like mean-field and full-rank get us?
+3.  Problem 1: KL-D prefers exclusive solutions; are there alternatives?
+4.  Problem 2: Not all VI samples are of equal utility; can we weight them cleverly?
+5.  Problem 3: How can we get deeply flexible variational approximations; are Normalizing Flows the answer?
+6.  **(This post)** Problem 4: How can we know when VI is wrong? Are there useful error bounds?
+7.  Putting it all together
 
 # Cutting to the chase
+
+
 
 # How it works
 
