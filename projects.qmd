@@ -2,7 +2,7 @@
 page-layout: full
 ---
 
-I always learn a ton about people's interests by hearing about what projects they're excited about. If you're working on similar things, and want to talk about them more or learn together, I'm always excited to chat (especially if your application is socially beneficial)!
+I'm usually teaching myself several new things, and this page is a suggestion from a friend about how to share that learning. If you're working on similar things, and want to talk about them more or learn together, I'm always excited to chat (especially if your application is socially beneficial)!
 
 Here are some themes of current personal and work projects I'm particularly excited about. Footnotes expand on resources I'm using to learn more:
 
@@ -16,11 +16,12 @@ Here are some themes of current personal and work projects I'm particularly exci
 :::
 
 ::: {.column width="50%"}
-# Work Projects
+# (Previous) Work Projects
 
+
+1.  **Hierarchical Forecasting for Media Planning:** Being able to accurately forecast the likely reach of a media plan at a variety of granularities enables better planning; what are the most reliable and accurate forecasting models for our applications? [^5].
+2.  **Productizing HTE Estimation:** Exploring which heterogeneous treatment effect models perform best in our industry in a variety of contexts, with a fully productized solution coming online as of early 2023[^6].
 1.  **Better Polling Methods:** Improving our political survey methodology choices to improve our resulting model quality in the 2022 midterm elections and beyond[^4].
-2.  **Hierarchical Forecasting for Media Planning:** Being able to accurately forecast the likely reach of a media plan at a variety of granularities enables better planning; what are the most reliable and accurate forecasting models for our applications? [^5].
-3.  **Productizing HTE Estimation:** Exploring which heterogeneous treatment effect models perform best in our industry in a variety of contexts, with a fully productized solution coming online as of early 2023[^6].
 :::
 
 :::
