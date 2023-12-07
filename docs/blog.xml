@@ -12,7 +12,7 @@
 <generator>quarto-1.3.450</generator>
 <lastBuildDate>Tue, 05 Dec 2023 05:00:00 GMT</lastBuildDate>
 <item>
-  <title>My talk on Regularized Raking at NYOSP</title>
+  <title>My talk on Regularized Raking at NYOSPM</title>
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</link>
   <description><![CDATA[ 
@@ -34,19 +34,20 @@
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Timm, Andy},
-  title = {My Talk on {Regularized} {Raking} at {NYOSP}},
+  title = {My Talk on {Regularized} {Raking} at {NYOSPM}},
   date = {2023-12-05},
   url = {https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
-Timm, Andy. 2023. <span>“My Talk on Regularized Raking at NYOSP.”</span>
-December 5, 2023. <a href="https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html">https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</a>.
+Timm, Andy. 2023. <span>“My Talk on Regularized Raking at
+NYOSPM.”</span> December 5, 2023. <a href="https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html">https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</a>.
 </div></div></section></div> ]]></description>
   <category>surveys</category>
   <category>weighting</category>
   <guid>https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</guid>
   <pubDate>Tue, 05 Dec 2023 05:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/image/December_2023_Meetup_Card.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
   <title>Variational Inference for MRP with Reliable Posterior Distributions</title>

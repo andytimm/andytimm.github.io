@@ -1,11 +1,12 @@
 ---
 layout: post
-title: My talk on Regularized Raking at NYOSP
+title: My talk on Regularized Raking at NYOSPM
 date: 2023-12-05
 draft: False
 categories:
   - surveys
   - weighting
+image: image/December_2023_Meetup_Card.jpg
 ---
 
 I recently gave a talk on **Regularized Raking** at the
