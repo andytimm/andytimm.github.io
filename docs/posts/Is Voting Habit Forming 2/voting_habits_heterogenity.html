@@ -64,16 +64,38 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Andy Timm - Who Forms Voting Habits?">
 <meta property="og:description" content="Evidence from Florida">
+<meta property="og:image" content="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_1.png">
 <meta property="og:site-name" content="Andy Timm">
+<meta property="og:image:height" content="538">
+<meta property="og:image:width" content="862">
 <meta name="twitter:title" content="Andy Timm - Who Forms Voting Habits?">
 <meta name="twitter:description" content="Evidence from Florida">
+<meta name="twitter:image" content="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_1.png">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="538">
+<meta name="twitter:image-width" content="862">
 </head>
 
 <body class="nav-fixed">
@@ -159,6 +181,10 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
   <li><a href="#data-and-descriptive-statistics" id="toc-data-and-descriptive-statistics" class="nav-link" data-scroll-target="#data-and-descriptive-statistics">Data and Descriptive Statistics</a></li>
+  <li><a href="#estimand" id="toc-estimand" class="nav-link" data-scroll-target="#estimand">Estimand</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  <li><a href="#instrument-effectiveness" id="toc-instrument-effectiveness" class="nav-link" data-scroll-target="#instrument-effectiveness">Instrument Effectiveness</a></li>
   </ul>
 </nav>
     </div>
@@ -271,6 +297,48 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <p>My outcome of interest is the number of votes cast in the downstream election, for example, the 2012 presidential general election. The “treatment” is having voted in the upstream presidential election, for example the 2008 election. The instrument is eligibility to participate in (for example) the 2008 election, which is determined by being 18 on election day, not 18 by the registration deadline as is sometimes commonly believed. The forcing variable is simply the cohort’s number of days above or below turning 18 on the upstream election day- a negative number in the field indicates the number of days older than 18 they are, whereas a positive number indicates the days remaining to turn 18. Finally, to account for seasonal and day of the week birth trends which subsequently influence total votes cast by each cohort, like Coppock and Green I include a lagged downstream vote total for the birthdate cohort one year younger. This is particularly important for this estimation strategy given that the several month period just before election day tends to have the most children born each year (Mulligan, 2012).</p>
 <p>As a final descriptive presentation below in figure 1 and 2 are two example plots of the 60 discontinuities I leverage. In both plots, overall downstream votes cast appear slightly higher for those who were just eligible, although the trend is much clearer in the 2008-2012 example. This is a good first illustration of the potential of the design. The red line indicates the actual eligibility cutoff. As I will discuss later in the robustness section, there seems to be some indication that young Floridians are confused about the difference between being 18 by election day (red line), and being 18 by the last day to register to vote for the general election (blue line). This is partially the failure of the Florida Division of Elections, as their online materials don’t explain the distinction well. This may also explain why my results are sensitive to variation in bandwith- a sharp change in behavior appears to occur 29 days before the actual eligibility deadline as well.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig_1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure 1: Example Discontinuity 1</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fig_2.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure 2: Example Discontinuity 2</figcaption>
+</figure>
+</div>
+</section>
+<section id="estimand" class="level1">
+<h1>Estimand</h1>
+<p>Given this data, we can estimate a Complier Average Causal Effect (CACE). Define <span class="math inline">D</span> to be the number of votes cast in the upstream election, and <span class="math inline">Y</span> to be votes in the downstream election. As a reminder, one cannot assign <span class="math inline">Y</span>, one can only leverage the encouragement to do so created by being just eligible, which I label <span class="math inline">Z ∈ [0,1]</span>, with 0 being too young, and 1 being old enough to vote in 2008 respectively. The forcing variable, days above or below being old enough to vote in 2008, I label <span class="math inline">T</span>. Lagged refers to lagged downstream vote total for the birthdate cohort one year older, used to eliminate other temporal trends. For individual birthdate cohorts, I use subscript <span class="math inline">i</span>’s.</p>
+<p>The estimand is thus:</p>
+<p><span class="math display">\lim _{T \downarrow 0} \sum_1^N\left[Y_i \mid D_{1 i}=1\right]-\lim _{T \uparrow 0} \sum_1^N\left[Y_i \mid D_{1 i}=0\right]</span></p>
+<p>This is the additional number of votes in the downstream year we would expect across cohorts if all voters did vote in the upstream one, beyond the number if each cohort’s subjects had not voted in the upstream, among only the compliers, subjects who vote if and only if they receive the “encouragement” of being eligible in the upstream. This CACE is identified only at the cutoff, which as discussed above considerably restricts our ability to generalize these findings to the full voting or even young voter population. Following Coppock and Green, I present these as expected proportions of increase, ie .06 or 6% increase in upstream turnout, as this makes it easier to compare to earlier work. This must be restricted to compliers only because they are the only group in our analysis whose behavior changes just above or below being 18 on election day. For example, the encouragement provided by becoming eligible does not influence the behavior of “never takers”, those who would never vote. Our encouragement cannot create a difference in votes cast for this group or any other that is not the compliers: being just above or below the eligibility threshold only potentially alters the observed outcome of the compliers.</p>
+</section>
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<p>I use linear 2 stage least squares (2SLS) regressions to estimate these CACEs:</p>
+<p><span class="math display">\begin{aligned} &amp; D=\alpha_0+\alpha_1 Z+\alpha_2 T+\alpha_3 T * Z+\alpha_4 \text { Lagged }+ \text { Controls }+\varepsilon(1) \\ &amp; Y=\beta_0+\beta_1 D+\beta_2 T+\beta_3 T * D+\beta_4 \text { Lagged }+ \text { Controls }+\varepsilon(2)\end{aligned}</span></p>
+<p>With our fuzzy regression discontinuity estimate of the CACE as <span class="math inline">β_1</span>. <span class="math inline">T</span> is centered at 0, removing the need to complicate this definition by including the interaction term. I have 9 different control variables for each birthdate cohort, which can be thought of as divided into three blocks: gender (% female/% male), race (% White, %Black, %Asian, %Hispanic), and party (% Democrat,% Republican,% No Party Affiliation). When estimating a subset CACE that is part of a block, I do not include any control variables from that block. For instance, with the data subset to only Hispanics to estimate the Hispanic CACEs, % White, Black, and Asian are all 0, and thus excluded. My main results are estimated with a 365-day bandwidth around the upstream election and using first order polynomials, as suggested by bandwith selection algorithms (Imbens &amp; Kalyanaraman, 2009). In the robustness checks section, I describe how varying choices of bandwidth and controls influence these estimates.</p>
+<p>I estimate 60 different CACEs in total. I have 2 estimates for each of type of election pair (presidential-presidential, midterm-midterm, and presidential-midterm), which I then estimate for 10 different subsets: one for each of the 9 controls, plus the overall Florida estimate as a point of comparison. These are carried out with the AER R package for estimation, and using the rdrobust R package for access to bandwidth selection algorithms. All code is available in the appendix.</p>
+</section>
+<section id="assumptions" class="level1">
+<h1>Assumptions</h1>
+<p>In order for the fuzzy regression discontinuity design to correctly identify and estimate the CACE, 5 different assumptions must be met. I discuss each in turn.</p>
+<p><strong>Exclusion:</strong> Is there any path other than through D through which the “treatment” of being just eligible in the upstream election could affect propensity to vote in the downstream election? Absent a history of actually participating, it is unlikely that someone who becomes eligible slightly earlier would be more likely to be targeted by a campaign to turn out. We can, however, imagine a subject who knew they would be eligible paying more attention in the upstream contest than someone who knew they would not be, which could spark more interest by the subsequent election. Similarly, a subject who missed voting in their first presidential election but was eligible might be more motivated in the downstream election for a fear of missing out again (“I missed voting for Obama, but won’t do so again”). With all such paths that imagine a more engaged citizen for their first presidential election, however, one has to imagine that most such citizens would want to put that energy towards voting in the first election. Thus, while we have no way to rule out such backdoor paths from being just eligible the upstream election to voting in the downstream, we have to imagine such cases would be relatively rare.</p>
+<p><strong>Effectiveness of the Instrument:</strong> While just being eligible alone likely has a relatively weak effect on subsequent turnout, given that we are working at the scale of a full state voter file, we can be confident we have generated a reasonable number of compliers to at least detect strong effects for many subsets.</p>
+<p><strong>Monotonicity:</strong> A defier in this design would be someone who votes despite not quite being old enough, or vice versa. Given that this constitutes a felony, and a hard to commit one with little benefit, we can be extremely confident in this form of the assumption. Alternatively, someone could choose to not vote only if just eligible, which again implies an extremely unlikely stance towards election law.</p>
+<p><strong>Ignorability:</strong> Here, we need to be clear that we mean ignorability within some cutoff of being just eligible, given our covariates: <span class="math inline">Y(1),Y(0) ⊥Z | x,x ϵ (C-a,C+a)</span>. It seems plausible that being a month above or below 18 on election day shouldn’t create any other major changes in a 17 or 18 year old’s potential outcomes. However, as we get farther from the eligibility threshold it becomes more plausible that the groups could diverge through, for example, differences in maturity or differences in education due to birthdate.</p>
+<p><strong>Cutoff and forcing variable determined independently:</strong> It seems unlikely that either Election Day or someone’s recorded birthday could be moved to help a subject vote earlier. Federal Election Day has been fixed in the United States since 1945. Further, it seems exceedingly unlikely that a parent or hospital administrator would attempt to modify a birth certificate simply to allow their child to vote 1 year earlier.</p>
+<p><strong>Estimation:</strong> As we saw in the plots above, there seems to be little non-linear trend in Y above or below the cutoff, simplifying modeling <span class="math inline">E[Y|X]</span>. Also, while there might be some concern with day of the week, seasonal, or other temporal trends in the number of dates on a given birthdate and thus the number of expected votes there, including the year lagged variable should arguably be sufficient to model them, provided any trends aren’t particularly unique to 1990 births. Compared to prior work, my 9 controls make it much easier to believe that we can model E[Y|X] precisely.</p>
+<p><strong>SUTVA:</strong> Lastly, there is little reason to believe that the encouragement to vote provided to one subject by turning 18 close to election day could influence another subject. While we can imagine students influencing each other’s politics, it seems implausible that a friend turning 18 close to election day alone could change a student’s propensity to vote meaningfully.</p>
+<p>Outside of the questions of strength of instrument which I discuss next in detail, most of these assumptions don’t seem to face any major violations that we should be particularly worried about.</p>
+</section>
+<section id="instrument-effectiveness" class="level1">
+<h1>Instrument Effectiveness</h1>
+<p>Given that strength of instruments is a major concern in this body of research, and given prior work has posited CACEs from subset estimation like I use would be too imprecise to really understand heterogeneity, it is important to give a precise characterization of my instrument’s strength. This can be easily done using just the first stage of my 2SLS estimates above, effectively presenting how many downstream votes we expect our instrument to generate for a variety of specifications. In table 2 below, the first estimate is the number of votes we believe to be generated by our instrument (the coefficient on α_1) for the 2008-2012 pair. Past work has been comfortable presenting this level of result as sufficiently precise. Next is the 2010-2014 pair, which prior work has also interpreted extensively. Restricting my data to blacks who are only 20% of the voting population is instructive- while fewer votes are of course generated, we can still expect an amount of precision in black presidential pairs similar to that in the full population in midterms. Hispanic voters show a similar trend given a similar share of the population, and white voter estimates will be even more precise as they are over half of Floridian voters. It is also important to show where this strategy breaks down- with the Asian (2% of population) subset, our estimates will be very imprecise, even for the presidential pair, and effectively useless for the midterms. Stepping back, given there is no prior knowledge about heterogeneity of CACEs by race, party, and gender, even these relatively coarse instruments are capable of showing any strong trends that exist, or ruling out ones that do not.</p>
 
 
 </section>
