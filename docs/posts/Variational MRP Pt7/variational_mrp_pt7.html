@@ -234,7 +234,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p><strong>Note:</strong> Since</p>
+<p><strong>Note:</strong> Since writing this post, <a href="https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro">Pathfinder</a> has become available in CmdStan, which poses a problem for this concluding post to the series.</p>
+<p>More specifically, the running example (a simple-ish MRP model), was chosen to be too complex to get a good approximation with a simple mean-field or full-rank approximation as implemented by <code>rstanarm</code>, but Pathfinder is both significantly faster than what’s below, and quite capable here.</p>
+<p>This is a bit awkward, but is informative. I generally still endorse my thoughts below about how to make variational inference work for much more complex models. That said, the series example now lives in an awkward middle ground where the most basic methods fail, but middle of the road options like Pathfinder can outperform complex methods like those I spent the series introducing.</p>
+<p>Another point worth emphasizing here is that the methods below are not only inefficient compared to Pathfinder, they produce worse posteriors with regards to uncertainty! This highlights that more complex tools for variational inference are not uniformly better for all problems, even if something like the methods below might still be in my toolbox for more challenging models.</p>
 <hr>
 <p>This is the final post in my series about using Variational Inference to speed up complex Bayesian models, such as Multilevel Regression and Poststratification. Ideally, we want to do this without the approximation being of hilariously poor quality.</p>
 <p>The last few posts in the series have explored several different major advances in black box variational inference. This post puts a bunch of these tools together to build a pretty decent approximation that runs ~8x faster than MCMC, and points to some other advances in BBVI I haven’t had time to cover in the series.</p>

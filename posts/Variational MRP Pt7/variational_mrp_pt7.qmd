@@ -9,7 +9,19 @@ categories:
   - Variational Inference
 ---
 
-**Note:** Since 
+**Note:** Since writing this post, [Pathfinder](https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro) has become available in CmdStan, which poses a problem for this concluding post to
+the series. 
+
+More specifically, the running example (a simple-ish MRP model), was chosen to be
+too complex to get a good approximation with a simple mean-field or full-rank
+approximation as implemented by `rstanarm`, but Pathfinder is both significantly faster than what's below, and
+quite capable here.
+
+This is a bit awkward, but is informative. I generally still endorse my thoughts
+below about how to make variational inference work for much more complex models. That said, the series example now lives in an awkward middle ground where the most basic methods fail, but middle of the road options like Pathfinder can outperform complex methods like those I spent the series introducing.
+
+Another point worth emphasizing here is that the methods below are not only inefficient
+compared to Pathfinder, they produce worse posteriors with regards to uncertainty! This highlights that more complex tools for variational inference are not uniformly better for all problems, even if something like the methods below might still be in my toolbox for more challenging models.
 
 ---
 
