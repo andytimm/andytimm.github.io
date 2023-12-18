@@ -9,7 +9,7 @@ categories:
   - Variational Inference
 ---
 
-**Note:** Since writing this post, [Pathfinder](https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro) has become available in CmdStan, which poses a problem for this concluding post to
+**Note:** Since writing this post, [Pathfinder](https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro) (described below as well in @sec-other-algos)  has become available in CmdStan, which poses a problem for this concluding post to
 the series. 
 
 More specifically, the running example (a simple-ish MRP model), was chosen to be
@@ -257,7 +257,7 @@ This is by no means a authoritative list, but hopefully this set of suggestions
 for the most common issues I've had with variational inference in a variety
 of applied models is helpful. I'd also highly recommend the [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf) paper mentioned above for more practical guidance of this type.
 
-# Other things I didn’t cover
+# Other things I didn’t cover {#sec-other-algos}
 
 Variational Inference is a decent sized research area, so I couldn't cover everything
 in this series. As a way to wrap up, I want to gesture at some other papers

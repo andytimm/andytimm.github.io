@@ -224,7 +224,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#what-i-might-change-next" id="toc-what-i-might-change-next" class="nav-link" data-scroll-target="#what-i-might-change-next">What I might change next</a></li>
   <li><a href="#what-i-might-change-for-other-models" id="toc-what-i-might-change-for-other-models" class="nav-link" data-scroll-target="#what-i-might-change-for-other-models">What I might change for other models</a></li>
-  <li><a href="#other-things-i-didnt-cover" id="toc-other-things-i-didnt-cover" class="nav-link" data-scroll-target="#other-things-i-didnt-cover">Other things I didn’t cover</a></li>
+  <li><a href="#sec-other-algos" id="toc-sec-other-algos" class="nav-link" data-scroll-target="#sec-other-algos">Other things I didn’t cover</a></li>
   </ul>
 </nav>
     </div>
@@ -234,7 +234,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p><strong>Note:</strong> Since writing this post, <a href="https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro">Pathfinder</a> has become available in CmdStan, which poses a problem for this concluding post to the series.</p>
+<p><strong>Note:</strong> Since writing this post, <a href="https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro">Pathfinder</a> (described below as well in <a href="#sec-other-algos">Section&nbsp;5</a>) has become available in CmdStan, which poses a problem for this concluding post to the series.</p>
 <p>More specifically, the running example (a simple-ish MRP model), was chosen to be too complex to get a good approximation with a simple mean-field or full-rank approximation as implemented by <code>rstanarm</code>, but Pathfinder is both significantly faster than what’s below, and quite capable here.</p>
 <p>This is a bit awkward, but is informative. I generally still endorse my thoughts below about how to make variational inference work for much more complex models. That said, the series example now lives in an awkward middle ground where the most basic methods fail, but middle of the road options like Pathfinder can outperform complex methods like those I spent the series introducing.</p>
 <p>Another point worth emphasizing here is that the methods below are not only inefficient compared to Pathfinder, they produce worse posteriors with regards to uncertainty! This highlights that more complex tools for variational inference are not uniformly better for all problems, even if something like the methods below might still be in my toolbox for more challenging models.</p>
@@ -337,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>There’s a whole part of the posterior entirely missing:</strong> I’ve only really seen this with highly multi-modal posteriors, but sometimes a single ELBO based model will only meaningfully cover a single mode in a parameter you care about. In this case, I’ve found a few smaller models averaged/MIS’d together to be the simplest solution- a single model that covers all modes is often quite hard given the mode seeking behavior of the ELBO that I discussed in post 3. Trying a different loss here is an option, but for more complex posteriors, I often struggle to get convergence with the CUBO.</p>
 <p>This is by no means a authoritative list, but hopefully this set of suggestions for the most common issues I’ve had with variational inference in a variety of applied models is helpful. I’d also highly recommend the <a href="https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf">Advances In Black-Box VI</a> paper mentioned above for more practical guidance of this type.</p>
 </section>
-<section id="other-things-i-didnt-cover" class="level1">
+<section id="sec-other-algos" class="level1">
 <h1>Other things I didn’t cover</h1>
 <p>Variational Inference is a decent sized research area, so I couldn’t cover everything in this series. As a way to wrap up, I want to gesture at some other papers that are worthwhile, but weren’t worth a full post in this series.</p>
 <p><strong>Better Optimization for Variational Inference:</strong> Besides the work on step search in <a href="https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf">Advances In Black-Box VI</a>, there are two really good papers on improving the underlying gradients we optimize on in variational inference. First, the <a href="https://arxiv.org/abs/1703.09194">Sticking the Landing</a> gradient estimator removes the score term in the total gradient with respect to the variational parameters. The result is a still unbiased<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, but lower variance gradient estimator which helps a lot with both normalizing flow and simpler approximation fitting. Second, for when using importance weighted training, there’s the <a href="https://arxiv.org/abs/1810.04152">doubly reparameterized gradient (DReG)</a> estimator, which is both lower variance and unbiased via a clever (second) application of the reparameterization trick.</p>
