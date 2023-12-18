@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2023-12-18T21:28:22.364Z</lastmod>
+    <lastmod>2023-12-18T22:17:08.996Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2023-12-18T20:53:06.405Z</lastmod>
+    <lastmod>2023-12-18T22:00:33.000Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/LICENSE.html</loc>
@@ -83,5 +83,9 @@
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt7/variational_mrp_pt7.html</loc>
     <lastmod>2023-12-18T19:58:00.622Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html</loc>
+    <lastmod>2023-12-18T22:10:01.466Z</lastmod>
   </url>
 </urlset>
