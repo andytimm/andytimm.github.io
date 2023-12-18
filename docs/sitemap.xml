@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2023-12-07T21:41:39.560Z</lastmod>
+    <lastmod>2023-12-18T19:17:22.971Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
@@ -58,7 +58,7 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</loc>
-    <lastmod>2023-05-27T16:14:33.349Z</lastmod>
+    <lastmod>2023-12-18T19:16:51.503Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html</loc>
@@ -79,5 +79,9 @@
   <url>
     <loc>https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</loc>
     <lastmod>2023-12-07T21:41:40.731Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt7/variational_mrp_pt7.html</loc>
+    <lastmod>2023-12-18T19:17:19.801Z</lastmod>
   </url>
 </urlset>
