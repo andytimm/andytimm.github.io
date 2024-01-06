@@ -5,7 +5,7 @@ editor: visual
 
 ## `rswjax`
 
-A [JAX](https://github.com/google/jax) implementation of optimal representative sample weighting, drawing heavily on the original `rsw` implementation of Barratt, Angeris, and Boyd ([rsw](https://github.com/cvxgrp/rsw/tree/master)). Thanks to rewriting some core operations in Jax, it is significantly faster than `rsw` for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition,
+A [JAX](https://github.com/google/jax) implementation of optimal representative sample weighting, drawing heavily on the original `rsw` implementation of Barratt, Angeris, and Boyd ([rsw](https://github.com/cvxgrp/rsw/tree/master)). Thanks to rewriting some core operations in JAX, it is significantly faster than `rsw` for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition,
 it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in [regularized raking](https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html), and wanting to iterate faster on large weighting problems.
 
 ```{=html}
