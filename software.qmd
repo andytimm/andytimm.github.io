@@ -3,7 +3,24 @@ title: "Software"
 editor: visual
 ---
 
-Most of the cool stuff I get to build these days isn't public unfortunately. Hoping to expand out my public stuff eventually, but I do have an R package that gets some use:
+## `rswjax`
+
+A [JAX](https://github.com/google/jax) implementation of optimal representative sample weighting, drawing heavily on the original `rsw` implementation of Barratt, Angeris, and Boyd ([rsw](https://github.com/cvxgrp/rsw/tree/master)). Thanks to rewriting some core operations in Jax, it is significantly faster than `rsw` for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition,
+it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in [regularized raking](https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html), and wanting to iterate faster on large weighting problems.
+
+```{=html}
+    <a class="btn btn-outline-dark btn-sm" href="https://stanford.edu/~boyd/papers/optimal_representative_sampling.html" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-file-text" role="img" aria-label="Original Paper"></i>
+    Original Paper
+</a>
+    </a> <a class="btn btn-outline-dark btn-sm" ,="" href=https://github.com/andytimm/rswjax target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-github" role="img" aria-label="Github"></i>
+        Github
+    </a> <a class="btn btn-outline-dark btn-sm" ,="" href="https://pypi.org/project/rswjax/" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-box-seam" role="img" aria-label="Package"></i>
+        Package
+    </a>
+```
 
 ## `retrodesign`
 

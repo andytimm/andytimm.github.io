@@ -312,7 +312,7 @@
     "href": "software.html",
     "title": "Software",
     "section": "",
-    "text": "Most of the cool stuff I get to build these days isn’t public unfortunately. Hoping to expand out my public stuff eventually, but I do have an R package that gets some use:"
+    "text": "A JAX implementation of optimal representative sample weighting, drawing heavily on the original rsw implementation of Barratt, Angeris, and Boyd (rsw). Thanks to rewriting some core operations in Jax, it is significantly faster than rsw for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition, it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in regularized raking, and wanting to iterate faster on large weighting problems.\n    \n    \n    Original Paper\n\n     \n        \n        Github\n     \n        \n        Package"
   },
   {
     "objectID": "software.html#retrodesign",
@@ -523,5 +523,12 @@
     "title": "Who Forms Voting Habits?",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nIt’s hard to TL;DR why I’m unsure about causes of effects, but essentially the methods don’t give us much ability to differentiate the “direct” effect of voting in one electing on voting in the next, versus anything that initial vote sets in action before the following election. For example, a campaign attempting to turn you out to vote would be impossible to distinguish from the direct effect of habit using this approach. Given that non-affiliated voters generally get less targeted turnout outreach, one plausible story is that voting doesn’t so much form habits as opt you into political contact of numerous types because you are seen as a “likely voter”.↩︎\nI avoid the term independent for these voters because many states have independent or independence parties, which is a common source of confusion.↩︎"
+  },
+  {
+    "objectID": "software.html#rswjax",
+    "href": "software.html#rswjax",
+    "title": "Software",
+    "section": "",
+    "text": "A JAX implementation of optimal representative sample weighting, drawing heavily on the original rsw implementation of Barratt, Angeris, and Boyd (rsw). Thanks to rewriting some core operations in Jax, it is significantly faster than rsw for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition, it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in regularized raking, and wanting to iterate faster on large weighting problems.\n    \n    \n    Original Paper\n\n     \n        \n        Github\n     \n        \n        Package"
   }
 ]
