@@ -1,0 +1,35 @@
+---
+layout: post
+title: Kangaroos, Fosters, and E.T. Jaynes
+subtitle: Also maybe some thoughts on priors
+date: 2024-02-06
+draft: False
+image: imgs/fosters_kangaroo.webp
+categories:
+  - priors
+  - stupid Bayesian stuff
+---
+
+![](imgs/fosters_kangaroo.webp){fig-align="center"}
+
+Ahead of starting a new gig next week (wooo!), I was reviewing a bit about
+multilevel models, and came across this fascinating footnote in Richard McElreath's
+[Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/):
+
+> See Jaynes (1986) for an entertaining example concerning the beer preferences
+of left-handed kangaroos. There is an updated 1996 version of this paper available
+online.
+
+I'm not sure what it is with Bayesians and wild footnotes[^1], but obviously
+I couldn't not chase this one down. Also, the paper didn't immediately pop
+up when I googled "beer preferences of left-handed kangaroos", so hopefully this post
+gets a few people where they're going.
+
+
+# Why on earth are we talking about kangroo's beer preferences?
+
+To be clear, we're actually talking about the *beer preferences of kangaroos
+
+
+
+[^1]: [Dan Simpson's](https://dansblog.netlify.app/) are particularly incredible.

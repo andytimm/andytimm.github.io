@@ -10,7 +10,56 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Mon, 18 Dec 2023 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 06 Feb 2024 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Kangaroos, Fosters, and E.T. Jaynes</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Ahead of starting a new gig next week (wooo!), I was reviewing a bit about multilevel models, and came across this fascinating footnote in Richard McElreath’s <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>:</p>
+<blockquote class="blockquote">
+<p>See Jaynes (1986) for an entertaining example concerning the beer preferences of left-handed kangaroos. There is an updated 1996 version of this paper available online.</p>
+</blockquote>
+<p>I’m not sure what it is with Bayesians and wild footnotes<sup>1</sup>, but obviously I couldn’t not chase this one down. Also, the paper didn’t immediately pop up when I googled “beer preferences of left-handed kangaroos”, so hopefully this post gets a few people where they’re going.</p>
+<section id="why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="level1">
+<h1>Why on earth are we talking about kangroo’s beer preferences?</h1>
+<p>To be clear, we’re actually talking about the *beer preferences of kangaroos</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p><a href="https://dansblog.netlify.app/">Dan Simpson’s</a> are particularly incredible.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
+  author = {Timm, Andy},
+  title = {Kangaroos, {Fosters,} and {E.T.} {Jaynes}},
+  date = {2024-02-06},
+  url = {https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas">
+Timm, Andy. 2024. <span>“Kangaroos, Fosters, and E.T. Jaynes.”</span>
+February 6, 2024. <a href="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html">https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</a>.
+</div></div></section></div> ]]></description>
+  <category>priors</category>
+  <category>stupid Bayesian stuff</category>
+  <guid>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</guid>
+  <pubDate>Tue, 06 Feb 2024 05:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp" medium="image" type="image/webp"/>
+</item>
 <item>
   <title>Who Forms Voting Habits?</title>
   <dc:creator>Andy Timm</dc:creator>

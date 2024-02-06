@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2023-12-18T22:17:08.996Z</lastmod>
+    <lastmod>2024-02-06T16:15:43.412Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
@@ -87,5 +87,9 @@
   <url>
     <loc>https://andytimm.github.io/posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html</loc>
     <lastmod>2023-12-18T22:10:01.466Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</loc>
+    <lastmod>2024-02-06T16:15:44.918Z</lastmod>
   </url>
 </urlset>
