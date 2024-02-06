@@ -9,7 +9,7 @@
 <meta name="author" content="Andy Timm">
 <meta name="dcterms.date" content="2024-02-06">
 
-<title>Andy Timm - Kangaroos, Fosters, and E.T. Jaynes</title>
+<title>Andy Timm - Kangaroos, Foster’s, and E.T. Jaynes</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,13 +64,29 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Andy Timm - Kangaroos, Fosters, and E.T. Jaynes">
+<meta property="og:title" content="Andy Timm - Kangaroos, Foster’s, and E.T. Jaynes">
 <meta property="og:description" content="Also maybe some thoughts on priors">
 <meta property="og:image" content="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp">
 <meta property="og:site-name" content="Andy Timm">
-<meta name="twitter:title" content="Andy Timm - Kangaroos, Fosters, and E.T. Jaynes">
+<meta name="twitter:title" content="Andy Timm - Kangaroos, Foster’s, and E.T. Jaynes">
 <meta name="twitter:description" content="Also maybe some thoughts on priors">
 <meta name="twitter:image" content="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp">
 <meta name="twitter:creator" content="@andy_timm">
@@ -122,7 +138,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Kangaroos, Fosters, and E.T. Jaynes</h1>
+      <h1 class="title">Kangaroos, Foster’s, and E.T. Jaynes</h1>
             <p class="subtitle lead">Also maybe some thoughts on priors</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">priors</div>
@@ -160,7 +176,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#why-on-earth-are-we-talking-about-kangroos-beer-preferences" id="toc-why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="nav-link active" data-scroll-target="#why-on-earth-are-we-talking-about-kangroos-beer-preferences">Why on earth are we talking about kangroo’s beer preferences?</a></li>
+  <li><a href="#why-on-earth-are-we-talking-about-kangroos-beer-preferences" id="toc-why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="nav-link active" data-scroll-target="#why-on-earth-are-we-talking-about-kangroos-beer-preferences">Why on earth are we talking about kangroos’ beer preferences?</a></li>
+  <li><a href="#but-first-more-kangaroo-facts" id="toc-but-first-more-kangaroo-facts" class="nav-link" data-scroll-target="#but-first-more-kangaroo-facts">But first, more kangaroo facts</a></li>
   </ul>
 </nav>
     </div>
@@ -180,8 +197,9 @@ ul.task-list li input[type="checkbox"] {
 <p>See Jaynes (1986) for an entertaining example concerning the beer preferences of left-handed kangaroos. There is an updated <a href="https://bayes.wustl.edu/etj/articles/cmonkeys.pdf">1996 version</a> of this paper available online.</p>
 </blockquote>
 <p>I’m not sure what it is with Bayesians and wild, fantastic adventures in the footnotes<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, but obviously I couldn’t not chase this one down. Also, the paper didn’t immediately pop up when I googled “beer preferences of left-handed kangaroos”, so hopefully this post gets a few people where they’re going.</p>
+<p>I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo drinking a Foster’s, but the more serious content of the post discusses different conceptions of maximum entropy, and how useful the idea is in building prior distributions for Bayesian inference.</p>
 <section id="why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="level1">
-<h1>Why on earth are we talking about kangroo’s beer preferences?</h1>
+<h1>Why on earth are we talking about kangroos’ beer preferences?</h1>
 <p>To be clear, we’re actually talking about the <em>joint distribution of beer preferences of kangaroos and their handedness</em>. Why?</p>
 <p>In the time-honored tradition of taking a joke and continuing to run with it until it’s funny, E.T. Jaynes is extending an example due to Steve Gull<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to discuss the properties of <a href="https://en.wikipedia.org/wiki/Principle_of_maximum_entropy">maximum entropy</a> priors:</p>
 <div class="quarto-figure quarto-figure-center">
@@ -189,7 +207,21 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="imgs/problem_setup.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>Extending analysis of this scenario based on clarifying our prior knowledge then provides a tutorial in prior specification.</p>
+<p>Extending analysis of this scenario then provides a tutorial in prior specification.</p>
+<p>For example, the first piece of intuitive prior knowledge that Jaynes shares is that kangaroos are (for most practical purposes) indivisible<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Constraining acceptable priors to ones with integer solutions tweaks the problem and corresponding reasonable priors a bit.</p>
+<p>From there, the article provides a nice example of a difficult Bayesian task: taking our priors seriously, and seeing how we feel about what they imply. For example, when taken to large N<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, the simplest maximum entropy prior starts to become remarkably confident about the unknown proportions <span class="math inline">p</span> above. The question that arises is whether our intuition about <span class="math inline">p</span> were poor, or whether we have hidden prior information to incorporate (i.e: do we know that kangaroos are likely to be related given they are drawn from the same genetic pool and environment)?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="imgs/hidden_kangaroo_knowledge.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">As I often ask myself…</figcaption>
+</figure>
+</div>
+<p>With the ensuing sermon<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, Jaynes makes the case that maximum entropy remains a useful, logical tool for building priors. Interestingly, this argument has a different presentation of maxent than more recent pieces that place these priors alongside reference, Jeffreys, or invariance-based priors<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. Jaynes instead lays out a presentation that feels more like a workflow, with maximum entropy itself providing a starting point.</p>
+</section>
+<section id="but-first-more-kangaroo-facts" class="level1">
+<h1>But first, more kangaroo facts</h1>
+<p>Just like our understanding of Bayesian inference has advanced since the 1980s, so has our understanding of kangaroo handedness.</p>
+<p><a href="https://www.cell.com/current-biology/fulltext/S0960-9822(15)00617-X#articleInformation">Giljov et al.&nbsp;(2015)</a> study the broader class of bipedal macropod[^7] marsupials, and</p>
 
 
 </section>
@@ -200,16 +232,20 @@ ul.task-list li input[type="checkbox"] {
 <ol>
 <li id="fn1"><p><a href="https://dansblog.netlify.app/">Dan Simpson’s</a> are particularly incredible.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Who I have to imagine Australians were thrilled with for this novel joke. I’m sure if the dropbear or ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then this problem would have been about the preferred reading angles of drop bears or something instead.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Fosters? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>umber of kangaroos.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>his wonderful term, not mine.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>For example, how the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page, or <a href="https://www.mdpi.com/1099-4300/19/10/555">Gelman, Simpson, and Betancourt (2017)</a> which I’ll discuss later in the post. [&amp;7]<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
   author = {Timm, Andy},
-  title = {Kangaroos, {Fosters,} and {E.T.} {Jaynes}},
+  title = {Kangaroos, {Foster’s,} and {E.T.} {Jaynes}},
   date = {2024-02-06},
   url = {https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas" role="listitem">
-Timm, Andy. 2024. <span>“Kangaroos, Fosters, and E.T. Jaynes.”</span>
+Timm, Andy. 2024. <span>“Kangaroos, Foster’s, and E.T. Jaynes.”</span>
 February 6, 2024. <a href="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html">https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

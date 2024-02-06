@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Kangaroos, Fosters, and E.T. Jaynes
+title: Kangaroos, Foster's, and E.T. Jaynes
 subtitle: Also maybe some thoughts on priors
 date: 2024-02-06
 draft: False
@@ -25,8 +25,13 @@ I couldn't not chase this one down. Also, the paper didn't immediately pop
 up when I googled "beer preferences of left-handed kangaroos", so hopefully this post
 gets a few people where they're going.
 
+I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo
+drinking a Foster's, but the more serious content of the post discusses different
+conceptions of maximum entropy, and how useful the idea is in building prior
+distributions for Bayesian inference.
 
-# Why on earth are we talking about kangroo's beer preferences?
+
+# Why on earth are we talking about kangroos' beer preferences?
 
 To be clear, we're actually talking about the *joint distribution of beer preferences of kangaroos
 and their handedness*. Why?
@@ -38,11 +43,49 @@ the properties of [maximum entropy](https://en.wikipedia.org/wiki/Principle_of_m
 
 ![](imgs/problem_setup.png){fig-align="center"}
 
-Extending analysis of this scenario based on clarifying our prior knowledge then
+Extending analysis of this scenario then
 provides a tutorial in prior specification.
+
+For example, the first piece of intuitive prior knowledge that Jaynes shares
+is that kangaroos are (for most practical purposes) indivisible[^3]. Constraining acceptable priors
+to ones with integer solutions tweaks the problem and corresponding reasonable
+priors a bit.
+
+From there, the article provides a nice example of a difficult Bayesian task:
+taking our priors seriously, and seeing how we feel about what they imply. For example, when
+taken to large N[^4], the simplest maximum entropy prior starts to become
+remarkably confident about the unknown proportions $p$ above. The question that arises
+is whether our intuition about $p$ were poor, or whether we have hidden prior
+information to incorporate (i.e: do we know that kangaroos are likely to be
+related given they are drawn from the same genetic pool and environment)?
+
+![As I often ask myself...](imgs/hidden_kangaroo_knowledge.png){fig-align="center"}
+
+With the ensuing sermon[^5], Jaynes makes the case that maximum entropy remains
+a useful, logical tool for building priors. Interestingly, this argument has a
+different presentation of maxent than more recent pieces that place these priors alongside
+reference, Jeffreys, or invariance-based priors[^6]. Jaynes instead lays out
+a presentation that feels more like a workflow, with maximum entropy itself
+providing a starting point.
+
+# But first, more kangaroo facts
+
+Just like our understanding of Bayesian inference has advanced since the 1980s,
+so has our understanding of kangaroo handedness.
+
+[Giljov et al. (2015)](https://www.cell.com/current-biology/fulltext/S0960-9822(15)00617-X#articleInformation)
+study the broader class of bipedal macropod[^7] marsupials, and 
+
 
 
 [^1]: [Dan Simpson's](https://dansblog.netlify.app/) are particularly incredible.
 [^2]: Who I have to imagine Australians were thrilled with for this novel joke. I'm
 sure if the dropbear or  ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then this problem
 would have been about the preferred reading angles of drop bears or something instead.
+[^3]: If one did divide a kangaroo, would it still have a preference for Fosters?
+I suppose it would depend on the type of division, but I have to imagine most
+types of division would leave the kangaroo desiring something a bit stronger.
+[^4]: umber of kangaroos.
+[^5]: his wonderful term, not mine.
+[^6]: For example, how the [Stan Prior Choice Recommendations](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles) page, or [Gelman, Simpson, and Betancourt (2017)](https://www.mdpi.com/1099-4300/19/10/555) which I'll discuss later in the post.
+[&7]

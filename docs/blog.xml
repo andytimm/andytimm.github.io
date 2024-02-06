@@ -12,7 +12,7 @@
 <generator>quarto-1.3.450</generator>
 <lastBuildDate>Tue, 06 Feb 2024 05:00:00 GMT</lastBuildDate>
 <item>
-  <title>Kangaroos, Fosters, and E.T. Jaynes</title>
+  <title>Kangaroos, Foster’s, and E.T. Jaynes</title>
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</link>
   <description><![CDATA[ 
@@ -30,8 +30,9 @@
 <p>See Jaynes (1986) for an entertaining example concerning the beer preferences of left-handed kangaroos. There is an updated <a href="https://bayes.wustl.edu/etj/articles/cmonkeys.pdf">1996 version</a> of this paper available online.</p>
 </blockquote>
 <p>I’m not sure what it is with Bayesians and wild, fantastic adventures in the footnotes<sup>1</sup>, but obviously I couldn’t not chase this one down. Also, the paper didn’t immediately pop up when I googled “beer preferences of left-handed kangaroos”, so hopefully this post gets a few people where they’re going.</p>
+<p>I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo drinking a Foster’s, but the more serious content of the post discusses different conceptions of maximum entropy, and how useful the idea is in building prior distributions for Bayesian inference.</p>
 <section id="why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="level1">
-<h1>Why on earth are we talking about kangroo’s beer preferences?</h1>
+<h1>Why on earth are we talking about kangroos’ beer preferences?</h1>
 <p>To be clear, we’re actually talking about the <em>joint distribution of beer preferences of kangaroos and their handedness</em>. Why?</p>
 <p>In the time-honored tradition of taking a joke and continuing to run with it until it’s funny, E.T. Jaynes is extending an example due to Steve Gull<sup>2</sup> to discuss the properties of <a href="https://en.wikipedia.org/wiki/Principle_of_maximum_entropy">maximum entropy</a> priors:</p>
 <div class="quarto-figure quarto-figure-center">
@@ -39,7 +40,21 @@
 <p><img src="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/problem_setup.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>Extending analysis of this scenario based on clarifying our prior knowledge then provides a tutorial in prior specification.</p>
+<p>Extending analysis of this scenario then provides a tutorial in prior specification.</p>
+<p>For example, the first piece of intuitive prior knowledge that Jaynes shares is that kangaroos are (for most practical purposes) indivisible<sup>3</sup>. Constraining acceptable priors to ones with integer solutions tweaks the problem and corresponding reasonable priors a bit.</p>
+<p>From there, the article provides a nice example of a difficult Bayesian task: taking our priors seriously, and seeing how we feel about what they imply. For example, when taken to large N<sup>4</sup>, the simplest maximum entropy prior starts to become remarkably confident about the unknown proportions <img src="https://latex.codecogs.com/png.latex?p"> above. The question that arises is whether our intuition about <img src="https://latex.codecogs.com/png.latex?p"> were poor, or whether we have hidden prior information to incorporate (i.e: do we know that kangaroos are likely to be related given they are drawn from the same genetic pool and environment)?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/hidden_kangaroo_knowledge.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">As I often ask myself…</figcaption>
+</figure>
+</div>
+<p>With the ensuing sermon<sup>5</sup>, Jaynes makes the case that maximum entropy remains a useful, logical tool for building priors. Interestingly, this argument has a different presentation of maxent than more recent pieces that place these priors alongside reference, Jeffreys, or invariance-based priors<sup>6</sup>. Jaynes instead lays out a presentation that feels more like a workflow, with maximum entropy itself providing a starting point.</p>
+</section>
+<section id="but-first-more-kangaroo-facts" class="level1">
+<h1>But first, more kangaroo facts</h1>
+<p>Just like our understanding of Bayesian inference has advanced since the 1980s, so has our understanding of kangaroo handedness.</p>
+<p><a href="https://www.cell.com/current-biology/fulltext/S0960-9822(15)00617-X#articleInformation">Giljov et al.&nbsp;(2015)</a> study the broader class of bipedal macropod[^7] marsupials, and</p>
 
 
 </section>
@@ -50,16 +65,20 @@
 <ol>
 <li id="fn1"><p><a href="https://dansblog.netlify.app/">Dan Simpson’s</a> are particularly incredible.↩︎</p></li>
 <li id="fn2"><p>Who I have to imagine Australians were thrilled with for this novel joke. I’m sure if the dropbear or ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then this problem would have been about the preferred reading angles of drop bears or something instead.↩︎</p></li>
+<li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Fosters? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.↩︎</p></li>
+<li id="fn4"><p>umber of kangaroos.↩︎</p></li>
+<li id="fn5"><p>his wonderful term, not mine.↩︎</p></li>
+<li id="fn6"><p>For example, how the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page, or <a href="https://www.mdpi.com/1099-4300/19/10/555">Gelman, Simpson, and Betancourt (2017)</a> which I’ll discuss later in the post. [&amp;7]↩︎</p></li>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
   author = {Timm, Andy},
-  title = {Kangaroos, {Fosters,} and {E.T.} {Jaynes}},
+  title = {Kangaroos, {Foster’s,} and {E.T.} {Jaynes}},
   date = {2024-02-06},
   url = {https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas">
-Timm, Andy. 2024. <span>“Kangaroos, Fosters, and E.T. Jaynes.”</span>
+Timm, Andy. 2024. <span>“Kangaroos, Foster’s, and E.T. Jaynes.”</span>
 February 6, 2024. <a href="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html">https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</a>.
 </div></div></section></div> ]]></description>
   <category>priors</category>
