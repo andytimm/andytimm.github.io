@@ -3,7 +3,7 @@ layout: post
 title: Kangaroos, Foster's, and E.T. Jaynes
 subtitle: Also maybe some thoughts on priors
 date: 2024-02-06
-draft: False
+draft: True
 image: imgs/fosters_kangaroo.webp
 categories:
   - priors
