@@ -17,10 +17,10 @@ multilevel models, and came across this fascinating footnote in Richard McElreat
 [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/):
 
 > See Jaynes (1986) for an entertaining example concerning the beer preferences
-of left-handed kangaroos. There is an updated 1996 version of this paper available
+of left-handed kangaroos. There is an updated [1996 version](https://bayes.wustl.edu/etj/articles/cmonkeys.pdf) of this paper available
 online.
 
-I'm not sure what it is with Bayesians and wild footnotes[^1], but obviously
+I'm not sure what it is with Bayesians and wild, fantastic adventures in the footnotes[^1], but obviously
 I couldn't not chase this one down. Also, the paper didn't immediately pop
 up when I googled "beer preferences of left-handed kangaroos", so hopefully this post
 gets a few people where they're going.
@@ -28,8 +28,21 @@ gets a few people where they're going.
 
 # Why on earth are we talking about kangroo's beer preferences?
 
-To be clear, we're actually talking about the *beer preferences of kangaroos
+To be clear, we're actually talking about the *joint distribution of beer preferences of kangaroos
+and their handedness*. Why?
 
+In the time-honored tradition of taking a joke and continuing to run with it
+until it's funny, E.T. Jaynes is extending an example due to Steve Gull[^2] to discuss
+the properties of [maximum entropy](https://en.wikipedia.org/wiki/Principle_of_maximum_entropy) priors:
+
+
+![](imgs/problem_setup.png){fig-align="center"}
+
+Extending analysis of this scenario based on clarifying our prior knowledge then
+provides a tutorial in prior specification.
 
 
 [^1]: [Dan Simpson's](https://dansblog.netlify.app/) are particularly incredible.
+[^2]: Who I have to imagine Australians were thrilled with for this novel joke. I'm
+sure if the dropbear or  ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then this problem
+would have been about the preferred reading angles of drop bears or something instead.
