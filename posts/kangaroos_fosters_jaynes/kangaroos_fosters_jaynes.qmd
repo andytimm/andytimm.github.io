@@ -44,7 +44,8 @@ the properties of [maximum entropy](https://en.wikipedia.org/wiki/Principle_of_m
 ![](imgs/problem_setup.png){fig-align="center"}
 
 Extending analysis of this scenario then
-provides a tutorial in prior specification.
+provides a tutorial in prior specification, improving the prior slowly to
+ensure it reflects all we know about the example.
 
 For example, the first piece of intuitive prior knowledge that Jaynes shares
 is that kangaroos are (for most practical purposes) indivisible[^3]. Constraining acceptable priors
@@ -94,15 +95,37 @@ we assume that Gull intended his problem to refer to the man sized species
 This seems reasonable enough, but to split unnecessary hairs even further, there
 are two different types of "man sized" kangaroos in the study- [red kangaroos](https://en.wikipedia.org/wiki/Red_kangaroo)
 and [eastern grey kangaroos](https://en.wikipedia.org/wiki/Eastern_grey_kangaroo)[^11][^12]. Digging into the [appendix](https://www.cell.com/cms/10.1016/j.cub.2015.05.043/attachment/6b90006c-b1dc-4683-97dd-03dabd0fdebc/mmc1) to find the raw data since the main paper
-only reports statistical test results, 68% of red kangaroos are left-handed, and 
-80% of eastern grey kangaroos are[^13]. Perhaps Gull was observing his kangaroos
+only reports statistical test results, 80% of red kangaroos are left-handed, and 
+68% of eastern grey kangaroos are[^13]. Perhaps Gull was observing his kangaroos
 in the eastern part of Australia, which (unsurprisingly) is where eastern
 grey kangaroos can be found.
 
-As much as we stand on the shoulders of giants when it comes to Bayesian inference
+As much as we now stand on the shoulders of giants when it comes to Bayesian inference
 and kangaroo handedness, I wasn't able to find any work on the beer preferences
 of kangaroos. That said, I see no reason to doubt Gull's 65% estimate, so let's
 move on to talking about priors.
+
+# Ok, some actual thoughts about priors
+
+In grad school, I was lucky to take a Bayesian inference course from Ben
+Goodrich- he came down from Columbia to teach at NYU. I spent some time in
+his office hours over a few weeks asking questions about maximum entropy.
+
+As I remember it, his position was that maximum entropy could be a useful concept for building
+some intuition about probability, but that it wasn't a good way to land on priors. Richard
+McElreath's take in Statistical Rethinking is similar, if a bit more enthusiastic
+on the intuition building point- chapter 10 develops the concept at length for this
+purpose, but not encouraging it as a tool for making priors.
+
+<personal initial thoughts>
+
+<How is what Jaynes saying a bit richer than that?>
+
+<Examples like the indivisible kangaroos>
+
+<is this still a useful perspective>
+
+<Outro/encouragment to read the paper>
 
 
 [^1]: [Dan Simpson's](https://dansblog.netlify.app/) are particularly incredible.
