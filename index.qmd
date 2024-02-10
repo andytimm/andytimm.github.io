@@ -40,6 +40,6 @@ This new website is still very much a WIP. Thanks to [Drew Dimmery](https://ddim
 :::
 
 ::: {.column-margin .column-container}
-![My Bookshelf as of January 2023. Hopefully more useful than squinting on zoom!](assets/jan2023-bookshelf.jpeg)
+![My Bookshelf as of January 2024. Hopefully more useful than squinting on zoom!](assets/jan2024-bookshelf.jpeg)
 :::
 :::
