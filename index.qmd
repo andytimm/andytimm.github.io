@@ -9,7 +9,7 @@ resources:
 ::: column-page-inset-left
 # About
 
-I was previously Manager of Data Science at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and persuadability modeling, helping our corporate and political clients to better understand the impact of their advertising campaigns and optimize their targeting. Before that, I was a grad student at [NYU Gallatin](https://gallatin.nyu.edu/), where I was lucky to have the freedom to study a wide variety of topics in political science, statistics, and computer science.
+I'm currently a Senior Data Scientist at [Grow Progress](https://growprogress.ai/), where I build our platform for fast, cost-effective, and easily interpretable message testing at scale. Before this, I was a Manager of Data Science at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and persuadability modeling, helping our corporate and political clients to better understand the impact of their advertising campaigns and optimize their targeting.
 
 I like leveraging modern statistical and machine learning tools to more effectively answer social science flavored questions. Some of my substantive interests include the increasing prominence of white identity in American politics, and the extent to which voting is habit forming.
 
