@@ -214,10 +214,28 @@ ul.task-list li input[type="checkbox"] {
 <p>One reasonable model<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> for this is to say that individual <span class="math inline">i</span> making choices among <span class="math inline">j</span> options can be inferred to have some underlying utility <span class="math inline">\mu</span> from the available choices, and that while they usually choose their most preferred option according to their utility function, there is some degree of randomness. The basic model is then</p>
 <p><span class="math display">
 \mu_{ij} = \mu_{ij} + \epsilon_{ij}
-</span> , where the <span class="math inline">\mu_{ij}</span> can have rich provenance (demographics and other individual traits, the context in which the decision is made, the other options available…) but is fixed, but there’s some <span class="math inline">\epsilon_{ij}</span> of randomness involved. To make this model easier to estimate, we assume that <span class="math inline">\epsilon_{ij}</span> has a <a href="https://en.wikipedia.org/wiki/Gumbel_distribution">Gumbel</a><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> distribution. While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let’s think about the data we gather here for a moment.</p>
-<p>To estimate</p>
+</span> , where the <span class="math inline">\mu_{ij}</span> can have rich provenance (demographics and other individual traits, the context in which the decision is made, the other options available…) but is fixed, but there’s some <span class="math inline">\epsilon_{ij}</span> of randomness involved. To make this model easier to estimate, we assume that <span class="math inline">\epsilon_{ij}</span> has a <a href="https://en.wikipedia.org/wiki/Gumbel_distribution">Gumbel</a><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> distribution.</p>
+<p>Under this model, the probability that individual <span class="math inline">i</span> chooses alternative <span class="math inline">j</span> from a choice set <span class="math inline">C_i</span> is: <span class="math display">
+P_{ij} = \frac{\exp(\mu_{ij})}{\sum_{k \in C_i} \exp(\mu_{ik})}
+</span> This is the standard multinomial logit.</p>
+<p>Now, suppose we have a dataset where each individual <span class="math inline">i</span> has made a choice <span class="math inline">y_i</span> from their choice set <span class="math inline">C_i</span>. The likelihood of observing this dataset under the multinomial logit model is: <span class="math display">
+L = \prod_i P_{iy_i} = \prod_i \frac{\exp(\mu_{iy_i})}{\sum_{k \in C_i} \exp(\mu_{ik})}
+</span> The likelihood is the product of the choice probabilities for each individual’s observed choice <span class="math inline">y_i</span>. We can estimate the parameters of the utility function <span class="math inline">\mu_{ij}</span> by maximizing this likelihood function (or, more commonly, the log-likelihood). This is how the single best choice data is naturally incorporated into the likelihood function for the standard multinomial logit model. Each observation contributes a term to the likelihood based on the probability of the chosen “best” alternative under the model.</p>
+<p>While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let’s think about the pressures of gathering data here for a moment.</p>
+<p>To estimate this, we gather respondents and ask them to choose their favorite option amongst a given choice set. As a way to control the difficulty of making a choice while still gathering enough data, we can limit the size of the set (choose the best of 10 items, instead of 20), and repeat the choice task.</p>
+<p>Getting sample and getting them to stick through a bunch of choice tasks is hard though, and it’s only natural to wonder: can we extract more with each choice set? One option would be to ask the respondents to rank ALL the options at once, but if you have a large choice set that sounds exhausting.</p>
+<p>What if we asked people to choose their best and worst choices each time? After all, people might not have strong preferences amongst the middling 18 chocolate bars, but the best and worst seem more memorable, and that’s only 1 more choice[^5].</p>
+<p>And now, (stepping into the trap to show its allure, if you will), what if we don’t want to entirely change up our likelihood to handle the new rich source of data? So instead, we just treat the worsts as the opposite of the bests, which makes a sort of sense, and simplifies the likelihood one hell of a lot:</p>
+<p><span class="math display">
+U_{ij}^W = -U_{ij}^B = -(\mu_{ij} + \epsilon_{ij})
+</span></p>
+<p>Under this assumption, the probability of individual <span class="math inline">i</span> choosing alternative <span class="math inline">j</span> as the worst is: <span class="math display">
+P_{ij}^W = \frac{\exp(-\mu_{ij})}{\sum_{k \in C_i} \exp(-\mu_{ik})}
+</span></p>
+<p>… Now we’ve stepped in it, and Jimmy is mad at us.</p>
 <section id="psycologically-incoherent" class="level2">
 <h2 class="anchored" data-anchor-id="psycologically-incoherent">Psycologically Incoherent</h2>
+<p>What I’ve introduced is the core of the MaxDiff formulation</p>
 </section>
 <section id="mathmatically-incorrect" class="level2">
 <h2 class="anchored" data-anchor-id="mathmatically-incorrect">Mathmatically Incorrect</h2>
