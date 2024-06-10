@@ -1,0 +1,45 @@
+---
+layout: post
+title: Better discrete choice modeling through rank ordered logits
+subtitle: Or- a mathmatically correct model of a psychologically coherent concept
+date: 2024-06-09
+draft: True
+image: imgs/fosters_kangaroo.webp
+categories:
+  - priors
+  - stupid Bayesian stuff
+---
+
+![](imgs/jimmy_dunk.png){fig-align="center"}
+
+The wonderful Jim Savage calls the MaxDiff model of discrete choice a "mathematically
+incorrect model of a psychologically incoherent concept"[^1].
+
+Despite this lovely dunk,
+and some lovely accompanying notes explaining why, the model remains frequently used in market
+research, most prominently as implemented in [Sawtooth](https://sawtoothsoftware.com/). Why is this?
+
+Putting aside the most obvious answers like inertia and a dim view of statistical practice in marketing, it's surprisingly hard to find a fully fleshed out explanation of the alternatives online. In this post, I do just that, with sections for:
+
+1. Introducing MaxDiff and its blemishes
+2. Showing how the issues propagate into final model quality
+3. Alternatives
+
+# Introducing MaxDiff
+
+## The basic model
+
+## Psycologically Incoherent
+
+## Mathmatically Incorrect
+
+# The defects are not theoretical or cosmetic: an illustration
+
+# Alternative #1: rank-ordered logits with connected graphs of choices
+
+# Alternative #2: a backup plan- rank-ordered logits with ties
+
+# Stepping Back: the utility of discrete choice more broadly
+
+[^1]: The smiley face is there to make sure MaxDiff stays down :-D
+
