@@ -16,7 +16,7 @@ The wonderful Jim Savage calls the MaxDiff model of discrete choice a "mathemati
 incorrect model of a psychologically incoherent concept"[^1].
 
 Despite this lovely dunk,
-and some lovely accompanying notes explaining why, the model remains frequently used in market
+and some lovely accompanying notes explaining why MaxDiff's not great, the model remains frequently used in market
 research, most prominently as implemented in [Sawtooth](https://sawtoothsoftware.com/). Why is this?
 
 Putting aside the most obvious answers like inertia and a dim view of statistical practice in marketing, it's surprisingly hard to find a fully fleshed out explanation of the alternatives online. In this post, I do just that, with sections for:
@@ -27,7 +27,29 @@ Putting aside the most obvious answers like inertia and a dim view of statistica
 
 # Introducing MaxDiff
 
-## The basic model
+If you're reading this post, you likely have some familiarity with the basics
+of discrete choice models, but here's a brief refresher[^2].
+
+We want to build a model of how real people respond to the request to make decisions
+among discrete options. This could be:
+ - A pollster asking which candidate(s) or political parties each respondent favors
+ - A marketing firm studying preferences amongst a variety of chocolate bars
+ - A political scientist asking which message voters find most convincing
+ 
+One reasonable model[^3] for this is to say that individual $i$ making choices among
+$j$ options can be inferred to have some underlying utility $\mu$ from the available
+choices, and that while they usually choose their most preferred option according to
+their utility function, there is some degree of randomness. The basic
+model is then
+
+$$
+\mu_{ij} = \mu_{ij} + \epsilon_{ij}
+$$
+, where the $\mu_{ij}$ can have rich provenance (demographics and other individual traits, the context in which the decision is made, the other options available...) but is fixed, but there's some
+$\epsilon_{ij}$ of randomness involved. To make this model easier to estimate, we assume
+that $\epsilon_{ij}$ has a [Gumbel](https://en.wikipedia.org/wiki/Gumbel_distribution)[^4] distribution. While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let's think about the data we gather here for a moment.
+
+To estimate 
 
 ## Psycologically Incoherent
 
@@ -41,5 +63,7 @@ Putting aside the most obvious answers like inertia and a dim view of statistica
 
 # Stepping Back: the utility of discrete choice more broadly
 
-[^1]: The smiley face is there to make sure MaxDiff stays down :-D
-
+[^1]: The smiley face is a threat: it's there to make sure MaxDiff stays down :-D
+[^2]: If you want more of an in-depth introduction, here are some resources I'd reccomend. First, Jim Savage's [blog post series](https://khakieconomics.github.io/2019/03/17/Logit-models-of-discrete-choice.html) is great, and does a fantastic job of explaining how our assumptions about choice making map onto the math. I also benefitted from reading Glasgow's [Interpreting Discrete Choice Models](https://www.cambridge.org/core/elements/abs/interpreting-discrete-choice-models/676EC2C0F19A3B6D932E12CC612872BC), which builds up the basics of choice models a bit more slowly. Finally, if you want something that goes much more in detail, Kenneth Train's [Discrete Choice Models with Simulation](https://eml.berkeley.edu/books/choice2.html) goes into great mathmatical detail about the models.
+[^3]: I won't rehash more subtle implications of this basic model here; see the footnote above for references that explore the mind of this **Homo Economicus** more in depth. Instead, I'll mostly pull up assumptions as they become relevant for discussing MaxDiff.
+[^4]: Other options are possible, but less common, and would take us too far afield, so I'll skip explaining the choice of Gumbel versus other distriubtions here.
