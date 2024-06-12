@@ -4,7 +4,7 @@ title: Better discrete choice modeling through rank ordered logits
 subtitle: Or- a mathmatically correct model of a psychologically coherent concept
 date: 2024-06-09
 draft: True
-image: imgs/fosters_kangaroo.webp
+image: imgs/gumby_distribution.webp
 categories:
   - priors
   - stupid Bayesian stuff
@@ -32,6 +32,7 @@ of discrete choice models, but here's a brief refresher[^2].
 
 We want to build a model of how real people respond to the request to make decisions
 among discrete options. This could be:
+
  - A pollster asking which candidate(s) or political parties each respondent favors
  - A marketing firm studying preferences amongst a variety of chocolate bars
  - A political scientist asking which message voters find most convincing
@@ -62,7 +63,7 @@ $$
 The likelihood is the product of the choice probabilities for each individual's observed choice $y_i$. We can estimate the parameters of the utility function $\mu_{ij}$ by maximizing this likelihood function (or, more commonly, the log-likelihood).
 This is how the single best choice data is naturally incorporated into the likelihood function for the standard multinomial logit model. Each observation contributes a term to the likelihood based on the probability of the chosen "best" alternative under the model.
 
-While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let's think about the pressures of gathering data here for a moment.
+While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let's think about the pressures of gathering data here for a moment, since that'll motivate the desire for something like MaxDiff.
 
 To estimate this, we gather respondents and ask them to choose their favorite
 option amongst a given choice set. As a way to control the difficulty of making a choice while still gathering enough data,
@@ -74,10 +75,10 @@ and it's only natural to wonder: can we extract more with each choice set? One o
 would be to ask the respondents to rank ALL the options at once, but if you have
 a large choice set that sounds exhausting.
 
-What if we asked people to choose their best and worst choices each time? After all, people might not have strong preferences amongst the middling 18 chocolate bars, but the best and  worst seem more memorable, and that's only 1 more choice[^5].
+What if we asked people to choose their best and worst choices each time? After all, people might not have strong preferences amongst the middling 18 chocolate bars, but the best and  worst seem more memorable, and that's only 1 more choice.
 
 And now, (stepping into the trap to show its allure, if you will), what if we
-don't want to entirely change up our likelihood to handle the new rich source of data? So instead, we just treat the worsts
+don't want to entirely change up our likelihood to handle the new rich source of data? What if handling ties sounds awful? Instead, what if we just treat the worsts
 as the opposite of the bests, which makes a sort of sense, and simplifies the likelihood
 one hell of a lot:
 
@@ -94,11 +95,19 @@ $$
 
 ## Psycologically Incoherent
 
-What I've introduced is the core of the MaxDiff formulation 
+What I've introduced is the core of the MaxDiff formulation of discrete choice,
+before bells and whistles like covariates or multilevel components are introduced. This has some deep problems though; let's start with the psychological ones.
+
+First, let's talk about **symmetry**. With the likelihoods above, we're treating
+the worst as sort of equal and opposite to the best. For example, though, I don't like
+Joe Biden as much as I detest Trump[^5]. I really really like the best pizza
+in Brookyln, but New York pizza is all New York pizza, it only gets so bad.
+
+Similarly, consider 
 
 ## Mathmatically Incorrect
 
-# The defects are not theoretical or cosmetic: an illustration
+# The defects are not just theoretical or cosmetic: an illustration
 
 # Alternative #1: rank-ordered logits with connected graphs of choices
 
@@ -108,5 +117,7 @@ What I've introduced is the core of the MaxDiff formulation
 
 [^1]: The smiley face is a threat: it's there to make sure MaxDiff stays down :-D
 [^2]: If you want more of an in-depth introduction, here are some resources I'd reccomend. First, Jim Savage's [blog post series](https://khakieconomics.github.io/2019/03/17/Logit-models-of-discrete-choice.html) is great, and does a fantastic job of explaining how our assumptions about choice making map onto the math. I also benefitted from reading Glasgow's [Interpreting Discrete Choice Models](https://www.cambridge.org/core/elements/abs/interpreting-discrete-choice-models/676EC2C0F19A3B6D932E12CC612872BC), which builds up the basics of choice models a bit more slowly. Finally, if you want something that goes much more in detail, Kenneth Train's [Discrete Choice Models with Simulation](https://eml.berkeley.edu/books/choice2.html) goes into great mathmatical detail about the models.
-[^3]: I won't rehash more subtle implications of this basic model here; see the footnote above for references that explore the mind of this **Homo Economicus** more in depth. Instead, I'll mostly pull up assumptions as they become relevant for discussing MaxDiff.
+[^3]: I won't rehash more subtle implications of this basic model here; see the footnote above for references that explore the mind of this *Homo Economicus* more in depth. Instead, I'll mostly pull up assumptions as they become relevant for discussing MaxDiff.
 [^4]: Other options are possible, but less common, and would take us too far afield, so I'll skip explaining the choice of Gumbel versus other distriubtions here.
+[^5]: President Biden is great, it's just hard to compete with the comically malignant
+and incompetent by being solid and stablizing.
