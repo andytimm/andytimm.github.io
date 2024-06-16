@@ -16,14 +16,14 @@ The wonderful Jim Savage calls the MaxDiff model of discrete choice a "mathemati
 incorrect model of a psychologically incoherent concept"[^1].
 
 Despite this lovely dunk,
-and some lovely accompanying notes explaining why MaxDiff's not great, the model remains frequently used in market
+and some wonderful     notes explaining why MaxDiff's not great, the model remains frequently used in market
 research, most prominently as implemented in [Sawtooth](https://sawtoothsoftware.com/). Why is this?
 
-Putting aside the most obvious answers like inertia and a dim view of statistical practice in marketing, it's surprisingly hard to find a fully fleshed out explanation of the alternatives online. In this post, I do just that, with sections for:
+Putting aside the most obvious answers like inertia and a dim view of statistical practice in marketing, it's surprisingly hard to find a fully fleshed out explanation of the alternatives online. In this post, I remedy that, with sections for:
 
 1. Introducing MaxDiff and its blemishes
 2. Showing how the issues propagate into final model quality
-3. Alternatives
+3. Alternatives- Rank-Ordered Logits with ties, and connected choice graphs
 
 # Introducing MaxDiff
 
@@ -61,7 +61,7 @@ $$
 L = \prod_i P_{iy_i} = \prod_i \frac{\exp(\mu_{iy_i})}{\sum_{k \in C_i} \exp(\mu_{ik})}
 $$
 The likelihood is the product of the choice probabilities for each individual's observed choice $y_i$. We can estimate the parameters of the utility function $\mu_{ij}$ by maximizing this likelihood function (or, more commonly, the log-likelihood).
-This is how the single best choice data is naturally incorporated into the likelihood function for the standard multinomial logit model. Each observation contributes a term to the likelihood based on the probability of the chosen "best" alternative under the model.
+This is how the single best choice data is naturally incorporated into the likelihood function. Each observation contributes a term to the likelihood based on the probability of the chosen "best" alternative under the model.
 
 While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let's think about the pressures of gathering data here for a moment, since that'll motivate the desire for something like MaxDiff.
 
@@ -70,14 +70,14 @@ option amongst a given choice set. As a way to control the difficulty of making 
 we can limit the size of the set (choose the best of 10 items, instead of 20), and
 repeat the choice task. 
 
-Getting sample and getting them to stick through a bunch of choice tasks is hard though,
+Getting respondents and getting them to stick through a bunch of choice tasks is hard though,
 and it's only natural to wonder: can we extract more with each choice set? One option
 would be to ask the respondents to rank ALL the options at once, but if you have
 a large choice set that sounds exhausting.
 
 What if we asked people to choose their best and worst choices each time? After all, people might not have strong preferences amongst the middling 18 chocolate bars, but the best and  worst seem more memorable, and that's only 1 more choice.
 
-And now, (stepping into the trap to show its allure, if you will), what if we
+And now, (stepping into the MaxDiff trap to show its allure, if you will), what if we
 don't want to entirely change up our likelihood to handle the new rich source of data? What if handling ties sounds awful? Instead, what if we just treat the worsts
 as the opposite of the bests, which makes a sort of sense, and simplifies the likelihood
 one hell of a lot:
@@ -96,14 +96,37 @@ $$
 ## Psycologically Incoherent
 
 What I've introduced is the core of the MaxDiff formulation of discrete choice,
-before bells and whistles like covariates or multilevel components are introduced. This has some deep problems though; let's start with the psychological ones.
+before bells and whistles are introduced. This has some deep problems though; let's start with the "psychological" ones. Human decisionmaking is an incredibly complex, not always logical
+process, and we'll always be losing significant fidelity in boiling it down into
+a model. Here though, I'll focus on explaining a handful of breakdowns in the relationship
+between reality and the world of our models that are particularly harmful.
 
-First, let's talk about **symmetry**. With the likelihoods above, we're treating
-the worst as sort of equal and opposite to the best. For example, though, I don't like
-Joe Biden as much as I detest Trump[^5]. I really really like the best pizza
-in Brookyln, but New York pizza is all New York pizza, it only gets so bad.
+First, let's talk about **symmetry**. With the MaxDiff likelihood above, we're treating
+the worst as equal and opposite to the best. For example, though, I don't like
+Joe Biden as much as I dislike Trump[^5]. I really really like the best pizza
+in Brookyln, but New York pizza is all New York pizza, it only gets so bad. This
+might be a reasonable simplification in some rare cases, but it's hard to argue
+that baking this into our model faithfully mirrors reality.
 
-Similarly, consider 
+Also, we're not only asking them to be symmetric, we're sort of conjoining
+the best and worst choice, asking them
+to share the **same utility scale**. In other words, the factors that make an alternative more attractive for the best choice are assumed to make it equally less attractive for the worst choice. An easy example is something like health risks- "that sushi place gave me food poisoning" is very relevant
+to my choice of worst restaurant, but the moment I have to think about food safety,
+a restaurant isn't really anywhere relevant on the "best" side of the spectrum for me.
+Again, you can probably think of a case where this is a fine approximation, but
+in an ideal world, we won't force ourselves to weld our notions of best to our
+notions of worst.
+
+Finally, the **error variances** being treated as the same should feel pretty
+strange. I'm much, much more consistent in my selection of "bests" than "worsts"-
+why would I spent a bunch of time deciding which opinion of 20 is the absolute
+worst and which is just 19th worst? People tend to be much less consistent, and
+frankly much less engaged, with their worst choices. Why would we bake this into
+our model?
+
+Putting this all together, The simplification in estimation that comes with MaxDiff also
+leaks into how the model "sees" the decision maker, and it meaningfully distorts
+the map in a way that does not reflect the territory,
 
 ## Mathmatically Incorrect
 
@@ -118,6 +141,6 @@ Similarly, consider
 [^1]: The smiley face is a threat: it's there to make sure MaxDiff stays down :-D
 [^2]: If you want more of an in-depth introduction, here are some resources I'd reccomend. First, Jim Savage's [blog post series](https://khakieconomics.github.io/2019/03/17/Logit-models-of-discrete-choice.html) is great, and does a fantastic job of explaining how our assumptions about choice making map onto the math. I also benefitted from reading Glasgow's [Interpreting Discrete Choice Models](https://www.cambridge.org/core/elements/abs/interpreting-discrete-choice-models/676EC2C0F19A3B6D932E12CC612872BC), which builds up the basics of choice models a bit more slowly. Finally, if you want something that goes much more in detail, Kenneth Train's [Discrete Choice Models with Simulation](https://eml.berkeley.edu/books/choice2.html) goes into great mathmatical detail about the models.
 [^3]: I won't rehash more subtle implications of this basic model here; see the footnote above for references that explore the mind of this *Homo Economicus* more in depth. Instead, I'll mostly pull up assumptions as they become relevant for discussing MaxDiff.
-[^4]: Other options are possible, but less common, and would take us too far afield, so I'll skip explaining the choice of Gumbel versus other distriubtions here.
+[^4]: Other options are possible, but less common, and would take us too far afield, so I'll skip explaining the choice of Gumbel versus other distributions here.
 [^5]: President Biden is great, it's just hard to compete with the comically malignant
-and incompetent by being solid and stablizing.
+and incompetent by being solid and stabilizing.
