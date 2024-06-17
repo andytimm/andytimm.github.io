@@ -759,15 +759,95 @@ From Choice Set 3, we know that Biden > Stein > Trump.
 Combining these partial rankings, we can infer the full ranking:
 Biden > Stein > RFK > Trump
 
-You'll notice that you can't get the full ranking in any less than 3 sets,
+</details> 
+
+You'll notice that you can't get the full ranking for e.g. 4 options in any less than 3 sets,
 but you well could add more sets to provide some redundancy and statistical
 efficiency if you so choose. Of course, in larger choice sets, you'll probably
 end up closer to K-1 sets given respondent fatigue, but for smaller sets it's
 a very helpful option to know exists.
 
+Most of the innovation here was in the choice set design, but there's some in
+the model too, so let's turn to that:
+
+<details> 
+
+<summary>**Model 3: Rank-Ordered Logit for Connected Graphs**</summary>
+
+```{R}
+ranked <- "// saved as ranked_rcl.stan
+functions {
+  real rank_logit_lpmf(int[] rank_order, vector delta) {
+    // We reorder the raw utilities so that the first rank is first, second rank second... 
+    vector[rows(delta)] tmp = delta[rank_order];
+    real out;
+    // ... and sequentially take the log of the first element of the softmax applied to the remaining
+    // unranked elements.
+    for(i in 1:(rows(tmp) - 1)) {
+      if(i == 1) {
+        out = tmp[1] - log_sum_exp(tmp);
+      } else {
+        out += tmp[i] - log_sum_exp(tmp[i:]);
+      }
+    }
+    // And return the log likelihood of observing that ranking
+    return(out);
+  }
+}
+data {
+  int N; // number of rows
+  int T; // number of inidvidual-choice sets/task combinations
+  int I; // number of Individuals
+  int P; // number of covariates that vary by choice
+  int P2; // number of covariates that vary by individual
+  int K; // number of choices
+  
+  int rank_order[N]; // The vector describing the index (within each task) of the first, second, third, ... choices. 
+  // In R, this is order(-utility) within each task
+  matrix[N, P] X; // choice attributes
+  matrix[I, P2] X2; // individual attributes
+  
+  int task[T]; // index for tasks
+  int task_individual[T]; // index for individual
+  int start[T]; // the starting observation for each task
+  int end[T]; // the ending observation for each task
+}
+parameters {
+  vector[P] beta; // hypermeans of the part-worths
+  matrix[P, P2] Gamma; // coefficient matrix on individual attributes
+  vector<lower = 0>[P] tau; // diagonal of the part-worth covariance matrix
+  matrix[I, P] z; // individual random effects (unscaled)
+  cholesky_factor_corr[P] L_Omega; // the cholesky factor of the correlation matrix of tastes/part-worths
+}
+transformed parameters {
+  // here we use the reparameterization discussed on slide 30
+  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z * diag_pre_multiply(tau, L_Omega);
+}
+model {
+  // priors on the parameters
+  tau ~ normal(0, .5);
+  beta ~ normal(0, 1);
+  to_vector(z) ~ normal(0, 1);
+  L_Omega ~ lkj_corr_cholesky(4);
+  to_vector(Gamma) ~ normal(0, 1);
+  
+  // log probabilities of each choice in the dataset
+  for(t in 1:T) {
+    vector[K] utilities; // tmp vector holding the utilities for the task/individual combination
+    // add utility from product attributes with individual part-worths/marginal utilities
+    utilities = X[start[t]:end[t]]*beta_individual[task_individual[t]]';
+    rank_order[start[t]:end[t]] ~ rank_logit(utilities);
+  }
+}"
+```
+
 </details> 
 
-For example, 
+Take a second to reason through the above code; we're able to use all of the information
+a full ranking provides to us, without having to force any interrelationship
+between best and worst to exist that isn't truly there. Also, notice that there's
+nothing here specifically for the "connected graph" part of model- that's all
+in the choice set generation, which we'll do next.
 
 [^8]: A fun little exercise: think through how these form a graph of connected
 choices! What's the structure of the graph look like? May not be applicable for all definitions of fun.
