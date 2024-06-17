@@ -252,7 +252,7 @@ library(tidyverse)
 library(rstan)
 options(mc.cores = parallel::detectCores())
 
-set.seed(605)
+set.seed(604)
 
 # Again, note that this code is just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html,
 # although with a more real-world feeling number of respondents and
@@ -260,7 +260,7 @@ set.seed(605)
 # down I, the results should reproduce just fine.
 
 # Number of individuals
-I <- 80
+I <- 60
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -634,15 +634,62 @@ combined_data <- bind_rows(best_choice, best_worst_choice)
 
 </details> 
 
+```{R}
+# Plot results
+ggplot(combined_data, aes(x = `True value`, y = median, color = Dataset)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_point(aes(y = median), alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1) +
+  labs(y = "Utility Estimates",
+       title = "Utility Estimates from the Two Models",
+       subtitle = "With interior 90% credibility intervals") +
+  scale_color_manual(values = c("Best Choice" = "blue", "Best-Worst Choice" = "red")) +
+  facet_wrap(~Dataset) +
+  theme(legend.position="none")
+```
 
+To be clear, what's plotted here are respondent level utilities for each choice. Concerningly, it doesn't even seem clear that the best-worst choice model
+performs better here despite the extra data. The fact that we have to do
+this at all doesn't bode well, but let's compare the RMSE's of the predictions
+versus the (simulated) truth to confirm:
 
-[^7]: I won't extensively explain this here, since the original source already
+```{R}
+# Is the B/W model actually better?
+combined_data %>%
+  group_by(Dataset) %>%
+  summarize(RMSE = sqrt(mean((`True value` - median)^2)))
+```
+
+To say this more emphatically, MaxDiff gets twice as much data from each
+respondent, and it's not even consistently the case that the MaxDiff model
+is better[^8]! And again, it's not like I chose some obscure DGP where MaxDiff
+is uniquely poor, we're working with data that align pretty precisely with
+the model assumptions.
+
+So to summarize, I've described some psychological and mathematical issues with MaxDiff.
+Then, via a comparison to a best choice only model, I showed that these differences
+are more than theoretical naggles: for pretty vanilla data, the MaxDiff model
+can actually perform worse than the best choice formulation.
+
+It's worth pointing out that we only get this type of precise comparison in a
+simulation study. On real world survey data with the same DGP, you'd just see
+the models give fairly similar answers, with no reason to suspect the slight
+differences might actually be bad tweaks on MaxDiff's part. Modeling only real
+world data is how many market researchers approach their work, so it should be
+no surprise that MaxDiff continues to be accepted in the field.  With simulation,
+however, we can look closer, and the flaws I've discussed become increasingly
+apparent.
+
+[^7]: I won't re-explain the details of the model here, since the original source already
 does a fantastic job. If you haven't already read the original post series, it's
 well worth taking the time to do so now, as there are a lot of moving pieces
 here- setting sensible priors for this model, incorporating covariates logically,
 and setting this up to run efficiently in Stan.
 
-
+[^8]: I will note that if you're following along at home, sampling variability
+means that for some realizations of this DGP + these models, MaxDiff performs
+just slightly better. But "barely better in a fraction of runs" isn't really a good outcome from
+twice as much data.
 
 # Alternative #1: rank-ordered logits with connected graphs of choices
 
