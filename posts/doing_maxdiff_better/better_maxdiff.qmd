@@ -672,11 +672,11 @@ are more than theoretical naggles: for pretty vanilla data, the MaxDiff model
 can actually perform worse than the best choice formulation.
 
 It's worth pointing out that we only get this type of precise comparison in a
-simulation study. On real world survey data with the same DGP, you'd just see
+simulation study. On real world survey data with a similar DGP, you'd just see
 the models give fairly similar answers, with no reason to suspect the slight
 differences might actually be bad tweaks on MaxDiff's part. Modeling only real
 world data is how many market researchers approach their work, so it should be
-no surprise that MaxDiff continues to be accepted in the field.  With simulation,
+no surprise that MaxDiff continues to be accepted in the field. With simulation,
 however, we can look closer, and the flaws I've discussed become increasingly
 apparent.
 
@@ -692,6 +692,87 @@ just slightly better. But "barely better in a fraction of runs" isn't really a g
 twice as much data.
 
 # Alternative #1: rank-ordered logits with connected graphs of choices
+
+Ok, so you get it. MaxDiff isn't great. But respondents are still expensive,
+and you still have a choice modeling task to complete at work, and you really,
+really want to do better than just using the best choices because your boss
+thinks Sawtooth is fine since it's been fine for a long time. What's the alternative?
+
+In this section, I'll lay out what we'll call the rank-ordered logit with connected
+graphs. If this sounds complicated, the model isn't actually going to get much
+more complicated.
+
+Instead, the plan is mostly to be cleverer about how we build our choice sets
+in the first place.
+
+## Setting up the Choice Sets
+
+What we really want, I'd argue, is full choice ranking data, for each respondent.
+But of course, people rapidly become unhappy and start really satisficing when
+they are forced to rank 20 different largely similar options at the same time. How
+can we get the simplicity from the respondent POV of MaxDiff, but the rich
+ranking data we want?
+
+The clever trick here is that by asking the right 3 item choice sets, and asking
+the survey taker to pick best and worst, we can collect every choice needed to
+construct a full ranking[^8]. We'll then be able to simply fit a rank-ordered
+logit model to these data, which makes far fewer simplifying assumptions about
+how the choices and their utilities interact.
+
+There are some downsides I'll be transparent about here: for $K$ choices, you
+need each respondent to do $K-1$ choice tasks. If you have 20 options, this
+can get tiring fast, and you won't really be gathering "extra" opinions per
+respondent anymore by doing the minimum $K-1$ rounds. Here's a hand worked
+example if you'd like it for intuition:
+
+<details> 
+
+<summary>**Illustration: K-1 Comparisons are Needed**</summary>
+
+Let's say we want to get someone's ranking over 2024 presidential candidate
+choices, from the set {Biden,Trump,RFK,Stein}.
+
+Choice Set 1:
+
+Options: {Biden, Stein, RFK}
+Best choice: Biden
+Worst choice: RFK
+
+Choice Set 2:
+
+Options: {Stein, RFK, Trump}
+Best choice: Stein
+Worst choice: Trump
+
+Choice Set 3:
+
+Options: {Biden, Stein, Trump}
+Best choice: Biden
+Worst choice: Trump
+
+Now, let's reconstruct the full ranking from these choice sets:
+
+From Choice Set 1, we know that Biden > Stein > RFK.
+From Choice Set 2, we know that Stein > RFK > Trump.
+From Choice Set 3, we know that Biden > Stein > Trump.
+
+Combining these partial rankings, we can infer the full ranking:
+Biden > Stein > RFK > Trump
+
+You'll notice that you can't get the full ranking in any less than 3 sets,
+but you well could add more sets to provide some redundancy and statistical
+efficiency if you so choose. Of course, in larger choice sets, you'll probably
+end up closer to K-1 sets given respondent fatigue, but for smaller sets it's
+a very helpful option to know exists.
+
+</details> 
+
+For example, 
+
+[^8]: A fun little exercise: think through how these form a graph of connected
+choices! What's the structure of the graph look like? May not be applicable for all definitions of fun.
+
+## Building the model and model comparisons
 
 # Alternative #2: a backup plan- rank-ordered logits with ties
 
