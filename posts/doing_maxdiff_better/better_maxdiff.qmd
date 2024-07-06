@@ -1075,8 +1075,91 @@ and other commonly used packages.
 Hopefully the theoretical discussion and simulation study above are persuasive:
 you can and should aim to do better than the Maxdiff model of discrete choice.
 
-# Alternative #2: a backup plan- rank-ordered logits with ties
+# Alternative #2: a backup plan- rank-ordered logits with unknown middle preferences
 
+The connected design I've advocated above isn't strictly necessary since I've used
+a mixed logit, and the multilevel component can help estimate when cases are
+disconnected. Of course though, having a completely connected graph within
+individual respondents helps a lot for statistical efficiency.
 
+That raises an interesting question: what to do if you already ran an experiment
+designed without connectedness in mind, or your survey platform won't easily
+allow you to make a connected design? 
+
+It's not my preferred choice if I have control over design, but in this scenario
+we can use a Rank-Ordered Logit with unknown middle preferences.
+
+## Allowing ties in Rank-Ordered Logits
+
+Let's reuse the example above where we ranked my preferences over 2024 presidential candidates. The complete ordering for me is:
+$$
+\textcolor{blue}{\text{Biden}} > \textcolor{green}{\text{Stein}} > \textcolor{yellow}{\text{RFK}} > \textcolor{red}{\text{Trump}}
+$$
+If we collected data from me though by only asking my best and worse choices, we'd have:
+$$
+\textcolor{blue}{\text{Biden}} > ??? > ??? > \textcolor{red}{\text{Trump}}
+$$
+To keep using a rank-ordered model here, we'd need to figure out how to reason about the middle two options being unknown. Allison and Christakis, 1994 discuss various ways to handle this, but the one that seems most promising and that we'll discuss operates as if the true ranking exists, but is unknown to the modeler. That seems pretty reasonable, since we're not saying the middle preferences have to be strong, just that people likely aren't totally ambivalent between the two in general.
+To handle this, we'll first enumerate the possible ways the middle options could pan out. Here's there's just two:
+$$
+\textcolor{blue}{\text{Biden}} > \textcolor{green}{\text{Stein}} > \textcolor{yellow}{\text{RFK}} > \textcolor{red}{\text{Trump}} \linebreak
+\textcolor{blue}{\text{Biden}} > \textcolor{yellow}{\text{RFK}} > \textcolor{green}{\text{Stein}} > \textcolor{red}{\text{Trump}}
+$$
+Then, to construct a likelihood, we'll marginalize over all the possible middle options. Since the two ways the middle options could shake out are mutually exclusive, that implies:
+$$
+P(\textcolor{blue}{B}>\textcolor{green}{S}>\textcolor{yellow}{R}>\textcolor{red}{T} \text{ or } \textcolor{blue}{B}>\textcolor{yellow}{R}>\textcolor{green}{S}>\textcolor{red}{T}) = P(\textcolor{blue}{B}>\textcolor{green}{S}>\textcolor{yellow}{R}>\textcolor{red}{T}) + P(\textcolor{blue}{B}>\textcolor{yellow}{R}>\textcolor{green}{S}>\textcolor{red}{T})
+$$
+Now, let's express this using the notation from Allison and Christakis (1994), since it'll make juggling all the subscripts a bit easier. For a given individual $i$, let $U_{ij}$ be the utility of alternative $j$. The probability of observing a particular complete ranking $r$ (where $r$ is one of the possible rankings consistent with the observed partial ranking) is:
+$$
+P(r) = \prod_{k=1}^{J-1} \frac{\exp(U_{ir_k})}{\sum_{l=k}^J \exp(U_{ir_l})}
+$$
+where $r_k$ is the alternative ranked $k$th in ranking $r$, and $J$ is the total number of alternatives.
+For our example with unknown middle preferences, the likelihood becomes:
+$$
+L(\textcolor{blue}{B}>\textcolor{green}{S},\textcolor{yellow}{R}>\textcolor{red}{T}) = \frac{\exp(U_{i\textcolor{blue}{B}})}{\sum_{j \in {\textcolor{blue}{B},\textcolor{green}{S},\textcolor{yellow}{R},\textcolor{red}{T}}} \exp(U_{ij})} \cdot \left[ \frac{\exp(U_{i\textcolor{green}{S}})}{\exp(U_{i\textcolor{green}{S}}) + \exp(U_{i\textcolor{yellow}{R}}) + \exp(U_{i\textcolor{red}{T}})} + \frac{\exp(U_{i\textcolor{yellow}{R}})}{\exp(U_{i\textcolor{green}{S}}) + \exp(U_{i\textcolor{yellow}{R}}) + \exp(U_{i\textcolor{red}{T}})} \right] \cdot \frac{\exp(U_{i\textcolor{red}{T}})}{\exp(U_{i\textcolor{red}{T}})}
+$$
+The central terms are the key to the unknown ranking model[^10]. This lets
+us fit a ranked model and avoid MaxDiff, even with unknown middle options.
+
+[^10]: Just for fun, notice what happens if there's only 1 middle term. It's your
+friendly neighborhood complete rank-ordered logit, since there's only 1 way
+1 option can occur!
+
+Of course, this approach isn't without issues. Obviously, with a bit more foresight
+on design we could've learned more from the middle options while still asking respondents
+to make two choices per task. Putting that aside, the number of unknown middle
+options grows as $n_{unknown}!$, which makes calculating all the likelihood terms
+a real, real pain in the ass. If we re-do our initial example with 10 total alternatives,
+the middle 8 will be unknown, and there will be 40,320 permutations.
+
+## Building the ROL with Unknown Middle Preferences in Stan
+
+<details>
+
+<summary>**Comparing ROL to Best Choice, and MaxDiff models**</summary>
+
+</details>
+
+## Evaluating ROL with Unknown Middle Preferences against MaxDiff 
+
+<details>
+
+<summary>**Comparing ROL to Best Choice, and MaxDiff models**</summary>
+
+</details>
+
+# Steelmanning the case for MaxDiff
+
+## What if the errors are actually symmetric?
+
+## What if we only care about population parameters?
+
+## What if you get more information from MaxDiff on larger choice sets?
 
 # Stepping Back: the utility of discrete choice more broadly
+
+<details>
+
+<summary>**Comparing ROL to Best Choice, and MaxDiff models**</summary>
+
+</details>
