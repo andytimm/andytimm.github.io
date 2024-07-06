@@ -1062,8 +1062,21 @@ all_results %>%
   summarize(RMSE = sqrt(mean((`True value` - median)^2)))
 ```
 
-The order is as we'd expect from the plots. 
+The ordering is as we'd expect from the plots. 
+
+If I have free choice over the design of a choice experiment, this sort of
+connected graph, analyzed with the rank-ordered logit is what I'd generally
+prefer to use. Designing the choice graphs to make this work well isn't
+particularly hard with modern software, and the rank ordered logit model
+is widely available, not just in a sophisticated Stan model like I cribbed
+from Jim Savage here, but also in [Stata](https://www.stata.com/manuals13/rrologit.pdf),
+and other commonly used packages.
+
+Hopefully the theoretical discussion and simulation study above are persuasive:
+you can and should aim to do better than the Maxdiff model of discrete choice.
 
 # Alternative #2: a backup plan- rank-ordered logits with ties
+
+
 
 # Stepping Back: the utility of discrete choice more broadly
