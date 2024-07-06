@@ -48,7 +48,7 @@ beta_i <- MASS::mvrnorm(I, beta, Sigma) + W %*% t(Gamma)
 # Again, quick plot to sanity check
 plot(as.data.frame(beta_i))
 
-bibd <- find.BIB(trt = 10, b = 300, k = 3)
+bibd <- find.BIB(trt = Tasks, b = I*Tasks, k = J)
 
 # Checks if the design is balanced wrt to both rows and columns.
 # The above function is not guaranteed to produce a valid BIBD; it may produce
