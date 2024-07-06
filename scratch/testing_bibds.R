@@ -52,14 +52,17 @@ bibd <- find.BIB(trt = Tasks, b = I*Tasks, k = J)
 
 # Checks if the design is balanced wrt to both rows and columns.
 # The above function is not guaranteed to produce a valid BIBD; it may produce
-# a close but imperfect design. We should expect the design to be balanced
-# wrt to rows, but usually not columns given our requirements
-isGYD(bibd)
+# a close but imperfect design, which is sufficient for our purposes. I will
+# however confirm it's connected, since we'd start to lose quite a lot of efficiency
+# if it were not. 
+
 # Returns 1 if the design is connected
 is.connected(bibd)
 
 
-# Create a mapping from BIBD options to attribute levels
+# Create a mapping from BIBD options to attribute levels; idea is to make
+# identically shaped inputs to our previous test, but using the conditions
+# from the BIBD instead of sampling randomly for X.
 option_attributes <- matrix(sample(0:1, 10*P, replace = TRUE), nrow = 10, ncol = P)
 
 # Function to convert BIBD task to attribute matrix
@@ -73,9 +76,6 @@ bibd_to_attributes <- function(bibd_row) {
 
 # Generate X matrix based on BIBD
 X <- do.call(rbind, lapply(1:nrow(bibd), function(i) bibd_to_attributes(bibd[i,])))
-
-# Verify dimensions
-dim(X)  # Should be 900 x 5
 
 indexes <- crossing(individual = 1:I, task = 1:Tasks, option = 1:J) %>% 
   mutate(row = 1:n())
@@ -415,4 +415,4 @@ ggplot(all_results, aes(x = `True value`, y = median, color = Dataset)) +
 
 all_results %>%
   group_by(Dataset) %>%
-  summarize(RMSE = sqrt(mean((`True value` - median)^2)))
+  summarize(RMSE = sqrt(mean((`True value` - median)^2))

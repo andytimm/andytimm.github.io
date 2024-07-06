@@ -254,6 +254,7 @@ exciting to you, feel free to skim or skip this section at first:
 library(tidyverse)
 library(rstan)
 library(ibd)
+library(crossdes)
 options(mc.cores = parallel::detectCores())
 
 set.seed(604)
@@ -786,9 +787,6 @@ between best and worst to exist that isn't truly there. Also, notice that there'
 nothing here specifically for the "connected graph of choices" part of model- that's all
 in the choice set generation, which we'll do next.
 
-[^8]: A fun little exercise: think through how these form a graph of connected
-choices! What's the structure of the graph look like? May not be applicable for all definitions of fun.
-
 ## Building the choice sets
 
 Let's try making the choice sets the new way, and then compare models again.
@@ -820,7 +818,7 @@ experimental design that has been recognized by the earliest statisticians.
 
 ```{R}
 # Number of individuals
-I <- 800
+I <- 30
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -918,30 +916,84 @@ tt <- ranked_options %>%
 ```
 </details>
 
-Now, let's design the connected graph choice sets. We'll use a balanced incomplete block design (BIBD) to ensure that each pair of choices appears together in at least one set across all respondents. 
+Now we have simulated data that represents a connected graph design with 10 total choices, and 15 choice sets per respondent. Each choice set contains 3 options, and each pair of choices appears together in at least one set across all respondents.
+
+## Evaluating our new model
+
+So now we've introduced the ranked choice logit model, and simulated data that
+fits the connected graph structure. How do the three models perform?
+
+Again, some data plumbing in the drop down below, so feel free to jump to the
+results plots after it.
+
 <details>
-<summary>**Designing Connected Graph Choice Sets**</summary>
 
-```{R}  
-data_list_best_choice <- list(
-  N = nrow(best_choice_data),
-  T = Tasks * I,  # Total number of choice tasks across all individuals
-  I = I,
-  P = P,
-  P2 = P2,
-  K = K,
-  choice = rep(1, nrow(best_choice_data)),  # Always 1 as we're only keeping the best choice
-  X = X_best,
-  X2 = W,
-  task = best_choice_data$task + (best_choice_data$individual - 1) * Tasks,  # Unique task identifier
-  task_individual = best_choice_data$individual,
-  start = 1:nrow(best_choice_data),
-  end = 1:nrow(best_choice_data)
-)
+<summary>**Comparing ROL to Best Choice, and MaxDiff models**</summary>
 
+```{R}
+data_list_best_choice <-list(N = nrow(X),
+                             T = nrow(tt),
+                             I = I, 
+                             P = P, 
+                             P2 = P2, 
+                             K = J, 
+                             # NOTE!! This is the tricky bit -- we use the order of the ranks (within task)
+                             # Not the raw rank orderings. This is how we get the likelihood evaluation to be pretty quick
+                             choice = ranked_options$best_choice,
+                             X = X, 
+                             X2 = W, 
+                             task = tt$task_number, 
+                             task_individual = tt$individual,
+                             start = tt$start, 
+                             end = tt$end)
+
+data_list_best_worst <-list(N = nrow(X),
+                            T = nrow(tt),
+                            I = I, 
+                            P = P, 
+                            P2 = P2, 
+                            K = J,
+                            choice = ranked_options$best_choice,
+                            worst_choice = ranked_options$worst_choice,
+                            X = X, 
+                            X2 = W, 
+                            task = tt$task_number, 
+                            task_individual = tt$individual,
+                            start = tt$start, 
+                            end = tt$end)
+
+data_list_ranked_rcl <- list(N = nrow(X),
+                             T = nrow(tt),
+                             I = I, 
+                             P = P, 
+                             P2 = P2, 
+                             K = J, 
+                             # NOTE!! This is the tricky bit -- we use the order of the ranks (within task)
+                             # Not the raw rank orderings. This is how we get the likelihood evaluation to be pretty quick
+                             rank_order = ranked_options$order,
+                             X = X, 
+                             X2 = W, 
+                             task = tt$task_number, 
+                             task_individual = tt$individual,
+                             start = tt$start, 
+                             end = tt$end)
+
+compiled_best_choice_model <- stan_model(model_code = best)
 best_choice_fit <- sampling(compiled_best_choice_model, 
                             data = data_list_best_choice, 
                             iter = 800)
+
+# Compile and fit MaxDiff model
+compiled_maxdiff_model <- stan_model(model_code = best_worst)
+maxdiff_fit <- sampling(compiled_maxdiff_model,
+                        data = data_list_best_worst,
+                        iter = 800)
+
+# Compile and fit ROL model
+compiled_rol_model <- stan_model(model_code = ranked)
+rol_fit <- sampling(compiled_rol_model,
+                    data = data_list_ranked_rcl,
+                    iter = 800)
 
 best_choice <- as.data.frame(best_choice_fit, pars = "beta_individual") %>%
   gather(Parameter, Value) %>%
@@ -955,136 +1007,62 @@ best_choice <- as.data.frame(best_choice_fit, pars = "beta_individual") %>%
   mutate(`True value` = as.numeric(t(beta_i)),
          Dataset = "Best Choice")
 
-# Plot results
-ggplot(best_choice, aes(x = `True value`, y = median, color = Dataset)) +
+# Process MaxDiff results
+maxdiff_choice <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
+  gather(Parameter, Value) %>%
+  group_by(Parameter) %>%
+  summarise(median = median(Value),
+            lower = quantile(Value, .05),
+            upper = quantile(Value, .95)) %>%
+  mutate(individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number,
+         column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
+  arrange(individual, column) %>%
+  mutate(`True value` = as.numeric(t(beta_i)),
+         Dataset = "MaxDiff")
+
+# Process ROL results
+rol_choice <- as.data.frame(rol_fit, pars = "beta_individual") %>%
+  gather(Parameter, Value) %>%
+  group_by(Parameter) %>%
+  summarise(median = median(Value),
+            lower = quantile(Value, .05),
+            upper = quantile(Value, .95)) %>%
+  mutate(individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number,
+         column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
+  arrange(individual, column) %>%
+  mutate(`True value` = as.numeric(t(beta_i)),
+         Dataset = "Rank-Ordered Logit")
+
+# Combine all results
+all_results <- bind_rows(best_choice, maxdiff_choice, rol_choice)
+```
+
+</details>
+
+```{R}
+ggplot(all_results, aes(x = `True value`, y = median, color = Dataset)) +
   geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
   geom_point(aes(y = median), alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1) +
   labs(y = "Utility Estimates",
-       title = "Utility Estimates from the Two Models",
+       title = "Utility Estimates from the Three Models",
        subtitle = "With interior 90% credibility intervals") +
-  scale_color_manual(values = c("Best Choice" = "blue")) +
+  scale_color_manual(values = c("Best Choice" = "blue", "MaxDiff" = "red", "Rank-Ordered Logit" = "green")) +
   facet_wrap(~Dataset) +
-  theme(legend.position="none")
-
-
+  theme(legend.position="bottom")
 ```
-</details>
 
-Now we have simulated data that represents a connected graph design with 10 total choices, and 15 choice sets per respondent. Each choice set contains 3 options, and each pair of choices appears together in at least one set across all respondents.
-
-How does this change performance?
+At a squint, Rank-Ordered Logit > Best Choice > MaxDiff as I've argued. Notice though that
+unlike the MaxDiff model, both Best Choice and Rank-Ordered Logit look unbiased;
+the ROL model simply seems more efficient. Let's check the RMSE to confirm
 
 ```{R}
-# Modify the data preparation
-best_choice_data <- simulated_df %>%
-  filter(ranking == 1) %>%
-  select(individual, task, choices, utilities)
-
-# Recreate X matrix for best choices only
-X_best <- matrix(0, nrow = nrow(best_choice_data), ncol = P)
-for (i in 1:nrow(best_choice_data)) {
-  X_best[i,] <- X[best_choice_data$choices[i],]
-}
-
-# Calculate total number of tasks
-total_tasks <- nrow(best_choice_data)
-
-# 2. Create the Stan data list
-data_list_best_choice <- list(
-  N = nrow(best_choice_data),
-  T = total_tasks,
-  I = I,
-  P = P,
-  P2 = P2,
-  K = 1,  # We only have one choice per task in the best choice model
-  choice = rep(1, nrow(best_choice_data)),  # Always 1 as we're only keeping the best choice
-  X = X_best,
-  X2 = W,
-  task = 1:total_tasks,
-  task_individual = best_choice_data$individual,
-  start = 1:total_tasks,
-  end = 1:total_tasks
-)
-
-# 3. Modify the Stan model
-best_choice_model <- "
-data {
-  int<lower=1> N;
-  int<lower=1> T;
-  int<lower=1> I;
-  int<lower=1> P;
-  int<lower=1> P2;
-  int<lower=1> K;
-  vector[N] choice;
-  matrix[N, P] X;
-  matrix[I, P2] X2;
-  int task[T];
-  int task_individual[T];
-  int start[T];
-  int end[T];
-}
-
-parameters {
-  vector[P] beta;
-  matrix[P, P2] Gamma;
-  vector<lower=0>[P] tau;
-  matrix[I, P] z;
-  cholesky_factor_corr[P] L_Omega;
-}
-
-transformed parameters {
-  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z * diag_pre_multiply(tau, L_Omega);
-}
-
-model {
-  vector[N] log_prob;
-  
-  tau ~ normal(0, .5);
-  beta ~ normal(0, .5);
-  to_vector(z) ~ normal(0, 1);
-  L_Omega ~ lkj_corr_cholesky(4);
-  to_vector(Gamma) ~ normal(0, 1);
-  
-  for(t in 1:T) {
-    log_prob[t] = X[t] * beta_individual[task_individual[t]]';
-  }
-  
-  target += log_prob' * choice;
-}
-"
-
-# Now try to fit the model again
-fit_best_choice <- stan(model_code = best_choice_model, 
-                        data = data_list_best_choice, 
-                        iter = 2000, 
-                        chains = 4)
-
-# 4. Extract and examine the results
-summary_best_choice <- summary(fit_best_choice, pars = c("beta", "tau"))$summary
-print(summary_best_choice)
-
-# Extract individual-level parameters
-beta_individual_summary <- summary(fit_best_choice, pars = "beta_individual")$summary
-
-# Compare estimated vs true individual-level parameters
-comparison <- data.frame(
-  true_value = as.vector(t(beta_i)),
-  estimated_mean = beta_individual_summary[,"mean"],
-  estimated_lower = beta_individual_summary[,"2.5%"],
-  estimated_upper = beta_individual_summary[,"97.5%"]
-)
-
-# Plot comparison
-ggplot(comparison, aes(x = true_value, y = estimated_mean)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = estimated_lower, ymax = estimated_upper), alpha = 0.3) +
-  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-  labs(x = "True Value", y = "Estimated Value",
-       title = "Comparison of True vs Estimated Individual-Level Parameters",
-       subtitle = "Best Choice Model") +
-  theme_minimal()
+all_results %>%
+  group_by(Dataset) %>%
+  summarize(RMSE = sqrt(mean((`True value` - median)^2)))
 ```
+
+The order is as we'd expect from the plots. 
 
 # Alternative #2: a backup plan- rank-ordered logits with ties
 
