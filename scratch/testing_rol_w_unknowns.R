@@ -110,18 +110,29 @@ stan_data <- list(
 
 rol_w_unknowns <- "
 functions {
-  real partial_rank_lpmf(int[] ranks, vector utilities, int[][] perms) {
+  // tgamma(n) = factorial(n-1), so this should work fine
+  int factorial(int n) {
+    return tgamma(n + 1);
+  }
+
+  real partial_rank_log_prob(array[] int ranks, vector utilities, array[,] int perms) {
     int n_perms = size(perms);
     vector[n_perms] perm_probs;
+    int J = size(ranks);
     
     for (p in 1:n_perms) {
-      vector[size(ranks)] perm_utilities;
+      vector[J] perm_utilities;
+      real prob = 0;
       perm_utilities[1] = utilities[ranks[1]];  // best
-      perm_utilities[size(ranks)] = utilities[ranks[size(ranks)]];  // worst
-      for (i in 2:(size(ranks)-1)) {
+      perm_utilities[J] = utilities[ranks[J]];  // worst
+      for (i in 2:(J-1)) {
         perm_utilities[i] = utilities[ranks[perms[p, i-1]]];
       }
-      perm_probs[p] = rank_lpmf(perm_utilities);
+      
+      for (j in 1:(J-1)) {
+        prob += perm_utilities[j] - log_sum_exp(perm_utilities[j:J]);
+      }
+      perm_probs[p] = prob;
     }
     return log_sum_exp(perm_probs);
   }
@@ -137,13 +148,13 @@ data {
   int<lower=1> K;  // number of unknown middle options
   matrix[N, P] X;  // predictors
   matrix[I, P2] X2; // individual-level predictors
-  int<lower=1,upper=J> best[T];  // index of best option for each task
-  int<lower=1,upper=J> worst[T];  // index of worst option for each task
-  int<lower=1,upper=J-2> middle_perms[factorial(K), K];  // all permutations of middle options
-  int<lower=1,upper=T> task[T];  // task index
-  int<lower=1,upper=I> task_individual[T];  // individual index for each task
-  int<lower=1,upper=N> start[T];  // start index for each task
-  int<lower=1,upper=N> end[T];  // end index for each task
+  array[T] int<lower=1,upper=J> best;  // index of best option for each task
+  array[T] int<lower=1,upper=J> worst;  // index of worst option for each task
+  array[factorial(K), K] int<lower=1,upper=J-2> middle_perms;  // all permutations of middle options
+  array[T] int<lower=1,upper=T> task;  // task index
+  array[T] int<lower=1,upper=I> task_individual;  // individual index for each task
+  array[T] int<lower=1,upper=N> start;  // start index for each task
+  array[T] int<lower=1,upper=N> end;  // end index for each task
 }
 
 parameters {
@@ -167,13 +178,46 @@ model {
 
   for (t in 1:T) {
     vector[J] utilities;
-    int ranks[J];
+    array[J] int ranks;
     utilities = X[start[t]:end[t]] * beta_individual[task_individual[t]]';
     ranks[1] = best[t];
     ranks[J] = worst[t];
-    ranks[2:(J-1)] = setdiff(1:J, {best[t], worst[t]});
-    target += partial_rank_lpmf(ranks | utilities, middle_perms);
+    int idx = 2;
+    for (j in 1:J) {
+      if (j != best[t] && j != worst[t]) {
+        ranks[idx] = j;
+        idx += 1;
+      }
+    }
+    target += partial_rank_log_prob(ranks, utilities, middle_perms);
   }
 }
 "
 
+compiled_rol_unk_model <- stan_model(model_code = rol_w_unknowns)
+rol_fit <- sampling(compiled_rol_unk_model,
+                    data = stan_data,
+                    iter = 800)
+
+best_choice <- as.data.frame(best_choice_fit, pars = "beta_individual") %>%
+  gather(Parameter, Value) %>%
+  group_by(Parameter) %>%
+  summarise(median = median(Value),
+            lower = quantile(Value, .05),
+            upper = quantile(Value, .95)) %>%
+  mutate(individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number,
+         column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
+  arrange(individual, column) %>%
+  mutate(`True value` = as.numeric(t(beta_i)),
+         Dataset = "Best Choice")
+
+ggplot(best_choice, aes(x = `True value`, y = median, color = Dataset)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_point(aes(y = median), alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1) +
+  labs(y = "Utility Estimates",
+       title = "Utility Estimates from the Two Models",
+       subtitle = "With interior 90% credibility intervals") +
+  scale_color_manual(values = c("Best Choice" = "blue")) +
+  facet_wrap(~Dataset) +
+  theme(legend.position="none")

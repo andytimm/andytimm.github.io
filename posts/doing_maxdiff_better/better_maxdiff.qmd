@@ -19,7 +19,7 @@ The wonderful Jim Savage calls the MaxDiff model of discrete choice a
 "mathematically incorrect model of a psychologically incoherent
 concept"[^1].
 
-[^1]: The smiley face is a threat: it's there to make sure MaxDiff stays
+[^1]: The smiley face is threatening: it's there to make sure MaxDiff stays
     down :-D
 
 Despite this lovely dunk, and some wonderful notes explaining why
@@ -28,7 +28,7 @@ research, most prominently as implemented in
 [Sawtooth](https://sawtoothsoftware.com/). Why is this?
 
 Putting aside the most obvious answers like inertia and a dim view of
-statistical practice in marketing, it's surprisingly hard to find a
+statistical practice in marketing, it's also surprisingly hard to find a
 fully fleshed out explanation of the alternatives online. In this post,
 I remedy that, with sections for:
 
@@ -47,7 +47,7 @@ basics of discrete choice models, but here's a brief refresher[^2].
     resources I'd recommend. First, Jim Savage's [blog post
     series](https://khakieconomics.github.io/2019/03/17/Logit-models-of-discrete-choice.html)
     is great, and does a fantastic job of explaining how our assumptions
-    about choice making map onto the math. I also benefited from
+    about choicemaking map onto the math. I also benefited from
     reading Glasgow's [Interpreting Discrete Choice
     Models](https://www.cambridge.org/core/elements/abs/interpreting-discrete-choice-models/676EC2C0F19A3B6D932E12CC612872BC),
     which builds up the basics of choice models a bit more slowly.
@@ -194,7 +194,7 @@ their worst choices. Why would we bake this into our model?
 
 Putting this all together, The simplification in estimation that comes
 with MaxDiff also leaks into how the model "sees" the decision maker,
-and it meaningfully distorts the map in a way that does not reflect the
+and it meaningfully distorts the map in a way that does not necessarily reflect the
 territory.
 
 ## Mathmatically Incorrect
@@ -350,7 +350,7 @@ moment. Similarly, this has load-bearing covariates at both the
 individual and choice level, since we would almost always have those in
 the real world. But the core utility function we've created for
 respondents boils down to simulating data under the assumptions of the
-logit choice model with Gumbel we've been discussing all along.
+logit choice model with Gumbel errors we've been discussing all along.
 
 Now, let's specify the best choice model in Stan[^7]:
 
@@ -1133,6 +1133,9 @@ a real, real pain in the ass. If we re-do our initial example with 10 total alte
 the middle 8 will be unknown, and there will be 40,320 permutations.
 
 ## Building the ROL with Unknown Middle Preferences in Stan
+
+Let's re-use our original simulation study structure here. the logic below
+should all be familiar
 
 <details>
 
