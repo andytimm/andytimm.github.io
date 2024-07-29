@@ -116,44 +116,37 @@ functions {
     real out = 0;
     int current_pos = 1;
     real remaining_sum = sum(exp_delta);
+    real epsilon = 1e-10;  // Small constant to avoid division by zero
 
-    // Print intermediate values for debugging
-    print(\"Initial exp_delta: \", exp_delta);
-    print(\"Initial remaining_sum: \", remaining_sum);
+    //print(\"Initial exp_delta: \", exp_delta);
+    //print(\"Initial remaining_sum: \", remaining_sum);
 
     while (current_pos <= K) {
       int tied_count = 1;
       real tied_sum = exp_delta[rank_order[current_pos]];
-
-      // Find ties
+      
       while (current_pos + tied_count <= K && rank_order[current_pos] == rank_order[current_pos + tied_count]) {
         tied_sum += exp_delta[rank_order[current_pos + tied_count]];
         tied_count += 1;
       }
 
-      // Print intermediate values for debugging
-      print(\"Current position: \", current_pos);
-      print(\"Tied count: \", tied_count);
-      print(\"Tied sum: \", tied_sum);
+      //print(\"Current position: \", current_pos);
+      //print(\"Tied count: \", tied_count);
+      //print(\"Tied sum: \", tied_sum);
 
       if (tied_count == 1) {
-        // No tie, standard logit term
-        out += delta[rank_order[current_pos]] - log(remaining_sum);
+        out += delta[rank_order[current_pos]] - log(fmax(remaining_sum, epsilon));
       } else {
-        // Tied (unknown) orderings
-        out += log(tied_sum) - log(remaining_sum);
+        out += log(fmax(tied_sum, epsilon)) - log(fmax(remaining_sum, epsilon));
       }
 
-      // Print contribution to log-likelihood
-      print(\"Log-likelihood contribution: \", out);
+      //print(\"Log-likelihood contribution: \", out);
 
-      remaining_sum -= tied_sum;
+      remaining_sum = fmax(remaining_sum - tied_sum, 0.0);  // Ensure non-negativity
       current_pos += tied_count;
 
-      // Print updated remaining sum for debugging
-      print(\"Updated remaining_sum: \", remaining_sum);
+      //print(\"Updated remaining_sum: \", remaining_sum);
     }
-
     return out;
   }
 }
@@ -204,19 +197,19 @@ model {
     utilities = utilities / max(fabs(utilities));
 
     // Print utilities and their transformations for debugging
-    print(\"Task: \", t);
-    print(\"Original utilities: \", X[start[t]:end[t]] * beta_individual[task_individual[t]]\');
-    print(\"Centered utilities: \", utilities + mean(utilities));
-    print(\"Scaled utilities: \", utilities);
-    print(\"Rank order: \", rank_order[start[t]:end[t]]);
+    //print(\"Task: \", t);
+    //print(\"Original utilities: \", X[start[t]:end[t]] * beta_individual[task_individual[t]]\');
+    //print(\"Centered utilities: \", utilities + mean(utilities));
+    //print(\"Scaled utilities: \", utilities);
+    //print(\"Rank order: \", rank_order[start[t]:end[t]]);
 
     // Use the improved likelihood function
     real ll = rank_logit_ties_lpmf(rank_order[start[t]:end[t]] | utilities);
-    print(\"Log-likelihood: \", ll);
+    //print(\"Log-likelihood: \", ll);
     if (!is_nan(ll) && !is_inf(ll)) {
       target += ll;
     } else {
-      print(\"Warning: Invalid log-likelihood at task \", t);
+      //print(\"Warning: Invalid log-likelihood at task \", t);
     }
   }
 }
@@ -232,6 +225,8 @@ fit <- sampling(compiled_model,
                 iter = 2000, 
                 warmup = 1000,
                 cores = 4)
+
+summary(fit)
 
 # Print a summary of the results
 print(fit, pars = c("beta", "tau"))
@@ -251,3 +246,45 @@ print(beta_summary)
 # If you want to examine individual-level betas:
 beta_individual_summary <- apply(posterior_samples$beta_individual, c(2, 3), mean)
 print(head(beta_individual_summary))
+
+# Assuming you have the true beta_i values stored in a matrix called 'beta_i'
+# and the estimated values are in the 'fit' object from Stan
+
+# Extract the posterior means for beta_individual
+posterior_means <- summary(fit)$summary[grep("beta_individual", rownames(summary(fit)$summary)), "mean"]
+
+# Reshape the posterior means into a matrix
+estimated_beta_i <- matrix(posterior_means, nrow = I, ncol = P, byrow = TRUE)
+
+# Calculate the difference between estimated and true values
+differences <- estimated_beta_i - beta_i
+
+# Calculate RMSE for each parameter
+rmse <- sqrt(colMeans(differences^2))
+
+# Calculate correlation between estimated and true values for each parameter
+correlations <- sapply(1:P, function(j) cor(estimated_beta_i[,j], beta_i[,j]))
+
+# Print results
+cat("RMSE for each parameter:\n")
+print(rmse)
+
+cat("\nCorrelation between estimated and true values for each parameter:\n")
+print(correlations)
+
+# Optionally, create a plot to visualize the comparison
+library(ggplot2)
+
+plot_data <- data.frame(
+  True = as.vector(beta_i),
+  Estimated = as.vector(estimated_beta_i),
+  Parameter = rep(paste("Parameter", 1:P), each = I)
+)
+
+ggplot(plot_data, aes(x = True, y = Estimated)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  facet_wrap(~ Parameter, scales = "free") +
+  labs(title = "Comparison of True vs Estimated Utilities",
+       x = "True Utility",
+       y = "Estimated Utility")
