@@ -11,7 +11,7 @@ set.seed(604)
 # down I, the results should reproduce just fine.
 
 # Number of individuals
-I <- 30
+I <- 100
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -64,25 +64,21 @@ mean(rgumbel(1e6))
 # They return their rankings. 
 
 # Modify the ranked_options data frame to include all necessary information
-ranked_options <- crossing(individual = 1:I, task = 1:Tasks, option = 1:J) %>% 
-  mutate(row = 1:n()) %>%
+ranked_options <- indexes %>% 
   group_by(individual, task) %>% 
   mutate(
     fixed_utility = as.numeric(X[row,] %*% as.numeric(beta_i[first(individual),])),
     plus_gumbel_error = fixed_utility + rgumbel(n()),
     true_rank = rank(-plus_gumbel_error),
-    true_order = order(-plus_gumbel_error),
-    # Simulate partial ordering by only observing top 1 and bottom 1
+    true_order = order(true_rank),
     observed_order = case_when(
-      true_order <= 1 ~ true_order,
-      true_order == J ~ J,
-      TRUE ~ 3  # tie all middle orders
+      true_order == 1 ~ J,  # Worst choice
+      true_order == J ~ 1,  # Best choice
+      TRUE ~ 3  # Tie all middle orders
     ),
-    # For original models
-    best_choice = as.numeric(true_order == 1),
-    worst_choice = as.numeric(true_order == J)
-  ) %>%
-  ungroup()
+    best_choice = as.numeric(true_order == J),
+    worst_choice = as.numeric(true_order == 1)
+  )
 
 tt <- ranked_options %>% 
   group_by(individual, task) %>%
@@ -112,41 +108,29 @@ efron_simplified_rol <- "
 functions {
   real rank_logit_ties_lpmf(int[] rank_order, vector delta) {
     int K = rows(delta);
-    vector[K] exp_delta = exp(delta - max(delta));  // Subtract max for numerical stability
+    vector[K] tmp = delta[rank_order];
     real out = 0;
     int current_pos = 1;
-    real remaining_sum = sum(exp_delta);
-    real epsilon = 1e-10;  // Small constant to avoid division by zero
-
-    //print(\"Initial exp_delta: \", exp_delta);
-    //print(\"Initial remaining_sum: \", remaining_sum);
 
     while (current_pos <= K) {
       int tied_count = 1;
-      real tied_sum = exp_delta[rank_order[current_pos]];
       
+      // Find ties
       while (current_pos + tied_count <= K && rank_order[current_pos] == rank_order[current_pos + tied_count]) {
-        tied_sum += exp_delta[rank_order[current_pos + tied_count]];
         tied_count += 1;
       }
 
-      //print(\"Current position: \", current_pos);
-      //print(\"Tied count: \", tied_count);
-      //print(\"Tied sum: \", tied_sum);
-
       if (tied_count == 1) {
-        out += delta[rank_order[current_pos]] - log(fmax(remaining_sum, epsilon));
+        // No tie, use original calculation
+        out += tmp[current_pos] - log_sum_exp(tmp[current_pos:]);
       } else {
-        out += log(fmax(tied_sum, epsilon)) - log(fmax(remaining_sum, epsilon));
+        // Tied (unknown) orderings
+        out += log_sum_exp(tmp[current_pos:(current_pos+tied_count-1)]) - log_sum_exp(tmp[current_pos:]);
       }
 
-      //print(\"Log-likelihood contribution: \", out);
-
-      remaining_sum = fmax(remaining_sum - tied_sum, 0.0);  // Ensure non-negativity
       current_pos += tied_count;
-
-      //print(\"Updated remaining_sum: \", remaining_sum);
     }
+    
     return out;
   }
 }
@@ -160,7 +144,6 @@ data {
   int K; // number of choices
   
   int rank_order[N]; // The vector describing the index (within each task) of the first, second, third, ... choices. 
-  // In R, this is observed_order within each task
   matrix[N, P] X; // choice attributes
   matrix[I, P2] X2; // individual attributes
   
@@ -169,6 +152,7 @@ data {
   int start[T]; // the starting observation for each task
   int end[T]; // the ending observation for each task
 }
+
 parameters {
   vector[P] beta; // hypermeans of the part-worths
   matrix[P, P2] Gamma; // coefficient matrix on individual attributes
@@ -176,9 +160,11 @@ parameters {
   matrix[I, P] z; // individual random effects (unscaled)
   cholesky_factor_corr[P] L_Omega; // the cholesky factor of the correlation matrix of tastes/part-worths
 }
+
 transformed parameters {
-  matrix[I, P] beta_individual = rep_matrix(beta\', I) + X2 * Gamma\' + z * diag_pre_multiply(tau, L_Omega);
+  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z * diag_pre_multiply(tau, L_Omega);
 }
+
 model {
   tau ~ normal(0, .5);
   beta ~ normal(0, 1);
@@ -188,29 +174,8 @@ model {
 
   for(t in 1:T) {
     vector[K] utilities;
-    utilities = X[start[t]:end[t]] * beta_individual[task_individual[t]]\';
-
-    // Center utilities for numerical stability
-    utilities = utilities - mean(utilities);
-
-    // Scale utilities
-    utilities = utilities / max(fabs(utilities));
-
-    // Print utilities and their transformations for debugging
-    //print(\"Task: \", t);
-    //print(\"Original utilities: \", X[start[t]:end[t]] * beta_individual[task_individual[t]]\');
-    //print(\"Centered utilities: \", utilities + mean(utilities));
-    //print(\"Scaled utilities: \", utilities);
-    //print(\"Rank order: \", rank_order[start[t]:end[t]]);
-
-    // Use the improved likelihood function
-    real ll = rank_logit_ties_lpmf(rank_order[start[t]:end[t]] | utilities);
-    //print(\"Log-likelihood: \", ll);
-    if (!is_nan(ll) && !is_inf(ll)) {
-      target += ll;
-    } else {
-      //print(\"Warning: Invalid log-likelihood at task \", t);
-    }
+    utilities = X[start[t]:end[t]] * beta_individual[task_individual[t]]';
+    target += rank_logit_ties_lpmf(rank_order[start[t]:end[t]] | utilities);
   }
 }
 "
@@ -228,63 +193,141 @@ fit <- sampling(compiled_model,
 
 summary(fit)
 
-# Print a summary of the results
-print(fit, pars = c("beta", "tau"))
+rol_choice <- as.data.frame(fit, pars = "beta_individual") %>%
+  gather(Parameter, Value) %>%
+  group_by(Parameter) %>%
+  summarise(median = median(Value),
+            lower = quantile(Value, .05),
+            upper = quantile(Value, .95)) %>%
+  mutate(individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number,
+         column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
+  arrange(individual, column) %>%
+  mutate(`True value` = as.numeric(t(beta_i)),
+         Dataset = "Rank-Ordered Logit w ties")
 
-# Extract the posterior samples
-posterior_samples <- extract(fit)
+ggplot(rol_choice, aes(x = `True value`, y = median, color = Dataset)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_point(aes(y = median), alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1) +
+  labs(y = "Utility Estimates",
+       title = "Utility Estimates from the Three Models",
+       subtitle = "With interior 90% credibility intervals") +
+  scale_color_manual(values = c("Rank-Ordered Logit" = "green")) +
+  facet_wrap(~Dataset) +
+  theme(legend.position="bottom")
 
-# Calculate mean betas and 95% credible intervals
-beta_summary <- data.frame(
-  mean_beta = apply(posterior_samples$beta, 2, mean),
-  lower_ci = apply(posterior_samples$beta, 2, quantile, probs = 0.025),
-  upper_ci = apply(posterior_samples$beta, 2, quantile, probs = 0.975)
-)
 
-print(beta_summary)
+# Debugging
 
-# If you want to examine individual-level betas:
-beta_individual_summary <- apply(posterior_samples$beta_individual, c(2, 3), mean)
-print(head(beta_individual_summary))
+# try ROL to see if we learn anything
+ranked <- "// saved as ranked_rcl.stan
+functions {
+  real rank_logit_lpmf(int[] rank_order, vector delta) {
+    // We reorder the raw utilities so that the first rank is first, second rank second... 
+    vector[rows(delta)] tmp = delta[rank_order];
+    real out;
+    // ... and sequentially take the log of the first element of the softmax applied to the remaining
+    // unranked elements.
+    for(i in 1:(rows(tmp) - 1)) {
+      if(i == 1) {
+        out = tmp[1] - log_sum_exp(tmp);
+      } else {
+        out += tmp[i] - log_sum_exp(tmp[i:]);
+      }
+    }
+    // And return the log likelihood of observing that ranking
+    return(out);
+  }
+}
+data {
+  int N; // number of rows
+  int T; // number of inidvidual-choice sets/task combinations
+  int I; // number of Individuals
+  int P; // number of covariates that vary by choice
+  int P2; // number of covariates that vary by individual
+  int K; // number of choices
+  
+  int rank_order[N]; // The vector describing the index (within each task) of the first, second, third, ... choices. 
+  // In R, this is order(-utility) within each task
+  matrix[N, P] X; // choice attributes
+  matrix[I, P2] X2; // individual attributes
+  
+  int task[T]; // index for tasks
+  int task_individual[T]; // index for individual
+  int start[T]; // the starting observation for each task
+  int end[T]; // the ending observation for each task
+}
+parameters {
+  vector[P] beta; // hypermeans of the part-worths
+  matrix[P, P2] Gamma; // coefficient matrix on individual attributes
+  vector<lower = 0>[P] tau; // diagonal of the part-worth covariance matrix
+  matrix[I, P] z; // individual random effects (unscaled)
+  cholesky_factor_corr[P] L_Omega; // the cholesky factor of the correlation matrix of tastes/part-worths
+}
+transformed parameters {
+  // here we use the reparameterization discussed on slide 30
+  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z * diag_pre_multiply(tau, L_Omega);
+}
+model {
+  // priors on the parameters
+  tau ~ normal(0, .5);
+  beta ~ normal(0, 1);
+  to_vector(z) ~ normal(0, 1);
+  L_Omega ~ lkj_corr_cholesky(4);
+  to_vector(Gamma) ~ normal(0, 1);
+  
+  // log probabilities of each choice in the dataset
+  for(t in 1:T) {
+    vector[K] utilities; // tmp vector holding the utilities for the task/individual combination
+    // add utility from product attributes with individual part-worths/marginal utilities
+    utilities = X[start[t]:end[t]]*beta_individual[task_individual[t]]';
+    rank_order[start[t]:end[t]] ~ rank_logit(utilities);
+  }
+}"
 
-# Assuming you have the true beta_i values stored in a matrix called 'beta_i'
-# and the estimated values are in the 'fit' object from Stan
+data_list_ranked_rcl <- list(N = nrow(X),
+                             T = nrow(tt),
+                             I = I, 
+                             P = P, 
+                             P2 = P2, 
+                             K = J, 
+                             # NOTE!! This is the tricky bit -- we use the order of the ranks (within task)
+                             # Not the raw rank orderings. This is how we get the likelihood evaluation to be pretty quick
+                             rank_order = ranked_options$true_order,
+                             X = X, 
+                             X2 = W, 
+                             task = tt$task_number, 
+                             task_individual = tt$individual,
+                             start = tt$start, 
+                             end = tt$end)
 
-# Extract the posterior means for beta_individual
-posterior_means <- summary(fit)$summary[grep("beta_individual", rownames(summary(fit)$summary)), "mean"]
+# Compile the model
+rol_model <- stan_model(model_code = ranked)
 
-# Reshape the posterior means into a matrix
-estimated_beta_i <- matrix(posterior_means, nrow = I, ncol = P, byrow = TRUE)
+# Fit the model
+fit_rol <- sampling(rol_model, data = data_list_ranked_rcl, 
+                    iter = 2000, warmup = 1000, chains = 4, cores = 4)
 
-# Calculate the difference between estimated and true values
-differences <- estimated_beta_i - beta_i
+# Check convergence
+rol_choice <- as.data.frame(fit_rol, pars = "beta_individual") %>%
+  gather(Parameter, Value) %>%
+  group_by(Parameter) %>%
+  summarise(median = median(Value),
+            lower = quantile(Value, .05),
+            upper = quantile(Value, .95)) %>%
+  mutate(individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number,
+         column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
+  arrange(individual, column) %>%
+  mutate(`True value` = as.numeric(t(beta_i)),
+         Dataset = "Rank-Ordered Logit w ties")
 
-# Calculate RMSE for each parameter
-rmse <- sqrt(colMeans(differences^2))
-
-# Calculate correlation between estimated and true values for each parameter
-correlations <- sapply(1:P, function(j) cor(estimated_beta_i[,j], beta_i[,j]))
-
-# Print results
-cat("RMSE for each parameter:\n")
-print(rmse)
-
-cat("\nCorrelation between estimated and true values for each parameter:\n")
-print(correlations)
-
-# Optionally, create a plot to visualize the comparison
-library(ggplot2)
-
-plot_data <- data.frame(
-  True = as.vector(beta_i),
-  Estimated = as.vector(estimated_beta_i),
-  Parameter = rep(paste("Parameter", 1:P), each = I)
-)
-
-ggplot(plot_data, aes(x = True, y = Estimated)) +
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
-  facet_wrap(~ Parameter, scales = "free") +
-  labs(title = "Comparison of True vs Estimated Utilities",
-       x = "True Utility",
-       y = "Estimated Utility")
+ggplot(rol_choice, aes(x = `True value`, y = median, color = Dataset)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_point(aes(y = median), alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1) +
+  labs(y = "Utility Estimates",
+       title = "Utility Estimates from the Three Models",
+       subtitle = "With interior 90% credibility intervals") +
+  scale_color_manual(values = c("Rank-Ordered Logit" = "green")) +
+  facet_wrap(~Dataset) +
+  theme(legend.position="bottom")
