@@ -1,5 +1,6 @@
 library(tidyverse)
 library(rstan)
+library(combinat)
 
 options(mc.cores = parallel::detectCores())
 
@@ -11,7 +12,7 @@ set.seed(604)
 # down I, the results should reproduce just fine.
 
 # Number of individuals
-I <- 100
+I <- 800
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -72,12 +73,12 @@ ranked_options <- indexes %>%
     true_rank = rank(-plus_gumbel_error),
     true_order = order(true_rank),
     observed_order = case_when(
-      true_order == 1 ~ J,  # Worst choice
-      true_order == J ~ 1,  # Best choice
+      true_order == J ~ J,  # Worst choice
+      true_order == 1 ~ 1,  # Best choice
       TRUE ~ 3  # Tie all middle orders
     ),
-    best_choice = as.numeric(true_order == J),
-    worst_choice = as.numeric(true_order == 1)
+    best_choice = as.numeric(true_order == 1),
+    worst_choice = as.numeric(true_order == J)
   )
 
 tt <- ranked_options %>% 
@@ -86,6 +87,11 @@ tt <- ranked_options %>%
             end = max(row)) %>% 
   ungroup %>%
   mutate(task_number = 1:n())
+
+n_tied <- J - 2  # Adjust this to match your DGP
+permutations <- permn(n_tied)
+permutation_matrix <- do.call(rbind, permutations)
+n_permutations <- nrow(permutation_matrix)
 
 stan_data <- list(
   N = nrow(X),
@@ -100,36 +106,37 @@ stan_data <- list(
   task = tt$task_number, 
   task_individual = tt$individual,
   start = tt$start, 
-  end = tt$end
+  end = tt$end,
+  n_tied = n_tied,
+  permutations = permutation_matrix,
+  n_permutations = n_permutations
 )
 
 
 efron_simplified_rol <- "
 functions {
-  real rank_logit_ties_lpmf(int[] rank_order, vector delta) {
+  real rank_logit_ties_lpmf(int[] y, vector delta, int[,] permutations, int n_permutations, int n_tied) {
     int K = rows(delta);
-    vector[K] tmp = delta[rank_order];
+    vector[K] sorted_delta = delta[y];
     real out = 0;
-    int current_pos = 1;
-
-    while (current_pos <= K) {
-      int tied_count = 1;
-      
-      // Find ties
-      while (current_pos + tied_count <= K && rank_order[current_pos] == rank_order[current_pos + tied_count]) {
-        tied_count += 1;
+    
+    // Handle known best
+    out += sorted_delta[1] - log_sum_exp(sorted_delta);
+    
+    // Handle tied middle ranks
+    real perm_sum = 0;
+    for (p in 1:n_permutations) {
+      real perm_ll = 0;
+      for (i in 1:n_tied) {
+        int idx = permutations[p, i];
+        perm_ll += sorted_delta[1+idx] - log_sum_exp(sorted_delta[2:K]);
       }
-
-      if (tied_count == 1) {
-        // No tie, use original calculation
-        out += tmp[current_pos] - log_sum_exp(tmp[current_pos:]);
-      } else {
-        // Tied (unknown) orderings
-        out += log_sum_exp(tmp[current_pos:(current_pos+tied_count-1)]) - log_sum_exp(tmp[current_pos:]);
-      }
-
-      current_pos += tied_count;
+      perm_sum += exp(perm_ll);
     }
+    out += log(perm_sum / n_permutations);
+    
+    // Handle known worst
+    // out += sorted_delta[K];
     
     return out;
   }
@@ -151,6 +158,10 @@ data {
   int task_individual[T]; // index for individual
   int start[T]; // the starting observation for each task
   int end[T]; // the ending observation for each task
+  
+  int<lower=2> n_tied;
+  int<lower=1> n_permutations;
+  int permutations[n_permutations, n_tied];
 }
 
 parameters {
@@ -175,7 +186,7 @@ model {
   for(t in 1:T) {
     vector[K] utilities;
     utilities = X[start[t]:end[t]] * beta_individual[task_individual[t]]';
-    target += rank_logit_ties_lpmf(rank_order[start[t]:end[t]] | utilities);
+    rank_order[start[t]:end[t]] ~ rank_logit_ties(utilities, permutations, n_permutations, n_tied);
   }
 }
 "
@@ -193,28 +204,48 @@ fit <- sampling(compiled_model,
 
 summary(fit)
 
+normalize_utilities <- function(utilities) {
+  (utilities - mean(utilities)) / sd(utilities)
+}
+
 rol_choice <- as.data.frame(fit, pars = "beta_individual") %>%
   gather(Parameter, Value) %>%
-  group_by(Parameter) %>%
-  summarise(median = median(Value),
-            lower = quantile(Value, .05),
-            upper = quantile(Value, .95)) %>%
-  mutate(individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number,
-         column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
-  arrange(individual, column) %>%
-  mutate(`True value` = as.numeric(t(beta_i)),
-         Dataset = "Rank-Ordered Logit w ties")
+  mutate(
+    individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
+    column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
+  ) %>%
+  group_by(individual) %>%
+  mutate(Value_normalized = normalize_utilities(Value)) %>%
+  group_by(individual, column) %>%
+  summarise(
+    median = median(Value_normalized),
+    lower = quantile(Value_normalized, 0.05),
+    upper = quantile(Value_normalized, 0.95),
+    .groups = 'drop'
+  ) %>%
+  ungroup() %>%
+  mutate(
+    True_value = as.numeric(t(beta_i)),
+    Dataset = "Rank-Ordered Logit w ties"
+  ) %>%
+  group_by(individual) %>%
+  mutate(True_value_normalized = normalize_utilities(True_value)) %>%
+  ungroup()
 
-ggplot(rol_choice, aes(x = `True value`, y = median, color = Dataset)) +
+ggplot(rol_choice, aes(x = True_value_normalized, y = median, color = Dataset)) +
   geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
   geom_point(aes(y = median), alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1) +
-  labs(y = "Utility Estimates",
-       title = "Utility Estimates from the Three Models",
+  labs(x = "Normalized True Utility",
+       y = "Normalized Estimated Utility",
+       title = "Normalized Utility Estimates vs True Values",
        subtitle = "With interior 90% credibility intervals") +
-  scale_color_manual(values = c("Rank-Ordered Logit" = "green")) +
-  facet_wrap(~Dataset) +
-  theme(legend.position="bottom")
+  scale_color_manual(values = c("Rank-Ordered Logit w ties" = "green")) +
+  theme_minimal() +
+  coord_fixed(ratio = 1)
+
+rmse <- sqrt(mean((rol_choice$True_value_normalized - rol_choice$median)^2))
+print(paste("RMSE:", round(rmse, 4)))
 
 
 # Debugging
@@ -307,6 +338,8 @@ rol_model <- stan_model(model_code = ranked)
 # Fit the model
 fit_rol <- sampling(rol_model, data = data_list_ranked_rcl, 
                     iter = 2000, warmup = 1000, chains = 4, cores = 4)
+
+summary(fit_rol)
 
 # Check convergence
 rol_choice <- as.data.frame(fit_rol, pars = "beta_individual") %>%
