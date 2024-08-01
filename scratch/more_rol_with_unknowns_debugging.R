@@ -123,20 +123,20 @@ functions {
     // Handle known best
     out += sorted_delta[1] - log_sum_exp(sorted_delta);
     
+    // Compute normalizing factor once
+    real normalizing_factor = log_sum_exp(sorted_delta[2:K]);
+    
     // Handle tied middle ranks
     real perm_sum = 0;
     for (p in 1:n_permutations) {
       real perm_ll = 0;
       for (i in 1:n_tied) {
         int idx = permutations[p, i];
-        perm_ll += sorted_delta[1+idx] - log_sum_exp(sorted_delta[2:K]);
+        perm_ll += sorted_delta[1+idx];
       }
-      perm_sum += exp(perm_ll);
+      perm_sum += exp(perm_ll - n_tied * normalizing_factor);
     }
     out += log(perm_sum / n_permutations);
-    
-    // Handle known worst
-    // out += sorted_delta[K];
     
     return out;
   }
