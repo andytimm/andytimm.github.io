@@ -12,7 +12,7 @@ set.seed(604)
 # down I, the results should reproduce just fine.
 
 # Number of individuals
-I <- 30
+I <- 100
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -232,50 +232,45 @@ rol_choice <- as.data.frame(fit, pars = "beta_individual") %>%
   mutate(True_value_normalized = normalize_utilities(True_value)) %>%
   ungroup()
 
-ggplot(rol_choice, aes(x = True_value_normalized, y = median, color = Dataset)) +
-  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
-  geom_point(aes(y = median), alpha = 0.5) +
-  geom_abline(intercept = 0, slope = 1) +
-  labs(x = "Normalized True Utility",
-       y = "Normalized Estimated Utility",
-       title = "Normalized Utility Estimates vs True Values",
-       subtitle = "With interior 90% credibility intervals") +
-  scale_color_manual(values = c("Rank-Ordered Logit w ties" = "green")) +
-  theme_minimal() +
-  coord_fixed(ratio = 1)
+############
+# Efron Time
+############
 
-rmse <- sqrt(mean((rol_choice$True_value_normalized - rol_choice$median)^2))
-print(paste("RMSE:", round(rmse, 4)))
+efron_model <- "
+functions {
+  real rank_logit_efron_lpmf(int[] y, vector delta, int n_tied) {
+    int K = rows(delta);
+    vector[K] sorted_delta = delta[y];
+    real out = 0;
+    
+    // Handle known best
+    out += sorted_delta[1] - log_sum_exp(sorted_delta);
+    
+    // Handle tied middle ranks using Efron approximation
+    real tied_sum = log_sum_exp(sorted_delta[2:(K-1)]);  // Changed to log_sum_exp
+    real normalizing_factor = log_sum_exp(sorted_delta[2:K]);
+    for (i in 1:n_tied) {
+      real d = (i - 1.0) / n_tied;
+      real adjusted_factor = log_diff_exp(normalizing_factor, log(d) + tied_sum);
+      out += sorted_delta[1+i] - adjusted_factor;
+    }
+    
+    // Handle known worst
+    // out += sorted_delta[K] - log_sum_exp(sorted_delta[2:K]);
+    
+    return out;
+  }
+}
 
-# Compare to Best-worst
-stan_data_maxdiff <- list(
-  N = nrow(X),
-  T = nrow(tt),
-  I = I, 
-  P = P, 
-  P2 = P2, 
-  K = J, 
-  choice = ranked_options$best_choice,
-  worst_choice = ranked_options$worst_choice,
-  X = X, 
-  X2 = W, 
-  task = tt$task_number, 
-  task_individual = tt$individual,
-  start = tt$start, 
-  end = tt$end
-)
-
-best_worst <- "// saved as mixed_conditional_individual_effects.stan
 data {
   int N; // number of rows
-  int T; // number of inidvidual-choice sets/task combinations
+  int T; // number of individual-choice sets/task combinations
   int I; // number of Individuals
   int P; // number of covariates that vary by choice
   int P2; // number of covariates that vary by individual
   int K; // number of choices
   
-  vector<lower = 0, upper = 1>[N] choice; // binary indicator for choice
-  vector<lower = 0, upper = 1>[N] worst_choice; // binary indicator for worst choice
+  int rank_order[N]; // The vector describing the index (within each task) of the first, second, third, ... choices. 
   matrix[N, P] X; // choice attributes
   matrix[I, P2] X2; // individual attributes
   
@@ -283,7 +278,10 @@ data {
   int task_individual[T]; // index for individual
   int start[T]; // the starting observation for each task
   int end[T]; // the ending observation for each task
+  
+  int<lower=2> n_tied; // number of tied ranks
 }
+
 parameters {
   vector[P] beta; // hypermeans of the part-worths
   matrix[P, P2] Gamma; // coefficient matrix on individual attributes
@@ -291,48 +289,61 @@ parameters {
   matrix[I, P] z; // individual random effects (unscaled)
   cholesky_factor_corr[P] L_Omega; // the cholesky factor of the correlation matrix of tastes/part-worths
 }
+
 transformed parameters {
-  // here we use the reparameterization discussed on slide 30
-  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z*diag_pre_multiply(tau, L_Omega);
+  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z * diag_pre_multiply(tau, L_Omega);
 }
+
 model {
-  // create a temporary holding vector
-  vector[N] log_prob;
-  vector[N] log_prob_worst;
-  
-  // priors on the parameters
   tau ~ normal(0, .5);
-  beta ~ normal(0, .5);
+  beta ~ normal(0, 1);
   to_vector(z) ~ normal(0, 1);
   L_Omega ~ lkj_corr_cholesky(4);
   to_vector(Gamma) ~ normal(0, 1);
-  
-  // log probabilities of each choice in the dataset
+
   for(t in 1:T) {
-    vector[K] utilities; // tmp vector holding the utilities for the task/individual combination
-    // add utility from product attributes with individual part-worths/marginal utilities
-    utilities = X[start[t]:end[t]]*beta_individual[task_individual[t]]';
-    
-    log_prob[start[t]:end[t]] = log_softmax(utilities);
-    log_prob_worst[start[t]:end[t]] = log_softmax(-utilities);
+    vector[K] utilities;
+    utilities = X[start[t]:end[t]] * beta_individual[task_individual[t]]';
+    rank_order[start[t]:end[t]] ~ rank_logit_efron(utilities, n_tied);
   }
-  
-  // use the likelihood derivation on slide 29
-  target += log_prob' * choice;
-  target += log_prob_worst' * worst_choice;
-}"
+}
+"
 
-compiled_maxdiff_model <- stan_model(model_code = best_worst)
+# Compile the Efron model
+efron_stan <- stan_model(model_code = efron_model)
 
-maxdiff_fit <- sampling(compiled_maxdiff_model, 
-                        data = stan_data_maxdiff, 
-                        chains = 4, 
-                        iter = 800, 
-                        warmup = 400,
-                        cores = 4)
+# Prepare data for Stan (Efron model)
+stan_data_efron <- list(
+  N = nrow(X),
+  T = nrow(tt),
+  I = I, 
+  P = P, 
+  P2 = P2, 
+  K = J, 
+  rank_order = ranked_options$observed_order,
+  X = X, 
+  X2 = W, 
+  task = tt$task_number, 
+  task_individual = tt$individual,
+  start = tt$start, 
+  end = tt$end,
+  n_tied = J - 2  # number of tied ranks
+)
 
-# Process MaxDiff results
-maxdiff_choice <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
+# Fit the Efron model
+fit_efron <- sampling(efron_stan, data = stan_data_efron, 
+                      iter = 2000, warmup = 1000, chains = 4, cores = 4)
+
+summary(fit_efron)
+
+
+# Function to normalize utilities
+normalize_utilities <- function(utilities) {
+  (utilities - mean(utilities)) / sd(utilities)
+}
+
+# Process results for the full model with ties
+rol_choice_ties <- as.data.frame(fit, pars = "beta_individual") %>%
   gather(Parameter, Value) %>%
   mutate(
     individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
@@ -350,46 +361,36 @@ maxdiff_choice <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
   ungroup() %>%
   mutate(
     True_value = as.numeric(t(beta_i)),
-    Dataset = "MaxDiff"
+    Dataset = "Rank-Ordered Logit w/ ties"
   ) %>%
   group_by(individual) %>%
   mutate(True_value_normalized = normalize_utilities(True_value)) %>%
   ungroup()
 
-# Combine results
-combined_results <- bind_rows(rol_choice, maxdiff_choice)
-
-# Create comparison plot
-ggplot(combined_results, aes(x = True_value_normalized, y = median, color = Dataset)) +
-  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
-  geom_point(aes(y = median), alpha = 0.5) +
-  geom_abline(intercept = 0, slope = 1) +
-  labs(x = "Normalized True Utility",
-       y = "Normalized Estimated Utility",
-       title = "Normalized Utility Estimates vs True Values",
-       subtitle = "With interior 90% credibility intervals") +
-  scale_color_manual(values = c("Rank-Ordered Logit w ties" = "green", "MaxDiff" = "blue")) +
-  theme_minimal() +
-  coord_fixed(ratio = 1) +
-  facet_wrap(~Dataset)
-
-# Calculate RMSE for both models
-rmse_rol <- sqrt(mean((rol_choice$True_value_normalized - rol_choice$median)^2))
-rmse_maxdiff <- sqrt(mean((maxdiff_choice$True_value_normalized - maxdiff_choice$median)^2))
-
-# Print RMSE values
-print(paste("RMSE Rank-Ordered Logit with ties:", round(rmse_rol, 4)))
-print(paste("RMSE MaxDiff:", round(rmse_maxdiff, 4)))
-
-# Add RMSE to the plot
-plot_with_rmse <- last_plot() +
-  labs(subtitle = paste("With interior 90% credibility intervals\n",
-                        "RMSE ROL:", round(rmse_rol, 4), 
-                        "RMSE MaxDiff:", round(rmse_maxdiff, 4)))
-
-print(plot_with_rmse)
-
-# Debugging
+# Process results for the Efron approximation model
+rol_choice_efron <- as.data.frame(fit_efron, pars = "beta_individual") %>%
+  gather(Parameter, Value) %>%
+  mutate(
+    individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
+    column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
+  ) %>%
+  group_by(individual) %>%
+  mutate(Value_normalized = normalize_utilities(Value)) %>%
+  group_by(individual, column) %>%
+  summarise(
+    median = median(Value_normalized),
+    lower = quantile(Value_normalized, 0.05),
+    upper = quantile(Value_normalized, 0.95),
+    .groups = 'drop'
+  ) %>%
+  ungroup() %>%
+  mutate(
+    True_value = as.numeric(t(beta_i)),
+    Dataset = "Efron Approximation"
+  ) %>%
+  group_by(individual) %>%
+  mutate(True_value_normalized = normalize_utilities(True_value)) %>%
+  ungroup()
 
 # try ROL to see if we learn anything
 ranked <- "// saved as ranked_rcl.stan
@@ -507,142 +508,145 @@ rol_choice_no_ties <- as.data.frame(fit_rol, pars = "beta_individual") %>%
   mutate(True_value_normalized = normalize_utilities(True_value)) %>%
   ungroup()
 
-all_results <- bind_rows(rol_choice, maxdiff_choice, rol_choice_no_ties)
+# Compare to Best-worst
+stan_data_maxdiff <- list(
+  N = nrow(X),
+  T = nrow(tt),
+  I = I, 
+  P = P, 
+  P2 = P2, 
+  K = J, 
+  choice = ranked_options$best_choice,
+  worst_choice = ranked_options$worst_choice,
+  X = X, 
+  X2 = W, 
+  task = tt$task_number, 
+  task_individual = tt$individual,
+  start = tt$start, 
+  end = tt$end
+)
 
-ggplot(all_results, aes(x = True_value_normalized, y = median, color = Dataset)) +
-  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
-  geom_point(aes(y = median), alpha = 0.5) +
-  geom_abline(intercept = 0, slope = 1) +
-  labs(x = "Normalized True Utility",
-       y = "Normalized Estimated Utility",
-       title = "Normalized Utility Estimates vs True Values",
-       subtitle = "With interior 90% credibility intervals") +
-  scale_color_manual(values = c("Rank-Ordered Logit w ties" = "green", 
-                                "MaxDiff" = "blue", 
-                                "Rank-Ordered Logit (no ties)" = "red")) +
-  theme_minimal() +
-  coord_fixed(ratio = 1) +
-  facet_wrap(~Dataset)
-
-rmse_rol <- sqrt(mean((rol_choice$True_value_normalized - rol_choice$median)^2))
-rmse_maxdiff <- sqrt(mean((maxdiff_choice$True_value_normalized - maxdiff_choice$median)^2))
-rmse_rol_no_ties <- sqrt(mean((rol_choice_no_ties$True_value_normalized - rol_choice_no_ties$median)^2))
-
-print(paste("RMSE Rank-Ordered Logit with ties:", round(rmse_rol, 4)))
-print(paste("RMSE MaxDiff:", round(rmse_maxdiff, 4)))
-print(paste("RMSE Rank-Ordered Logit (no ties):", round(rmse_rol_no_ties, 4)))
-
-plot_with_rmse <- last_plot() +
-  labs(subtitle = paste("With interior 90% credibility intervals\n",
-                        "RMSE ROL w/ ties:", round(rmse_rol, 4), "\n",
-                        "RMSE MaxDiff:", round(rmse_maxdiff, 4), "\n",
-                        "RMSE ROL (no ties):", round(rmse_rol_no_ties, 4)))
-
-print(plot_with_rmse)
-
-############################################################
-## Not individual level aggregated (unsure if this is valid)
-############################################################
-
-# Function to normalize utilities across all respondents
-normalize_utilities_global <- function(utilities) {
-  (utilities - mean(utilities)) / sd(utilities)
+best_worst <- "// saved as mixed_conditional_individual_effects.stan
+data {
+  int N; // number of rows
+  int T; // number of inidvidual-choice sets/task combinations
+  int I; // number of Individuals
+  int P; // number of covariates that vary by choice
+  int P2; // number of covariates that vary by individual
+  int K; // number of choices
+  
+  vector<lower = 0, upper = 1>[N] choice; // binary indicator for choice
+  vector<lower = 0, upper = 1>[N] worst_choice; // binary indicator for worst choice
+  matrix[N, P] X; // choice attributes
+  matrix[I, P2] X2; // individual attributes
+  
+  int task[T]; // index for tasks
+  int task_individual[T]; // index for individual
+  int start[T]; // the starting observation for each task
+  int end[T]; // the ending observation for each task
 }
+parameters {
+  vector[P] beta; // hypermeans of the part-worths
+  matrix[P, P2] Gamma; // coefficient matrix on individual attributes
+  vector<lower = 0>[P] tau; // diagonal of the part-worth covariance matrix
+  matrix[I, P] z; // individual random effects (unscaled)
+  cholesky_factor_corr[P] L_Omega; // the cholesky factor of the correlation matrix of tastes/part-worths
+}
+transformed parameters {
+  // here we use the reparameterization discussed on slide 30
+  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z*diag_pre_multiply(tau, L_Omega);
+}
+model {
+  // create a temporary holding vector
+  vector[N] log_prob;
+  vector[N] log_prob_worst;
+  
+  // priors on the parameters
+  tau ~ normal(0, .5);
+  beta ~ normal(0, .5);
+  to_vector(z) ~ normal(0, 1);
+  L_Omega ~ lkj_corr_cholesky(4);
+  to_vector(Gamma) ~ normal(0, 1);
+  
+  // log probabilities of each choice in the dataset
+  for(t in 1:T) {
+    vector[K] utilities; // tmp vector holding the utilities for the task/individual combination
+    // add utility from product attributes with individual part-worths/marginal utilities
+    utilities = X[start[t]:end[t]]*beta_individual[task_individual[t]]';
+    
+    log_prob[start[t]:end[t]] = log_softmax(utilities);
+    log_prob_worst[start[t]:end[t]] = log_softmax(-utilities);
+  }
+  
+  // use the likelihood derivation on slide 29
+  target += log_prob' * choice;
+  target += log_prob_worst' * worst_choice;
+}"
 
-# Process ROL with ties results
-rol_choice_global <- as.data.frame(fit, pars = "beta_individual") %>%
-  gather(Parameter, Value) %>%
-  mutate(
-    individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
-    column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
-  ) %>%
-  group_by(Parameter) %>%
-  summarise(
-    median = median(Value),
-    lower = quantile(Value, 0.05),
-    upper = quantile(Value, 0.95)
-  ) %>%
-  ungroup() %>%
-  mutate(
-    True_value = as.numeric(t(beta_i)),
-    Dataset = "Rank-Ordered Logit w ties"
-  )
+compiled_maxdiff_model <- stan_model(model_code = best_worst)
+
+maxdiff_fit <- sampling(compiled_maxdiff_model, 
+                        data = stan_data_maxdiff, 
+                        chains = 4, 
+                        iter = 800, 
+                        warmup = 400,
+                        cores = 4)
 
 # Process MaxDiff results
-maxdiff_choice_global <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
+maxdiff_choice <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
   gather(Parameter, Value) %>%
   mutate(
     individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
     column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
   ) %>%
-  group_by(Parameter) %>%
+  group_by(individual) %>%
+  mutate(Value_normalized = normalize_utilities(Value)) %>%
+  group_by(individual, column) %>%
   summarise(
-    median = median(Value),
-    lower = quantile(Value, 0.05),
-    upper = quantile(Value, 0.95)
+    median = median(Value_normalized),
+    lower = quantile(Value_normalized, 0.05),
+    upper = quantile(Value_normalized, 0.95),
+    .groups = 'drop'
   ) %>%
   ungroup() %>%
   mutate(
     True_value = as.numeric(t(beta_i)),
     Dataset = "MaxDiff"
-  )
-
-# Process ROL without ties results
-rol_choice_no_ties_global <- as.data.frame(fit_rol, pars = "beta_individual") %>%
-  gather(Parameter, Value) %>%
-  mutate(
-    individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
-    column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
   ) %>%
-  group_by(Parameter) %>%
-  summarise(
-    median = median(Value),
-    lower = quantile(Value, 0.05),
-    upper = quantile(Value, 0.95)
-  ) %>%
-  ungroup() %>%
-  mutate(
-    True_value = as.numeric(t(beta_i)),
-    Dataset = "Rank-Ordered Logit (no ties)"
-  )
+  group_by(individual) %>%
+  mutate(True_value_normalized = normalize_utilities(True_value)) %>%
+  ungroup()
 
-# Combine all results
-all_results_global <- bind_rows(rol_choice_global, maxdiff_choice_global, rol_choice_no_ties_global)
+# Combine results
+all_results <- bind_rows(maxdiff_choice,rol_choice_ties, rol_choice_efron,rol_choice_no_ties)
 
-# Normalize all utilities globally
-all_results_global <- all_results_global %>%
-  mutate(
-    median_normalized = normalize_utilities_global(median),
-    lower_normalized = normalize_utilities_global(lower),
-    upper_normalized = normalize_utilities_global(upper),
-    True_value_normalized = normalize_utilities_global(True_value)
-  )
-
-# Calculate RMSE for each model
-rmse_rol <- sqrt(mean((all_results_global$True_value_normalized[all_results_global$Dataset == "Rank-Ordered Logit w ties"] - 
-                         all_results_global$median_normalized[all_results_global$Dataset == "Rank-Ordered Logit w ties"])^2))
-rmse_maxdiff <- sqrt(mean((all_results_global$True_value_normalized[all_results_global$Dataset == "MaxDiff"] - 
-                             all_results_global$median_normalized[all_results_global$Dataset == "MaxDiff"])^2))
-rmse_rol_no_ties <- sqrt(mean((all_results_global$True_value_normalized[all_results_global$Dataset == "Rank-Ordered Logit (no ties)"] - 
-                                 all_results_global$median_normalized[all_results_global$Dataset == "Rank-Ordered Logit (no ties)"])^2))
+# Calculate RMSE for all models
+rmse_maxdiff <- sqrt(mean((maxdiff_choice$True_value_normalized - maxdiff_choice$median)^2))
+rmse_ties <- sqrt(mean((rol_choice_ties$True_value_normalized - rol_choice_ties$median)^2))
+rmse_efron <- sqrt(mean((rol_choice_efron$True_value_normalized - rol_choice_efron$median)^2))
+rmse_no_ties <- sqrt(mean((rol_choice_no_ties$True_value_normalized - rol_choice_no_ties$median)^2))
 
 # Create the plot
-ggplot(all_results_global, aes(x = True_value_normalized, y = median_normalized, color = Dataset)) +
-  geom_linerange(aes(ymin = lower_normalized, ymax = upper_normalized), alpha = 0.3) +
+ggplot(all_results, aes(x = True_value_normalized, y = median, color = Dataset)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
   geom_point(alpha = 0.5) +
-  geom_abline(intercept = 0, slope = 1) +
-  labs(x = "Normalized True Utility (Global)",
-       y = "Normalized Estimated Utility (Global)",
-       title = "Globally Normalized Utility Estimates vs True Values",
-       subtitle = paste("With interior 90% credibility intervals\n",
-                        "RMSE ROL w/ ties:", round(rmse_rol, 4), "\n",
-                        "RMSE MaxDiff:", round(rmse_maxdiff, 4), "\n",
-                        "RMSE ROL (no ties):", round(rmse_rol_no_ties, 4))) +
-  scale_color_manual(values = c("Rank-Ordered Logit w ties" = "green", 
-                                "MaxDiff" = "blue", 
-                                "Rank-Ordered Logit (no ties)" = "red")) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  labs(x = "Normalized True Utility",
+       y = "Normalized Estimated Utility",
+       title = "Comparison of Model Performances",
+       subtitle = paste("RMSE MaxDiff:", round(rmse_maxdiff, 4), "\n",
+                        "RMSE ROL w/ ties:", round(rmse_ties, 4), "\n",
+                        "RMSE Efron Approx:", round(rmse_efron, 4), "\n",
+                        "RMSE ROL (no ties):", round(rmse_no_ties, 4))) +
+  scale_color_manual(values = c("MaxDiff" = "blue", 
+                                "Rank-Ordered Logit w/ ties" = "green",
+                                "Efron Approximation" = "red",
+                                "Rank-Ordered Logit (no ties)" = "purple")) +
   theme_minimal() +
   coord_fixed(ratio = 1) +
-  facet_wrap(~Dataset)
+  facet_wrap(~Dataset, ncol = 2) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
 
-ggsave("global_normalized_comparison.png", width = 12, height = 6)
+
