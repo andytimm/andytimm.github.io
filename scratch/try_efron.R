@@ -12,7 +12,7 @@ set.seed(604)
 # down I, the results should reproduce just fine.
 
 # Number of individuals
-I <- 100
+I <- 800
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task

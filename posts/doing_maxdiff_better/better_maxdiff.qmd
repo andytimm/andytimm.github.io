@@ -1256,8 +1256,9 @@ print(permutation_matrix)
 Calculating these outside R is convenient in two senses. First, it's more efficient-
 Stan isn't really designed or equipped to work with permutations like this as they get more
 involved.
-Second, the Efron approximation I'll introduce in a moment has a nice representation as
-an approximation of the permutations.
+Second, it can be helpful for intuition to mentally step through this matrix of permutations
+and consider the calculation needed for each entry, imagining
+it growing rapidly with the number of unknown middle options.
 
 Here's the stan input data and model:
 
@@ -1265,7 +1266,6 @@ Here's the stan input data and model:
 
 <summary>**ROL with unknown middle preferences**</summary>
 
-</details>
 
 
 ```{R}
@@ -1366,13 +1366,141 @@ model {
 }
 ```
 
-By summing over the possible
+</details>
 
+Summing up all the possible middle options should be fairly transparent, but if you're interested
+in the `log_sum_exp` tricks I'm using to speed this up, see this footnote[^11].
+
+[^11]: Woo optimization gang! Ok, so the idea here is similar to this block in 
+the ROL without ties model, where at each choice we normalize by subtracting out ` out += tmp[i] - log_sum_exp(tmp[i:])`,
+but it has to function differently given the unknowns. More specifically, the right
+normalizing factor for all the middle $J -2$ options is `log_sum_exp(sorted_delta[2:K])` for
+each possible *permutation*, not each possible middle option. So as the number
+of permutations grows, we can save a bunch of compute mostly through pre-computing
+the normalizing factor, but also by doing `n_tied * normalizing_factor` instead of
+subtracting `n_tied` times per permutation.
+
+To reinforce the intuition here, this is choosing to handles unknown middle options
+with maximum precision given we know very little about them, at (usually) great computational cost. Before
+we compare this to MaxDiff, and see if it is meaningfully more accurate with the same data,
+I want to also introduce an approximation to this full marginal likelihood to throw
+into the comparison as well.
+
+## N! is pretty bad; is there an approximation?
+
+As we've seen, calculating all possible orderings for unknown middle preferences can quickly become computationally intensive as the number of choices increases. Fortunately, there's a clever approximation that can help us out.
+This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data [^11]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
+
+Mathematically, the Efron approximation for our rank-ordered logit with unknown middle preferences looks like this:
+
+[^11]: See the Allison/Christakis paper above for a more fleshed out version of this comparison. It's very elegant,
+but I don't think there's a way to do that analogy justice without a massive detour in this post. Similarly, I'd
+love to walk through the reasoning that leads to the Efron approximation and how it compares to competitors, but this post is
+already pretty long.
+
+$$
+L(\beta) = \prod_{i=1}^N \frac{\exp(\beta'X_{i(1)})}{\sum_{j \in C_i} \exp(\beta'X_j)} \cdot \prod_{k=2}^{J-2} \frac{\exp(\beta'X_{i(k)})}{\sum_{j \in C_i} \exp(\beta'X_j) - \frac{k-1}{J-2} \sum_{l \in M_i} \exp(\beta'X_l)}
+$$
+
+Where $C_i$ is the choice set at decision $i$, $T_i$ is the set of tied alternatives, and $t_i$ is the number of tied alternatives. I recognize this is super dense, and that grokking it will require a bit of reading that's outside the scope of this post; here's a footnote with some helpful references[^12].
+
+[^12]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in their terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is insightful, but very very dense.
+
+Intuitively, this approximation attempts to more continuously approximate the full marginal likelihood we just discussed without calculating every possible ranking. It does this by adjusting the denominator of the likelihood to account for the tied middle alternatives in a stepwise fashion. This approach recognizes that while we know the best and worst choices, the middle alternatives are essentially competing with each other in a way that's more nuanced than simply treating them as fully ranked or completely tied.
+
+Here's the code implementation, which to me gives a lot more intuition than the equation above:
+
+<details>
+
+<summary>**ROL with Efron Approximation of Unknown Middle Options**</summary>
+
+```{R}
+efron_model <- "
+functions {
+  real rank_logit_efron_lpmf(int[] y, vector delta, int n_tied) {
+    int K = rows(delta);
+    vector[K] sorted_delta = delta[y];
+    real out = 0;
+    
+    // Handle known best
+    out += sorted_delta[1] - log_sum_exp(sorted_delta);
+    
+    // Handle tied middle ranks using Efron approximation
+    real tied_sum = log_sum_exp(sorted_delta[2:(K-1)]);  // Changed to log_sum_exp
+    real normalizing_factor = log_sum_exp(sorted_delta[2:K]);
+    for (i in 1:n_tied) {
+      real d = (i - 1.0) / n_tied;
+      real adjusted_factor = log_diff_exp(normalizing_factor, log(d) + tied_sum);
+      out += sorted_delta[1+i] - adjusted_factor;
+    }
+    
+    // Handle known worst
+    // out += sorted_delta[K] - log_sum_exp(sorted_delta[2:K]);
+    
+    return out;
+  }
+}
+
+data {
+  int N; // number of rows
+  int T; // number of individual-choice sets/task combinations
+  int I; // number of Individuals
+  int P; // number of covariates that vary by choice
+  int P2; // number of covariates that vary by individual
+  int K; // number of choices
+  
+  int rank_order[N]; // The vector describing the index (within each task) of the first, second, third, ... choices. 
+  matrix[N, P] X; // choice attributes
+  matrix[I, P2] X2; // individual attributes
+  
+  int task[T]; // index for tasks
+  int task_individual[T]; // index for individual
+  int start[T]; // the starting observation for each task
+  int end[T]; // the ending observation for each task
+  
+  int<lower=2> n_tied; // number of tied ranks
+}
+
+parameters {
+  vector[P] beta; // hypermeans of the part-worths
+  matrix[P, P2] Gamma; // coefficient matrix on individual attributes
+  vector<lower = 0>[P] tau; // diagonal of the part-worth covariance matrix
+  matrix[I, P] z; // individual random effects (unscaled)
+  cholesky_factor_corr[P] L_Omega; // the cholesky factor of the correlation matrix of tastes/part-worths
+}
+
+transformed parameters {
+  matrix[I, P] beta_individual = rep_matrix(beta', I) + X2 * Gamma' + z * diag_pre_multiply(tau, L_Omega);
+}
+
+model {
+  tau ~ normal(0, .5);
+  beta ~ normal(0, 1);
+  to_vector(z) ~ normal(0, 1);
+  L_Omega ~ lkj_corr_cholesky(4);
+  to_vector(Gamma) ~ normal(0, 1);
+
+  for(t in 1:T) {
+    vector[K] utilities;
+    utilities = X[start[t]:end[t]] * beta_individual[task_individual[t]]';
+    rank_order[start[t]:end[t]] ~ rank_logit_efron(utilities, n_tied);
+  }
+}
+"
+```
+
+</details>
+
+The beauty of the Efron approximation is that it works remarkably well in practice compared to alternatives. As discussed in Hertz-Picciotto and Rockhill (1997) and elsewhere, the Efron method tends to outperform other approximations, particularly when dealing with moderate to heavy ties (read: unknown middle ranks).
 
 ## Evaluating ROL with Unknown Middle Preferences against MaxDiff and ROL
 
-Let's re-use our original simulation study structure here. the logic below
-should all be familiar
+So now we've got 3 candidate models for best/worst data- MaxDiff, ROL with
+exact handling of unknown middle options, and ROL using the Efron approximation
+for handling the middle options. I'll also add in the ROL without ties in the comparison
+below to give a sense of the information lost when just collecting best and worst
+choices, though of course my main goal is compare the quality of the 3 estimators
+on best/worst data.
 
 <details>
 
