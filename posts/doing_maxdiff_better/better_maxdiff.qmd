@@ -255,6 +255,7 @@ library(tidyverse)
 library(rstan)
 library(ibd)
 library(crossdes)
+library(combinat)
 options(mc.cores = parallel::detectCores())
 
 set.seed(604)
@@ -1118,10 +1119,10 @@ For our example with unknown middle preferences, the likelihood becomes:
 $$
 L(\textcolor{blue}{B}>\textcolor{green}{S},\textcolor{yellow}{R}>\textcolor{red}{T}) = \frac{\exp(U_{i\textcolor{blue}{B}})}{\sum_{j \in {\textcolor{blue}{B},\textcolor{green}{S},\textcolor{yellow}{R},\textcolor{red}{T}}} \exp(U_{ij})} \cdot \left[ \frac{\exp(U_{i\textcolor{green}{S}})}{\exp(U_{i\textcolor{green}{S}}) + \exp(U_{i\textcolor{yellow}{R}}) + \exp(U_{i\textcolor{red}{T}})} + \frac{\exp(U_{i\textcolor{yellow}{R}})}{\exp(U_{i\textcolor{green}{S}}) + \exp(U_{i\textcolor{yellow}{R}}) + \exp(U_{i\textcolor{red}{T}})} \right] \cdot \frac{\exp(U_{i\textcolor{red}{T}})}{\exp(U_{i\textcolor{red}{T}})}
 $$
-The central terms are the key to the unknown ranking model[^10]. This lets
+The central terms are the key to the unknown ranking model[^11]. This lets
 us fit a ranked model and avoid MaxDiff, even with unknown middle options.
 
-[^10]: Just for fun, notice what happens if there's only 1 middle term. It's your
+[^11]: Just for fun, notice what happens if there's only 1 middle term. It's your
 friendly neighborhood complete rank-ordered logit, since there's only 1 way
 1 option can occur!
 
@@ -1157,7 +1158,7 @@ a correct model that doesn't.
 
 ```{R}
 # Number of individuals
-I <- 800
+I <- 30
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -1364,14 +1365,15 @@ model {
     rank_order[start[t]:end[t]] ~ rank_logit_ties(utilities, permutations, n_permutations, n_tied);
   }
 }
+"
 ```
 
 </details>
 
 Summing up all the possible middle options should be fairly transparent, but if you're interested
-in the `log_sum_exp` tricks I'm using to speed this up, see this footnote[^11].
+in the `log_sum_exp` tricks I'm using to speed this up, see this footnote[^12].
 
-[^11]: Woo optimization gang! Ok, so the idea here is similar to this block in 
+[^12]: Woo optimization gang! Ok, so the idea here is similar to this block in 
 the ROL without ties model, where at each choice we normalize by subtracting out ` out += tmp[i] - log_sum_exp(tmp[i:])`,
 but it has to function differently given the unknowns. More specifically, the right
 normalizing factor for all the middle $J -2$ options is `log_sum_exp(sorted_delta[2:K])` for
@@ -1402,9 +1404,9 @@ $$
 L(\beta) = \prod_{i=1}^N \frac{\exp(\beta'X_{i(1)})}{\sum_{j \in C_i} \exp(\beta'X_j)} \cdot \prod_{k=2}^{J-2} \frac{\exp(\beta'X_{i(k)})}{\sum_{j \in C_i} \exp(\beta'X_j) - \frac{k-1}{J-2} \sum_{l \in M_i} \exp(\beta'X_l)}
 $$
 
-Where $C_i$ is the choice set at decision $i$, $T_i$ is the set of tied alternatives, and $t_i$ is the number of tied alternatives. I recognize this is super dense, and that grokking it will require a bit of reading that's outside the scope of this post; here's a footnote with some helpful references[^12].
+Where $C_i$ is the choice set at decision $i$, $T_i$ is the set of tied alternatives, and $t_i$ is the number of tied alternatives. I recognize this is super dense, and that grokking it will require a bit of reading that's outside the scope of this post; here's a footnote with some helpful references[^13].
 
-[^12]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in their terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is insightful, but very very dense.
+[^13]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in their terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is insightful, but very very dense.
 
 Intuitively, this approximation attempts to more continuously approximate the full marginal likelihood we just discussed without calculating every possible ranking. It does this by adjusting the denominator of the likelihood to account for the tied middle alternatives in a stepwise fashion. This approach recognizes that while we know the best and worst choices, the middle alternatives are essentially competing with each other in a way that's more nuanced than simply treating them as fully ranked or completely tied.
 
@@ -1496,25 +1498,220 @@ The beauty of the Efron approximation is that it works remarkably well in practi
 ## Evaluating ROL with Unknown Middle Preferences against MaxDiff and ROL
 
 So now we've got 3 candidate models for best/worst data- MaxDiff, ROL with
-exact handling of unknown middle options, and ROL using the Efron approximation
+ROL using the Efron approximation
 for handling the middle options. I'll also add in the ROL without ties in the comparison
 below to give a sense of the information lost when just collecting best and worst
 choices, though of course my main goal is compare the quality of the 3 estimators
 on best/worst data.
 
+The next chunk just sets up the comparison between the four models on data with $J = 5$,
+so feel free to jump to the summary plot after it.
+
 <details>
 
-<summary>**Comparing ROL to Best Choice, and MaxDiff models**</summary>
+<summary>**4 way Comparison Setup**</summary>
+
+```{R}
+# 1. Setup and compile models
+compiled_maxdiff_model <- stan_model(model_code = best_worst)
+compiled_rol_ties_model <- stan_model(model_code = rol_with_uknown_middle_options)
+compiled_efron_model <- stan_model(model_code = efron_model)
+compiled_rol_model <- stan_model(model_code = ranked)
+
+# Prepare data for Stan models
+stan_data_maxdiff <- list(
+  N = nrow(X),
+  T = nrow(tt),
+  I = I,
+  P = P,
+  P2 = P2,
+  K = J,
+  choice = ranked_options$best_choice,
+  worst_choice = ranked_options$worst_choice,
+  X = X, X2 = W, 
+  task = tt$task_number, 
+  task_individual = tt$individual,
+  start = tt$start, end = tt$end
+)
+
+stan_data_efron <- list(
+  N = nrow(X),
+  T = nrow(tt),
+  I = I,
+  P = P,
+  P2 = P2,
+  K = J,
+  rank_order = ranked_options$observed_order,
+  X = X, X2 = W, 
+  task = tt$task_number, 
+  task_individual = tt$individual,
+  start = tt$start, end = tt$end,
+  n_tied = J - 2  # number of tied ranks
+)
+
+stan_data_rol <- list(
+  N = nrow(X),
+  T = nrow(tt),
+  I = I,
+  P = P,
+  P2 = P2,
+  K = J,
+  rank_order = ranked_options$true_order,  # Use true_order for full ranking
+  X = X, X2 = W, 
+  task = tt$task_number, 
+  task_individual = tt$individual,
+  start = tt$start, end = tt$end
+)
+
+stan_data_rol_ties <- stan_data
+
+# 2. Fit the models
+fit_maxdiff <- sampling(compiled_maxdiff_model, data = stan_data_maxdiff, iter = 800)
+fit_rol_ties <- sampling(compiled_rol_ties_model, data = stan_data_rol_ties, iter = 800)
+fit_efron <- sampling(compiled_efron_model, data = stan_data_efron, iter = 800)
+fit_rol <- sampling(compiled_rol_model, data = stan_data_rol, iter = 800)
+
+# Function to normalize utilities across all respondents
+normalize_utilities <- function(utilities) {
+  (utilities - mean(utilities)) / sd(utilities)
+}
+
+# 3. Process results and create plot
+process_results <- function(fit, dataset_name) {
+  as.data.frame(fit, pars = "beta_individual") %>%
+    gather(Parameter, Value) %>%
+    mutate(
+      individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
+      column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
+    ) %>%
+    group_by(individual) %>%
+    mutate(Value_normalized = normalize_utilities(Value)) %>%
+    group_by(individual, column) %>%
+    summarise(
+      median = median(Value_normalized),
+      lower = quantile(Value_normalized, 0.05),
+      upper = quantile(Value_normalized, 0.95),
+      .groups = 'drop'
+    ) %>%
+    ungroup() %>%
+    mutate(
+      True_value = as.numeric(t(beta_i)),
+      Dataset = dataset_name
+    ) %>%
+    group_by(individual) %>%
+    mutate(True_value_normalized = normalize_utilities(True_value)) %>%
+    ungroup()
+}
+
+results_maxdiff <- process_results(fit_maxdiff, "MaxDiff")
+results_rol_ties <- process_results(fit_rol_ties, "ROL with ties")
+results_efron <- process_results(fit_efron, "Efron Approximation")
+results_rol <- process_results(fit_rol, "ROL (no ties)")
+
+all_results <- bind_rows(results_maxdiff, results_rol_ties, results_efron, results_rol)
+
+# 4. Calculate and print RMSE
+calculate_rmse <- function(data) {
+  sqrt(mean((data$True_value_normalized - data$median)^2))
+}
+
+rmse_comparison <- data.frame(
+  Model = c("MaxDiff", "ROL with ties", "Efron Approximation", "ROL (no ties)"),
+  RMSE = c(
+    calculate_rmse(results_maxdiff),
+    calculate_rmse(results_rol_ties),
+    calculate_rmse(results_efron),
+    calculate_rmse(results_rol)
+  )
+) %>%
+  arrange(desc(RMSE))
+
+
+fourway_comparison_plot <- ggplot(all_results, aes(x = True_value_normalized, y = median, color = Dataset)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+  geom_point(alpha = 0.5) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  labs(x = "Normalized True Utility",
+       y = "Normalized Estimated Utility",
+       title = "Comparison of Model Performances",
+       subtitle = "With 90% credibility intervals") +
+  scale_color_manual(values = c("MaxDiff" = "blue", 
+                                "ROL with ties" = "green",
+                                "Efron Approximation" = "red",
+                                "ROL (no ties)" = "purple")) +
+  theme_minimal() +
+  facet_wrap(~Dataset, ncol = 2) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+```
 
 </details>
 
+Before we show the comparison plot, here's a minor technical caveat. The natural
+scale of the utilities the two unknown handling models produce is different than
+that of the MaxDiff and ROL without ties models. To plot them usefully against
+one another, I thus have to normalize the utilities. This makes it a bit harder
+to compare these plots to the last few, but unfortunately its necessary for a
+valid comparison.
+
+```{R}
+print(fourway_comparison_plot)
+```
+
+So roughly from the plot: ROL without unknowns > ROL with full marginal likelihood for unknowns > ROL with Efron Approximation for Unknowns > MaxDiff. Let's sanity check that by looking at RMSEs.
+
+```{R}
+print(rmse_comparison)
+```
+
+I flagged this briefly above, but to say it again: $J = 5$ has few unknown middle options, meaning
+these are fairly favorable conditions for the Efron approximation. We'd expect
+higher $J$ to widen the gap between the full marginal likelihood and the Efron
+approximation.
+
+So practically, the takeaway here is that you can do better than modeling with MaxDiff
+even if you designed your discrete choice experiment for MaxDiff. If you have the
+time and/or your number of alternatives isn't super large, you can do better with
+the full marginal likelihood model. If you want a workable and fast approximation,
+the Efron model still looks meaningfully better than MaxDiff.
+
+Beyond giving a better option for existing MaxDiff data, I'll admit I had a secondary 
+motive in wanting to explore these "unknown middle choices" style models. I've sometimes
+seen MaxDiff discussed as an imperfect modeling strategy that becomes desirable
+because it gives access to new and important data collection strategies.
+
+To flesh out that claim, the idea is that MaxDiff has known flaws that aren't
+ideal, but a study only needing to collect best and worst options
+hits a sweet spot of respondent experience, simplicity to setup, and 
+statistical efficiency (via being able to repeat many choice sets). Better a slightly
+worse model on significantly more informative-dense data, since design trumps analysis. 
+
+This is probably
+the type of argument for MaxDiff I'm most sympathetic to, in the sense that I do genuinely 
+do believe choice experiments place a lot of burden on respondents in a way that
+may bias results; perhaps selecting only the best and worst option meaningfully
+helps with that. Further, I even find it plausible that if you need to compare a larger
+than ideal set of options, there might be value in asking a bunch of best/worst
+of 10 choice sets instead of trying to do tons of best of threes to enable the
+full ROL with ties option I mentioned above. 
+Even if you think this way though, the existence of the ROL with unknown middle options
+models I've just shown you are the more accurate model for the design you find significant
+value in. **You can't justify
+using MaxDiff via the designs it enables.**
+
 # Steelmanning the case for MaxDiff
+
+I'm a little hesitant to call what I do in this section a true [Steelman](https://en.wikipedia.org/wiki/Straw_man#Steelmanning)
+of MaxDiff, in the sense that I struggle to find the best arguments I know of
+for MaxDiff compelling. Still, there's value in trying to lay out a clear 
 
 ## What if the errors are actually symmetric?
 
-## What if we only care about population parameters?
+## What if MaxDiff looks the same as other models on my data?
 
-## What if you get more information from MaxDiff on larger choice sets?
+## The advantages of the Sawtooth suite of products
 
 # Stepping Back: the utility of discrete choice more broadly
 
