@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Better discrete choice modeling through rank ordered logit
-subtitle: Or- a mathmatically correct model of a psychologically coherent concept
+subtitle: Or- a mathematically correct model of a psychologically coherent concept
 date: 2024-08-04
 draft: True
 image: imgs/gumby_distribution.webp
@@ -152,7 +152,7 @@ $$
 What I've introduced is the core of the MaxDiff formulation of discrete
 choice, before bells and whistles are introduced. This has some deep
 problems though; let's start with the "psychological" ones. Human
-decisionmaking is an incredibly complex, not always logical process, and
+decision-making is an incredibly complex, not always logical process, and
 we'll always be losing significant fidelity in boiling it down into a
 model. Here though, I'll focus on explaining a handful of breakdowns in
 the relationship between reality and the world of MaxDiff models that are
@@ -1283,7 +1283,7 @@ stan_data_rol_ties <- list(
   n_permutations = n_permutations
 )
 
-rol_with_uknown_middle_options <- "
+rol_with_unknown_middle_options <- "
 functions {
   real rank_logit_ties_lpmf(int[] y, vector delta, int[,] permutations, int n_permutations, int n_tied) {
     int K = rows(delta);
@@ -1385,11 +1385,11 @@ won't choke even on big choice sets.
 ## J! is pretty bad; is there an approximation?
 
 As we've seen, calculating all possible orderings for unknown middle preferences can quickly become computationally intensive as the number of choices increases. Fortunately, there's a clever approximation that can help us out.
-This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data[^11]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
+This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data[^12]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
 
 Mathematically, the Efron approximation for our rank-ordered logit with unknown middle preferences looks like this:
 
-[^11]: See the Allison/Christakis paper above for a more fleshed out version of this comparison. It's very elegant,
+[^12]: See the Allison/Christakis paper above for a more fleshed out version of this comparison. It's very elegant,
 but I don't think there's a way to do that analogy justice without a massive detour in this post. Similarly, I'd
 love to walk through the reasoning that leads to the Efron approximation and how it compares to competitors, but this post is
 already pretty long.
@@ -1505,7 +1505,7 @@ so feel free to jump to the summary plot after it.
 ```{R}
 # 1. Setup and compile models
 compiled_maxdiff_model <- stan_model(model_code = best_worst)
-compiled_rol_ties_model <- stan_model(model_code = rol_with_uknown_middle_options)
+compiled_rol_ties_model <- stan_model(model_code = rol_with_unknown_middle_options)
 compiled_efron_model <- stan_model(model_code = efron_model)
 compiled_rol_model <- stan_model(model_code = ranked)
 
@@ -1708,12 +1708,12 @@ MaxDiff using ROL models that correctly handle unknown middle choices. Crucially
 of these models negates the argument for using MaxDiff based solely on its compatibility with best/worst choice designs.
 
 In writing this post, I've aimed to both give intuition and concrete examples of
-models that I would've benefited from when I was initially to find alternatives
+models that I would've benefited from when I was initially trying to find alternatives
 to the MaxDiff formulation of discrete choice. My hope is gathering both the objections to MaxDiff and alternatives
 in one place can make it a bit easier for others to pivot to the better models available.
 
 There are plenty of ways you can extend what I've done in this post, and I don't want to
-claim this is in any way some definitve model for discrete choice. Just to name a few- one could
+claim this is in any way some definitive model for discrete choice. Just to name a few- one could
 improve the priors in the models, design much more efficient graphs of options, compare the efficiency of connected graphs to
 ROL with unknowns for large choice sets via simulation, or even
 implement these models in something like [Blackjax](https://blackjax-devs.github.io/blackjax/)
