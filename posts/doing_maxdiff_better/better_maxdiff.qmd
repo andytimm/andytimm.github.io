@@ -1,13 +1,13 @@
 ---
 layout: post
-title: Better discrete choice modeling through rank ordered logits
+title: Better discrete choice modeling through rank ordered logit
 subtitle: Or- a mathmatically correct model of a psychologically coherent concept
-date: 2024-06-09
+date: 2024-08-04
 draft: True
 image: imgs/gumby_distribution.webp
 categories:
-  - priors
-  - stupid Bayesian stuff
+  - discrete choice
+  - Bayes
 editor: 
   markdown: 
     wrap: 72
@@ -15,28 +15,25 @@ editor:
 
 ![](imgs/jimmy_dunk.png){fig-align="center"}
 
-The wonderful Jim Savage calls the MaxDiff model of discrete choice a
+Jim Savage calls the MaxDiff model of discrete choice a
 "mathematically incorrect model of a psychologically incoherent
 concept"[^1].
 
-[^1]: The smiley face is threatening: it's there to make sure MaxDiff stays
+[^1]: The smiley face is threatening: it's feels like it's there to make sure MaxDiff stays
     down :-D
 
-Despite this lovely dunk, and some wonderful notes explaining why
-MaxDiff's not great, the model remains frequently used in market
-research, most prominently as implemented in
+Despite this lovely dunk, and some wonderful [notes](https://discourse.mc-stan.org/t/post-on-ranked-random-coefficients-logit/7136/2) explaining why
+MaxDiff's not great, the model remains frequently used, most prominently in market research, as implemented in
 [Sawtooth](https://sawtoothsoftware.com/). Why is this?
 
-Putting aside the most obvious answers like inertia and a dim view of
-statistical practice in marketing, it's also surprisingly hard to find a
-fully fleshed out explanation of the alternatives online. In this post,
-I remedy that, with sections for:
+Beyond the most obvious explanations like inertia, it's also surprisingly hard to find a
+fully fleshed out explanation of alternatives online. In this post,
+I aim to remedy that, with sections for:
 
-1.  Introducing MaxDiff and its blemishes
-2.  Showing how the issues propagate into final model quality
-3.  Alternatives- Rank-Ordered Logits with connected choice
-    graphs, and Rank-Ordered Logits with Ties
-4.  Steelmanning some common objections
+1.  An introduction to MaxDiff and its limitations
+2.  An illustration of how these issues impact final model quality
+3.  Alternatives: rank-ordered logit with connected choice graphs, and
+rank-ordered logit with unknown Middle Options
 
 # Introducing MaxDiff
 
@@ -56,7 +53,7 @@ basics of discrete choice models, but here's a brief refresher[^2].
     Simulation](https://eml.berkeley.edu/books/choice2.html) goes into
     great mathematical detail about the models.
 
-We want to build a model of how people respond to the request to
+We want to build a model of how people
 make decisions among discrete options. This could be:
 
 -   A pollster asking which candidate(s) or political parties each
@@ -78,12 +75,12 @@ there is some degree of randomness. The basic model is then
     assumptions as they become relevant for discussing MaxDiff.
 
 $$
-\mu_{ij} = \mu_{ij} + \epsilon_{ij}
-$$ ,
+U_{ij} = \mu_{ij} + \epsilon_{ij}
+$$
 
 where the $\mu_{ij}$ can have rich provenance (demographics and
 other individual traits, the context in which the decision is made, the
-other options available...) but is fixed, but there's some
+other options available...) but is fixed, and there's some
 $\epsilon_{ij}$ of randomness involved. To make this model easier to
 estimate, we assume that $\epsilon_{ij}$ has a
 [Gumbel](https://en.wikipedia.org/wiki/Gumbel_distribution)[^4]
@@ -95,7 +92,7 @@ distribution.
 
 Under this model, the probability that individual $i$ chooses
 alternative $j$ from a choice set $C_i$ is: $$
-P_{ij} = \frac{\exp(\mu_{ij})}{\sum_{k \in C_i} \exp(\mu_{ik})}
+P_{ij} = \frac{\exp(U_{ij})}{\sum_{k \in C_i} \exp(U_{ik})}
 $$ This is the standard multinomial logit.
 
 Now, suppose we have a dataset where each individual $i$ has made a
@@ -116,7 +113,7 @@ and other improvements, let's think about the pressures of gathering
 data here for a moment, since that'll motivate the desire for something
 like MaxDiff.
 
-To estimate this, we gather respondents and ask them to choose their
+To estimate this, we recruit and ask them to choose their
 favorite option amongst a given choice set. As a way to control the
 difficulty of making a choice while still gathering enough data, we can
 limit the size of the set (choose the best of 10 items, instead of 20),
@@ -133,8 +130,7 @@ time? After all, people might not have strong preferences amongst the
 middling 18 chocolate bars, but the best and worst seem more memorable,
 and that's only 1 more choice.
 
-And now, (stepping into the MaxDiff trap to show its allure, if you
-will), what if we don't want to entirely change up our likelihood to
+And now, what if we don't want to entirely change up our likelihood to
 handle the new rich source of data?
 Instead, what if we just treat the worsts as the opposite of the bests,
 which makes a sort of sense, and simplifies the likelihood one hell of a
@@ -151,7 +147,7 @@ $$
 
 ... Now we've stepped in it, and Jimmy is mad at us.
 
-## Psycologically Incoherent
+## Psychologically Incoherent
 
 What I've introduced is the core of the MaxDiff formulation of discrete
 choice, before bells and whistles are introduced. This has some deep
@@ -159,14 +155,14 @@ problems though; let's start with the "psychological" ones. Human
 decisionmaking is an incredibly complex, not always logical process, and
 we'll always be losing significant fidelity in boiling it down into a
 model. Here though, I'll focus on explaining a handful of breakdowns in
-the relationship between reality and the world of Maxdiff models that are
+the relationship between reality and the world of MaxDiff models that are
 particularly harmful.
 
 First, let's talk about **symmetry**. With the MaxDiff likelihood above,
 we're treating the worst as equal and opposite to the best. For example,
 though, I don't like Joe Biden as much as I dislike Trump[^5]. I really
 really like the best pizza in Brookyln, but New York pizza is all New
-York pizza, it only gets so bad. This might be a reasonable
+York pizza, so it only gets so bad. This might be a reasonable
 simplification in some cases, but it's hard to argue that baking
 this into our model faithfully mirrors reality.
 
@@ -187,17 +183,17 @@ force ourselves to weld our notions of best to our notions of worst.
 
 Finally, the **error variances** being treated as the same should feel
 pretty strange. I'm much, much more consistent in my selection of
-"bests" than "worsts"- why would I spent a bunch of time deciding which
+"bests" than "worsts"- why would I spend a bunch of time deciding which
 opinion of 20 is the absolute worst and which is just 19th worst? People
 tend to be much less consistent, and frankly much less engaged, with
 their worst choices. Why would we bake this into our model?
 
-Putting this all together, The simplification in estimation that comes
+Putting this all together, the simplification in estimation that comes
 with MaxDiff also leaks into how the model "sees" the decision maker,
 and it meaningfully distorts the map in a way that does not necessarily reflect the
 territory.
 
-## Mathmatically Incorrect
+## Mathematically Incorrect
 
 Beyond calling the model psychologically incoherent, Savage also says
 the model is mathematically incorrect. This feels like a slightly
@@ -215,14 +211,14 @@ $\epsilon_{ij}$. As a reminder, the Gumbel distribution is chosen for its mathem
     I'm working on, this post was not primarily motivated by the urge to
     ask DALL-E to create this.
 
-![](imgs/Gumbel-Density.svg.png){fig-align="center"}
+![Probability density function of the Gumbel distribution. Source: Wikimedia Commons, https://en.wikipedia.org/wiki/Gumbel_distribution](imgs/Gumbel-Density.svg.png){fig-align="center"}
 
 Here's where the trouble starts: like we discussed above, the MaxDiff
 model forcibly inserts an element of symmetry into the error
 distributions of the choices. However, as you probably already noticed,
 the ~~Gumby~~ Gumbel distribution is not a symmetric distribution! This
 is fine in the case where we're just reasoning about the best choice,
-but even on it's own terms the MaxDiff formulation doesn't quite make
+but even on its own terms the MaxDiff formulation doesn't quite make
 sense.
 
 # The defects are not just theoretical or cosmetic: an illustration
@@ -230,20 +226,21 @@ sense.
 So I've shown some ways I claim that the MaxDiff model of discrete
 choice falls short, but how much do they really matter? As someone with
 an appreciation for the [agnostic perspective on statistical
-modeling](https://www.cambridge.org/core/books/foundations-of-agnostic-statistics/684756357E7E9B3DFF0A8157FB2DCECA)
-, I think it's important to not only show that there are theoretical
+modeling](https://www.cambridge.org/core/books/foundations-of-agnostic-statistics/684756357E7E9B3DFF0A8157FB2DCECA),
+I think it's important to not only show that there are theoretical
 senses in which a model might be flawed, but further prove that these
 technical blemishes harm model performance on metrics we care about.
 
 To do this, let's generate some synthetic data, and fit both the
-best-choice and MaxDiff models to it. For this section, I'll essentially
-be starting from Jim Savage's best choice model
+best-choice and MaxDiff models to it. For this section, I'll be
+starting from Jim Savage's best choice model and simulated data
 [here](https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html),
 and then add in the "worst choice as negative best choice" logic
 afterwards.
 
 Let's start with the synthetic data. If the exact DGP isn't very
-exciting to you, feel free to skim or skip this section at first:
+exciting to you, feel free to skim or skip this section at first. I'll give
+an overview after the block.
 
 <details> 
 
@@ -263,10 +260,10 @@ set.seed(604)
 # Again, note that this code is just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html,
 # although with a more real-world feeling number of respondents and
 # and total choices. If this is taking uncomfortably long, feel free to scale
-# down I, the results should reproduce just fine.
+# down I, the results should reproduce just fine outside irresponsible I.
 
 # Number of individuals
-I <- 30
+I <- 800
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -342,8 +339,7 @@ tt <- ranked_options %>%
 
 </details> 
 
-While this simulation isn't exactly simple, let me pause to point
-something out something I've not done. I have not made any choices here
+While this simulation isn't exactly simple, let me pause to point out something I've not done. I have not made any choices here
 that are designed to make MaxDiff look poor. Since we want to use a
 model of realistic complexity, this has simulated structure such that
 it'll benefit from the random coefficients formulation I'll use in a
@@ -351,16 +347,16 @@ moment. Similarly, this has load-bearing covariates at both the
 individual and choice level, since we would almost always have those in
 the real world. But the core utility function we've created for
 respondents boils down to simulating data under the assumptions of the
-logit choice model with Gumbel errors we've been discussing all along.
+multinomial choice model with Gumbel errors we've been discussing all along.
 
-Now, let's specify the best choice model in Stan[^7]:
+Let's specify the best choice model in Stan[^7]:
 
 <details> 
 
-<summary>**Best Choice Logit Model**</summary>
+<summary>**Best choice logit model**</summary>
 
 ```{R}
-best <- "// saved as mixed_conditional_individual_effects.stan
+best <- "// Again, note that this code is just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html
 data {
   int N; // number of rows
   int T; // number of inidvidual-choice sets/task combinations
@@ -409,7 +405,6 @@ model {
     log_prob[start[t]:end[t]] = log_softmax(utilities);
   }
   
-  // use the likelihood derivation on slide 29
   target += log_prob' * choice;
 }"
 ```
@@ -422,10 +417,11 @@ will arise when we extend the above model into MaxDiff:
 
 <details> 
 
-<summary>**MaxDiff Model**</summary>
+<summary>**MaxDiff model**</summary>
 
 ```{R}
-best_worst <- "// saved as mixed_conditional_individual_effects.stan
+best_worst <- "// Again, note that this code is starting from https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html
+// I've just adapted to to include the worst choice
 data {
   int N; // number of rows
   int T; // number of inidvidual-choice sets/task combinations
@@ -474,10 +470,9 @@ model {
     utilities = X[start[t]:end[t]]*beta_individual[task_individual[t]]';
     
     log_prob[start[t]:end[t]] = log_softmax(utilities);
-    log_prob_worst[start[t]:end[t]] = log_softmax(-utilities);
+    log_prob_worst[start[t]:end[t]] = log_softmax(-utilities); // Here's the problem!
   }
   
-  // use the likelihood derivation on slide 29
   target += log_prob' * choice;
   target += log_prob_worst' * worst_choice;
 }"
@@ -487,7 +482,7 @@ model {
 
 Comparing the two, you can definitely see the implementation simplicity MaxDiff
 provides; we're essentially just building out `log_prob_worst` and pulling it
-into the likelihood. 
+into the likelihood. Boom, done.
 
 So how does this perform? Well, let's fit the two and find out. The next code
 block has some plumbing to fit the models and extract results, so feel free
@@ -495,9 +490,12 @@ to jump to the results plot below:
 
 <details> 
 
-<summary>**Fit the Two Models, and Gather Predictions to Compare**</summary>
+<summary>**Fit the two models, and gather predictions to compare**</summary>
 
 ```{R}
+# Again, note that this code is largely just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html,
+# and then adding in details need to compare it to MaxDiff
+
 data_list_best_choice <-list(N = nrow(X),
                              T = nrow(tt),
                              I = I, 
@@ -564,7 +562,7 @@ best_worst_choice <- as.data.frame(best__worst_choice_fit, pars = "beta_individu
          column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number) %>%
   arrange(individual, column) %>%
   mutate(`True value` = as.numeric(t(beta_i)),
-         Dataset = "Best-Worst Choice")
+         Dataset = "MaxDiff")
 
 # Combine the datasets
 combined_data <- bind_rows(best_choice, best_worst_choice)
@@ -582,7 +580,7 @@ ggplot(combined_data, aes(x = `True value`, y = median, color = Dataset)) +
   labs(y = "Utility Estimates",
        title = "Utility Estimates from the Two Models",
        subtitle = "With interior 90% credibility intervals") +
-  scale_color_manual(values = c("Best Choice" = "blue", "Best-Worst Choice" = "red")) +
+  scale_color_manual(values = c("Best Choice" = "blue", "MaxDiff" = "red")) +
   facet_wrap(~Dataset) +
   theme(legend.position="none")
 ```
@@ -590,17 +588,17 @@ ggplot(combined_data, aes(x = `True value`, y = median, color = Dataset)) +
 To be clear, what's plotted here are respondent level utilities for each choice. Concerningly, it doesn't even seem clear that the best-worst choice model
 performs better here despite the extra data. The fact that we have to do
 this at all doesn't bode well, but let's compare the RMSE's of the predictions
-versus the (simulated) truth to confirm:
+versus the (simulated and thus known) truth to confirm:
 
 ```{R}
-# Is the B/W model actually better?
+# Is the MaxDiff model actually better?
 combined_data %>%
   group_by(Dataset) %>%
   summarize(RMSE = sqrt(mean((`True value` - median)^2)))
 ```
 
 To say this more emphatically, MaxDiff gets twice as much data from each
-respondent, and it's not even consistently the case that the MaxDiff model
+respondent, and it's not even consistently the case that it
 is better[^8]! And again, it's not like I chose some obscure DGP where MaxDiff
 is uniquely poor, we're working with data that aligns precisely with
 the model assumptions.
@@ -613,41 +611,39 @@ can actually perform worse than the best choice formulation.
 It's worth pointing out that we only get this type of precise comparison in a
 simulation study. On real world survey data with a similar DGP, you'd just see
 the models give fairly similar answers, with no reason to suspect the slight
-differences might actually be bad tweaks on MaxDiff's part. Modeling only real
-world data is how many market researchers approach their work, so it should be
-no surprise that MaxDiff continues to be accepted in the field. With simulation,
+differences might actually be bad tweaks on MaxDiff's part. With simulation,
 however, we can look closer, and the flaws I've discussed become increasingly
 apparent.
 
-[^7]: I won't re-explain the details of the model here, since the original source already
+[^7]: I won't re-explain the full details of the model here, since the original source already
 does a fantastic job. If you haven't already read the original post series, it's
 well worth taking the time to do so now, as there are a lot of moving pieces
 here- setting sensible priors for this model, incorporating covariates logically,
 and setting this up to run efficiently in Stan.
 
 [^8]: I will note that if you're following along at home, sampling variability
-means that for some realizations of this DGP + these models at lowe N, MaxDiff performs
+means that for some realizations of this DGP + these models at much lower N, MaxDiff performs
 just slightly better. But "barely better in a fraction of runs" isn't really a good outcome from
-twice as much data.
+gathering twice as much data.
 
 # Alternative #1: rank-ordered logits with connected graphs of choices
 
 Ok, so you get it. MaxDiff isn't great. But respondents are still expensive,
 and you still have a choice modeling task to complete at work, and you really,
-really want to do better than just using the best choices because your boss
+really want to do better than just using the best choices. Maybe your boss
 thinks Sawtooth is fine since it's been used for a long time. What's the alternative?
 
-In this section, I'll lay out what we'll call the rank-ordered logit with connected
+In this section, I'll lay out what we'll call the rank-ordered logit with a connected graph of
 choices. If this sounds complicated, don't worry; the model isn't actually going to get much
 more complicated.
 
 Instead, the plan is mostly to be cleverer about how we build our choice sets
 in the first place.
 
-## Setting up the Choice Sets
+## Explaining the "connected graphs"
 
 What we really want, I'd argue, is full choice ranking data, for each respondent.
-But of course, people rapidly become unhappy and start really satisficing when
+But of course, respondents rapidly become unhappy and start satisficing when
 they are forced to rank 20 different largely similar options at the same time. How
 can we get the simplicity from the respondent POV of MaxDiff, but the rich
 ranking data we want?
@@ -662,11 +658,11 @@ There are some downsides I'll be transparent about here: for $K$ choices, you
 need each respondent to do $K-1$ choice tasks. If you have 20 options, this
 can get tiring fast, and you won't really be gathering "extra" opinions per
 respondent anymore by doing the minimum $K-1$ rounds. Here's a hand worked
-example if you'd like it for intuition:
+example of what this looks like for intuition:
 
 <details> 
 
-<summary>**Illustration: K-1 Comparisons are Needed**</summary>
+<summary>**Illustration: K-1 comparisons are needed**</summary>
 
 Let's say we want to get someone's ranking over 2024 presidential candidate
 choices, from the set {Biden,Trump,RFK,Stein}.
@@ -701,20 +697,30 @@ Biden > Stein > RFK > Trump
 </details> 
 
 You'll notice that you can't get the full ranking for e.g. 4 options in any less than 3 sets,
-but you well could add more sets to provide some redundancy and statistical
+but you well could add more sets to gain some statistical
 efficiency if you so choose. Of course, in larger choice sets, you'll probably
 end up closer to K-1 sets given respondent fatigue, but for smaller sets it's
 a very helpful option to know exists.
 
 Most of the innovation here was in the choice set design, but there's some in
-the model too, so let's turn to that:
+the model too, so let's turn to that. The likelihood for the Rank-Ordered Logit model
+just extends the intuition from the best-choice model to account for the full ranking. 
+
+For a given ranking $r$ of $J$ alternatives, the likelihood takes the form:
+
+$$
+P(r) = \prod_{j=1}^{J-1} \frac{\exp(U_{ir_j})}{\sum_{k=j}^J \exp(U_{ir_k})}
+$$
+
+where $U_{ir_j}$ is the utility of the alternative ranked $j$-th for individual $i$. Here that is in code; the key bit is the `rank_logit_lpmf`
+function.
 
 <details> 
 
 <summary>**Model 3: Rank-Ordered Logit for Connected Graphs**</summary>
 
 ```{R}
-ranked <- "// saved as ranked_rcl.stan
+ranked <- "// Again, note that this code is just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html
 functions {
   real rank_logit_lpmf(int[] rank_order, vector delta) {
     // We reorder the raw utilities so that the first rank is first, second rank second... 
@@ -784,7 +790,7 @@ model {
 
 Take a second to reason through the above code; we're able to use all of the information
 a full ranking provides to us, without having to force any interrelationship
-between best and worst to exist that isn't truly there. Also, notice that there's
+between best and worst to exist that may or may not exist. Also, notice that there's
 nothing here specifically for the "connected graph of choices" part of model- that's all
 in the choice set generation, which we'll do next.
 
@@ -794,7 +800,7 @@ Let's try making the choice sets the new way, and then compare models again.
 
 To keep things simple, we'll generate our graph of options as a
 [balanced incomplete block design](https://online.stat.psu.edu/stat503/lesson/4/4.7).
-This is a quick way to get the connectedness property we find desirable along with
+This is a quick way to get the connectedness property we want in
 a reasonably statistically efficient design. It's worth noting though that the
 literature on designing maximally efficient discrete choice experiments is
 deep, and has some beautiful connections to the broader experimental design
@@ -806,11 +812,11 @@ is the literature review section of
 desirable properties of designs like the BIBD I actually chose, Raghavarao's 1988 book
 **Constructions and Combinatorial Problems in Design of Experiments** is wonderful.
 Part of what I find appealing about this broader literature is that results not
-only from the 80s, but stretching back a century or more remain relevant for
+just from the '80s, but stretching back a century or more remain relevant for
 building good choice experiments. While the last decade or so has seen numerous new
 techniques pop up that squeeze out additional bits of accuracy in the right conditions,
 the core challenge remains interwoven with the combinatorics of
-experimental design that has been recognized by the earliest statisticians.
+experimental design that were recognized by the earliest statisticians.
 
 
 <details>
@@ -819,7 +825,7 @@ experimental design that has been recognized by the earliest statisticians.
 
 ```{R}
 # Number of individuals
-I <- 30
+I <- 800
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -857,12 +863,10 @@ plot(as.data.frame(beta_i))
 
 bibd <- find.BIB(trt = Tasks, b = I*Tasks, k = J)
 
-# Checks if the design is balanced wrt to both rows and columns.
-# The above function is not guaranteed to produce a valid BIBD; it may produce
+# The below function is not guaranteed to produce a valid BIBD; it may produce
 # a close but imperfect design, which is sufficient for our purposes. I will
 # however confirm it's connected, since we'd start to lose quite a lot of efficiency
 # if it were not. 
-
 # Returns 1 if the design is connected
 is.connected(bibd)
 
@@ -1008,7 +1012,6 @@ best_choice <- as.data.frame(best_choice_fit, pars = "beta_individual") %>%
   mutate(`True value` = as.numeric(t(beta_i)),
          Dataset = "Best Choice")
 
-# Process MaxDiff results
 maxdiff_choice <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
   gather(Parameter, Value) %>%
   group_by(Parameter) %>%
@@ -1021,7 +1024,6 @@ maxdiff_choice <- as.data.frame(maxdiff_fit, pars = "beta_individual") %>%
   mutate(`True value` = as.numeric(t(beta_i)),
          Dataset = "MaxDiff")
 
-# Process ROL results
 rol_choice <- as.data.frame(rol_fit, pars = "beta_individual") %>%
   gather(Parameter, Value) %>%
   group_by(Parameter) %>%
@@ -1055,7 +1057,7 @@ ggplot(all_results, aes(x = `True value`, y = median, color = Dataset)) +
 
 At a squint, Rank-Ordered Logit > Best Choice > MaxDiff as I've argued. Notice though that
 unlike the MaxDiff model, both Best Choice and Rank-Ordered Logit look unbiased;
-the ROL model simply seems more efficient. Let's check the RMSE to confirm
+the ROL model simply seems more efficient. Let's check the RMSE to confirm:
 
 ```{R}
 all_results %>%
@@ -1066,31 +1068,26 @@ all_results %>%
 The ordering is as we'd expect from the plots. 
 
 If I have free choice over the design of a choice experiment, this sort of
-connected graph, analyzed with the rank-ordered logit is what I'd generally
+connected graph design, analyzed with the rank-ordered logit is what I'd generally
 prefer to use. Designing the choice graphs to make this work well isn't
 particularly hard with modern software, and the rank ordered logit model
 is widely available, not just in a sophisticated Stan model like I cribbed
 from Jim Savage here, but also in [Stata](https://www.stata.com/manuals13/rrologit.pdf),
-and other commonly used packages.
+and other commonly used languages.
 
-Hopefully the theoretical discussion and simulation study above are persuasive:
+Hopefully the theoretical discussion and simulation study so far are persuasive:
 you can and should aim to do better than the Maxdiff model of discrete choice.
 
 # Alternative #2: a backup plan- rank-ordered logits with unknown middle preferences
 
-The connected design I've advocated above isn't strictly necessary since I've used
-a mixed logit, and the multilevel component can help estimate when cases are
-disconnected. Of course though, having a completely connected graph within
-individual respondents helps a lot for statistical efficiency.
-
-That raises an interesting question: what to do if you already ran an experiment
+There's still an interesting question left here: what to do if you already ran an experiment
 designed without connectedness in mind, or your survey platform won't easily
 allow you to make a connected design? 
 
 It's not my preferred choice if I have control over design, but in this scenario
 we can use a Rank-Ordered Logit with unknown middle preferences.
 
-## Allowing ties in Rank-Ordered Logits
+## Allowing unknown options in rank-ordered logit models
 
 Let's reuse the example above where we ranked my preferences over 2024 presidential candidates. The complete ordering for me is:
 $$
@@ -1100,10 +1097,10 @@ If we collected data from me though by only asking my best and worse choices, we
 $$
 \textcolor{blue}{\text{Biden}} > ??? > ??? > \textcolor{red}{\text{Trump}}
 $$
-To keep using a rank-ordered model here, we'd need to figure out how to reason about the middle two options being unknown. Allison and Christakis, 1994 discuss various ways to handle this, but the one that seems most promising and that we'll discuss operates as if the true ranking exists, but is unknown to the modeler. That seems pretty reasonable, since we're not saying the middle preferences have to be strong, just that people likely aren't totally ambivalent between the two in general.
+To keep using a rank-ordered model here, we'd need to figure out how to reason about the middle two options being unknown. [Allison and Christakis, 1994](https://www.jstor.org/stable/270983) discuss various ways to handle this, but the one that seems most promising and that we'll discuss operates as if the true ranking exists, but is unknown to the modeler. That seems pretty reasonable, since we're not saying the middle preferences have to be strong, just that people likely aren't totally ambivalent between the two in general.
 To handle this, we'll first enumerate the possible ways the middle options could pan out. Here's there's just two:
 $$
-\textcolor{blue}{\text{Biden}} > \textcolor{green}{\text{Stein}} > \textcolor{yellow}{\text{RFK}} > \textcolor{red}{\text{Trump}} \linebreak
+\textcolor{blue}{\text{Biden}} > \textcolor{green}{\text{Stein}} > \textcolor{yellow}{\text{RFK}} > \textcolor{red}{\text{Trump}} \vert
 \textcolor{blue}{\text{Biden}} > \textcolor{yellow}{\text{RFK}} > \textcolor{green}{\text{Stein}} > \textcolor{red}{\text{Trump}}
 $$
 Then, to construct a likelihood, we'll marginalize over all the possible middle options. Since the two ways the middle options could shake out are mutually exclusive, that implies:
@@ -1129,18 +1126,17 @@ friendly neighborhood complete rank-ordered logit, since there's only 1 way
 Of course, this approach isn't without issues. Obviously, with a bit more foresight
 on design we could've learned more from the middle options while still asking respondents
 to make two choices per task. Putting that aside, the number of unknown middle
-options grows as $n_{unknown}!$, which makes calculating all the likelihood terms
+options grows as $J_{unknown}!$, which makes calculating all the likelihood terms
 a real, real pain in the ass. If we re-do our initial example with 10 total alternatives,
-the middle 8 will be unknown, and there will be 40,320 permutations. I'll
-also show an approximation for the unknown middle options in a moment, 
+the middle 8 will be unknown, and there will be 40,320 permutations.
 
-## Building the ROL with Unknown Middle Preferences in Stan
+## Building the ROL with unknown middle preferences in Stan
 
-I'll present two versions of the ROL with unknown ties model in Stan. First,
-the full marginal likelihood model above, and then the Efron approximation
-you can use when the number of unknown middle options. We'll build towards
+I'll present two versions of the ROL with unknown ties model. First,
+the full marginal likelihood model described above, and then the Efron approximation
+you can use when the number of unknown middle options gets unwieldy. We'll build towards
 comparing MaxDiff, ROL with known middle options, and the two ROL with unknown
-middle options all.
+middle options all together.
 
 To make it easier to follow logic for many middle options, we'll use
 $J = 5$[^10]. The initial block below just sets up our DGP again with that $J$,
@@ -1148,9 +1144,7 @@ so feel free to skip over it.
 
 [^10]: To be transparent, note that J = 5 isn't a totally neutral comparison
 ground between the full marginal likelihood model and the Efron approximation. The
-Efron will get somewhat worse as the number of middle options grows, but of
-course better an approximation that finishes in a useful amount of time than
-a correct model that doesn't.
+Efron will get somewhat worse as the number of middle options grows.
 
 <details>
 
@@ -1158,7 +1152,7 @@ a correct model that doesn't.
 
 ```{R}
 # Number of individuals
-I <- 30
+I <- 800
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -1261,7 +1255,7 @@ Second, it can be helpful for intuition to mentally step through this matrix of 
 and consider the calculation needed for each entry, imagining
 it growing rapidly with the number of unknown middle options.
 
-Here's the stan input data and model:
+Here's the Stan input data and model:
 
 <details>
 
@@ -1374,7 +1368,7 @@ Summing up all the possible middle options should be fairly transparent, but if 
 in the `log_sum_exp` tricks I'm using to speed this up, see this footnote[^12].
 
 [^12]: Woo optimization gang! Ok, so the idea here is similar to this block in 
-the ROL without ties model, where at each choice we normalize by subtracting out ` out += tmp[i] - log_sum_exp(tmp[i:])`,
+the ROL without unknowns model, where at each choice we normalize by subtracting out ` out += tmp[i] - log_sum_exp(tmp[i:])`,
 but it has to function differently given the unknowns. More specifically, the right
 normalizing factor for all the middle $J -2$ options is `log_sum_exp(sorted_delta[2:K])` for
 each possible *permutation*, not each possible middle option. So as the number
@@ -1385,13 +1379,13 @@ subtracting `n_tied` times per permutation.
 To reinforce the intuition here, this is choosing to handles unknown middle options
 with maximum precision given we know very little about them, at (usually) great computational cost. Before
 we compare this to MaxDiff, and see if it is meaningfully more accurate with the same data,
-I want to also introduce an approximation to this full marginal likelihood to throw
-into the comparison as well.
+I want to also introduce an approximation to this full marginal likelihood that
+won't choke even on big choice sets.
 
-## N! is pretty bad; is there an approximation?
+## J! is pretty bad; is there an approximation?
 
 As we've seen, calculating all possible orderings for unknown middle preferences can quickly become computationally intensive as the number of choices increases. Fortunately, there's a clever approximation that can help us out.
-This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data [^11]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
+This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data[^11]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
 
 Mathematically, the Efron approximation for our rank-ordered logit with unknown middle preferences looks like this:
 
@@ -1406,15 +1400,15 @@ $$
 
 Where $C_i$ is the choice set at decision $i$, $T_i$ is the set of tied alternatives, and $t_i$ is the number of tied alternatives. I recognize this is super dense, and that grokking it will require a bit of reading that's outside the scope of this post; here's a footnote with some helpful references[^13].
 
-[^13]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in their terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is insightful, but very very dense.
+[^13]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in those terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is great, but very very dense.
 
-Intuitively, this approximation attempts to more continuously approximate the full marginal likelihood we just discussed without calculating every possible ranking. It does this by adjusting the denominator of the likelihood to account for the tied middle alternatives in a stepwise fashion. This approach recognizes that while we know the best and worst choices, the middle alternatives are essentially competing with each other in a way that's more nuanced than simply treating them as fully ranked or completely tied.
+Intuitively, this approximation attempts to more continuously approximate the full marginal likelihood we just discussed without calculating every possible ranking. It does this by adjusting the denominator of the likelihood to account for the tied middle alternatives in a stepwise fashion.
 
 Here's the code implementation, which to me gives a lot more intuition than the equation above:
 
 <details>
 
-<summary>**ROL with Efron Approximation of Unknown Middle Options**</summary>
+<summary>**ROL with Efron approximation of unknown middle options**</summary>
 
 ```{R}
 efron_model <- "
@@ -1493,16 +1487,13 @@ model {
 
 </details>
 
-The beauty of the Efron approximation is that it works remarkably well in practice compared to alternatives. As discussed in Hertz-Picciotto and Rockhill (1997) and elsewhere, the Efron method tends to outperform other approximations, particularly when dealing with moderate to heavy ties (read: unknown middle ranks).
+The beauty of the Efron approximation is that it works remarkably well in practice, especially compared to alternatives. As discussed for example in [Hertz-Picciotto and Rockhill (1997)](https://pubmed.ncbi.nlm.nih.gov/9333345/), the Efron method tends to outperform other approximations, particularly when dealing with moderate to heavy ties (read: unknown middle rankings).
 
 ## Evaluating ROL with Unknown Middle Preferences against MaxDiff and ROL
 
-So now we've got 3 candidate models for best/worst data- MaxDiff, ROL with
-ROL using the Efron approximation
-for handling the middle options. I'll also add in the ROL without ties in the comparison
-below to give a sense of the information lost when just collecting best and worst
+So now we've got 3 candidate models for best/worst choice data- MaxDiff, ROL calculating the full marginal likelihood for the middle options, and ROL using the Efron approximation. I'll also add in the ROL without ties to give a sense of the information lost when just collecting best and worst
 choices, though of course my main goal is compare the quality of the 3 estimators
-on best/worst data.
+on best/worst choice data.
 
 The next chunk just sets up the comparison between the four models on data with $J = 5$,
 so feel free to jump to the summary plot after it.
@@ -1608,7 +1599,7 @@ results_rol <- process_results(fit_rol, "ROL (no ties)")
 
 all_results <- bind_rows(results_maxdiff, results_rol_ties, results_efron, results_rol)
 
-# 4. Calculate and print RMSE
+# 4. Calculate and print RMSE; couldn't be bothered to find one in a package
 calculate_rmse <- function(data) {
   sqrt(mean((data$True_value_normalized - data$median)^2))
 }
@@ -1670,7 +1661,7 @@ higher $J$ to widen the gap between the full marginal likelihood and the Efron
 approximation.
 
 So practically, the takeaway here is that you can do better than modeling with MaxDiff
-even if you designed your discrete choice experiment for MaxDiff. If you have the
+even if you designed your discrete choice experiment to just collect best/worst choice data. If you have the
 time and/or your number of alternatives isn't super large, you can do better with
 the full marginal likelihood model. If you want a workable and fast approximation,
 the Efron model still looks meaningfully better than MaxDiff.
@@ -1678,7 +1669,7 @@ the Efron model still looks meaningfully better than MaxDiff.
 Beyond giving a better option for existing MaxDiff data, I'll admit I had a secondary 
 motive in wanting to explore these "unknown middle choices" style models. I've sometimes
 seen MaxDiff discussed as an imperfect modeling strategy that becomes desirable
-because it gives access to new and important data collection strategies.
+because it gives access to the best/worst choice data collection strategy.
 
 To flesh out that claim, the idea is that MaxDiff has known flaws that aren't
 ideal, but a study only needing to collect best and worst options
@@ -1689,13 +1680,13 @@ worse model on significantly more informative-dense data, since design trumps an
 This is probably
 the type of argument for MaxDiff I'm most sympathetic to, in the sense that I do genuinely 
 do believe choice experiments place a lot of burden on respondents in a way that
-may bias results; perhaps selecting only the best and worst option meaningfully
-helps with that. Further, I even find it plausible that if you need to compare a larger
+may bias results. Perhaps selecting only the best and worst option meaningfully
+helps with that. Further, I might even find it plausible that if you need to compare a larger
 than ideal set of options, there might be value in asking a bunch of best/worst
 of 10 choice sets instead of trying to do tons of best of threes to enable the
 full ROL with ties option I mentioned above. 
-Even if you think this way though, the existence of the ROL with unknown middle options
-models I've just shown you are the more accurate model for the design you find significant
+Even if you think this way though, the ROL with unknown middle options
+models I've just shownn are likely the more accurate model for the design you find significant
 value in. **You can't justify
 using MaxDiff via the designs it enables.**
 
@@ -1703,23 +1694,31 @@ using MaxDiff via the designs it enables.**
 
 In summary:
 
-1. There are some odd psychological and mathematical quirks entailed in using a
+1. There are some significant psychological and mathematical limitations entailed in using a
 MaxDiff model of discrete choice.
 2. These issues with the MaxDiff model are more than theoretical, and can cause
 significant harm to the quality of model predictions.
 3. If you have control over the design of the choice experiment, you can do much
 better than MaxDiff by designing the choice sets in a connected graph, and then
-using a Rank-Ordered Logit. This gets most of the benefit of ROLs more generally,
+using a rank-ordered logit. This gets most of the benefit of ROLs more generally,
 while preserving the relatively low burden respondent experience of just choosing
 a best and worst choice.
-4. If you don't have control over the design of the experiment, you can still do
-better than MaxDiff via ROL models that correctly handle unknown middle choices.
-Crucially, the existence of these options implies MaxDiff has no unique design
-it enables us to use; we're free to use any design with Best/Worst choices only,
-and we can still do better.
+4. Even if you don't have control over the design of the experiment, you can still outperform
+MaxDiff using ROL models that correctly handle unknown middle choices. Crucially, the existence
+of these models negates the argument for using MaxDiff based solely on its compatibility with best/worst choice designs.
 
 In writing this post, I've aimed to both give intuition and concrete examples of
-models I would've benefited from seeing when I was first trying to find alternatives
-to the MaxDiff formulation of discrete choice. My hope is gathering both the objections and alternatives
-in one place can make it a bit easier for others to move away from MaxDiff to more the effective
-models available. Thanks for reading!
+models that I would've benefited from when I was initially to find alternatives
+to the MaxDiff formulation of discrete choice. My hope is gathering both the objections to MaxDiff and alternatives
+in one place can make it a bit easier for others to pivot to the better models available.
+
+There are plenty of ways you can extend what I've done in this post, and I don't want to
+claim this is in any way some definitve model for discrete choice. Just to name a few- one could
+improve the priors in the models, design much more efficient graphs of options, compare the efficiency of connected graphs to
+ROL with unknowns for large choice sets via simulation, or even
+implement these models in something like [Blackjax](https://blackjax-devs.github.io/blackjax/)
+with a Gibbs sampler to make them blazing fast. My primary goal here has been
+to show that the MaxDiff likelihood isn't a great foundation for extending
+discrete choice.
+
+Thanks for reading!
