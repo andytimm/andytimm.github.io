@@ -2,8 +2,7 @@
 layout: post
 title: Better discrete choice modeling through rank ordered logit
 subtitle: Or- a mathematically correct model of a psychologically coherent concept
-date: 2024-08-04
-draft: True
+date: 2024-08-06
 image: imgs/gumby_distribution.webp
 categories:
   - discrete choice
@@ -33,7 +32,7 @@ I aim to remedy that, with sections for:
 1.  An introduction to MaxDiff and its limitations
 2.  An illustration of how these issues impact final model quality
 3.  Alternatives: rank-ordered logit with connected choice graphs, and
-rank-ordered logit with unknown Middle Options
+rank-ordered logit with unknown middle options
 
 # Introducing MaxDiff
 
@@ -56,7 +55,7 @@ basics of discrete choice models, but here's a brief refresher[^2].
 We want to build a model of how people
 make decisions among discrete options. This could be:
 
--   A pollster asking which candidate(s) or political parties each
+-   A pollster asking which candidates or political parties each
     respondent favors
 -   A marketing firm studying preferences amongst a variety of chocolate
     bars
@@ -70,8 +69,7 @@ choose their most preferred option according to their utility function,
 there is some degree of randomness. The basic model is then
 
 [^3]: I won't rehash more subtle implications of this basic model here;
-    see the footnote above for references that explore the mind of this
-    *Homo Economicus* more in depth. Instead, I'll mostly pull up
+    see the footnote above for references. Instead, I'll mostly pull up
     assumptions as they become relevant for discussing MaxDiff.
 
 $$
@@ -91,15 +89,23 @@ distribution.
     other distributions here.
 
 Under this model, the probability that individual $i$ chooses
-alternative $j$ from a choice set $C_i$ is: $$
-P_{ij} = \frac{\exp(U_{ij})}{\sum_{k \in C_i} \exp(U_{ik})}
-$$ This is the standard multinomial logit.
+alternative $j$ from a choice set $C_i$ is: 
+
+$$
+P_{ij} = \frac{\exp(\mu_{ij})}{\sum_{k \in C_i} \exp(\mu_{ik})}
+$$ 
+
+This is the standard multinomial logit. We could further decompose this $\mu_{ij}$ into a linear function of explanatory variables, but this is not central to my point, so I won't build up notation for these. 
 
 Now, suppose we have a dataset where each individual $i$ has made a
 choice $y_i$ from their choice set $C_i$. The likelihood of observing
-this dataset under the multinomial logit model is: $$
+this dataset under the multinomial logit model is: 
+
+$$
 L = \prod_i P_{iy_i} = \prod_i \frac{\exp(\mu_{iy_i})}{\sum_{k \in C_i} \exp(\mu_{ik})}
-$$ The likelihood is the product of the choice probabilities for each
+$$
+
+The likelihood is the product of the choice probabilities for each
 individual's observed choice $y_i$. We can estimate the parameters of
 the utility function $\mu_{ij}$ by maximizing this likelihood function
 (or, more commonly, the log-likelihood). This is how the single best
@@ -113,7 +119,7 @@ and other improvements, let's think about the pressures of gathering
 data here for a moment, since that'll motivate the desire for something
 like MaxDiff.
 
-To estimate this, we recruit and ask them to choose their
+To estimate this, we recruit participants and ask them to choose their
 favorite option amongst a given choice set. As a way to control the
 difficulty of making a choice while still gathering enough data, we can
 limit the size of the set (choose the best of 10 items, instead of 20),
@@ -650,7 +656,7 @@ ranking data we want?
 
 The clever trick here is that by asking the right 3 item choice sets, and asking
 the survey taker to pick best and worst, we can collect every choice needed to
-construct a full ranking[^8]. We'll then be able to simply fit a rank-ordered
+construct a full ranking. We'll then be able to simply fit a rank-ordered
 logit model to these data, which makes far fewer simplifying assumptions about
 how the choices and their utilities interact.
 
@@ -709,10 +715,10 @@ just extends the intuition from the best-choice model to account for the full ra
 For a given ranking $r$ of $J$ alternatives, the likelihood takes the form:
 
 $$
-P(r) = \prod_{j=1}^{J-1} \frac{\exp(U_{ir_j})}{\sum_{k=j}^J \exp(U_{ir_k})}
+P(r) = \prod_{j=1}^{J-1} \frac{\exp(\mu_{ij})}{\sum_{k=j}^J \exp(\mu_{ik})}
 $$
 
-where $U_{ir_j}$ is the utility of the alternative ranked $j$-th for individual $i$. Here that is in code; the key bit is the `rank_logit_lpmf`
+where $\mu_{ij}$ is the utility of the alternative ranked $j$-th for individual $i$. Here that is in code; the key bit is the `rank_logit_lpmf`
 function.
 
 <details> 
@@ -821,11 +827,11 @@ experimental design that were recognized by the earliest statisticians.
 
 <details>
 
-<summary>**Updated Data Generation for Connected Graph Illustration**</summary>
+<summary>**Updated data generation for connected graph illustration**</summary>
 
 ```{R}
 # Number of individuals
-I <- 800
+I <- 400
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -933,7 +939,7 @@ results plots after it.
 
 <details>
 
-<summary>**Comparing ROL to Best Choice, and MaxDiff models**</summary>
+<summary>**Comparing ROL to best choice, and MaxDiff models**</summary>
 
 ```{R}
 data_list_best_choice <-list(N = nrow(X),
@@ -1055,8 +1061,8 @@ ggplot(all_results, aes(x = `True value`, y = median, color = Dataset)) +
   theme(legend.position="bottom")
 ```
 
-At a squint, Rank-Ordered Logit > Best Choice > MaxDiff as I've argued. Notice though that
-unlike the MaxDiff model, both Best Choice and Rank-Ordered Logit look unbiased;
+At a squint, rank-ordered logit > best choice > MaxDiff as I've argued. Notice though that
+unlike the MaxDiff model, both best choice and rank-ordered logit look unbiased;
 the ROL model simply seems more efficient. Let's check the RMSE to confirm:
 
 ```{R}
@@ -1076,7 +1082,7 @@ from Jim Savage here, but also in [Stata](https://www.stata.com/manuals13/rrolog
 and other commonly used languages.
 
 Hopefully the theoretical discussion and simulation study so far are persuasive:
-you can and should aim to do better than the Maxdiff model of discrete choice.
+you can and should aim to do better than the MaxDiff model of discrete choice.
 
 # Alternative #2: a backup plan- rank-ordered logits with unknown middle preferences
 
@@ -1107,15 +1113,20 @@ Then, to construct a likelihood, we'll marginalize over all the possible middle 
 $$
 P(\textcolor{blue}{B}>\textcolor{green}{S}>\textcolor{yellow}{R}>\textcolor{red}{T} \text{ or } \textcolor{blue}{B}>\textcolor{yellow}{R}>\textcolor{green}{S}>\textcolor{red}{T}) = P(\textcolor{blue}{B}>\textcolor{green}{S}>\textcolor{yellow}{R}>\textcolor{red}{T}) + P(\textcolor{blue}{B}>\textcolor{yellow}{R}>\textcolor{green}{S}>\textcolor{red}{T})
 $$
-Now, let's express this using the notation from Allison and Christakis (1994), since it'll make juggling all the subscripts a bit easier. For a given individual $i$, let $U_{ij}$ be the utility of alternative $j$. The probability of observing a particular complete ranking $r$ (where $r$ is one of the possible rankings consistent with the observed partial ranking) is:
+
+Now, let's express this using the notation from Allison and Christakis (1994), which will help us handle the subscripts more easily. For a given individual $i$, let $\mu_{ij}$ be the deterministic utility of the alternative ranked $j$-th. The probability of observing a particular complete ranking $r$ (where $r$ is one of the possible rankings consistent with the observed partial ranking) is:
+
 $$
-P(r) = \prod_{k=1}^{J-1} \frac{\exp(U_{ir_k})}{\sum_{l=k}^J \exp(U_{ir_l})}
+P(r) = \prod_{j=1}^{J-1} \frac{\exp(\mu_{ij})}{\sum_{k=j}^J \exp(\mu_{ik})}
 $$
-where $r_k$ is the alternative ranked $k$th in ranking $r$, and $J$ is the total number of alternatives.
+
+where $J$ is the total number of alternatives.
 For our example with unknown middle preferences, the likelihood becomes:
+
 $$
-L(\textcolor{blue}{B}>\textcolor{green}{S},\textcolor{yellow}{R}>\textcolor{red}{T}) = \frac{\exp(U_{i\textcolor{blue}{B}})}{\sum_{j \in {\textcolor{blue}{B},\textcolor{green}{S},\textcolor{yellow}{R},\textcolor{red}{T}}} \exp(U_{ij})} \cdot \left[ \frac{\exp(U_{i\textcolor{green}{S}})}{\exp(U_{i\textcolor{green}{S}}) + \exp(U_{i\textcolor{yellow}{R}}) + \exp(U_{i\textcolor{red}{T}})} + \frac{\exp(U_{i\textcolor{yellow}{R}})}{\exp(U_{i\textcolor{green}{S}}) + \exp(U_{i\textcolor{yellow}{R}}) + \exp(U_{i\textcolor{red}{T}})} \right] \cdot \frac{\exp(U_{i\textcolor{red}{T}})}{\exp(U_{i\textcolor{red}{T}})}
+L(\textcolor{blue}{B}>\textcolor{green}{S},\textcolor{yellow}{R}>\textcolor{red}{T}) = \frac{\exp(\mu_{i\textcolor{blue}{B}})}{\sum_{j \in {\textcolor{blue}{B},\textcolor{green}{S},\textcolor{yellow}{R},\textcolor{red}{T}}} \exp(\mu_{ij})} \cdot \left[ \frac{\exp(\mu_{i\textcolor{green}{S}})}{\exp(\mu_{i\textcolor{green}{S}}) + \exp(\mu_{i\textcolor{yellow}{R}}) + \exp(\mu_{i\textcolor{red}{T}})} + \frac{\exp(\mu_{i\textcolor{yellow}{R}})}{\exp(\mu_{i\textcolor{green}{S}}) + \exp(\mu_{i\textcolor{yellow}{R}}) + \exp(\mu_{i\textcolor{red}{T}})} \right] \cdot \frac{\exp(\mu_{i\textcolor{red}{T}})}{\exp(\mu_{i\textcolor{red}{T}})}
 $$
+
 The central terms are the key to the unknown ranking model[^11]. This lets
 us fit a ranked model and avoid MaxDiff, even with unknown middle options.
 
@@ -1148,11 +1159,11 @@ Efron will get somewhat worse as the number of middle options grows.
 
 <details>
 
-<summary>**Setting up Sim Study with J = 5**</summary>
+<summary>**Setting up sim study with J = 5**</summary>
 
 ```{R}
 # Number of individuals
-I <- 800
+I <- 400
 # Number of tasks per individual
 Tasks <- 10
 # Number of choices per task
@@ -1385,22 +1396,22 @@ won't choke even on big choice sets.
 ## J! is pretty bad; is there an approximation?
 
 As we've seen, calculating all possible orderings for unknown middle preferences can quickly become computationally intensive as the number of choices increases. Fortunately, there's a clever approximation that can help us out.
-This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data[^12]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
+This approximation comes to us via a deep connection between discrete choice models and survival analysis. To gesture at the analogy here- tied times in survival models function like our unknown middle options, and the survival analysis literature has decades of experience handling this type of tie given how common they are in survival data[^13]. We'll look at my favorite of these, the Efron approximation, originally developed for tied times in Cox proportional-hazards models.
 
 Mathematically, the Efron approximation for our rank-ordered logit with unknown middle preferences looks like this:
 
-[^12]: See the Allison/Christakis paper above for a more fleshed out version of this comparison. It's very elegant,
+[^13]: See the Allison/Christakis paper above for a more fleshed out version of this comparison. It's very elegant,
 but I don't think there's a way to do that analogy justice without a massive detour in this post. Similarly, I'd
 love to walk through the reasoning that leads to the Efron approximation and how it compares to competitors, but this post is
 already pretty long.
 
 $$
-L(\beta) = \prod_{i=1}^N \frac{\exp(\beta'X_{i(1)})}{\sum_{j \in C_i} \exp(\beta'X_j)} \cdot \prod_{k=2}^{J-2} \frac{\exp(\beta'X_{i(k)})}{\sum_{j \in C_i} \exp(\beta'X_j) - \frac{k-1}{J-2} \sum_{l \in M_i} \exp(\beta'X_l)}
+L(\mu) = \prod_{i=1}^N \frac{\exp(\mu_{ij})}{\sum_{j \in C_i} \exp(\mu_{ij})} \cdot \prod_{k=2}^{J-2} \frac{\exp(\mu_{ik})}{\sum_{j \in C_i} \exp(\mu_{ij}) - \frac{k-1}{J-2} \sum_{l \in M_i} \exp(\mu_{il})}
 $$
 
-Where $C_i$ is the choice set at decision $i$, $T_i$ is the set of tied alternatives, and $t_i$ is the number of tied alternatives. I recognize this is super dense, and that grokking it will require a bit of reading that's outside the scope of this post; here's a footnote with some helpful references[^13].
+Where $C_i$ is the full choice set for individual $i$, $M_i$ is the subset of $C_i$ containing the tied (unranked) middle alternatives, and $J$ is the total number of alternatives in $C_i$. I recognize this is super dense, and that grokking it will require a bit of reading that's outside the scope of this post; here's a footnote with some helpful references[^14].
 
-[^13]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in those terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is great, but very very dense.
+[^14]: I really appreciate [this set of slides](https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf) for pumping intuitions about different approaches to approximating the middle options. These [course notes](https://public.websites.umich.edu/~yili/lect4notes.pdf) are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in those terms. Finally of course, the [original paper](https://www.jstor.org/stable/2286217) is great, but very very dense.
 
 Intuitively, this approximation attempts to more continuously approximate the full marginal likelihood we just discussed without calculating every possible ranking. It does this by adjusting the denominator of the likelihood to account for the tied middle alternatives in a stepwise fashion.
 
@@ -1492,7 +1503,7 @@ The beauty of the Efron approximation is that it works remarkably well in practi
 ## Evaluating ROL with Unknown Middle Preferences against MaxDiff and ROL
 
 So now we've got 3 candidate models for best/worst choice data- MaxDiff, ROL calculating the full marginal likelihood for the middle options, and ROL using the Efron approximation. I'll also add in the ROL without ties to give a sense of the information lost when just collecting best and worst
-choices, though of course my main goal is compare the quality of the 3 estimators
+choices, though of course my main goal is compare the quality of the 3 models
 on best/worst choice data.
 
 The next chunk just sets up the comparison between the four models on data with $J = 5$,
@@ -1503,7 +1514,6 @@ so feel free to jump to the summary plot after it.
 <summary>**4 way Comparison Setup**</summary>
 
 ```{R}
-# 1. Setup and compile models
 compiled_maxdiff_model <- stan_model(model_code = best_worst)
 compiled_rol_ties_model <- stan_model(model_code = rol_with_unknown_middle_options)
 compiled_efron_model <- stan_model(model_code = efron_model)
@@ -1554,18 +1564,15 @@ stan_data_rol <- list(
   start = tt$start, end = tt$end
 )
 
-# 2. Fit the models
 fit_maxdiff <- sampling(compiled_maxdiff_model, data = stan_data_maxdiff, iter = 800)
 fit_rol_ties <- sampling(compiled_rol_ties_model, data = stan_data_rol_ties, iter = 800)
 fit_efron <- sampling(compiled_efron_model, data = stan_data_efron, iter = 800)
 fit_rol <- sampling(compiled_rol_model, data = stan_data_rol, iter = 800)
 
-# Function to normalize utilities across all respondents
 normalize_utilities <- function(utilities) {
   (utilities - mean(utilities)) / sd(utilities)
 }
 
-# 3. Process results and create plot
 process_results <- function(fit, dataset_name) {
   as.data.frame(fit, pars = "beta_individual") %>%
     gather(Parameter, Value) %>%
@@ -1599,7 +1606,7 @@ results_rol <- process_results(fit_rol, "ROL (no ties)")
 
 all_results <- bind_rows(results_maxdiff, results_rol_ties, results_efron, results_rol)
 
-# 4. Calculate and print RMSE; couldn't be bothered to find one in a package
+# Calculate and print RMSE; couldn't be bothered to find one in a package
 calculate_rmse <- function(data) {
   sqrt(mean((data$True_value_normalized - data$median)^2))
 }
@@ -1686,7 +1693,7 @@ than ideal set of options, there might be value in asking a bunch of best/worst
 of 10 choice sets instead of trying to do tons of best of threes to enable the
 full ROL with ties option I mentioned above. 
 Even if you think this way though, the ROL with unknown middle options
-models I've just shownn are likely the more accurate model for the design you find significant
+models I've just shown are likely the more accurate model for the design you find significant
 value in. **You can't justify
 using MaxDiff via the designs it enables.**
 
@@ -1718,7 +1725,6 @@ improve the priors in the models, design much more efficient graphs of options, 
 ROL with unknowns for large choice sets via simulation, or even
 implement these models in something like [Blackjax](https://blackjax-devs.github.io/blackjax/)
 with a Gibbs sampler to make them blazing fast. My primary goal here has been
-to show that the MaxDiff likelihood isn't a great foundation for extending
-discrete choice.
+to show that the MaxDiff likelihood isn't a great foundation for discrete choice.
 
 Thanks for reading!

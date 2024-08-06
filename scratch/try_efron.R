@@ -650,3 +650,69 @@ ggplot(all_results, aes(x = True_value_normalized, y = median, color = Dataset))
         plot.subtitle = element_text(hjust = 0.5))
 
 
+##########################
+# Sanity Check that "bias"
+##########################
+
+# Corrected function to extract and process un-normalized utilities
+process_unnormalized <- function(fit, true_values, dataset_name) {
+  as.data.frame(fit, pars = "beta_individual") %>%
+    gather(Parameter, Value) %>%
+    mutate(
+      individual = str_extract(Parameter, "[0-9]+(?=,)") %>% parse_number(),
+      column = str_extract(Parameter, ",[0-9]{1,2}") %>% parse_number()
+    ) %>%
+    group_by(individual, column) %>%
+    summarise(
+      median = median(Value),
+      lower = quantile(Value, 0.05),
+      upper = quantile(Value, 0.95),
+      .groups = 'drop'
+    ) %>%
+    mutate(
+      True_value = true_values[individual, column],
+      Dataset = dataset_name
+    )
+}
+
+# Extract un-normalized utilities for each model
+unnorm_maxdiff <- process_unnormalized(maxdiff_fit, beta_i, "MaxDiff")
+unnorm_ties <- process_unnormalized(fit, beta_i, "Rank-Ordered Logit w/ ties")
+unnorm_efron <- process_unnormalized(fit_efron, beta_i, "Efron Approximation")
+unnorm_no_ties <- process_unnormalized(fit_rol, beta_i, "Rank-Ordered Logit (no ties)")
+
+# Combine results
+all_unnorm_results <- bind_rows(unnorm_maxdiff, unnorm_ties, unnorm_efron, unnorm_no_ties)
+
+# Calculate RMSE for un-normalized utilities
+rmse_unnorm <- all_unnorm_results %>%
+  group_by(Dataset) %>%
+  summarise(RMSE = sqrt(mean((True_value - median)^2)))
+
+# Create plot for un-normalized utilities
+ggplot(all_unnorm_results, aes(x = True_value, y = median, color = Dataset)) +
+  geom_point(alpha = 0.1, size = 0.5) +  # Reduced point size and alpha for better visibility
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed") +  # Add trend line
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "black") +  # Perfect prediction line
+  labs(x = "True Utility",
+       y = "Estimated Utility",
+       title = "Comparison of Un-normalized Model Performances",
+       subtitle = paste(
+         paste(rmse_unnorm$Dataset, round(rmse_unnorm$RMSE, 4), sep = ": "),
+         collapse = "\n"
+       )) +
+  scale_color_manual(values = c("MaxDiff" = "blue", 
+                                "Rank-Ordered Logit w/ ties" = "green",
+                                "Efron Approximation" = "red",
+                                "Rank-Ordered Logit (no ties)" = "purple")) +
+  theme_minimal() +
+  coord_fixed(ratio = 1) +
+  facet_wrap(~Dataset, ncol = 2) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+ggsave("unnormalized_model_comparison_corrected.png", width = 12, height = 10)
+
+# Print RMSE values for un-normalized utilities
+print(rmse_unnorm)
