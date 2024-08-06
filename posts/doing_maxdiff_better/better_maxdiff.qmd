@@ -585,7 +585,7 @@ ggplot(combined_data, aes(x = `True value`, y = median, color = Dataset)) +
   geom_abline(intercept = 0, slope = 1) +
   labs(y = "Utility Estimates",
        title = "Utility Estimates from the Two Models",
-       subtitle = "With interior 90% credibility intervals") +
+       subtitle = "With 90% CIs") +
   scale_color_manual(values = c("Best Choice" = "blue", "MaxDiff" = "red")) +
   facet_wrap(~Dataset) +
   theme(legend.position="none")
@@ -1055,7 +1055,7 @@ ggplot(all_results, aes(x = `True value`, y = median, color = Dataset)) +
   geom_abline(intercept = 0, slope = 1) +
   labs(y = "Utility Estimates",
        title = "Utility Estimates from the Three Models",
-       subtitle = "With interior 90% credibility intervals") +
+       subtitle = "With 90% CIs") +
   scale_color_manual(values = c("Best Choice" = "blue", "MaxDiff" = "red", "Rank-Ordered Logit" = "green")) +
   facet_wrap(~Dataset) +
   theme(legend.position="bottom")
@@ -1656,7 +1656,7 @@ valid comparison.
 print(fourway_comparison_plot)
 ```
 
-So roughly from the plot: ROL without unknowns > ROL with full marginal likelihood for unknowns > ROL with Efron Approximation for Unknowns > MaxDiff. Let's sanity check that by looking at RMSEs.
+So roughly from the plot: ROL without unknowns > ROL with full marginal likelihood for unknowns ~ ROL with Efron Approximation for Unknowns > MaxDiff. Let's sanity check that by looking at RMSEs.
 
 ```{R}
 print(rmse_comparison)

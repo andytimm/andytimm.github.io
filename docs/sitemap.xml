@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2024-06-10T05:43:01.397Z</lastmod>
+    <lastmod>2024-08-06T19:33:15.744Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2024-06-10T02:48:11.023Z</lastmod>
+    <lastmod>2024-07-27T15:07:19.747Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/LICENSE.html</loc>
@@ -50,11 +50,11 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/projects.html</loc>
-    <lastmod>2023-11-07T16:04:15.822Z</lastmod>
+    <lastmod>2024-07-27T15:04:51.814Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/software.html</loc>
-    <lastmod>2024-01-06T00:22:14.163Z</lastmod>
+    <lastmod>2024-07-27T15:07:34.323Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</loc>
@@ -87,5 +87,13 @@
   <url>
     <loc>https://andytimm.github.io/posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html</loc>
     <lastmod>2023-12-18T22:10:01.466Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/scratch/checking_big_likelihood_formatting.html</loc>
+    <lastmod>2024-08-06T01:31:22.269Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html</loc>
+    <lastmod>2024-08-06T19:34:18.312Z</lastmod>
   </url>
 </urlset>

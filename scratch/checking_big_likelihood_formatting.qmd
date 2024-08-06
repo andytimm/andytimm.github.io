@@ -1,0 +1,9 @@
+---
+title: "Untitled"
+---
+
+
+
+$$
+L(\textcolor{blue}{B}>\textcolor{green}{S},\textcolor{yellow}{R}>\textcolor{red}{T}) = \frac{\exp(\mu_{i\textcolor{blue}{B}})}{\sum_{j \in {\textcolor{blue}{B},\textcolor{green}{S},\textcolor{yellow}{R},\textcolor{red}{T}}} \exp(\mu_{ij})} \cdot \left[ \frac{\exp(\mu_{i\textcolor{green}{S}})}{\exp(\mu_{i\textcolor{green}{S}}) + \exp(\mu_{i\textcolor{yellow}{R}}) + \exp(\mu_{i\textcolor{red}{T}})} + \frac{\exp(\mu_{i\textcolor{yellow}{R}})}{\exp(\mu_{i\textcolor{green}{S}}) + \exp(\mu_{i\textcolor{yellow}{R}}) + \exp(\mu_{i\textcolor{red}{T}})} \right] \cdot \frac{\exp(\mu_{i\textcolor{red}{T}})}{\exp(\mu_{i\textcolor{red}{T}})}
+$$

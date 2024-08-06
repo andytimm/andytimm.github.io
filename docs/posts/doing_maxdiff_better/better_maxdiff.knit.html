@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2024-06-09">
+
+<title>Andy Timm - Better discrete choice modeling through rank ordered logits</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Andy Timm - Better discrete choice modeling through rank ordered logits">
+<meta property="og:description" content="Or- a mathmatically correct model of a psychologically coherent concept">
+<meta property="og:image" content="https://andytimm.github.io/posts/doing_maxdiff_better/imgs/gumby_distribution.webp">
+<meta property="og:site-name" content="Andy Timm">
+<meta name="twitter:title" content="Andy Timm - Better discrete choice modeling through rank ordered logits">
+<meta name="twitter:description" content="Or- a mathmatically correct model of a psychologically coherent concept">
+<meta name="twitter:image" content="https://andytimm.github.io/posts/doing_maxdiff_better/imgs/gumby_distribution.webp">
+<meta name="twitter:creator" content="@andy_timm">
+<meta name="twitter:site" content="@andy_timm">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Andy Timm</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html" rel="" target="">
+ <span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../software.html" rel="" target="">
+ <span class="menu-text">Software</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html" rel="" target="">
+ <span class="menu-text">Rarely Updated Blog</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Better discrete choice modeling through rank ordered logits</h1>
+            <p class="subtitle lead">Or- a mathmatically correct model of a psychologically coherent concept</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">priors</div>
+                <div class="quarto-category">stupid Bayesian stuff</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://andytimm.github.io">Andy Timm</a> </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 9, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#introducing-maxdiff" id="toc-introducing-maxdiff" class="nav-link active" data-scroll-target="#introducing-maxdiff">Introducing MaxDiff</a>
+  <ul>
+  <li><a href="#psycologically-incoherent" id="toc-psycologically-incoherent" class="nav-link" data-scroll-target="#psycologically-incoherent">Psycologically Incoherent</a></li>
+  <li><a href="#mathmatically-incorrect" id="toc-mathmatically-incorrect" class="nav-link" data-scroll-target="#mathmatically-incorrect">Mathmatically Incorrect</a></li>
+  </ul></li>
+  <li><a href="#the-defects-are-not-just-theoretical-or-cosmetic-an-illustration" id="toc-the-defects-are-not-just-theoretical-or-cosmetic-an-illustration" class="nav-link" data-scroll-target="#the-defects-are-not-just-theoretical-or-cosmetic-an-illustration">The defects are not just theoretical or cosmetic: an illustration</a></li>
+  <li><a href="#alternative-1-rank-ordered-logits-with-connected-graphs-of-choices" id="toc-alternative-1-rank-ordered-logits-with-connected-graphs-of-choices" class="nav-link" data-scroll-target="#alternative-1-rank-ordered-logits-with-connected-graphs-of-choices">Alternative #1: rank-ordered logits with connected graphs of choices</a></li>
+  <li><a href="#alternative-2-a-backup-plan--rank-ordered-logits-with-ties" id="toc-alternative-2-a-backup-plan--rank-ordered-logits-with-ties" class="nav-link" data-scroll-target="#alternative-2-a-backup-plan--rank-ordered-logits-with-ties">Alternative #2: a backup plan- rank-ordered logits with ties</a></li>
+  <li><a href="#stepping-back-the-utility-of-discrete-choice-more-broadly" id="toc-stepping-back-the-utility-of-discrete-choice-more-broadly" class="nav-link" data-scroll-target="#stepping-back-the-utility-of-discrete-choice-more-broadly">Stepping Back: the utility of discrete choice more broadly</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="imgs/jimmy_dunk.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>The wonderful Jim Savage calls the MaxDiff model of discrete choice a “mathematically incorrect model of a psychologically incoherent concept”<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Despite this lovely dunk, and some wonderful notes explaining why MaxDiff’s not great, the model remains frequently used in market research, most prominently as implemented in <a href="https://sawtoothsoftware.com/">Sawtooth</a>. Why is this?</p>
+<p>Putting aside the most obvious answers like inertia and a dim view of statistical practice in marketing, it’s surprisingly hard to find a fully fleshed out explanation of the alternatives online. In this post, I remedy that, with sections for:</p>
+<ol type="1">
+<li>Introducing MaxDiff and its blemishes</li>
+<li>Showing how the issues propagate into final model quality</li>
+<li>Alternatives- Rank-Ordered Logits with ties, and connected choice graphs</li>
+</ol>
+<section id="introducing-maxdiff" class="level1">
+<h1>Introducing MaxDiff</h1>
+<p>If you’re reading this post, you likely have some familiarity with the basics of discrete choice models, but here’s a brief refresher<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>We want to build a model of how real people respond to the request to make decisions among discrete options. This could be:</p>
+<ul>
+<li>A pollster asking which candidate(s) or political parties each respondent favors</li>
+<li>A marketing firm studying preferences amongst a variety of chocolate bars</li>
+<li>A political scientist asking which message voters find most convincing</li>
+</ul>
+<p>One reasonable model<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> for this is to say that individual <span class="math inline">i</span> making choices among <span class="math inline">j</span> options can be inferred to have some underlying utility <span class="math inline">\mu</span> from the available choices, and that while they usually choose their most preferred option according to their utility function, there is some degree of randomness. The basic model is then</p>
+<p><span class="math display">
+\mu_{ij} = \mu_{ij} + \epsilon_{ij}
+</span> , where the <span class="math inline">\mu_{ij}</span> can have rich provenance (demographics and other individual traits, the context in which the decision is made, the other options available…) but is fixed, but there’s some <span class="math inline">\epsilon_{ij}</span> of randomness involved. To make this model easier to estimate, we assume that <span class="math inline">\epsilon_{ij}</span> has a <a href="https://en.wikipedia.org/wiki/Gumbel_distribution">Gumbel</a><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> distribution.</p>
+<p>Under this model, the probability that individual <span class="math inline">i</span> chooses alternative <span class="math inline">j</span> from a choice set <span class="math inline">C_i</span> is: <span class="math display">
+P_{ij} = \frac{\exp(\mu_{ij})}{\sum_{k \in C_i} \exp(\mu_{ik})}
+</span> This is the standard multinomial logit.</p>
+<p>Now, suppose we have a dataset where each individual <span class="math inline">i</span> has made a choice <span class="math inline">y_i</span> from their choice set <span class="math inline">C_i</span>. The likelihood of observing this dataset under the multinomial logit model is: <span class="math display">
+L = \prod_i P_{iy_i} = \prod_i \frac{\exp(\mu_{iy_i})}{\sum_{k \in C_i} \exp(\mu_{ik})}
+</span> The likelihood is the product of the choice probabilities for each individual’s observed choice <span class="math inline">y_i</span>. We can estimate the parameters of the utility function <span class="math inline">\mu_{ij}</span> by maximizing this likelihood function (or, more commonly, the log-likelihood). This is how the single best choice data is naturally incorporated into the likelihood function. Each observation contributes a term to the likelihood based on the probability of the chosen “best” alternative under the model.</p>
+<p>While we can (and will) push the basic logit model of this further to include respondent and choice level covariates, multilevel components, and other improvements, let’s think about the pressures of gathering data here for a moment, since that’ll motivate the desire for something like MaxDiff.</p>
+<p>To estimate this, we gather respondents and ask them to choose their favorite option amongst a given choice set. As a way to control the difficulty of making a choice while still gathering enough data, we can limit the size of the set (choose the best of 10 items, instead of 20), and repeat the choice task.</p>
+<p>Getting respondents and getting them to stick through a bunch of choice tasks is hard though, and it’s only natural to wonder: can we extract more with each choice set? One option would be to ask the respondents to rank ALL the options at once, but if you have a large choice set that sounds exhausting.</p>
+<p>What if we asked people to choose their best and worst choices each time? After all, people might not have strong preferences amongst the middling 18 chocolate bars, but the best and worst seem more memorable, and that’s only 1 more choice.</p>
+<p>And now, (stepping into the MaxDiff trap to show its allure, if you will), what if we don’t want to entirely change up our likelihood to handle the new rich source of data? What if handling ties sounds awful? Instead, what if we just treat the worsts as the opposite of the bests, which makes a sort of sense, and simplifies the likelihood one hell of a lot:</p>
+<p><span class="math display">
+U_{ij}^W = -U_{ij}^B = -(\mu_{ij} + \epsilon_{ij})
+</span></p>
+<p>Under this assumption, the probability of individual <span class="math inline">i</span> choosing alternative <span class="math inline">j</span> as the worst is: <span class="math display">
+P_{ij}^W = \frac{\exp(-\mu_{ij})}{\sum_{k \in C_i} \exp(-\mu_{ik})}
+</span></p>
+<p>… Now we’ve stepped in it, and Jimmy is mad at us.</p>
+<section id="psycologically-incoherent" class="level2">
+<h2 class="anchored" data-anchor-id="psycologically-incoherent">Psycologically Incoherent</h2>
+<p>What I’ve introduced is the core of the MaxDiff formulation of discrete choice, before bells and whistles are introduced. This has some deep problems though; let’s start with the “psychological” ones. Human decisionmaking is an incredibly complex, not always logical process, and we’ll always be losing significant fidelity in boiling it down into a model. Here though, I’ll focus on explaining a handful of breakdowns in the relationship between reality and the world of our models that are particularly harmful.</p>
+<p>First, let’s talk about <strong>symmetry</strong>. With the MaxDiff likelihood above, we’re treating the worst as equal and opposite to the best. For example, though, I don’t like Joe Biden as much as I dislike Trump<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. I really really like the best pizza in Brookyln, but New York pizza is all New York pizza, it only gets so bad. This might be a reasonable simplification in some rare cases, but it’s hard to argue that baking this into our model faithfully mirrors reality.</p>
+<p>Also, we’re not only asking them to be symmetric, we’re sort of conjoining the best and worst choice, asking them to share the <strong>same utility scale</strong>. In other words, the factors that make an alternative more attractive for the best choice are assumed to make it equally less attractive for the worst choice. An easy example is something like health risks- “that sushi place gave me food poisoning” is very relevant to my choice of worst restaurant, but the moment I have to think about food safety, a restaurant isn’t really anywhere relevant on the “best” side of the spectrum for me. Again, you can probably think of a case where this is a fine approximation, but in an ideal world, we won’t force ourselves to weld our notions of best to our notions of worst.</p>
+<p>Finally, the <strong>error variances</strong> being treated as the same should feel pretty strange. I’m much, much more consistent in my selection of “bests” than “worsts”- why would I spent a bunch of time deciding which opinion of 20 is the absolute worst and which is just 19th worst? People tend to be much less consistent, and frankly much less engaged, with their worst choices. Why would we bake this into our model?</p>
+<p>Putting this all together, The simplification in estimation that comes with MaxDiff also leaks into how the model “sees” the decision maker, and it meaningfully distorts the map in a way that does not reflect the territory.</p>
+</section>
+<section id="mathmatically-incorrect" class="level2">
+<h2 class="anchored" data-anchor-id="mathmatically-incorrect">Mathmatically Incorrect</h2>
+<p>Beyond calling the model psychologically incoherent, Savage also says the model is mathematically incorrect. This feels like a slightly stronger insult, and indeed it is, in the sense that the model is failing on its own terms.</p>
+<p>How? Well, we’ve explicitly laid out a model with Gumby errors:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="imgs/gumby_distribution.webp" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Wait, no sorry sorry<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. we’ve laid out a model with Gumbel errors <span class="math inline">\epsilon_{ij}</span>. the PDF is plotted below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="imgs/Gumbel-Density.svg.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Here’s where the trouble starts: like we discussed above, the MaxDiff model forcibly inserts an element of symmetry into the error distributions of the choices. However, as you probably already noticed, the <del>Gumby</del> Gumbel distribution is not a symmetric distribution! This is fine in the case where we’re just reasoning about the best choice, but even on it’s own terms the MaxDiff formulation doesn’t quite make sense.</p>
+</section>
+</section>
+<section id="the-defects-are-not-just-theoretical-or-cosmetic-an-illustration" class="level1">
+<h1>The defects are not just theoretical or cosmetic: an illustration</h1>
+<p>So I’ve shown some ways I claim that the MaxDiff model of discrete choice falls short, but how much do they really matter? As someone with an appreciation for the <a href="https://www.cambridge.org/core/books/foundations-of-agnostic-statistics/684756357E7E9B3DFF0A8157FB2DCECA">agnostic perspective on statistical modeling</a> , I think it’s important to not only show that there are theoretical senses in which a model might be flawed, but further prove that these technical blemishes harm model performance on metrics we care about.</p>
+<p>To do this, let’s generate some synthetic data, and fit both the best-choice and MaxDiff models to it. For this section, I’ll essentially be starting from Jim Savage’s best choice model <a href="https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html">here</a>, and then add in the “worst choice as negative best choice” logic afterwards.</p>
+<p>Let’s start with the synthetic data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyverse' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tibble' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'readr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'purrr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'dplyr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'stringr' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'forcats' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'lubridate' was built under R version 4.2.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.3     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.4.3     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">605</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, note that this code is just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># although with a more real-world feeling number of respondents and</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># and total choices. If this is taking uncomfortably long, feel free to scale</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># down I, the results should reproduce just fine.</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of individuals</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>I <span class="ot">&lt;-</span> <span class="dv">80</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of tasks per individual</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>Tasks <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of choices per task</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>J <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Dimension of covariate matrix</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Dimension of demographic matrix</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>P2 <span class="ot">&lt;-</span> <span class="dv">6</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co"># demographic matrix</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(I<span class="sc">*</span>P2), I, P2)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Loading matrix</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>Gamma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(P<span class="sc">*</span>P2), P, P2)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Show W * t(Gamma) to make sure it looks right</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>W <span class="sc">%*%</span> <span class="fu">t</span>(Gamma)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             [,1]         [,2]        [,3]        [,4]         [,5]
+ [1,] -0.20118871  9.206073052 -4.90732660  1.22570695  0.254437432
+ [2,]  2.05653571  4.632417586 -0.83071218  3.66072904 -3.113028068
+ [3,]  2.83488119  0.748930555  1.82887602  3.12793312 -3.243019500
+ [4,]  1.83951600  1.506277454 -0.02852955  2.78125877 -0.094713376
+ [5,] -1.47773034 -1.148103261  0.27733769 -0.29107622  2.234426701
+ [6,] -1.01930073  4.736293756  0.16251167  3.20195420 -1.278667324
+ [7,]  3.23890889  4.195001408  0.81494632  2.39546137  0.721627716
+ [8,]  0.98337054 -0.685904230  0.72839847 -0.12196762  1.603084902
+ [9,] -5.58702058 -4.985870599 -1.15600468 -5.80518294  1.078758984
+[10,] -0.12772996  4.045428596 -0.64621205  2.66231433 -0.453288090
+[11,]  1.67727639  3.990616250 -1.84679962  2.66606849 -2.084772759
+[12,]  4.68883604  3.782109906  1.99418151  6.13183147 -2.872940462
+[13,] -0.74161811 -0.004481844  2.16725774  0.82550310 -0.783562046
+[14,]  2.75804116  0.411851572 -2.46194289  0.01416128 -0.607472300
+[15,] -0.86038783 -1.050135664 -2.40537750 -5.16668579  4.874610800
+[16,]  1.87868192 -5.322296592  1.09344861 -1.14185839  0.415905110
+[17,]  3.31912590  3.240838481 -4.24212119 -5.27697738  1.916184515
+[18,]  2.30579752 -2.219583585  0.55727158 -1.43915537 -0.095504533
+[19,] -3.01579820  5.030730668 -2.47446388  2.18053398 -1.289145628
+[20,]  0.31890145 -1.568856272 -1.35724354 -2.05476813  0.593944809
+[21,] -1.38337750  4.009637747 -1.31152169  2.12814760 -2.068449813
+[22,]  2.10599703  0.741299941 -0.40215814  6.97264816 -0.851457242
+[23,] -4.09184154 -3.596758737  1.21672625 -0.10505207  0.001259287
+[24,]  3.98759920 -0.826613407  1.72760181 -0.54649916 -0.821299186
+[25,] -1.37694568  0.202248088 -0.16417314 -2.11722741 -0.307164553
+[26,] -1.96647925  0.798602885  1.38003402  0.61128280  1.429625243
+[27,]  3.77346541  2.429590084 -0.89749203 -0.14947217  2.226512977
+[28,] -0.78482735  0.309900696 -2.32185749  0.56236182  1.283895024
+[29,] -0.95309693  3.037345380 -0.06805727 -1.63608860  1.227206485
+[30,] -3.75884594  1.842268124 -0.72247887  0.10465034  1.043169577
+[31,]  0.40196027  4.772795840 -1.80336705  1.89032656 -1.163826480
+[32,]  6.82226750 -1.146676762  3.24935556  8.13724245  0.304597169
+[33,]  1.36322828 -4.788374158  1.74625474  0.05689724  1.423752628
+[34,]  0.27299172 -4.673575681  0.21701797 -0.33225904  3.709737394
+[35,]  0.78855411 -0.901487822  0.35593230 -0.79318865 -0.234454091
+[36,] -0.48075546  4.396496065 -2.45061007  5.44342737 -0.620959048
+[37,] -2.67949832 -0.951131292 -1.63839248 -2.30478808 -0.715546093
+[38,] -1.82420627 -2.418782252 -0.93394743 -8.12095945  0.532170191
+[39,]  1.00213859  4.571469780 -2.53124532 -1.59340532 -0.858448941
+[40,]  4.45328543  0.256618316  0.06535792 -4.86891777 -0.478664300
+[41,]  4.20997453  2.857547776 -1.18735432  2.85259332  0.314711433
+[42,] -2.65196666 -3.646116445 -1.12055997 -2.61031180  0.067688105
+[43,] -4.24204364  1.351733586 -2.50359734 -5.27268075 -1.053605604
+[44,]  0.17698378  7.177184996 -0.95017990  2.23745146 -0.979164767
+[45,]  2.67980933 -3.586581232  2.24363946 -2.55580145 -0.906960874
+[46,] -0.46634453  0.837549347  0.89102085  2.23528708 -1.122657648
+[47,]  0.14174222  1.656053979  0.60347706  2.87860268 -1.769602185
+[48,] -1.07286723  0.313642982  0.65907096  4.17026260  0.112078691
+[49,] -3.37056767 -7.491725045  2.39923938 -0.04276072 -1.097350065
+[50,]  1.59145087  1.184594926 -1.26881727 -1.19000315 -0.808550696
+[51,]  0.32283651 -6.198504814  2.93755321  4.42168324  2.970639152
+[52,] -1.48990688 -1.030299651  1.85091542  1.07071284  0.295165437
+[53,]  1.43990584 -1.645791442 -2.46091367 -2.00797024  2.165102199
+[54,]  0.81467721  8.076939072 -1.30790754  4.77434850 -1.794507411
+[55,] -1.23635398 -2.440382645  0.46859949 -2.14802892  1.291783062
+[56,] -4.62715454  1.360941241 -1.90619526 -3.27898558  0.417183414
+[57,]  5.09030732  2.866881220  0.38260145  3.34122459 -0.534314676
+[58,]  2.51686075 -3.750962813  1.88876030  0.86903933  0.689155494
+[59,]  1.79827930 -1.034860719 -0.87670541  0.31767731 -0.232214738
+[60,]  1.78043853  2.754380651 -2.98034776  1.96841301  1.521271155
+[61,]  0.04377856 -2.880988673  2.45856925  2.42083372 -0.373365567
+[62,]  3.97985874 -1.377704533 -0.54794250 -0.53264529  1.478460932
+[63,]  3.43424011  1.534815942 -0.05649607 -0.56337438 -0.026207161
+[64,]  5.98129695 -0.718527583 -0.13916191  3.32719892 -0.624592042
+[65,] -5.65919839 -2.388927731 -3.92200749 -8.54732128  0.965253852
+[66,] -5.99266586 -1.248456826  2.87381371 -0.36305725 -0.192917735
+[67,]  3.25549453  1.395395786 -1.48563964  0.60620884 -1.336586895
+[68,] -1.99372894  5.907598263 -2.47831840 -1.19291803  0.790261502
+[69,] -0.62132786 -1.463882316  0.64427566  0.29353733 -0.984609681
+[70,] -2.26404826  2.253721607 -2.18270181 -1.02876139 -0.339199078
+[71,] -3.75988963  3.042170189 -2.23001256  1.19739044 -0.267936148
+[72,]  2.52111946  0.205515079  2.55689332  1.40422124  1.949964744
+[73,] -0.77885843  5.535097092 -1.02356595  4.45000878  1.263320091
+[74,]  0.46194122  3.595764206  0.21574470  0.48140472 -1.310484353
+[75,] -5.63290291 -0.997444665 -2.19180942 -3.46642763  1.633666362
+[76,]  3.33263348  0.820386748  0.13572053  0.33299016 -1.095472101
+[77,] -1.39625957 -1.146174208 -2.44473084 -2.04755146  4.122744791
+[78,]  2.06166374  3.626179001 -0.16007591 -1.45219574  0.932864237
+[79,]  0.47088093 -4.319923649  0.77696144 -1.59444598  0.878305916
+[80,]  0.91387892  2.691910546 -1.13168599  3.36307638  0.135868236</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation of decisionmaker random slopes</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(P<span class="sc">*</span>(P<span class="sc">+</span><span class="dv">2</span>)), P<span class="sc">+</span><span class="dv">2</span>, P))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Scale of decisionmaker random slopes</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>tau <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">rnorm</span>(P, <span class="dv">0</span>, .<span class="dv">5</span>))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Covariance matrix of decisionmaker random slopes</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">diag</span>(tau) <span class="sc">%*%</span> Omega <span class="sc">%*%</span> <span class="fu">diag</span>(tau)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Centers of random slopes</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(P)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Individual slopes</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>beta_i <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(I, beta, Sigma) <span class="sc">+</span> W <span class="sc">%*%</span> <span class="fu">t</span>(Gamma)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, quick plot to sanity check</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">as.data.frame</span>(beta_i))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create X -- let's make this a dummy matrix</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, Tasks<span class="sc">*</span>I<span class="sc">*</span>J<span class="sc">*</span>P, <span class="at">replace =</span> T), Tasks<span class="sc">*</span>I<span class="sc">*</span>J, P)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Each of the rows in this matrix correspond to a choice presented to a given individual</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># in a given task</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>indexes <span class="ot">&lt;-</span> <span class="fu">crossing</span>(<span class="at">individual =</span> <span class="dv">1</span><span class="sc">:</span>I, <span class="at">task =</span> <span class="dv">1</span><span class="sc">:</span>Tasks, <span class="at">option =</span> <span class="dv">1</span><span class="sc">:</span>J) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">row =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>While this simulation certainly isn’t exactly simple, let me pause to point something out something I’ve not done. I have not made any choices here that are designed to make MaxDiff look poor. Since we want to use a model of realistic complexity, this has simulated structure such that it’ll benefit from the random coefficients formulation I’ll use in a moment. Similarly, this has load-bearing covariates at both the individual and choice level, since we would almost always have those in the real world. But the core utility function we’ve created for respondents boils down to simulating data under the assumptions of the logit choice model we’ve been discussing all along.</p>
+</section>
+<section id="alternative-1-rank-ordered-logits-with-connected-graphs-of-choices" class="level1">
+<h1>Alternative #1: rank-ordered logits with connected graphs of choices</h1>
+</section>
+<section id="alternative-2-a-backup-plan--rank-ordered-logits-with-ties" class="level1">
+<h1>Alternative #2: a backup plan- rank-ordered logits with ties</h1>
+</section>
+<section id="stepping-back-the-utility-of-discrete-choice-more-broadly" class="level1">
+<h1>Stepping Back: the utility of discrete choice more broadly</h1>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The smiley face is a threat: it’s there to make sure MaxDiff stays down :-D<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>If you want more of an in-depth introduction, here are some resources I’d reccomend. First, Jim Savage’s <a href="https://khakieconomics.github.io/2019/03/17/Logit-models-of-discrete-choice.html">blog post series</a> is great, and does a fantastic job of explaining how our assumptions about choice making map onto the math. I also benefitted from reading Glasgow’s <a href="https://www.cambridge.org/core/elements/abs/interpreting-discrete-choice-models/676EC2C0F19A3B6D932E12CC612872BC">Interpreting Discrete Choice Models</a>, which builds up the basics of choice models a bit more slowly. Finally, if you want something that goes much more in detail, Kenneth Train’s <a href="https://eml.berkeley.edu/books/choice2.html">Discrete Choice Models with Simulation</a> goes into great mathmatical detail about the models.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>I won’t rehash more subtle implications of this basic model here; see the footnote above for references that explore the mind of this <em>Homo Economicus</em> more in depth. Instead, I’ll mostly pull up assumptions as they become relevant for discussing MaxDiff.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Other options are possible, but less common, and would take us too far afield, so I’ll skip explaining the choice of Gumbel versus other distributions here.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>President Biden is great, it’s just hard to compete with the comically malignant and incompetent by being solid and stabilizing.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Unlike the blog post about left-handed kangaroos drinking fosters I’m working on, this post was not primarily motivated by the urge to ask DALL-E to create this.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
+  author = {Timm, Andy},
+  title = {Better Discrete Choice Modeling Through Rank Ordered Logits},
+  date = {2024-06-09},
+  url = {https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.knit.html},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas" role="listitem">
+Timm, Andy. 2024. <span>“Better Discrete Choice Modeling Through Rank
+Ordered Logits.”</span> June 9, 2024. <a href="https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.knit.html">https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.knit.html</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
