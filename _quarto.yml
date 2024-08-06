@@ -19,8 +19,9 @@ website:
     right:
       - href: index.qmd
         text: About
-      - href: projects.qmd
-        text: Projects
+#      - href: projects.qmd Want to replace this with a better formulation;
+# so commenting out for now
+#        text: Projects
       - href: software.qmd
       - href: blog.qmd
         text: Rarely Updated Blog
