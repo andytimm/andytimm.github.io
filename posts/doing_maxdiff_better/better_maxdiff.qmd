@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Better discrete choice modeling through rank ordered logit
+title: Better discrete choice modeling through the rank ordered logit
 subtitle: Or- a mathematically correct model of a psychologically coherent concept
 date: 2024-08-06
 image: imgs/gumby_distribution.webp

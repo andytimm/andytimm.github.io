@@ -9,7 +9,7 @@
 <meta name="author" content="Andy Timm">
 <meta name="dcterms.date" content="2024-08-06">
 
-<title>Andy Timm - Better discrete choice modeling through rank ordered logit</title>
+<title>Andy Timm - Better discrete choice modeling through the rank ordered logit</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -116,11 +116,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Andy Timm - Better discrete choice modeling through rank ordered logit">
+<meta property="og:title" content="Andy Timm - Better discrete choice modeling through the rank ordered logit">
 <meta property="og:description" content="Or- a mathematically correct model of a psychologically coherent concept">
 <meta property="og:image" content="https://andytimm.github.io/posts/doing_maxdiff_better/imgs/gumby_distribution.webp">
 <meta property="og:site-name" content="Andy Timm">
-<meta name="twitter:title" content="Andy Timm - Better discrete choice modeling through rank ordered logit">
+<meta name="twitter:title" content="Andy Timm - Better discrete choice modeling through the rank ordered logit">
 <meta name="twitter:description" content="Or- a mathematically correct model of a psychologically coherent concept">
 <meta name="twitter:image" content="https://andytimm.github.io/posts/doing_maxdiff_better/imgs/gumby_distribution.webp">
 <meta name="twitter:creator" content="@andy_timm">
@@ -150,10 +150,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../projects.html" rel="" target="">
- <span class="menu-text">Projects</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="../../software.html" rel="" target="">
  <span class="menu-text">Software</span></a>
   </li>  
@@ -172,7 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Better discrete choice modeling through rank ordered logit</h1>
+      <h1 class="title">Better discrete choice modeling through the rank ordered logit</h1>
             <p class="subtitle lead">Or- a mathematically correct model of a psychologically coherent concept</p>
                                 <div class="quarto-categories">
                 <div class="quarto-category">discrete choice</div>
@@ -3331,7 +3327,7 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <p><img src="better_maxdiff_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>So roughly from the plot: ROL without unknowns &gt; ROL with full marginal likelihood for unknowns &gt; ROL with Efron Approximation for Unknowns &gt; MaxDiff. Let’s sanity check that by looking at RMSEs.</p>
+<p>So roughly from the plot: ROL without unknowns &gt; ROL with full marginal likelihood for unknowns ~ ROL with Efron Approximation for Unknowns &gt; MaxDiff. Let’s sanity check that by looking at RMSEs.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(rmse_comparison)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -3386,14 +3382,15 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </ol>
 </section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
   author = {Timm, Andy},
-  title = {Better Discrete Choice Modeling Through Rank Ordered Logit},
+  title = {Better Discrete Choice Modeling Through the Rank Ordered
+    Logit},
   date = {2024-08-06},
   url = {https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas" role="listitem">
-Timm, Andy. 2024. <span>“Better Discrete Choice Modeling Through Rank
-Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html">https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html</a>.
+Timm, Andy. 2024. <span>“Better Discrete Choice Modeling Through the
+Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html">https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {

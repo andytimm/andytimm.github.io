@@ -9,15 +9,14 @@ resources:
 ::: column-page-inset-left
 # About
 
-I'm currently a Senior Data Scientist at [Grow Progress](https://growprogress.ai/), where I build our platform for fast, cost-effective, and easily interpretable message testing at scale. Before this, I was a Manager of Data Science at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and persuadability modeling, helping our corporate and political clients to better understand the impact of their advertising campaigns and optimize their targeting.
+I'm a Senior Data Scientist at [Grow Progress](https://growprogress.ai/), where I build our platform for fast, cost-effective, and easily interpretable message testing at scale. Before this, I was a Manager of Data Science at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and persuadability modeling.
 
-I like leveraging modern statistical and machine learning tools to more effectively answer social science flavored questions. Some of my substantive interests include the increasing prominence of white identity in American politics, and the extent to which voting is habit forming.
+Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference. Examples
+of each of these can be found on my blog.
 
 Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.
 
-My aim with this space is to show off some of my larger side projects, especially those that would benefit from some expository writing. I'll also include occasional career updates.
-
-This new website is still very much a WIP. Thanks to [Drew Dimmery](https://ddimmery.com/) for starting point for this and post on how to make a quick Quarto website!
+This site showcases some of my larger side projects, particularly those benefiting from expository writing.
 
 ```{=html}
 <a class="btn btn-outline-dark", href="https://www.linkedin.com/in/andrew-timm-b70857a2/" target="_blank" rel="noopener noreferrer">
@@ -40,6 +39,6 @@ This new website is still very much a WIP. Thanks to [Drew Dimmery](https://ddim
 :::
 
 ::: {.column-margin .column-container}
-![My Bookshelf as of January 2024. Hopefully more useful than squinting on zoom!](assets/jan2024-bookshelf.jpeg)
+![My Bookshelf as of January 2024. Hopefully more useful than squinting on zoom!](assets/aug2024-bookshelf.jpeg)
 :::
 :::
