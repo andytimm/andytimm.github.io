@@ -5,14 +5,13 @@ resources:
     - "sept-2022-bookshelf.jpg"
 ---
 
-::: column-page-inset
-::: column-page-inset-left
+::: {.grid}
+::: {.g-col-12 .g-col-md-8}
 # About
 
 I'm a Senior Data Scientist at [Grow Progress](https://growprogress.ai/), where I build our platform for fast, cost-effective, and easily interpretable message testing at scale. Before this, I was a Manager of Data Science at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and persuadability modeling.
 
-Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference. Examples
-of each of these can be found on my blog.
+Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference. Examples of each of these can be found on my blog.
 
 Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.
 
@@ -27,18 +26,24 @@ This site showcases some of my larger side projects, particularly those benefiti
     <i class="bi bi-github" role='img' aria-label='Github'></i>
 </a>
 
+<a class="btn btn-outline-dark", href="https://bsky.app/profile/andytimm.bsky.social" target="_blank" rel="noopener noreferrer">
+    <img src="assets/bluesky-1.svg" alt="Bluesky" style="width: 20px; height: 20px; filter: brightness(0);">
+</a>
+
 <a class="btn btn-outline-dark", href="https://twitter.com/Andy_Timm" target="_blank" rel="noopener noreferrer">
     <i class="bi bi-twitter" role='img' aria-label='Twitter'></i>
 </a>
 
 <a class="btn btn-outline-dark", href="mailto:timmandrew1@gmail.com" target="_blank" rel="noopener noreferrer">
-    <i class="ai bi-envelope" role='img' aria-label='email'></i>
+    <i class="bi bi-envelope" role='img' aria-label='email'></i>
 </a>
 ```
-<br></br>
 :::
 
-::: {.column-margin .column-container}
-![My Bookshelf as of January 2024. Hopefully more useful than squinting on zoom!](assets/aug2024-bookshelf.jpeg)
+::: {.g-col-12 .g-col-md-4}
+<figure style="margin: 0;">
+  <img src="assets/aug2024-bookshelf.jpeg" alt="My Bookshelf as of January 2024" style="max-height: 800px; width: auto; display: block; max-width: 100%;">
+  <figcaption>My Bookshelf as of January 2024</figcaption>
+</figure>
 :::
 :::

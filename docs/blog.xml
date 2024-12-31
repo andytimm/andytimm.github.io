@@ -20,6 +20,7 @@
 
 
 
+
 <p>Now that the cycle is over, and I have a bit more time to write, I want to unpack some interesting (also, <em>frustrating</em>) moments in polling that occurred this cycle.</p>
 <p>Let’s start with one that occupied pollster twitter for several days: are we all dirty herders? Or are we just increasingly weighting on quite predictive things like party or 2020 vote choice? Moreover, why do these look similar to so many folks, and what could pollsters have done to avoid this misconception?</p>
 <p>Here’s a rough outline:</p>
@@ -61,7 +62,7 @@
 <li id="fn2"><p>Possibly adjusted to be wider by a design effect.↩︎</p></li>
 <li id="fn3"><p>Note that this is the MoE on the difference between the two (higher than just the MoE on 1 proportion), and that I’m not adjusting for a design effect here. The specifics might make this a bit wider or narrower, but I’ll be more precise in a moment when it actually matters.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
   author = {Timm, Andy},
   title = {A {Tale} of {Two} {Design} {Effects-}},
   date = {2024-11-27},
