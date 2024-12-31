@@ -2,10 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
-      "/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html",
-      "/posts/a_tale_of_two_design_effects/two_design_effects.html",
       "/posts/doing_maxdiff_better/better_maxdiff.html",
-      "/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html",
       "/posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html",
       "/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html",
       "/posts/Variational MRP Pt7/variational_mrp_pt7.html",
@@ -15,11 +12,6 @@
       "/posts/Variational MRP Pt3/variational_mrp_3.html",
       "/posts/Variational MRP Pt2/Variational_MRP_pt2.html",
       "/posts/Variational MRP Pt1/variational_mrp_pt1.html",
-      "/posts/BART VI/2020-03-06-BART-vi.html",
-      "/posts/Convention Model/2019-07-13-convention-model.html",
-      "/posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html",
-      "/posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html",
-      "/posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html",
       "/posts/Race Models Pt 1/race_models_part1.html"
     ]
   }

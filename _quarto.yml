@@ -7,6 +7,7 @@ website:
   description: "Personal website of Andy Timm"
   site-url: https://andytimm.github.io
   repo-url: https://github.com/andytimm/andytimm.github.io
+  draft-mode: gone
   open-graph: true
  # favicon: favicon.png
   twitter-card: 

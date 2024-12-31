@@ -1,7 +1,7 @@
 ---
 title: "Rarely Updated Blog"
 listing:
-  contents: posts
+  contents: posts/**/*.qmd  # Only match actual posts, not metadata files
   sort: "date desc"
   type: default
   categories: true
