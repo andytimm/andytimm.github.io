@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
 <meta name="dcterms.date" content="2024-08-06">
 
-<title>Andy Timm - Better discrete choice modeling through the rank ordered logit</title>
+<title>Better discrete choice modeling through the rank ordered logit – Andy Timm</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -24,7 +24,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -35,7 +35,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -71,17 +71,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-05fe91a66cf75bbbb8c9664867fe5124.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-82348daeeb1715b674cd594e670d93f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -90,6 +96,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -98,7 +105,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
-  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
  var macros = [];
@@ -113,14 +121,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    });
 }}});
   </script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Andy Timm - Better discrete choice modeling through the rank ordered logit">
+<meta property="og:title" content="Better discrete choice modeling through the rank ordered logit – Andy Timm">
 <meta property="og:description" content="Or- a mathematically correct model of a psychologically coherent concept">
 <meta property="og:image" content="https://andytimm.github.io/posts/doing_maxdiff_better/imgs/gumby_distribution.webp">
-<meta property="og:site-name" content="Andy Timm">
-<meta name="twitter:title" content="Andy Timm - Better discrete choice modeling through the rank ordered logit">
+<meta property="og:site_name" content="Andy Timm">
+<meta name="twitter:title" content="Better discrete choice modeling through the rank ordered logit – Andy Timm">
 <meta name="twitter:description" content="Or- a mathematically correct model of a psychologically coherent concept">
 <meta name="twitter:image" content="https://andytimm.github.io/posts/doing_maxdiff_better/imgs/gumby_distribution.webp">
 <meta name="twitter:creator" content="@andy_timm">
@@ -131,36 +166,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andy Timm</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../software.html" rel="" target="">
- <span class="menu-text">Software</span></a>
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../blog.html" rel="" target="">
- <span class="menu-text">Rarely Updated Blog</span></a>
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Rarely Updated Blog</span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -226,6 +261,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#evaluating-rol-with-unknown-middle-preferences-against-maxdiff-and-rol" id="toc-evaluating-rol-with-unknown-middle-preferences-against-maxdiff-and-rol" class="nav-link" data-scroll-target="#evaluating-rol-with-unknown-middle-preferences-against-maxdiff-and-rol">Evaluating ROL with Unknown Middle Preferences against MaxDiff and ROL</a></li>
   </ul></li>
   <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
+  <li><a href="#bluesky-comments" id="toc-bluesky-comments" class="nav-link" data-scroll-target="#bluesky-comments">Bluesky Comments</a></li>
   </ul>
 </nav>
     </div>
@@ -235,9 +271,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
+
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="imgs/jimmy_dunk.png" class="img-fluid figure-img"></p>
+<p><img src="imgs/jimmy_dunk.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 <p>Jim Savage calls the MaxDiff model of discrete choice a “mathematically incorrect model of a psychologically incoherent concept”<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
@@ -298,14 +335,14 @@ P_{ij}^W = \frac{\exp(-\mu_{ij})}{\sum_{k \in C_i} \exp(-\mu_{ik})}
 <p>How? Well, we’ve explicitly laid out a model with Gumby errors:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="imgs/gumby_distribution.webp" class="img-fluid figure-img"></p>
+<p><img src="imgs/gumby_distribution.webp" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 <p>Wait, no sorry sorry<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. we’ve laid out a model with Gumbel errors <span class="math inline">\epsilon_{ij}</span>. As a reminder, the Gumbel distribution is chosen for its mathematical convenience, as it leads to a closed-form expression for the choice probabilities in the logit model. the PDF is plotted below:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="imgs/Gumbel-Density.svg.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Probability density function of the Gumbel distribution. Source: Wikimedia Commons, https://en.wikipedia.org/wiki/Gumbel_distribution</figcaption>
+<figcaption>Probability density function of the Gumbel distribution. Source: Wikimedia Commons, https://en.wikipedia.org/wiki/Gumbel_distribution</figcaption>
 </figure>
 </div>
 <p>Here’s where the trouble starts: like we discussed above, the MaxDiff model forcibly inserts an element of symmetry into the error distributions of the choices. However, as you probably already noticed, the <del>Gumby</del> Gumbel distribution is not a symmetric distribution! This is fine in the case where we’re just reasoning about the best choice, but even on its own terms the MaxDiff formulation doesn’t quite make sense.</p>
@@ -1263,7 +1300,11 @@ The following object is masked from 'package:utils':
 <span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, quick plot to sanity check</span></span>
 <span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">as.data.frame</span>(beta_i))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create X -- let's make this a dummy matrix</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, Tasks<span class="sc">*</span>I<span class="sc">*</span>J<span class="sc">*</span>P, <span class="at">replace =</span> T), Tasks<span class="sc">*</span>I<span class="sc">*</span>J, P)</span>
@@ -1476,12 +1517,12 @@ The following object is masked from 'package:utils':
 <span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>compiled_best_choice_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> best)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
-'C:/Users/timma/Documents/.R/Makevars.win'</code></pre>
+'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>compiled_bw_choice_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> best_worst)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
-'C:/Users/timma/Documents/.R/Makevars.win'</code></pre>
+'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>best_choice_fit <span class="ot">&lt;-</span> <span class="fu">sampling</span>(compiled_best_choice_model, </span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">data =</span> data_list_best_choice, </span>
@@ -1567,7 +1608,11 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Dataset) <span class="sc">+</span></span>
 <span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>To be clear, what’s plotted here are respondent level utilities for each choice. Concerningly, it doesn’t even seem clear that the best-worst choice model performs better here despite the extra data. The fact that we have to do this at all doesn’t bode well, but let’s compare the RMSE’s of the predictions versus the (simulated and thus known) truth to confirm:</p>
@@ -2141,7 +2186,11 @@ P(r) = \prod_{j=1}^{J-1} \frac{\exp(\mu_{ij})}{\sum_{k=j}^J \exp(\mu_{ik})}
 <span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, quick plot to sanity check</span></span>
 <span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">as.data.frame</span>(beta_i))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>bibd <span class="ot">&lt;-</span> <span class="fu">find.BIB</span>(<span class="at">trt =</span> Tasks, <span class="at">b =</span> I<span class="sc">*</span>Tasks, <span class="at">k =</span> J)</span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -2313,7 +2362,7 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>compiled_rol_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> ranked)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
-'C:/Users/timma/Documents/.R/Makevars.win'</code></pre>
+'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>rol_fit <span class="ot">&lt;-</span> <span class="fu">sampling</span>(compiled_rol_model,</span>
 <span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">data =</span> data_list_ranked_rcl,</span>
@@ -2393,7 +2442,11 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Dataset) <span class="sc">+</span></span>
 <span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>At a squint, rank-ordered logit &gt; best choice &gt; MaxDiff as I’ve argued. Notice though that unlike the MaxDiff model, both best choice and rank-ordered logit look unbiased; the ROL model simply seems more efficient. Let’s check the RMSE to confirm:</p>
@@ -2890,7 +2943,11 @@ L(\textcolor{blue}{B}&gt;\textcolor{green}{S},\textcolor{yellow}{R}&gt;\textcolo
 <span id="cb85-16"><a href="#cb85-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, quick plot to sanity check</span></span>
 <span id="cb85-17"><a href="#cb85-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">as.data.frame</span>(beta_i))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 <div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create X -- let's make this a dummy matrix</span></span>
 <span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, Tasks<span class="sc">*</span>I<span class="sc">*</span>J<span class="sc">*</span>P, <span class="at">replace =</span> T), Tasks<span class="sc">*</span>I<span class="sc">*</span>J, P)</span>
@@ -3170,12 +3227,12 @@ L(\mu) = \prod_{i=1}^N \frac{\exp(\mu_{ij})}{\sum_{j \in C_i} \exp(\mu_{ij})} \c
 <span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>compiled_rol_ties_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> rol_with_unknown_middle_options)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
-'C:/Users/timma/Documents/.R/Makevars.win'</code></pre>
+'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>compiled_efron_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> efron_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
-'C:/Users/timma/Documents/.R/Makevars.win'</code></pre>
+'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>compiled_rol_model <span class="ot">&lt;-</span> <span class="fu">stan_model</span>(<span class="at">model_code =</span> ranked)</span>
 <span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -3324,7 +3381,11 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fourway_comparison_plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="better_maxdiff_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>So roughly from the plot: ROL without unknowns &gt; ROL with full marginal likelihood for unknowns ~ ROL with Efron Approximation for Unknowns &gt; MaxDiff. Let’s sanity check that by looking at RMSEs.</p>
@@ -3357,6 +3418,12 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <p>In writing this post, I’ve aimed to both give intuition and concrete examples of models that I would’ve benefited from when I was initially trying to find alternatives to the MaxDiff formulation of discrete choice. My hope is gathering both the objections to MaxDiff and alternatives in one place can make it a bit easier for others to pivot to the better models available.</p>
 <p>There are plenty of ways you can extend what I’ve done in this post, and I don’t want to claim this is in any way some definitive model for discrete choice. Just to name a few- one could improve the priors in the models, design much more efficient graphs of options, compare the efficiency of connected graphs to ROL with unknowns for large choice sets via simulation, or even implement these models in something like <a href="https://blackjax-devs.github.io/blackjax/">Blackjax</a> with a Gibbs sampler to make them blazing fast. My primary goal here has been to show that the MaxDiff likelihood isn’t a great foundation for discrete choice.</p>
 <p>Thanks for reading!</p>
+</section>
+<section id="bluesky-comments" class="level1">
+<h1>Bluesky Comments</h1>
+<div class="bluesky-comments">
+
+</div>
 
 
 </section>
@@ -3380,7 +3447,7 @@ https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 <li id="fn13"><p>See the Allison/Christakis paper above for a more fleshed out version of this comparison. It’s very elegant, but I don’t think there’s a way to do that analogy justice without a massive detour in this post. Similarly, I’d love to walk through the reasoning that leads to the Efron approximation and how it compares to competitors, but this post is already pretty long.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn14"><p>I really appreciate <a href="https://myweb.uiowa.edu/pbreheny/7210/f15/notes/11-5.pdf">this set of slides</a> for pumping intuitions about different approaches to approximating the middle options. These <a href="https://public.websites.umich.edu/~yili/lect4notes.pdf">course notes</a> are also super helpful, especially if you want to see the Cox proportional hazards model discussed more in depth before you try to understand the tie handling in those terms. Finally of course, the <a href="https://www.jstor.org/stable/2286217">original paper</a> is great, but very very dense.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
   author = {Timm, Andy},
   title = {Better Discrete Choice Modeling Through the Rank Ordered
     Logit},
@@ -3427,18 +3494,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -3470,11 +3526,48 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/andytimm\.github\.io");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -3484,8 +3577,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -3497,7 +3599,129 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -3541,6 +3765,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -3566,6 +3791,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -3626,6 +3877,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

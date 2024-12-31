@@ -1728,3 +1728,8 @@ with a Gibbs sampler to make them blazing fast. My primary goal here has been
 to show that the MaxDiff likelihood isn't a great foundation for discrete choice.
 
 Thanks for reading!
+
+# Bluesky Comments
+
+::: {.bluesky-comments}
+:::

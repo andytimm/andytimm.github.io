@@ -19,19 +19,20 @@ to avoid this misconception?
 
 Here's a rough outline:
 
-1. Weighting **can** reduce variance (I'll show how), but some people interpreted low variability
-of 2024 vote choice estimates relative to polls' stated margins of error as
-a blindingly obvious sign of herding.
+1. Weighting can reduce variance (I'll show how), but some people interpreted low variability
+of 2024 vote choice estimates[^1] as a blindingly obvious sign of herding.
 2. The above misconception isn't terribly surprising, given how pervasively our industry tends to think
 of and communicate about variance and weighting in terms of Kish's design effect. I'll explain how
 Kish's design effect generally encodes an assumption about weighting increasing variance,
 and show an alternative design effect (Henry/Valliant) that does correctly get smaller when weighting
 should reduce variance.
-3. ...But any discussion of design effects that get *smaller* due to weighting need to grapple
-with the fact that empirically, **our MoE's are generally far too narrow, not too wide**. As Andrew
+3. ...But any discussion of design effects that get smaller due to weighting need to grapple
+with the fact that empirically, our MoE's are generally far too narrow, not too wide. As Andrew
 Gelman loves to say, take the stated MoE, and double it to get a realistic one. So
 to square that circle, I'll discuss about what each deff gets right and wrong,
 and sketch out about what more ambitious uncertainty quantification could look like.
+
+[^1]: Relative to the polls stated margin of error.
 
 More ambitiously, I'd like to use this post as a jumping off point to discuss the design based
 inference roots of the polling industry, and the tensions that perspective faces
@@ -39,6 +40,22 @@ as accuracy increasingly demands a more and more model based approach
 in the era of low responses rates and broad adoption of non-probability methods.
 
 # Weighting Can Reduce Variance
+
+Let's briefly lay out the argument I'm responding to here:
+
+1. Polls give us their margin of error[^2], so we should have a reasonable sense of the
+expected spread of estimates we should expect over lots of surveys. For example, a $N = 800$ poll should have roughly
+a +/-6pp margin of error on the difference between Harris and Trump's vote share[^3].
+2. In October, it felt like nearly all the battleground state polls showed the candidates
+within like 2.5pp and often even less.
+3. If we take the reported MoEs seriously, we should see about 20% of polls show differences larger than 3.8 points,
+and 5% should show differences larger than 6 points. If we take the reported MoEs, something has to be seriously fishy.
+
+[^2]: Possibly adjusted to be wider by a design effect.
+[^3]: Note that this is the MoE on the difference between the two (higher than just the MoE on 1 proportion), and that
+I'm not adjusting for a design effect here. The specifics might make this a bit
+wider or narrower, but I'll be more precise in a moment when it actually matters.
+
 
 # Why does that look like Herding?
 

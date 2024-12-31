@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Andy Timm - Rarely Updated Blog</title>
+<title>Rarely Updated Blog – Andy Timm</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -37,17 +37,23 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-05fe91a66cf75bbbb8c9664867fe5124.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-82348daeeb1715b674cd594e670d93f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -56,6 +62,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -92,7 +99,8 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
-  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
  var macros = [];
@@ -107,15 +115,42 @@ ul.task-list li input[type="checkbox"] {
    });
 }}});
   </script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="Andy Timm" href="blog.xml"><meta property="og:title" content="Andy Timm - Rarely Updated Blog">
+<link rel="alternate" type="application/rss+xml" title="Andy Timm" href="blog.xml" data-external="1"><meta property="og:title" content="Rarely Updated Blog – Andy Timm">
 <meta property="og:image" content="https://andytimm.github.io/posts/Variational MRP Pt4/images/importance-weights-preview.png">
-<meta property="og:site-name" content="Andy Timm">
+<meta property="og:site_name" content="Andy Timm">
 <meta property="og:image:height" content="102">
 <meta property="og:image:width" content="203">
-<meta name="twitter:title" content="Andy Timm - Rarely Updated Blog">
+<meta name="twitter:title" content="Rarely Updated Blog – Andy Timm">
 <meta name="twitter:image" content="https://andytimm.github.io/posts/Variational MRP Pt4/images/importance-weights-preview.png">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
@@ -128,35 +163,35 @@ ul.task-list li input[type="checkbox"] {
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Andy Timm</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./software.html" rel="" target="">
- <span class="menu-text">Software</span></a>
+    <a class="nav-link" href="./software.html"> 
+<span class="menu-text">Software</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./blog.html" rel="" target="" aria-current="page">
- <span class="menu-text">Rarely Updated Blog</span></a>
+    <a class="nav-link active" href="./blog.html" aria-current="page"> 
+<span class="menu-text">Rarely Updated Blog</span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -166,7 +201,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(17)</span></div><div class="category" data-category="BART">BART <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Bayes">Bayes <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Causal Inference">Causal Inference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Diagnostics">Diagnostics <span class="quarto-category-count">(1)</span></div><div class="category" data-category="From Old Website">From Old Website <span class="quarto-category-count">(6)</span></div><div class="category" data-category="MRP">MRP <span class="quarto-category-count">(8)</span></div><div class="category" data-category="Normalizing Flows">Normalizing Flows <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Stan">Stan <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Variational Inference">Variational Inference <span class="quarto-category-count">(7)</span></div><div class="category" data-category="causal inference">causal inference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="discrete choice">discrete choice <span class="quarto-category-count">(1)</span></div><div class="category" data-category="surveys">surveys <span class="quarto-category-count">(1)</span></div><div class="category" data-category="weighting">weighting <span class="quarto-category-count">(1)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(19)</span></div><div class="category" data-category="QkFSVA==">BART <span class="quarto-category-count">(2)</span></div><div class="category" data-category="QmF5ZXM=">Bayes <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Q2F1c2FsJTIwSW5mZXJlbmNl">Causal Inference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="RGlhZ25vc3RpY3M=">Diagnostics <span class="quarto-category-count">(1)</span></div><div class="category" data-category="RnJvbSUyME9sZCUyMFdlYnNpdGU=">From Old Website <span class="quarto-category-count">(6)</span></div><div class="category" data-category="TVJQ">MRP <span class="quarto-category-count">(8)</span></div><div class="category" data-category="TmF0ZSUyMFNpbHZlciUyMGdyaXBpbmc=">Nate Silver griping <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Tm9ybWFsaXppbmclMjBGbG93cw==">Normalizing Flows <span class="quarto-category-count">(1)</span></div><div class="category" data-category="U3Rhbg==">Stan <span class="quarto-category-count">(1)</span></div><div class="category" data-category="U3VydmV5JTIwV2VpZ2h0aW5n">Survey Weighting <span class="quarto-category-count">(1)</span></div><div class="category" data-category="VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U=">Variational Inference <span class="quarto-category-count">(7)</span></div><div class="category" data-category="Y2F1c2FsJTIwaW5mZXJlbmNl">causal inference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="ZGlzY3JldGUlMjBjaG9pY2U=">discrete choice <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cHJpb3Jz">priors <span class="quarto-category-count">(1)</span></div><div class="category" data-category="c3R1cGlkJTIwQmF5ZXNpYW4lMjBzdHVmZg==">stupid Bayesian stuff <span class="quarto-category-count">(1)</span></div><div class="category" data-category="c3VydmV5cw==">surveys <span class="quarto-category-count">(1)</span></div><div class="category" data-category="d2VpZ2h0aW5n">weighting <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -185,7 +220,9 @@ ul.task-list li input[type="checkbox"] {
   </div>
   
 
+
 </header>
+
 
 
 
@@ -193,59 +230,97 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1663462469255" data-listing-reading-time-sort="0">
+<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1663462469255">
 <div class="thumbnail">
-<p><a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external"></a></p><a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html">
 <h3 class="no-anchor listing-title">
+<a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external"></a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-
+<a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external"><section class="quarto-appendix-contents"><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents">https://creativecommons.org/licenses/by/4.0/</div></section><section class="quarto-appendix-contents"><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm,
+  author = {Andy Timm},
+  url = {https://andytimm.github.io/2018-04-10-race-models-pt1.html},
+ …</code></pre><div class="quarto-appendix-secondary-label"></div><div id="ref-timm" class="csl-entry quarto-appendix-citeas"></div></div></section></a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html">
+<p><a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external"></a></p><a href="./posts/Race Models Pt 1/2018-04-10-race-models-pt1.html" class="no-external">
 <div class="listing-author">
 Andy Timm
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="discrete choice,Bayes" data-listing-date-sort="1722916800000" data-listing-file-modified-sort="1722983578445" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="64">
+<div class="quarto-post image-right" data-index="1" data-categories="U3VydmV5JTIwV2VpZ2h0aW5nJTJDTmF0ZSUyMFNpbHZlciUyMGdyaXBpbmc=" data-listing-date-sort="1732683600000" data-listing-file-modified-sort="1732764734576" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="487">
 <div class="thumbnail">
-<p><a href="./posts/doing_maxdiff_better/better_maxdiff.html"> <img src="./posts/doing_maxdiff_better/imgs/gumby_distribution.webp" class="thumbnail-image"> </a></p>
+<p><a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external"></a></p><a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/doing_maxdiff_better/better_maxdiff.html">
 <h3 class="no-anchor listing-title">
-Better discrete choice modeling through the rank ordered logit
+<a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external">A Tale of Two Design Effects-</a>
 </h3>
 <div class="listing-subtitle">
-Or- a mathematically correct model of a psychologically coherent concept
+<a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external">weighting, variance, and what margins of error should mean</a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('U3VydmV5JTIwV2VpZ2h0aW5n'); return false;">
+Survey Weighting
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('TmF0ZSUyMFNpbHZlciUyMGdyaXBpbmc='); return false;">
+Nate Silver griping
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external">Now that the cycle is over, and I have a bit more time to write, I want to unpack some interesting (also, <em>frustrating</em>) moments in polling that occurred this cycle.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/a_tale_of_two_design_effects/two_design_effects.html" class="no-external">
+<div class="listing-date">
+Nov 27, 2024
+</div>
+<div class="listing-author">
+Andy Timm
 </div>
 </a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="ZGlzY3JldGUlMjBjaG9pY2UlMkNCYXllcw==" data-listing-date-sort="1722916800000" data-listing-file-modified-sort="1735666143165" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="64" data-listing-word-count-sort="12787">
+<div class="thumbnail">
+<p><a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external"></a></p><a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external">
+<p><img loading="lazy" src="./posts/doing_maxdiff_better/imgs/gumby_distribution.webp" class="thumbnail-image"></p>
+</a><p><a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external">Better discrete choice modeling through the rank ordered logit</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external">Or- a mathematically correct model of a psychologically coherent concept</a>
+</div>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('discrete choice'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('ZGlzY3JldGUlMjBjaG9pY2U='); return false;">
 discrete choice
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Bayes'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('QmF5ZXM='); return false;">
 Bayes
 </div>
 </div>
-<a href="./posts/doing_maxdiff_better/better_maxdiff.html">
 <div class="listing-description">
-Jim Savage calls the MaxDiff model of discrete choice a “mathematically incorrect model of a psychologically incoherent concept”<sup>1</sup>.
+<a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external">Jim Savage calls the MaxDiff model of discrete choice a “mathematically incorrect model of a psychologically incoherent concept”<sup>1</sup>.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/doing_maxdiff_better/better_maxdiff.html">
+<a href="./posts/doing_maxdiff_better/better_maxdiff.html" class="no-external">
 <div class="listing-date">
 Aug 6, 2024
 </div>
@@ -255,32 +330,66 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="Causal Inference" data-listing-date-sort="1702875600000" data-listing-file-modified-sort="1702937391106" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="66">
+<div class="quarto-post image-right" data-index="3" data-categories="cHJpb3JzJTJDc3R1cGlkJTIwQmF5ZXNpYW4lMjBzdHVmZg==" data-listing-date-sort="1707195600000" data-listing-file-modified-sort="1707333689087" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1396">
 <div class="thumbnail">
-<p><a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html"> <img src="./posts/Is Voting Habit Forming 2/images/fig_3.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external"></a></p><a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external">
+<p><img loading="lazy" src="./posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp" class="thumbnail-image"></p>
+</a><p><a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html">
 <h3 class="no-anchor listing-title">
-Who Forms Voting Habits?
+<a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external">Kangaroos, Foster’s, and E.T. Jaynes</a>
 </h3>
 <div class="listing-subtitle">
-Evidence from Florida
+<a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external">Also maybe some thoughts on priors</a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('cHJpb3Jz'); return false;">
+priors
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('c3R1cGlkJTIwQmF5ZXNpYW4lMjBzdHVmZg=='); return false;">
+stupid Bayesian stuff
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external">Ahead of starting a new gig next week (wooo!), I was reviewing a bit about multilevel models, and came across this fascinating footnote in Richard McElreath’s Statistical…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html" class="no-external">
+<div class="listing-date">
+Feb 6, 2024
+</div>
+<div class="listing-author">
+Andy Timm
 </div>
 </a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="Q2F1c2FsJTIwSW5mZXJlbmNl" data-listing-date-sort="1702875600000" data-listing-file-modified-sort="1702937391106" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="66" data-listing-word-count-sort="13054">
+<div class="thumbnail">
+<p><a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external"></a></p><a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external">
+<p><img loading="lazy" src="./posts/Is Voting Habit Forming 2/images/fig_3.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external">Who Forms Voting Habits?</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external">Evidence from Florida</a>
+</div>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Causal Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('Q2F1c2FsJTIwSW5mZXJlbmNl'); return false;">
 Causal Inference
 </div>
 </div>
-<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html">
 <div class="listing-description">
-This is a draft of a paper I wrote in grad school on whether formation of voting habits exhibits any heterogeneity by race, party, or gender…
+<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external">This is a draft of a paper I wrote in grad school on whether formation of voting habits exhibits any heterogeneity by race, party, or gender, using data from the Florida…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html">
+<a href="./posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html" class="no-external">
 <div class="listing-date">
 Dec 18, 2023
 </div>
@@ -290,35 +399,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="surveys,weighting" data-listing-date-sort="1701752400000" data-listing-file-modified-sort="1701985296232" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
+<div class="quarto-post image-right" data-index="5" data-categories="c3VydmV5cyUyQ3dlaWdodGluZw==" data-listing-date-sort="1701752400000" data-listing-file-modified-sort="1701985296232" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="213">
 <div class="thumbnail">
-<p><a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html"> <img src="./posts/NYSOPM_talk_regularized_raking/image/December_2023_Meetup_Card.jpg" class="thumbnail-image"> </a></p>
+<p><a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external"></a></p><a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external">
+<p><img loading="lazy" src="./posts/NYSOPM_talk_regularized_raking/image/December_2023_Meetup_Card.jpg" class="thumbnail-image"></p>
+</a><p><a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html">
 <h3 class="no-anchor listing-title">
-My talk on Regularized Raking at NYOSPM
+<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external">My talk on Regularized Raking at NYOSPM</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('surveys'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('c3VydmV5cw=='); return false;">
 surveys
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('weighting'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('d2VpZ2h0aW5n'); return false;">
 weighting
 </div>
 </div>
-<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html">
 <div class="listing-description">
-I recently gave a talk on <strong>Regularized Raking</strong> at the New York Open Statistical Programming Meetup.
+<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external">I recently gave a talk on <strong>Regularized Raking</strong> at the New York Open Statistical Programming Meetup.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html">
+<a href="./posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html" class="no-external">
 <div class="listing-date">
 Dec 5, 2023
 </div>
@@ -328,35 +435,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="MRP,Variational Inference" data-listing-date-sort="1689134400000" data-listing-file-modified-sort="1702929472599" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16">
+<div class="quarto-post image-right" data-index="6" data-categories="TVJQJTJDVmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U=" data-listing-date-sort="1689134400000" data-listing-file-modified-sort="1702929472599" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3048">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html"> <p class="card-img-top"><img src="posts\Variational MRP Pt7\plots\CI_plot.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external">
+<p class="card-img-top"><img src="posts\Variational MRP Pt7\plots\CI_plot.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Part 7- Putting it all together
+<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external">Part 7- Putting it all together</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
 </div>
-<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html">
 <div class="listing-description">
-<strong>Note:</strong> Since writing this post, Pathfinder (described below as well in Section&nbsp;5) has become available in CmdStan, which poses a problem for this concluding post to the series.
+<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external"><strong>Note:</strong> Since writing this post, Pathfinder (described below as well in Section&nbsp;5) has become available in CmdStan, which poses a problem for this concluding post to the series.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html">
+<a href="./posts/Variational MRP Pt7/variational_mrp_pt7.html" class="no-external">
 <div class="listing-date">
 Jul 12, 2023
 </div>
@@ -366,38 +471,36 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="MRP,Variational Inference,Diagnostics" data-listing-date-sort="1686974400000" data-listing-file-modified-sort="1691349063717" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="30">
+<div class="quarto-post image-right" data-index="7" data-categories="TVJQJTJDVmFyaWF0aW9uYWwlMjBJbmZlcmVuY2UlMkNEaWFnbm9zdGljcw==" data-listing-date-sort="1686974400000" data-listing-file-modified-sort="1691349063717" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="30" data-listing-word-count-sort="5993">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html"> <img src="./posts/Variational MRP Pt6/funnel_example.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external">
+<p><img loading="lazy" src="./posts/Variational MRP Pt6/funnel_example.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Part 6- Diagnostics
+<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external">Part 6- Diagnostics</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Diagnostics'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RGlhZ25vc3RpY3M='); return false;">
 Diagnostics
 </div>
 </div>
-<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html">
 <div class="listing-description">
-This is section 6 in my series on using…
+<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external">This is section 6 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html">
+<a href="./posts/Variational MRP Pt6/variational_mrp_pt6.html" class="no-external">
 <div class="listing-date">
 Jun 17, 2023
 </div>
@@ -407,38 +510,36 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="MRP,Variational Inference,Normalizing Flows" data-listing-date-sort="1686456000000" data-listing-file-modified-sort="1686512314280" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="37">
+<div class="quarto-post image-right" data-index="8" data-categories="TVJQJTJDVmFyaWF0aW9uYWwlMjBJbmZlcmVuY2UlMkNOb3JtYWxpemluZyUyMEZsb3dz" data-listing-date-sort="1686456000000" data-listing-file-modified-sort="1686512314280" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="37" data-listing-word-count-sort="7248">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html"> <img src="./posts/Variational MRP Pt5/images/32_layer.gif" class="thumbnail-image"> </a></p>
+<p><a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external">
+<p><img loading="lazy" src="./posts/Variational MRP Pt5/images/32_layer.gif" class="thumbnail-image"></p>
+</a><p><a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Part 5- Normalizing Flows
+<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external">Part 5- Normalizing Flows</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Normalizing Flows'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('Tm9ybWFsaXppbmclMjBGbG93cw=='); return false;">
 Normalizing Flows
 </div>
 </div>
-<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html">
 <div class="listing-description">
-This is section 5 in my series on using…
+<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external">This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html">
+<a href="./posts/Variational MRP Pt5/variational_mrp_pt5.html" class="no-external">
 <div class="listing-date">
 Jun 11, 2023
 </div>
@@ -448,35 +549,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="MRP,Variational Inference" data-listing-date-sort="1685160000000" data-listing-file-modified-sort="1685204556530" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="26">
+<div class="quarto-post image-right" data-index="9" data-categories="TVJQJTJDVmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U=" data-listing-date-sort="1685160000000" data-listing-file-modified-sort="1685204556530" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="26" data-listing-word-count-sort="5071">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html"> <img src="./posts/Variational MRP Pt4/images/importance-weights-preview.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external">
+<p><img loading="lazy" src="./posts/Variational MRP Pt4/images/importance-weights-preview.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Part 4- Importance Sampling
+<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external">Part 4- Importance Sampling</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
 </div>
-<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html">
 <div class="listing-description">
-This is section 4 in my series on using…
+<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external">This is section 4 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html">
+<a href="./posts/Variational MRP Pt4/variational_mrp_pt4.html" class="no-external">
 <div class="listing-date">
 May 27, 2023
 </div>
@@ -486,35 +585,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="MRP,Variational Inference" data-listing-date-sort="1683000000000" data-listing-file-modified-sort="1702926980937" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14">
+<div class="quarto-post image-right" data-index="10" data-categories="TVJQJTJDVmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U=" data-listing-date-sort="1683000000000" data-listing-file-modified-sort="1702926980937" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2623">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt3/variational_mrp_3.html"> <p class="card-img-top"><img src="posts\Variational MRP Pt3\variational_mrp_3_files\figure-html\unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external">
+<p class="card-img-top"><img src="posts\Variational MRP Pt3\variational_mrp_3_files\figure-html\unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt3/variational_mrp_3.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Part 3- Alternatives to KL Divergence
+<a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external">Part 3- Alternatives to KL Divergence</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
 </div>
-<a href="./posts/Variational MRP Pt3/variational_mrp_3.html">
 <div class="listing-description">
-<strong>Note:</strong> I’ve gotten a lot more pessimistic about how generally useful the alternatives to simple KL-Divergence are on their own since writing this post. I still think these are…
+<a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external"><strong>Note:</strong> I’ve gotten a lot more pessimistic about how generally useful the alternatives to simple KL-Divergence are on their own since writing this post. I still think these…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt3/variational_mrp_3.html">
+<a href="./posts/Variational MRP Pt3/variational_mrp_3.html" class="no-external">
 <div class="listing-date">
 May 2, 2023
 </div>
@@ -524,35 +621,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="MRP,Variational Inference" data-listing-date-sort="1668920400000" data-listing-file-modified-sort="1669051950429" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21">
+<div class="quarto-post image-right" data-index="11" data-categories="TVJQJTJDVmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U=" data-listing-date-sort="1668920400000" data-listing-file-modified-sort="1669051950429" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4077">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html"> <img src="./posts/Variational MRP Pt2/images/cover_photo.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external">
+<p><img loading="lazy" src="./posts/Variational MRP Pt2/images/cover_photo.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Part 2- The errors of our ways
+<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external">Part 2- The errors of our ways</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
 </div>
-<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html">
 <div class="listing-description">
-This is the second post in my series on using…
+<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external">This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html">
+<a href="./posts/Variational MRP Pt2/Variational_MRP_pt2.html" class="no-external">
 <div class="listing-date">
 Nov 20, 2022
 </div>
@@ -562,38 +657,36 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="MRP,BART,Variational Inference" data-listing-date-sort="1665374400000" data-listing-file-modified-sort="1668980947093" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19">
+<div class="quarto-post image-right" data-index="12" data-categories="TVJQJTJDQkFSVCUyQ1ZhcmlhdGlvbmFsJTIwSW5mZXJlbmNl" data-listing-date-sort="1665374400000" data-listing-file-modified-sort="1668980947093" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19" data-listing-word-count-sort="3654">
 <div class="thumbnail">
-<p><a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html"> <img src="./posts/Variational MRP Pt1/elboplot.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external"></a></p><a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external">
+<p><img loading="lazy" src="./posts/Variational MRP Pt1/elboplot.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html">
 <h3 class="no-anchor listing-title">
-Variational Inference for MRP with Reliable Posterior Distributions
+<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external">Variational Inference for MRP with Reliable Posterior Distributions</a>
 </h3>
 <div class="listing-subtitle">
-Introductions- things to do, places to be
+<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external">Introductions- things to do, places to be</a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('BART'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('QkFSVA=='); return false;">
 BART
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Variational Inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('VmFyaWF0aW9uYWwlMjBJbmZlcmVuY2U='); return false;">
 Variational Inference
 </div>
 </div>
-<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html">
 <div class="listing-description">
-This post introduces a series I intend to write, exploring using Variational Inference to massively speed up running complex survey estimation models like variants of Multilevel Regression and…
+<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external">This post introduces a series I intend to write, exploring using Variational Inference to massively speed up running complex survey estimation models like variants of Multile…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html">
+<a href="./posts/Variational MRP Pt1/variational_mrp_pt1.html" class="no-external">
 <div class="listing-date">
 Oct 10, 2022
 </div>
@@ -603,38 +696,36 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="From Old Website,MRP,BART" data-listing-date-sort="1562126400000" data-listing-file-modified-sort="1663468014152" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15">
+<div class="quarto-post image-right" data-index="13" data-categories="RnJvbSUyME9sZCUyMFdlYnNpdGUlMkNNUlAlMkNCQVJU" data-listing-date-sort="1562126400000" data-listing-file-modified-sort="1663468014152" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2814">
 <div class="thumbnail">
-<p><a href="./posts/BART VI/2020-03-06-BART-vi.html"> <p class="card-img-top"><img src="posts\BART VI\bart-compare.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external"></a></p><a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external">
+<p class="card-img-top"><img src="posts\BART VI\bart-compare.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/BART VI/2020-03-06-BART-vi.html">
 <h3 class="no-anchor listing-title">
-BART with varying intercepts in the MRP framework
+<a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external">BART with varying intercepts in the MRP framework</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('From Old Website'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RnJvbSUyME9sZCUyMFdlYnNpdGU='); return false;">
 From Old Website
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('MRP'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('TVJQ'); return false;">
 MRP
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('BART'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('QkFSVA=='); return false;">
 BART
 </div>
 </div>
-<a href="./posts/BART VI/2020-03-06-BART-vi.html">
 <div class="listing-description">
-This is the first of a few posts about some of the substantive and modeling findings from my master’s thesis, where I use Bayesian Additive Regression Trees (BART) and…
+<a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external">This is the first of a few posts about some of the substantive and modeling findings from my master’s thesis, where I use Bayesian Additive Regression Trees (BART) and…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/BART VI/2020-03-06-BART-vi.html">
+<a href="./posts/BART VI/2020-03-06-BART-vi.html" class="no-external">
 <div class="listing-date">
 Jul 3, 2019
 </div>
@@ -644,35 +735,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-categories="From Old Website,Stan" data-listing-date-sort="1562126400000" data-listing-file-modified-sort="1663467979936" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="22">
+<div class="quarto-post image-right" data-index="14" data-categories="RnJvbSUyME9sZCUyMFdlYnNpdGUlMkNTdGFu" data-listing-date-sort="1562126400000" data-listing-file-modified-sort="1663467979936" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="22" data-listing-word-count-sort="4367">
 <div class="thumbnail">
-<p><a href="./posts/Convention Model/2019-07-13-convention-model.html"> <p class="card-img-top"><img src="posts\Convention Model\unnamed-chunk-2-1.png" alt="first test"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external"></a></p><a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external">
+<p class="card-img-top"><img src="posts\Convention Model\unnamed-chunk-2-1.png" alt="first test"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Convention Model/2019-07-13-convention-model.html">
 <h3 class="no-anchor listing-title">
-Convention Prediction with a Bayesian Hierarchical Multinomial Model
+<a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external">Convention Prediction with a Bayesian Hierarchical Multinomial Model</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('From Old Website'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RnJvbSUyME9sZCUyMFdlYnNpdGU='); return false;">
 From Old Website
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('Stan'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('U3Rhbg=='); return false;">
 Stan
 </div>
 </div>
-<a href="./posts/Convention Model/2019-07-13-convention-model.html">
 <div class="listing-description">
-Here, I use a Bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party…
+<a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external">Here, I use a Bayesian hierarchical multinomial model to predict the first ballot results at the 2018 DFL (Democratic) State Convention, with data aggregated to the Party…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Convention Model/2019-07-13-convention-model.html">
+<a href="./posts/Convention Model/2019-07-13-convention-model.html" class="no-external">
 <div class="listing-date">
 Jul 3, 2019
 </div>
@@ -682,35 +771,33 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-categories="From Old Website,causal inference" data-listing-date-sort="1562126400000" data-listing-file-modified-sort="1663467961660" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="28">
+<div class="quarto-post image-right" data-index="15" data-categories="RnJvbSUyME9sZCUyMFdlYnNpdGUlMkNjYXVzYWwlMjBpbmZlcmVuY2U=" data-listing-date-sort="1562126400000" data-listing-file-modified-sort="1663467961660" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="28" data-listing-word-count-sort="5408">
 <div class="thumbnail">
-<p><a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html"> <p class="card-img-top"><img src="posts\Is Voting Habit Forming\discontinuity.jpg"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external"></a></p><a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external">
+<p class="card-img-top"><img src="posts\Is Voting Habit Forming\discontinuity.jpg"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html">
 <h3 class="no-anchor listing-title">
-Is Voting Habit Forming? Replication, and additional robustness checks
+<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external">Is Voting Habit Forming? Replication, and additional robustness checks</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('From Old Website'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RnJvbSUyME9sZCUyMFdlYnNpdGU='); return false;">
 From Old Website
 </div>
-<div class="listing-category" onclick="window.quartoListingCategory('causal inference'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('Y2F1c2FsJTIwaW5mZXJlbmNl'); return false;">
 causal inference
 </div>
 </div>
-<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html">
 <div class="listing-description">
-This post walks through my replication of the fuzzy regression discontinuity portion of Coppock and Green’s 2016 paper Is Voting Habit Forming?…
+<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external">This post walks through my replication of the fuzzy regression discontinuity portion of Coppock and Green’s 2016 paper Is Voting Habit Forming? New Evidence from Experiments…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html">
+<a href="./posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html" class="no-external">
 <div class="listing-date">
 Jul 3, 2019
 </div>
@@ -720,32 +807,30 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-categories="From Old Website" data-listing-date-sort="1526011200000" data-listing-file-modified-sort="1663467944095" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
+<div class="quarto-post image-right" data-index="16" data-categories="RnJvbSUyME9sZCUyMFdlYnNpdGU=" data-listing-date-sort="1526011200000" data-listing-file-modified-sort="1663467944095" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2313">
 <div class="thumbnail">
-<p><a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html"> <p class="card-img-top"><img src="posts\Intro to Retrodesign\unnamed-chunk-2-1.png" alt="Visual of what type S and M errors are"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external"></a></p><a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external">
+<p class="card-img-top"><img src="posts\Intro to Retrodesign\unnamed-chunk-2-1.png" alt="Visual of what type S and M errors are"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html">
 <h3 class="no-anchor listing-title">
-Type S/M errors in R with retrodesign()
+<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external">Type S/M errors in R with retrodesign()</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('From Old Website'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RnJvbSUyME9sZCUyMFdlYnNpdGU='); return false;">
 From Old Website
 </div>
 </div>
-<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html">
 <div class="listing-description">
-This is a online version of the vignette for my r package <strong>retrodesign</strong>. It can be installed with:
+<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external">This is a online version of the vignette for my r package <strong>retrodesign</strong>. It can be installed with:</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html">
+<a href="./posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html" class="no-external">
 <div class="listing-date">
 May 11, 2018
 </div>
@@ -755,32 +840,30 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-categories="From Old Website" data-listing-date-sort="1526011200000" data-listing-file-modified-sort="1663467989639" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="17" data-categories="RnJvbSUyME9sZCUyMFdlYnNpdGU=" data-listing-date-sort="1526011200000" data-listing-file-modified-sort="1663467989639" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="936">
 <div class="thumbnail">
-<p><a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html"> <p class="card-img-top"><img src="posts\Maximum Entropy Normal\boring_normal.jpg"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external"></a></p><a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external">
+<p class="card-img-top"><img src="posts\Maximum Entropy Normal\boring_normal.jpg"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html">
 <h3 class="no-anchor listing-title">
-Why the normal distribution?
+<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external">Why the normal distribution?</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('From Old Website'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RnJvbSUyME9sZCUyMFdlYnNpdGU='); return false;">
 From Old Website
 </div>
 </div>
-<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html">
 <div class="listing-description">
-When I was first studying probability theory as an undergrad, I had a bit of a conceptual hang-up with the Central Limit Theorem. Simulating it in R gave a nice visual of how each additional random variable smoothed out some of the original distribution’s individuality, and asymptotically we were left with a more…<strong></strong>
+<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external">When I was first studying probability theory as an undergrad, I had a bit of a conceptual hang-up with the Central Limit Theorem. Simulating it in R gave a nice visual of…<strong></strong></a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html">
+<a href="./posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html" class="no-external">
 <div class="listing-date">
 May 11, 2018
 </div>
@@ -790,32 +873,30 @@ Andy Timm
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-categories="From Old Website" data-listing-date-sort="1523332800000" data-listing-file-modified-sort="1663467970096" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="18" data-categories="RnJvbSUyME9sZCUyMFdlYnNpdGU=" data-listing-date-sort="1523332800000" data-listing-file-modified-sort="1663467970096" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2090">
 <div class="thumbnail">
-<p><a href="./posts/Race Models Pt 1/race_models_part1.html"> <p class="card-img-top"><img src="posts\Race Models Pt 1\example_curves.jpg" alt="Example ROCs"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external"></a></p><a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external">
+<p class="card-img-top"><img src="posts\Race Models Pt 1\example_curves.jpg" alt="Example ROCs"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/Race Models Pt 1/race_models_part1.html">
 <h3 class="no-anchor listing-title">
-Predicting race part 1- Bayes’ rule method and extensions
+<a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external">Predicting race part 1- Bayes’ rule method and extensions</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('From Old Website'); return false;">
+<div class="listing-category" onclick="window.quartoListingCategory('RnJvbSUyME9sZCUyMFdlYnNpdGU='); return false;">
 From Old Website
 </div>
 </div>
-<a href="./posts/Race Models Pt 1/race_models_part1.html">
 <div class="listing-description">
-Race is a defining part of political identity in the United States, and so it should be no surprise that accurately modeling race can be beneficial for many political…
+<a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external">Race is a defining part of political identity in the United States, and so it should be no surprise that accurately modeling race can be beneficial for many political…</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/Race Models Pt 1/race_models_part1.html">
+<a href="./posts/Race Models Pt 1/race_models_part1.html" class="no-external">
 <div class="listing-date">
 Apr 10, 2018
 </div>
@@ -865,18 +946,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -908,11 +978,48 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/andytimm\.github\.io");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -922,8 +1029,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -935,7 +1051,129 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -979,6 +1217,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1004,6 +1243,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1064,6 +1329,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

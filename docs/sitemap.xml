@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2024-11-27T20:59:38.113Z</lastmod>
+    <lastmod>2023-02-04T20:26:58.088Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2024-08-07T00:53:48.918Z</lastmod>
+    <lastmod>2024-08-06T23:26:47.163Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/LICENSE.html</loc>
@@ -54,7 +54,7 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/software.html</loc>
-    <lastmod>2024-07-27T15:07:34.323Z</lastmod>
+    <lastmod>2024-01-06T00:21:52.536Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</loc>
@@ -94,6 +94,10 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html</loc>
-    <lastmod>2024-08-07T00:54:25.323Z</lastmod>
+    <lastmod>2024-12-31T17:29:03.165Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</loc>
+    <lastmod>2024-11-28T03:32:14.576Z</lastmod>
   </url>
 </urlset>
