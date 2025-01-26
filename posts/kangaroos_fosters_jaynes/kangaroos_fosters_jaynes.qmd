@@ -151,7 +151,7 @@ formulating what we believe is minimally coherent for our problem.
 
 Hopefully you've enjoyed this post, and have been convinced to think about maximum entropy
 a bit more on your next prior specification journey. And if you enjoyed this, you truly should read
- the [original paper](https://bayes.wustl.edu/etj/articles/cmonkeys.pdf)- if this table contents doesn't sound like a good time, I don't know what does.
+ the [original paper](https://bayes.wustl.edu/etj/articles/cmonkeys.pdf) - if this table contents doesn't sound like a good time, I don't know what does.
 
 ![](imgs/toc.png){fig-align="center"}
 
