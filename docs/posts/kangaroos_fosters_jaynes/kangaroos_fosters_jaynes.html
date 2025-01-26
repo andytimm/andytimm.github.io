@@ -207,7 +207,7 @@ window.Quarto = {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#why-on-earth-are-we-talking-about-kangroos-beer-preferences" id="toc-why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="nav-link active" data-scroll-target="#why-on-earth-are-we-talking-about-kangroos-beer-preferences">Why on earth are we talking about kangroos’ beer preferences?</a></li>
+  <li><a href="#why-on-earth-are-we-talking-about-kangaroos-beer-preferences" id="toc-why-on-earth-are-we-talking-about-kangaroos-beer-preferences" class="nav-link active" data-scroll-target="#why-on-earth-are-we-talking-about-kangaroos-beer-preferences">Why on earth are we talking about kangaroos’ beer preferences?</a></li>
   <li><a href="#but-first-more-kangaroo-facts" id="toc-but-first-more-kangaroo-facts" class="nav-link" data-scroll-target="#but-first-more-kangaroo-facts">But first, more kangaroo facts</a></li>
   <li><a href="#ok-some-actual-thoughts-about-priors" id="toc-ok-some-actual-thoughts-about-priors" class="nav-link" data-scroll-target="#ok-some-actual-thoughts-about-priors">Ok, some actual thoughts about priors</a></li>
   <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
@@ -232,8 +232,8 @@ window.Quarto = {
 </blockquote>
 <p>I’m not sure what it is with Bayesians and wild, fantastic adventures in the footnotes<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, but obviously I had to chase this one down. Also, the paper didn’t immediately pop up when I googled “beer preferences of left-handed kangaroos”, so hopefully this post gets a few people where they’re going.</p>
 <p>I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo drinking a Foster’s, but the more serious content of the post discusses different conceptions of maximum entropy, and how the idea can be useful in building prior distributions, even if we shouldn’t stop at a maximum entropy prior.</p>
-<section id="why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="level1">
-<h1>Why on earth are we talking about kangroos’ beer preferences?</h1>
+<section id="why-on-earth-are-we-talking-about-kangaroos-beer-preferences" class="level1">
+<h1>Why on earth are we talking about kangaroos’ beer preferences?</h1>
 <p>To be clear, we’re actually talking about the <em>joint distribution of beer preferences of kangaroos and their handedness</em>. Why?</p>
 <p>In the time-honored tradition of taking a joke and continuing to run with it until it’s funny, E.T. Jaynes is extending an example due to Steve Gull<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to discuss the properties of <a href="https://en.wikipedia.org/wiki/Principle_of_maximum_entropy">maximum entropy</a> priors:</p>
 <div class="quarto-figure quarto-figure-center">
@@ -268,7 +268,7 @@ window.Quarto = {
 <h1>Ok, some actual thoughts about priors</h1>
 <p>In grad school, I was lucky to take a Bayesian inference course from Ben Goodrich- he came down from Columbia to teach at NYU. I spent some time in his office hours asking questions about maximum entropy.</p>
 <p>As I remember it, his position was that maximum entropy could be a useful concept for building some intuition about probability, but that it wasn’t a good way to land on priors. Richard McElreath’s take in Statistical Rethinking is similar, if a bit more enthusiastic on the intuition building point- chapter 10 develops the concept at length for this purpose, but not encouraging it as a tool for making priors.</p>
-<p>From both sources of Bayesian education, along with other formative ones like Andrew Gelman’s writing, I’m pretty broadly convinced that our workflow for building priors should usualy aim at specifying weakly informative priors<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>. Without getting too deep into that point, I think the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page summarizes the intuition well:</p>
+<p>From both sources of Bayesian education, along with other formative ones like Andrew Gelman’s writing, I’m pretty broadly convinced that our workflow for building priors should usually aim at specifying weakly informative priors<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>. Without getting too deep into that point, I think the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page summarizes the intuition well:</p>
 <blockquote class="blockquote">
 <p>Weakly informative prior should contain enough information to regularize: the idea is that the prior rules out unreasonable parameter values but is not so strong as to rule out values that might make sense</p>
 </blockquote>
@@ -279,7 +279,7 @@ window.Quarto = {
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
 <p>Reading this Jaynes piece, I’m struck by how much of his process for developing priors reminds me of the modern <a href="http://www.stat.columbia.edu/~gelman/research/unpublished/Bayesian_Workflow_article.pdf">Bayesian Workflow</a> for developing priors. His method of working with the idea of maximum entropy demonstrated in the piece is far richer than the basic notion of maximum entropy distributions would suggest. Even if we shouldn’t stop at a maximum entropy prior, doing “weakly informative” right can benefit from formulating what we believe is minimally coherent for our problem.</p>
-<p>Hopefully you’ve enjoyed this post, and have been convinced to think a bit about maximum entropy a bit more on your next prior specification journey. And if you enjoyed this, you truly should read the original paper- if this table contents doesn’t sound like a good time, I don’t know what does.</p>
+<p>Hopefully you’ve enjoyed this post, and have been convinced to think about maximum entropy a bit more on your next prior specification journey. And if you enjoyed this, you truly should read the <a href="https://bayes.wustl.edu/etj/articles/cmonkeys.pdf">original paper</a> - if this table contents doesn’t sound like a good time, I don’t know what does.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="imgs/toc.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
@@ -295,7 +295,7 @@ window.Quarto = {
 <ol>
 <li id="fn1"><p><a href="https://dansblog.netlify.app/">Dan Simpson’s</a> are particularly incredible.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Who I have to imagine Australians were thrilled with for this novel joke. I’m sure if the dropbear or ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then, this problem would have been about the preferred reading angles of drop bears or something similar.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Fosters? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Foster’s? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>umber of kangaroos.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>his wonderful term, not mine.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p>For example, how the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page, or <a href="https://www.mdpi.com/1099-4300/19/10/555">Gelman, Simpson, and Betancourt (2017)</a> which I’ll discuss later in the post.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>

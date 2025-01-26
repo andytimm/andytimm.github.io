@@ -79,7 +79,7 @@
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
 <p>Reading this Jaynes piece, I’m struck by how much of his process for developing priors reminds me of the modern <a href="http://www.stat.columbia.edu/~gelman/research/unpublished/Bayesian_Workflow_article.pdf">Bayesian Workflow</a> for developing priors. His method of working with the idea of maximum entropy demonstrated in the piece is far richer than the basic notion of maximum entropy distributions would suggest. Even if we shouldn’t stop at a maximum entropy prior, doing “weakly informative” right can benefit from formulating what we believe is minimally coherent for our problem.</p>
-<p>Hopefully you’ve enjoyed this post, and have been convinced to think about maximum entropy a bit more on your next prior specification journey. And if you enjoyed this, you truly should read the [original paper](https://bayes.wustl.edu/etj/articles/cmonkeys.pdf- if this table contents doesn’t sound like a good time, I don’t know what does.</p>
+<p>Hopefully you’ve enjoyed this post, and have been convinced to think about maximum entropy a bit more on your next prior specification journey. And if you enjoyed this, you truly should read the <a href="https://bayes.wustl.edu/etj/articles/cmonkeys.pdf">original paper</a> - if this table contents doesn’t sound like a good time, I don’t know what does.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/toc.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
@@ -95,7 +95,7 @@
 <ol>
 <li id="fn1"><p><a href="https://dansblog.netlify.app/">Dan Simpson’s</a> are particularly incredible.↩︎</p></li>
 <li id="fn2"><p>Who I have to imagine Australians were thrilled with for this novel joke. I’m sure if the dropbear or ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then, this problem would have been about the preferred reading angles of drop bears or something similar.↩︎</p></li>
-<li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Fosters? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.↩︎</p></li>
+<li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Foster’s? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.↩︎</p></li>
 <li id="fn4"><p>umber of kangaroos.↩︎</p></li>
 <li id="fn5"><p>his wonderful term, not mine.↩︎</p></li>
 <li id="fn6"><p>For example, how the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page, or <a href="https://www.mdpi.com/1099-4300/19/10/555">Gelman, Simpson, and Betancourt (2017)</a> which I’ll discuss later in the post.↩︎</p></li>
@@ -124,6 +124,16 @@ January 26, 2025. <a href="https://andytimm.github.io/posts/kangaroos_fosters_ja
   <guid>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</guid>
   <pubDate>Sun, 26 Jan 2025 05:00:00 GMT</pubDate>
   <media:content url="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp" medium="image" type="image/webp"/>
+</item>
+<item>
+  <title></title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>Survey Weighting</category>
+  <category>Nate Silver griping</category>
+  <guid>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</guid>
+  <pubDate>Wed, 27 Nov 2024 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Better discrete choice modeling through the rank ordered logit</title>
