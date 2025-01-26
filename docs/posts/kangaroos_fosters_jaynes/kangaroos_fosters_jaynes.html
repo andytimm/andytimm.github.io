@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
-<meta name="dcterms.date" content="2024-02-06">
+<meta name="dcterms.date" content="2025-01-26">
 
-<title>Andy Timm - Kangaroos, Foster’s, and E.T. Jaynes</title>
+<title>Kangaroos, Foster’s, and E.T. Jaynes – Andy Timm</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -37,17 +37,23 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-05fe91a66cf75bbbb8c9664867fe5124.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-82348daeeb1715b674cd594e670d93f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -56,6 +62,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -64,7 +71,8 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
-  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
  var macros = [];
@@ -79,14 +87,41 @@ ul.task-list li input[type="checkbox"] {
    });
 }}});
   </script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Andy Timm - Kangaroos, Foster’s, and E.T. Jaynes">
+<meta property="og:title" content="Kangaroos, Foster’s, and E.T. Jaynes – Andy Timm">
 <meta property="og:description" content="Also maybe some thoughts on priors">
 <meta property="og:image" content="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp">
-<meta property="og:site-name" content="Andy Timm">
-<meta name="twitter:title" content="Andy Timm - Kangaroos, Foster’s, and E.T. Jaynes">
+<meta property="og:site_name" content="Andy Timm">
+<meta name="twitter:title" content="Kangaroos, Foster’s, and E.T. Jaynes – Andy Timm">
 <meta name="twitter:description" content="Also maybe some thoughts on priors">
 <meta name="twitter:image" content="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp">
 <meta name="twitter:creator" content="@andy_timm">
@@ -97,40 +132,36 @@ ul.task-list li input[type="checkbox"] {
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andy Timm</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../index.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../projects.html" rel="" target="">
- <span class="menu-text">Projects</span></a>
+    <a class="nav-link" href="../../software.html"> 
+<span class="menu-text">Software</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../software.html" rel="" target="">
- <span class="menu-text">Software</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../blog.html" rel="" target="">
- <span class="menu-text">Rarely Updated Blog</span></a>
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Rarely Updated Blog</span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -160,7 +191,7 @@ ul.task-list li input[type="checkbox"] {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">February 6, 2024</p>
+        <p class="date">January 26, 2025</p>
       </div>
     </div>
     
@@ -179,6 +210,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#why-on-earth-are-we-talking-about-kangroos-beer-preferences" id="toc-why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="nav-link active" data-scroll-target="#why-on-earth-are-we-talking-about-kangroos-beer-preferences">Why on earth are we talking about kangroos’ beer preferences?</a></li>
   <li><a href="#but-first-more-kangaroo-facts" id="toc-but-first-more-kangaroo-facts" class="nav-link" data-scroll-target="#but-first-more-kangaroo-facts">But first, more kangaroo facts</a></li>
   <li><a href="#ok-some-actual-thoughts-about-priors" id="toc-ok-some-actual-thoughts-about-priors" class="nav-link" data-scroll-target="#ok-some-actual-thoughts-about-priors">Ok, some actual thoughts about priors</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions">Conclusions</a></li>
   </ul>
 </nav>
     </div>
@@ -188,24 +220,25 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="imgs/fosters_kangaroo.webp" class="img-fluid figure-img"></p>
+<p><img src="imgs/fosters_kangaroo.webp" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
-<p>Ahead of starting a new gig next week (wooo!), I was reviewing a bit about multilevel models, and came across this fascinating footnote in Richard McElreath’s <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>:</p>
+<p>Ahead of starting my current gig last February, I was reviewing a bit about multilevel models, and came across this fascinating footnote in Richard McElreath’s <a href="https://xcelab.net/rm/statistical-rethinking/">Statistical Rethinking</a>:</p>
 <blockquote class="blockquote">
 <p>See Jaynes (1986) for an entertaining example concerning the beer preferences of left-handed kangaroos. There is an updated <a href="https://bayes.wustl.edu/etj/articles/cmonkeys.pdf">1996 version</a> of this paper available online.</p>
 </blockquote>
-<p>I’m not sure what it is with Bayesians and wild, fantastic adventures in the footnotes<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, but obviously I couldn’t not chase this one down. Also, the paper didn’t immediately pop up when I googled “beer preferences of left-handed kangaroos”, so hopefully this post gets a few people where they’re going.</p>
-<p>I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo drinking a Foster’s, but the more serious content of the post discusses different conceptions of maximum entropy, and how useful the idea is in building prior distributions for Bayesian inference.</p>
+<p>I’m not sure what it is with Bayesians and wild, fantastic adventures in the footnotes<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, but obviously I had to chase this one down. Also, the paper didn’t immediately pop up when I googled “beer preferences of left-handed kangaroos”, so hopefully this post gets a few people where they’re going.</p>
+<p>I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo drinking a Foster’s, but the more serious content of the post discusses different conceptions of maximum entropy, and how the idea can be useful in building prior distributions, even if we shouldn’t stop at a maximum entropy prior.</p>
 <section id="why-on-earth-are-we-talking-about-kangroos-beer-preferences" class="level1">
 <h1>Why on earth are we talking about kangroos’ beer preferences?</h1>
 <p>To be clear, we’re actually talking about the <em>joint distribution of beer preferences of kangaroos and their handedness</em>. Why?</p>
 <p>In the time-honored tradition of taking a joke and continuing to run with it until it’s funny, E.T. Jaynes is extending an example due to Steve Gull<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to discuss the properties of <a href="https://en.wikipedia.org/wiki/Principle_of_maximum_entropy">maximum entropy</a> priors:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="imgs/problem_setup.png" class="img-fluid figure-img"></p>
+<p><img src="imgs/problem_setup.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 <p>Extending analysis of this scenario then provides a tutorial in prior specification, improving the prior slowly to ensure it reflects all we know about the example.</p>
@@ -214,10 +247,10 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="imgs/hidden_kangaroo_knowledge.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">As I often ask myself…</figcaption>
+<figcaption>As I often ask myself…</figcaption>
 </figure>
 </div>
-<p>With the ensuing sermon<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, Jaynes makes the case that maximum entropy remains a useful, logical tool for building priors. Interestingly, this argument has a different presentation of maxent than more recent pieces that place these priors alongside reference, Jeffreys, or invariance-based priors<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. Jaynes instead lays out a presentation that feels more like a workflow, with maximum entropy itself providing a starting point.</p>
+<p>With the ensuing sermon<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, Jaynes makes the case that maximum entropy is a useful, logical tool for building priors. Interestingly, this argument has a different orientation to maxent than more recent pieces that place these priors alongside reference, Jeffreys, or invariance-based priors<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. Jaynes instead lays out a presentation that feels more like a workflow, with maximum entropy itself providing a starting point.</p>
 </section>
 <section id="but-first-more-kangaroo-facts" class="level1">
 <h1>But first, more kangaroo facts</h1>
@@ -233,13 +266,25 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="ok-some-actual-thoughts-about-priors" class="level1">
 <h1>Ok, some actual thoughts about priors</h1>
-<p>In grad school, I was lucky to take a Bayesian inference course from Ben Goodrich- he came down from Columbia to teach at NYU. I spent some time in his office hours over a few weeks asking questions about maximum entropy.</p>
+<p>In grad school, I was lucky to take a Bayesian inference course from Ben Goodrich- he came down from Columbia to teach at NYU. I spent some time in his office hours asking questions about maximum entropy.</p>
 <p>As I remember it, his position was that maximum entropy could be a useful concept for building some intuition about probability, but that it wasn’t a good way to land on priors. Richard McElreath’s take in Statistical Rethinking is similar, if a bit more enthusiastic on the intuition building point- chapter 10 develops the concept at length for this purpose, but not encouraging it as a tool for making priors.</p>
-<p><personal initial="" thoughts=""></personal></p>
-<p>&lt;How is what Jaynes saying a bit richer than that?&gt;</p>
-<p><examples like="" the="" indivisible="" kangaroos=""></examples></p>
-<p><is this="" still="" a="" useful="" perspective=""></is></p>
-<p><outro encouragment="" to="" read="" the="" paper=""></outro></p>
+<p>From both sources of Bayesian education, along with other formative ones like Andrew Gelman’s writing, I’m pretty broadly convinced that our workflow for building priors should usualy aim at specifying weakly informative priors<a href="#fn14" class="footnote-ref" id="fnref14" role="doc-noteref"><sup>14</sup></a>. Without getting too deep into that point, I think the <a href="https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles">Stan Prior Choice Recommendations</a> page summarizes the intuition well:</p>
+<blockquote class="blockquote">
+<p>Weakly informative prior should contain enough information to regularize: the idea is that the prior rules out unreasonable parameter values but is not so strong as to rule out values that might make sense</p>
+</blockquote>
+<p>The slight distinction I want to make here, however, is that <strong>thinking about maximum entropy is a powerful way to grapple with the space of possible priors for a given problem</strong>. For most complex problems, even clearly grasping what our priors imply can be a challenge.</p>
+<p>In this type of context, trying to clearly state a maximum entropy prior can be deeply orienting. Once we know the minimum amount of information structural constraints encode, it becomes a lot easier to think about what “weakly informative” might mean, adding any further information on top of maxent.</p>
+<p>As we saw above with our beer-swilling Kangaroo friends, even the initial question of what maximum entropy implies can turn out to be a surprisingly deep question. <a href="https://khakieconomics.github.io/2019/03/17/Choosing-priors-for-logit-choice-models.html">Examples</a> abound where “uninformative” seeming priors accidentally imply humorously absurd results. Asking what maximum entropy might mean can be a way to start unraveling such situations, stripping things back to a simple baseline that we can then build further on.</p>
+</section>
+<section id="conclusions" class="level1">
+<h1>Conclusions</h1>
+<p>Reading this Jaynes piece, I’m struck by how much of his process for developing priors reminds me of the modern <a href="http://www.stat.columbia.edu/~gelman/research/unpublished/Bayesian_Workflow_article.pdf">Bayesian Workflow</a> for developing priors. His method of working with the idea of maximum entropy demonstrated in the piece is far richer than the basic notion of maximum entropy distributions would suggest. Even if we shouldn’t stop at a maximum entropy prior, doing “weakly informative” right can benefit from formulating what we believe is minimally coherent for our problem.</p>
+<p>Hopefully you’ve enjoyed this post, and have been convinced to think a bit about maximum entropy a bit more on your next prior specification journey. And if you enjoyed this, you truly should read the original paper- if this table contents doesn’t sound like a good time, I don’t know what does.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="imgs/toc.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
 
 
 </section>
@@ -249,7 +294,7 @@ ul.task-list li input[type="checkbox"] {
 
 <ol>
 <li id="fn1"><p><a href="https://dansblog.netlify.app/">Dan Simpson’s</a> are particularly incredible.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Who I have to imagine Australians were thrilled with for this novel joke. I’m sure if the dropbear or ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then this problem would have been about the preferred reading angles of drop bears or something instead.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Who I have to imagine Australians were thrilled with for this novel joke. I’m sure if the dropbear or ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then, this problem would have been about the preferred reading angles of drop bears or something similar.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>If one did divide a kangaroo, would it still have a preference for Fosters? I suppose it would depend on the type of division, but I have to imagine most types of division would leave the kangaroo desiring something a bit stronger.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>umber of kangaroos.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>his wonderful term, not mine.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
@@ -257,21 +302,22 @@ ul.task-list li input[type="checkbox"] {
 <li id="fn7"><p>See <a href="https://en.wikipedia.org/wiki/Macropodidae">Macropodidae</a>- basically all the cute, friend-shaped ones, including kangaroos, wallabies, sugar gliders, quokkas, and wallaroos (which I just learned of, and am happy to report exist).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn8"><p>Three limbs, not the tail, sadly.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn9"><p>Ok, ok fine. The authors restricted their attention to “natural, not artificially evoked, behaviors”, and that condition is what presumably ruled out handing any of them a Foster’s.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>The motivating causal theory here is that handedness seems to be more common in primarily bipedal species, according the <a href="https://www.smithsonianmag.com/science-nature/kangaroos-are-lefties-and-can-teach-us-about-human-handedness-180955630/">lead author</a>. This connects this work to a larger, interesting debate on whether handedness is a uniquely human or primate trait.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>The motivating causal theory here is that handedness seems to be more common in primarily bipedal species, according the <a href="https://www.smithsonianmag.com/science-nature/kangaroos-are-lefties-and-can-teach-us-about-human-handedness-180955630/">lead author</a>. This connects this work to a larger, genuinely fascinating debate on whether handedness is a uniquely human or primate trait.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn11"><p>There are also two other species referred to as kangaroos, the <a href="https://en.wikipedia.org/wiki/Western_grey_kangaroo">western grey kangaroo</a>, and the <a href="https://en.wikipedia.org/wiki/Antilopine_kangaroo">antilopine kangaroo</a>. Note that the term “kangaroo” is a <a href="https://en.wikipedia.org/wiki/Paraphyly">paraphyletic</a> grouping, and seems to be based on size, so, for example, I found some references to the antilopine kangaroo being referred to as a wallaby or wallaroo. I was thus unable to verify Jaynes’ claim of mouse-sized kangaroos, and presume he was thinking of other Macropodidae. Fortunately, neither of the other two species should undermine our confidence in the study’s ability to tell us about the man sized kangaroos capable of standing up at a bar and drinking: while both the eastern and red kangaroo can easily stand over a bar, with male heights often observed roughly around 6’7” and 5’11” respectively, the western grey kangaroo only reaches typical heights of 4’3” (unclear if this is males only, or all of them), and the antilopine kangaroo males only reaching 3’9”. If we instead restricted our attention to just the <a href="https://letmegooglethat.com/?q=typical+height+of+a+bar">typical height of a bar</a> however, and take a typical bar height to be 42”, we might have some further decisions to make, as both species would (for the tallest members) only narrowly be taller than the bar, and might not be able to comfortably drink at one. In addition, we would need to take into consideration the bartender’s willingness to serve such small patrons…<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn12"><p>Second footnote to say all average male heights in the first footnote are just from the linked Wikipedia pages. I’m in a footnote for a footnote here, which in turn is referring to a paper I found to validate a comment in a 28 year old paper referencing a 41 year old anecdote. If you nitpick me on the roo heights with more precise information about the distribution of their heights, I’ll laugh at you, but I will update the text. If you argue whether we care about length of the roo (including tail), not height, I’ll just laugh at you.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn13"><p>I’m taking them at their word on whether each kangaroo is left-handed or not based on counting the number of left vs.&nbsp;right pawed observations of each action. You can find the relevant data and make your own conclusions in tables S3/S4 of the appendix, or use the summary of handedness by task I’ve included here.<a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>Of course, there are plenty of times when we might want to build a genuinely informative prior, and state clearly why we’re doing so.<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2025,
   author = {Timm, Andy},
   title = {Kangaroos, {Foster’s,} and {E.T.} {Jaynes}},
-  date = {2024-02-06},
+  date = {2025-01-26},
   url = {https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html},
   langid = {en}
 }
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas" role="listitem">
-Timm, Andy. 2024. <span>“Kangaroos, Foster’s, and E.T. Jaynes.”</span>
-February 6, 2024. <a href="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html">https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</a>.
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Timm, Andy. 2025. <span>“Kangaroos, Foster’s, and E.T. Jaynes.”</span>
+January 26, 2025. <a href="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html">https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -308,18 +354,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -351,11 +386,48 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/andytimm\.github\.io");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -365,8 +437,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -378,7 +459,129 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -422,6 +625,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -447,6 +651,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -507,6 +737,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

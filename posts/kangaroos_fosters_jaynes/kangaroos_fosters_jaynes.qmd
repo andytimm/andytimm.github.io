@@ -2,8 +2,8 @@
 layout: post
 title: Kangaroos, Foster's, and E.T. Jaynes
 subtitle: Also maybe some thoughts on priors
-date: 2024-02-06
-draft: True
+date: 2025-01-26
+draft: False
 image: imgs/fosters_kangaroo.webp
 categories:
   - priors
@@ -12,7 +12,7 @@ categories:
 
 ![](imgs/fosters_kangaroo.webp){fig-align="center"}
 
-Ahead of starting a new gig next week (wooo!), I was reviewing a bit about
+Ahead of starting my current gig last February, I was reviewing a bit about
 multilevel models, and came across this fascinating footnote in Richard McElreath's
 [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/):
 
@@ -21,17 +21,17 @@ of left-handed kangaroos. There is an updated [1996 version](https://bayes.wustl
 online.
 
 I'm not sure what it is with Bayesians and wild, fantastic adventures in the footnotes[^1], but obviously
-I couldn't not chase this one down. Also, the paper didn't immediately pop
+I had to chase this one down. Also, the paper didn't immediately pop
 up when I googled "beer preferences of left-handed kangaroos", so hopefully this post
 gets a few people where they're going.
 
 I mostly started this post to have a reason to DALL-E a (left-handed) kangaroo
 drinking a Foster's, but the more serious content of the post discusses different
-conceptions of maximum entropy, and how useful the idea is in building prior
-distributions for Bayesian inference.
+conceptions of maximum entropy, and how the idea can be useful in building prior
+distributions, even if we shouldn't stop at a maximum entropy prior.
 
 
-# Why on earth are we talking about kangroos' beer preferences?
+# Why on earth are we talking about kangaroos' beer preferences?
 
 To be clear, we're actually talking about the *joint distribution of beer preferences of kangaroos
 and their handedness*. Why?
@@ -60,11 +60,12 @@ is whether our intuition about $p$ were poor, or whether we have hidden prior
 information to incorporate (i.e: do we know that kangaroos are likely to be
 related given they are drawn from the same genetic pool and environment)?
 
+
 ![As I often ask myself...](imgs/hidden_kangaroo_knowledge.png){fig-align="center"}
 
-With the ensuing sermon[^5], Jaynes makes the case that maximum entropy remains
+With the ensuing sermon[^5], Jaynes makes the case that maximum entropy is
 a useful, logical tool for building priors. Interestingly, this argument has a
-different presentation of maxent than more recent pieces that place these priors alongside
+different orientation to maxent than more recent pieces that place these priors alongside
 reference, Jeffreys, or invariance-based priors[^6]. Jaynes instead lays out
 a presentation that feels more like a workflow, with maximum entropy itself
 providing a starting point.
@@ -95,7 +96,7 @@ we assume that Gull intended his problem to refer to the man sized species
 This seems reasonable enough, but to split unnecessary hairs even further, there
 are two different types of "man sized" kangaroos in the study- [red kangaroos](https://en.wikipedia.org/wiki/Red_kangaroo)
 and [eastern grey kangaroos](https://en.wikipedia.org/wiki/Eastern_grey_kangaroo)[^11][^12]. Digging into the [appendix](https://www.cell.com/cms/10.1016/j.cub.2015.05.043/attachment/6b90006c-b1dc-4683-97dd-03dabd0fdebc/mmc1) to find the raw data since the main paper
-only reports statistical test results, 80% of red kangaroos are left-handed, and 
+only reports statistical test results, 80% of red kangaroos are left-handed, and
 68% of eastern grey kangaroos are[^13]. Perhaps Gull was observing his kangaroos
 in the eastern part of Australia, which (unsurprisingly) is where eastern
 grey kangaroos can be found.
@@ -109,7 +110,7 @@ move on to talking about priors.
 
 In grad school, I was lucky to take a Bayesian inference course from Ben
 Goodrich- he came down from Columbia to teach at NYU. I spent some time in
-his office hours over a few weeks asking questions about maximum entropy.
+his office hours asking questions about maximum entropy.
 
 As I remember it, his position was that maximum entropy could be a useful concept for building
 some intuition about probability, but that it wasn't a good way to land on priors. Richard
@@ -117,21 +118,48 @@ McElreath's take in Statistical Rethinking is similar, if a bit more enthusiasti
 on the intuition building point- chapter 10 develops the concept at length for this
 purpose, but not encouraging it as a tool for making priors.
 
-<personal initial thoughts>
+From both sources of Bayesian education, along with other formative ones like Andrew Gelman's
+writing, I'm pretty broadly convinced that our workflow for building priors should usually aim
+at specifying weakly informative priors[^14]. Without getting too deep into that point, I think
+the [Stan Prior Choice Recommendations](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles) page summarizes the intuition well:
 
-<How is what Jaynes saying a bit richer than that?>
+> Weakly informative prior should contain enough information to regularize: the idea is that the prior rules out unreasonable parameter values but is not so strong as to rule out values that might make sense
 
-<Examples like the indivisible kangaroos>
+The slight distinction I want to make here, however, is that **thinking about maximum entropy
+is a powerful way to grapple with the space of possible priors for a given problem**. For most
+complex problems, even clearly grasping what our priors imply can be a challenge.
 
-<is this still a useful perspective>
+In this type of context, trying to clearly state a maximum entropy prior can be deeply
+orienting. Once we know the minimum amount of information structural constraints encode,
+it becomes a lot easier to think about what "weakly informative" might mean, adding any further
+information on top of maxent.
 
-<Outro/encouragment to read the paper>
+As we saw above with our beer-swilling Kangaroo friends, even the initial question of what
+maximum entropy implies can turn out to be a surprisingly deep question. [Examples](https://khakieconomics.github.io/2019/03/17/Choosing-priors-for-logit-choice-models.html) abound where "uninformative" seeming
+priors accidentally imply humorously absurd results. Asking what maximum entropy might mean
+can be a way to start unraveling such situations, stripping things back to a simple
+baseline that we can then build further on.
+
+# Conclusions
+
+Reading this Jaynes piece, I'm struck by how much of his process for developing priors reminds
+me of the modern [Bayesian Workflow](http://www.stat.columbia.edu/~gelman/research/unpublished/Bayesian_Workflow_article.pdf) for developing priors. His method of working with the
+idea of maximum entropy demonstrated in the piece is far richer than the basic notion of maximum entropy
+distributions would suggest. Even
+if we shouldn't stop at a maximum entropy prior, doing "weakly informative" right can benefit from
+formulating what we believe is minimally coherent for our problem.
+
+Hopefully you've enjoyed this post, and have been convinced to think about maximum entropy
+a bit more on your next prior specification journey. And if you enjoyed this, you truly should read
+ the [original paper](https://bayes.wustl.edu/etj/articles/cmonkeys.pdf)- if this table contents doesn't sound like a good time, I don't know what does.
+
+![](imgs/toc.png){fig-align="center"}
 
 
 [^1]: [Dan Simpson's](https://dansblog.netlify.app/) are particularly incredible.
 [^2]: Who I have to imagine Australians were thrilled with for this novel joke. I'm
-sure if the dropbear or  ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then this problem
-would have been about the preferred reading angles of drop bears or something instead.
+sure if the dropbear or  ʇxǝʇ uʍop ǝpᴉsdn jokes existed back then, this problem
+would have been about the preferred reading angles of drop bears or something similar.
 [^3]: If one did divide a kangaroo, would it still have a preference for Fosters?
 I suppose it would depend on the type of division, but I have to imagine most
 types of division would leave the kangaroo desiring something a bit stronger.
@@ -145,10 +173,13 @@ wallaroos (which I just learned of, and am happy to report exist).
 [^9]: Ok, ok fine. The authors restricted their attention to "natural, not artificially evoked, behaviors",
 and that condition is what presumably ruled out handing any of them a Foster's.
 [^10]: The motivating causal theory here is that handedness seems to be more common
-in primarily bipedal species, according the [lead author](https://www.smithsonianmag.com/science-nature/kangaroos-are-lefties-and-can-teach-us-about-human-handedness-180955630/). This connects this work to a larger, interesting debate on whether handedness is a uniquely human
+in primarily bipedal species, according the [lead author](https://www.smithsonianmag.com/science-nature/kangaroos-are-lefties-and-can-teach-us-about-human-handedness-180955630/). This connects this work to a larger, genuinely fascinating debate on whether handedness is a uniquely human
 or primate trait.
 [^11]: There are also two other species referred to as kangaroos, the [western
 grey kangaroo](https://en.wikipedia.org/wiki/Western_grey_kangaroo), and the [antilopine kangaroo](https://en.wikipedia.org/wiki/Antilopine_kangaroo). Note that the term "kangaroo" is
 a [paraphyletic](https://en.wikipedia.org/wiki/Paraphyly) grouping, and seems to be based on size, so, for example, I found some references to the antilopine kangaroo being referred to as a wallaby or wallaroo. I was thus unable to verify Jaynes' claim of mouse-sized kangaroos, and presume he was thinking of other Macropodidae. Fortunately, neither of the other two species should undermine our confidence in the study's ability to tell us about the man sized kangaroos capable of standing up at a bar and drinking: while both the eastern and red kangaroo can easily stand over a bar, with male heights often observed roughly around 6'7" and 5'11" respectively, the western grey kangaroo only reaches typical heights of 4'3" (unclear if this is males only, or all of them), and the antilopine kangaroo males only reaching 3'9". If we instead restricted our attention to just the [typical height of a bar](https://letmegooglethat.com/?q=typical+height+of+a+bar) however, and take a typical bar height to be 42", we might have some further decisions to make, as both species would (for the tallest members) only narrowly be taller than the bar, and might not be able to comfortably drink at one. In addition, we would need to take into consideration the bartender's willingness to serve such small patrons...
 [^12]: Second footnote to say all average male heights in the first footnote are just from the linked Wikipedia pages. I'm in a footnote for a footnote here, which in turn is referring to a paper I found to validate a comment in a 28 year old paper referencing a 41 year old anecdote. If you nitpick me on the roo heights with more precise information about the distribution of their heights, I'll laugh at you, but I will update the text. If you argue whether we care about length of the roo (including tail), not height, I'll just laugh at you.
 [^13]: I'm taking them at their word on whether each kangaroo is left-handed or not based on counting the number of left vs. right pawed observations of each action. You can find the relevant data and make your own conclusions in tables S3/S4 of the appendix, or use the summary of handedness by task I've included here.
+[^14]: Of course, there are plenty of times when we might want to build a genuinely informative prior, and
+state clearly why we're doing so.
+
