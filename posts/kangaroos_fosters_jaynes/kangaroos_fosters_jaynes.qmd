@@ -123,7 +123,7 @@ writing, I'm pretty broadly convinced that our workflow for building priors shou
 at specifying weakly informative priors[^14]. Without getting too deep into that point, I think
 the [Stan Prior Choice Recommendations](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations#general-principles) page summarizes the intuition well:
 
-> Weakly informative prior should contain enough information to regularize: the idea is that the prior rules out unreasonable parameter values but is not so strong as to rule out values that might make sense
+> Weakly informative priors should contain enough information to regularize: the idea is that the prior rules out unreasonable parameter values but is not so strong as to rule out values that might make sense
 
 The slight distinction I want to make here, however, is that **thinking about maximum entropy
 is a powerful way to grapple with the space of possible priors for a given problem**. For most
