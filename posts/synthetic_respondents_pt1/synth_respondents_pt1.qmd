@@ -20,6 +20,12 @@ Instead, I'm most excited about a research agenda focused on mixing human and LL
 
 # The Plan
 
-This post
+This post will cover points 1 and 2 above- a follow up post will get more into the weeds of elicting good predictions from LLMs.
+
+For this post, we'll work purely with simulated data. That is, I'll ask you to grant for a moment that LLMs can indeed produce at least somewhat relevant predictions of human survey response[2^]. By simulating stand-ins for LLM predictions[^3] ranging from useless to remarkably predictive, I'll introduce a variety of estimators capable of leveraging good such predictions and roughly, of ignoring bad ones. From there, we can further simulate a variety of well known flaws of LLM survey responses like excessively consistent answers, and illustrate estimators stil capable of sifting signal from noise to improve precision.
 
 [^1]: To state the obvious, AAPOR is a huge conference! Apologies in advance if there was a session where the discussion felt significantly better than what I've outlined here; I'd love to see materials for any sessions I missed. To be clear, there were also lots of really fantastic sessions on other uses from AI in survey research from folks like Mas  @ Applecart, and Josh Learner from NORC; I'm specifically taking issue with the discussion of synthetic sample, where folks felt distinctly uncalibrated in their takes.
+
+[^2]: To be clear, rejecting that LLMs are capable of this is pretty unreasonable. See [Park et al. 2024](https://arxiv.org/abs/2411.10109) for some examples of situations where LLMs are remarkably predictive.
+
+[^3]: One might say.... Synthetic synthetic responses?
