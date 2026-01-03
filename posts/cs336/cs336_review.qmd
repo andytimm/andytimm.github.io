@@ -1,0 +1,15 @@
+---
+layout: post
+title: CS336\: A fantastic way to catch up
+subtitle: Review + Practical Notes for Auditors
+date: 2026-01-03
+draft: TRUE
+categories:
+  - LLMs
+  - Variational Inference
+---
+
+> If you wish to make an apple pie from scratch, you must first invent the universe. - Carl Sagan, probably
+
+In December, I finished working through Stanford NLP's [CS336: Language Models From Scratch](https://stanford-cs336.github.io/spring2025/).
+The basic premise of the course is that

@@ -8,16 +8,17 @@ This is Andy Timm's personal website/blog built with [Quarto](https://quarto.org
 
 ## Build Commands
 
-```bash
-# Render the full website (outputs to docs/)
-quarto render
+**WARNING:** Do not run `quarto render` locally - some posts have Python dependencies that require WSL, and a full render will break the cached outputs. Use `quarto preview` for local development instead.
 
-# Preview the site locally with live reload
+```bash
+# Preview the site locally with live reload (RECOMMENDED)
 quarto preview
 
-# Render a single post
+# Render a single post (if you know it will work locally)
 quarto render posts/"Post Name"/filename.qmd
 ```
+
+Full site rendering happens via GitHub Actions on push to main.
 
 ## Site Structure
 
