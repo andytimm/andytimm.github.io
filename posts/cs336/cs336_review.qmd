@@ -12,4 +12,11 @@ categories:
 > If you wish to make an apple pie from scratch, you must first invent the universe. - Carl Sagan, probably
 
 In December, I finished working through Stanford NLP's [CS336: Language Models From Scratch](https://stanford-cs336.github.io/spring2025/).
-The basic premise of the course is that
+The basic premise of the course is that:
+- Researchers are becoming **disconnected** from the underlying details of LLMs, and increasingly living on top of high level abstractions.
+- Moving up levels of abstraction can allow you to move faster in some ways, BUT
+- there are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn. 
+- Thus, build Modern LLMs from Scratch to build deeper understanding, and develop capacity to do more fundamental research.
+
+I found the course delivered well on this premise. This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations
+if you're considering auditing it as well. 
