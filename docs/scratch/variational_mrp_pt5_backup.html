@@ -328,7 +328,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <p>Let’s first make a fun target posterior distribution from an image to model. I think it’d be a fun preview gif for the post to watch the model say Hi:</p>
 <p><img src="images/hard_to_draw_posterior.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
 <p>It’s quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor. To represent this as a 2-D density we can fit models against, we’ll read in the image, collapse along the color dimension, and transform it into a torch tensor:</p>
-<div id="55e7681c" class="cell" data-execution_count="2">
+<div id="b4a8d96a" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>raw_img <span class="op">=</span> Image.<span class="bu">open</span>(<span class="st">"images/hard_to_draw_posterior.png"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sum the 3 color channels</span></span>
@@ -358,7 +358,7 @@ ln q_K (x_K) = lnq_0(x_0) - \sum \limits_{K = 1}\limits^{K} ln  \lvert \frac{\pa
 <p>First, we pick a simple base distribution to push through our flow, here a 2-D Normal distribution called <code>base_distr</code>. We’ll also include the interesting target we just made above, <code>distr</code>.</p>
 <p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropogation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
 <p>Keeping with the structure above of numbering successive stages of the flow, <code>z0</code> here is our base distribution, and <code>z</code> will be the learned approximation to the target. In addition to the terms you’d expect in the ELBO, we’re also tracking and making use of the sum of the log determinant of the Jacobians to a handle on the distortion of the base density the flows apply.</p>
-<div id="3ceb62e0" class="cell" data-execution_count="4">
+<div id="779a6cf9" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/e-hulten/planar-flows/blob/master/loss.py</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VariationalLoss(nn.Module):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,distribution):</span>
@@ -381,7 +381,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 </span></p>
 <p><span class="math inline">w</span> and <span class="math inline">b</span> define the hyperplane and u specifies the direction and strength of the expansion. I’ll show a visualization of just one layer of that below.</p>
 <p>If you’re more used to working with neural nets, you might wonder why we choose the non-linearity <span class="math inline">tanh</span> here, which generally isn’t as popular as something like <span class="math inline">relu</span> or it’s variants in more recent years due to it’s more unstable gradient flows. As the authors show in appendix <span class="math inline">A.1</span>, functions like the above aren’t actually always invertible, and choosing <span class="math inline">tanh</span> allows them to impose some constraints that make things reliably invertible. See the Appendix for more details about how that works, or take a careful look at Edvard’s implementation of the single function below:</p>
-<div id="4ac1013d" class="cell" data-execution_count="5">
+<div id="89df9a2d" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From https://github.com/e-hulten/planar-flows/blob/master/planar_transform.py</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarTransform(nn.Module):</span>
@@ -428,7 +428,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>      )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Where things will start to get exciting is multiple layers of the flow; here’s how we can make an abstraction that allows us to stack up <span class="math inline">K</span> layers of the flow to control the flexibility of our approximation.</p>
-<div id="c06eb07e" class="cell" data-execution_count="6">
+<div id="1a5e5adb" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PlanarFlow(nn.Module):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>, K: <span class="bu">int</span> <span class="op">=</span> <span class="dv">6</span>):</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Make a planar flow by stacking planar transformations in sequence.</span></span>
@@ -451,7 +451,7 @@ f(x) = x + u*tanh(w^Tx + b), w, u \in   \mathbb{R}^d, b \in \mathbb{R}
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z, log_det_J</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Let’s run this for a single layer to introduce the training loop, and build some intuition on the planar flow. Note that I’m hiding setting up the plot code.</p>
-<div id="5b0f0305" class="cell" data-execution_count="8">
+<div id="8bff0a56" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>target_distr <span class="op">=</span> <span class="st">"ring"</span>  <span class="co"># U_1, U_2, U_3, U_4, ring</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>flow_length <span class="op">=</span> <span class="dv">2</span></span>
