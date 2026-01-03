@@ -10,7 +10,7 @@
         "eval: False \n",
         "---"
       ],
-      "id": "ab8cfc10"
+      "id": "53901234"
     },
     {
       "cell_type": "code",
@@ -49,7 +49,7 @@
         "\n",
         "x"
       ],
-      "id": "f9ac6cbd",
+      "id": "a5f3588a",
       "execution_count": null,
       "outputs": []
     },
@@ -97,7 +97,7 @@
         "\n",
         "plot_density(U_1)"
       ],
-      "id": "b4b9c5d9",
+      "id": "10edf646",
       "execution_count": null,
       "outputs": []
     },
@@ -119,7 +119,7 @@
         "\n",
         "#torch.randn(2, 2)"
       ],
-      "id": "599e2662",
+      "id": "d389ccd5",
       "execution_count": null,
       "outputs": []
     },
@@ -173,7 +173,7 @@
         "\n",
         "print(interpolated_values)\n"
       ],
-      "id": "e6694aa8",
+      "id": "67a0418e",
       "execution_count": null,
       "outputs": []
     },
@@ -187,7 +187,7 @@
         "for value, count in zip(unique_values, counts):\n",
         "    print(f\"Value: {value}, Count: {count}\")"
       ],
-      "id": "f996931b",
+      "id": "789f4e59",
       "execution_count": null,
       "outputs": []
     },
@@ -206,7 +206,7 @@
         "# Show the plot\n",
         "plt.show()"
       ],
-      "id": "2d81e761",
+      "id": "55d08c1d",
       "execution_count": null,
       "outputs": []
     },
@@ -235,7 +235,7 @@
         "ring_density(batch).min()\n",
         "ring_density(batch).max()"
       ],
-      "id": "a3e0e895",
+      "id": "34f5baf2",
       "execution_count": null,
       "outputs": []
     },
@@ -278,7 +278,7 @@
         "\n",
         "#ring_density(batch)"
       ],
-      "id": "a805d796",
+      "id": "1fe023b6",
       "execution_count": null,
       "outputs": []
     },
@@ -290,7 +290,7 @@
         "#interpolate_tensor(torch_posterior,batch2)\n",
         "batch2"
       ],
-      "id": "12fcd665",
+      "id": "5272257d",
       "execution_count": null,
       "outputs": []
     },
@@ -309,7 +309,7 @@
         "# Show the plot\n",
         "plt.show()"
       ],
-      "id": "47bdd836",
+      "id": "e8786e50",
       "execution_count": null,
       "outputs": []
     },
@@ -330,7 +330,7 @@
         "#    i, j = idx\n",
         "#    print(f\"Pair of indices: ({i}, {j})\")"
       ],
-      "id": "d9e928ea",
+      "id": "51ec0f39",
       "execution_count": null,
       "outputs": []
     },
@@ -342,7 +342,7 @@
         "\n",
         "test.sample()"
       ],
-      "id": "11c53f83",
+      "id": "fb0d636a",
       "execution_count": null,
       "outputs": []
     },
@@ -368,7 +368,7 @@
         "    \n",
         "make_gif_from_train_plots(\"32_layer.gif\")"
       ],
-      "id": "9fd830eb",
+      "id": "7abb3b37",
       "execution_count": null,
       "outputs": []
     }
@@ -378,7 +378,7 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
-      "path": "C:\\Python311\\share\\jupyter\\kernels\\python3"
+      "path": "/home/atimm/anaconda3/share/jupyter/kernels/python3"
     }
   },
   "nbformat": 4,

@@ -19,3 +19,5 @@ scratch/
 # Dropbox extended attributes
 *:com.dropbox.attrs
 *:com.dropbox.attributes
+
+**/*.quarto_ipynb

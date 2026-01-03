@@ -2,14 +2,17 @@ project:
   type: website
   output-dir: docs
   render:
+    - "**/*.qmd"
+    - "**/*.md"
     - "!CLAUDE.md"
+    - "!posts/**/ppi_blog_outline.md"
 
 website:
   title: "Andy Timm"
   description: "Personal website of Andy Timm"
   site-url: https://andytimm.github.io
   repo-url: https://github.com/andytimm/andytimm.github.io
-  draft-mode: gone
+  draft-mode: unlinked
   open-graph: true
  # favicon: favicon.png
   twitter-card: 

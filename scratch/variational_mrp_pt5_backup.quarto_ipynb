@@ -16,7 +16,6 @@
         "  - Normalizing Flows\n",
         "eval: False \n",
         "---\n",
-        "\n",
         "   \n",
         "This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. \n",
         "\n",
@@ -196,7 +195,7 @@
         "this may moderately new to PyTorch, I'll explain in detail\n",
         "than normal what each operation is doing and why we need it.\n"
       ],
-      "id": "aef011bc"
+      "id": "b730f422"
     },
     {
       "cell_type": "code",
@@ -217,7 +216,7 @@
         "torch.set_default_device('cuda')\n",
         "device = torch.device(\"cuda:0\" if torch.cuda.is_available() else \"cpu\")"
       ],
-      "id": "79feaa0b",
+      "id": "f1c39cdd",
       "execution_count": null,
       "outputs": []
     },
@@ -233,9 +232,9 @@
         "It's quick to turn the 300x300 pixel image above into a 300x300 PyTorch tensor.\n",
         "To represent this as a 2-D density we can fit models against, we'll read in\n",
         "the image, collapse along the color dimension, and transform it into a torch\n",
-        "tensor:\n"
+        "tensor:"
       ],
-      "id": "6669c5e2"
+      "id": "a43a2963"
     },
     {
       "cell_type": "code",
@@ -262,7 +261,7 @@
         "#300 x 300 px, normalized grayscale representation of the above image\n",
         "torch_posterior.sum()"
       ],
-      "id": "cde82665",
+      "id": "1764f69b",
       "execution_count": null,
       "outputs": []
     },
@@ -293,9 +292,9 @@
         "`z0` here is our base distribution, and `z` will be the learned approximation\n",
         "to the target. In addition to the terms you'd expect in the ELBO, we're also\n",
         "tracking and making use of the sum of the log determinant of the Jacobians to\n",
-        "a handle on the distortion of the base density the flows apply.\n"
+        "a handle on the distortion of the base density the flows apply."
       ],
-      "id": "96191a97"
+      "id": "5d5b6bf7"
     },
     {
       "cell_type": "code",
@@ -424,7 +423,7 @@
         "          \n",
         "          return two_moons_density"
       ],
-      "id": "d66ac6cd",
+      "id": "c7223df7",
       "execution_count": null,
       "outputs": []
     },
@@ -444,7 +443,7 @@
         "      target_density_log_prob = -self.distr(z)\n",
         "      return (base_log_prob - target_density_log_prob - sum_log_det_J).mean()"
       ],
-      "id": "9f2515a0",
+      "id": "22da5d45",
       "execution_count": null,
       "outputs": []
     },
@@ -477,9 +476,9 @@
         "above aren't actually always invertible, and choosing $tanh$ allows them\n",
         "to impose some constraints that make things reliably invertible. See the Appendix\n",
         "for more details about how that works, or take a careful look at Edvard's\n",
-        "implementation of the single function below:\n"
+        "implementation of the single function below:"
       ],
-      "id": "526cac84"
+      "id": "be206b07"
     },
     {
       "cell_type": "code",
@@ -530,7 +529,7 @@
         "          self.u + (m_wtu - wtu) * self.w / torch.norm(self.w, p=2, dim=1) ** 2\n",
         "      )"
       ],
-      "id": "f1614589",
+      "id": "1c1d2003",
       "execution_count": null,
       "outputs": []
     },
@@ -540,9 +539,9 @@
       "source": [
         "Where things will start to get exciting is multiple layers of the flow; here's\n",
         "how we can make an abstraction that allows us to stack up $K$ layers\n",
-        "of the flow to control the flexibility of our approximation.\n"
+        "of the flow to control the flexibility of our approximation."
       ],
-      "id": "c177f3a6"
+      "id": "f712a968"
     },
     {
       "cell_type": "code",
@@ -569,7 +568,7 @@
         "\n",
         "        return z, log_det_J"
       ],
-      "id": "36f6b158",
+      "id": "75ef0cec",
       "execution_count": null,
       "outputs": []
     },
@@ -578,9 +577,9 @@
       "metadata": {},
       "source": [
         "Let's run this for a single layer to introduce the training loop, and build some\n",
-        "intuition on the planar flow. Note that I'm hiding setting up the plot code.\n"
+        "intuition on the planar flow. Note that I'm hiding setting up the plot code."
       ],
-      "id": "bdd62f34"
+      "id": "87ece69e"
     },
     {
       "cell_type": "code",
@@ -759,7 +758,7 @@
         "        plt.setp(axes, xticks=[], yticks=[])\n",
         "    plt.show()"
       ],
-      "id": "95fc931b",
+      "id": "0cfd4a52",
       "execution_count": null,
       "outputs": []
     },
@@ -804,7 +803,7 @@
         "        # Save plots during training. Plots are saved to the 'train_plots' folder.\n",
         "        plot_training(model, flow_length, batch_num, lr, axlim) "
       ],
-      "id": "2324a5fb",
+      "id": "5e41efe7",
       "execution_count": null,
       "outputs": []
     },
@@ -839,7 +838,7 @@
         "different notations and framings that they very successfully bridge.\n",
         "are many different implicit and explicit objectives and "
       ],
-      "id": "63450486"
+      "id": "cc45f779"
     }
   ],
   "metadata": {
@@ -847,7 +846,7 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
-      "path": "C:\\Python311\\share\\jupyter\\kernels\\python3"
+      "path": "/home/atimm/anaconda3/share/jupyter/kernels/python3"
     }
   },
   "nbformat": 4,

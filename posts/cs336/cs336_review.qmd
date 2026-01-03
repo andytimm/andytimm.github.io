@@ -1,9 +1,10 @@
 ---
 layout: post
-title: CS336\: A fantastic way to catch up
+title: "CS336: Language Models From Scratch"
 subtitle: Review + Practical Notes for Auditors
 date: 2026-01-03
-draft: TRUE
+draft: true
+freeze: auto
 categories:
   - LLMs
   - Variational Inference
@@ -13,10 +14,12 @@ categories:
 
 In December, I finished working through Stanford NLP's [CS336: Language Models From Scratch](https://stanford-cs336.github.io/spring2025/).
 The basic premise of the course is that:
+
 - Researchers are becoming **disconnected** from the underlying details of LLMs, and increasingly living on top of high level abstractions.
 - Moving up levels of abstraction can allow you to move faster in some ways, BUT
 - there are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn. 
-- Thus, build Modern LLMs from Scratch to build deeper understanding, and develop capacity to do more fundamental research.
+- Thus: **build build Modern LLMs from Scratch** to build deeper understanding, and improve capacity to do more fundamental research.
 
-I found the course delivered well on this premise. This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations
-if you're considering auditing it as well. 
+I found the course delivered well on this premise- I feel much better equipped to understand/iterate on recent research, and considerably more capable at systems skills increasingly required for meaningful work. Full courses are rarely better 
+
+This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations if you're considering auditing it as well. 

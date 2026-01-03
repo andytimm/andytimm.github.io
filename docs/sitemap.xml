@@ -1,107 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://andytimm.github.io/blog.html</loc>
-    <lastmod>2024-12-31T21:39:31.561Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2025-01-04T02:07:26.289Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/LICENSE.html</loc>
-    <lastmod>2023-04-08T19:12:31.031Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/BART VI/2020-03-06-BART-vi.html</loc>
-    <lastmod>2023-04-08T21:54:26.105Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Convention Model/2019-07-13-convention-model.html</loc>
-    <lastmod>2023-04-08T19:12:32.166Z</lastmod>
+    <loc>https://andytimm.github.io/posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html</loc>
+    <lastmod>2022-09-18T02:26:29.639Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Intro to Retrodesign/2019-02-05-Intro_To_retrodesign.html</loc>
-    <lastmod>2023-04-08T19:12:32.813Z</lastmod>
+    <lastmod>2022-09-18T02:25:44.095Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html</loc>
-    <lastmod>2023-04-08T19:12:33.520Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Maximum Entropy Normal/2018-05-11-maxentropynormal.html</loc>
-    <lastmod>2023-04-08T19:12:33.951Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Race Models Pt 1/2018-04-10-race-models-pt1.html</loc>
-    <lastmod>2022-09-18T00:54:29.255Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Race Models Pt 1/race_models_part1.html</loc>
-    <lastmod>2024-12-31T21:41:19.558Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</loc>
-    <lastmod>2023-05-01T00:38:23.969Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html</loc>
-    <lastmod>2023-05-12T01:27:13.393Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/projects.html</loc>
-    <lastmod>2024-07-27T15:04:51.814Z</lastmod>
+    <loc>https://andytimm.github.io/posts/BART VI/2020-03-06-BART-vi.html</loc>
+    <lastmod>2022-09-18T02:26:54.152Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/software.html</loc>
     <lastmod>2024-01-06T00:21:52.536Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</loc>
-    <lastmod>2023-12-18T19:16:51.503Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html</loc>
-    <lastmod>2023-06-04T15:44:13.248Z</lastmod>
-  </url>
-  <url>
     <loc>https://andytimm.github.io/scratch/python_plotting_tests.html</loc>
-    <lastmod>2023-06-11T17:43:32.722Z</lastmod>
+    <lastmod>2023-06-11T17:43:25.964Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html</loc>
-    <lastmod>2023-11-07T16:32:04.260Z</lastmod>
+    <loc>https://andytimm.github.io/projects.html</loc>
+    <lastmod>2023-11-07T16:04:14.339Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6.html</loc>
-    <lastmod>2023-07-11T02:21:47.301Z</lastmod>
-  </url>
-  <url>
-    <loc>https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</loc>
-    <lastmod>2023-12-07T21:41:40.731Z</lastmod>
+    <loc>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</loc>
+    <lastmod>2025-01-26T22:59:51.886Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Variational MRP Pt7/variational_mrp_pt7.html</loc>
-    <lastmod>2023-12-18T19:58:00.622Z</lastmod>
+    <lastmod>2023-12-18T19:57:52.599Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html</loc>
+    <lastmod>2023-06-11T19:38:34.280Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</loc>
+    <lastmod>2023-12-18T19:16:20.937Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</loc>
+    <lastmod>2022-11-20T21:49:07.093Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html</loc>
+    <lastmod>2023-12-07T21:41:36.232Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/index.html</loc>
+    <lastmod>2025-01-04T02:07:26.289Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/blog.html</loc>
+    <lastmod>2024-12-31T21:39:31.561Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/Is Voting Habit Forming 2/voting_habits_heterogenity.html</loc>
-    <lastmod>2024-08-07T00:54:21.181Z</lastmod>
+    <lastmod>2023-12-18T22:09:51.106Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/scratch/checking_big_likelihood_formatting.html</loc>
-    <lastmod>2025-01-04T04:04:40.615Z</lastmod>
+    <loc>https://andytimm.github.io/posts/Race Models Pt 1/race_models_part1.html</loc>
+    <lastmod>2024-12-31T21:41:19.558Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html</loc>
+    <lastmod>2022-11-21T17:32:30.429Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html</loc>
+    <lastmod>2023-05-27T16:22:36.530Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6.html</loc>
+    <lastmod>2023-08-06T19:11:03.717Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html</loc>
     <lastmod>2024-12-31T17:29:03.165Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</loc>
-    <lastmod>2024-11-28T03:32:14.576Z</lastmod>
+    <loc>https://andytimm.github.io/scratch/checking_big_likelihood_formatting.html</loc>
+    <lastmod>2025-01-04T04:04:40.615Z</lastmod>
   </url>
   <url>
-    <loc>https://andytimm.github.io/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html</loc>
-    <lastmod>2025-01-26T22:59:51.886Z</lastmod>
+    <loc>https://andytimm.github.io/LICENSE.html</loc>
+    <lastmod>2022-09-03T23:19:15.785Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Convention Model/2019-07-13-convention-model.html</loc>
+    <lastmod>2022-09-18T02:26:19.936Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/Is Voting Habit Forming/2020-03-09-Voting-Habit-FRD.html</loc>
+    <lastmod>2022-09-18T02:26:01.660Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</loc>
+    <lastmod>2024-11-28T03:32:14.576Z</lastmod>
   </url>
 </urlset>

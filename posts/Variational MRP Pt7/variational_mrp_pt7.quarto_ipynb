@@ -15,7 +15,6 @@
         "  - Variational Inference\n",
         "---\n",
         "\n",
-        "\n",
         "**Note:** Since writing this post, [Pathfinder](https://mc-stan.org/docs/2_33/cmdstan-guide/pathfinder-intro.html#pathfinder-intro) (described below as well in @sec-other-algos)  has become available in CmdStan, which poses a problem for this concluding post to\n",
         "the series. \n",
         "\n",
@@ -95,9 +94,9 @@
         "python package to their great paper [Advances In Black-Box VI](https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf).\n",
         "\n",
         "Here's a footnote with more implementation details[^3], but for purposes of this post, I'll\n",
-        "just reference the parameters of the main setup function here:\n"
+        "just reference the parameters of the main setup function here:"
       ],
-      "id": "393b1381"
+      "id": "51e9e5f6"
     },
     {
       "cell_type": "code",
@@ -127,7 +126,7 @@
         "    rnvp_params_init_scale =  0.01\n",
         ")"
       ],
-      "id": "e284c7a0",
+      "id": "af1076b0",
       "execution_count": null,
       "outputs": []
     },
@@ -346,7 +345,7 @@
         "[^8]: Beyond this [toy example](https://pyro.ai/examples/boosting_bbvi.html) in Pyro,\n",
         "I can't find much. Again, prove me wrong if you know of something."
       ],
-      "id": "e313e81f"
+      "id": "ca8a8e86"
     }
   ],
   "metadata": {
@@ -354,7 +353,7 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
-      "path": "C:\\Python311\\share\\jupyter\\kernels\\python3"
+      "path": "/home/atimm/anaconda3/share/jupyter/kernels/python3"
     }
   },
   "nbformat": 4,

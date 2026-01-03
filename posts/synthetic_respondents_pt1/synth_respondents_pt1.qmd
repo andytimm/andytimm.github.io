@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Taking Synthetic Respondents Seriously
-subtitle: Part 1: Mere prediction is sufficient
+subtitle: "Part 1: Mere prediction is sufficient"
 date: 2025-07-12
 draft: True
 categories:

@@ -9,8 +9,92 @@
 <link>https://andytimm.github.io/blog.html</link>
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
-<generator>quarto-1.6.39</generator>
-<lastBuildDate>Sun, 26 Jan 2025 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.8.26</generator>
+<lastBuildDate>Sat, 03 Jan 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>CS336: Language Models From Scratch</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/cs336/cs336_review.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<blockquote class="blockquote">
+<p>If you wish to make an apple pie from scratch, you must first invent the universe. - Carl Sagan, probably</p>
+</blockquote>
+<p>In December, I finished working through Stanford NLP’s <a href="https://stanford-cs336.github.io/spring2025/">CS336: Language Models From Scratch</a>. The basic premise of the course is that:</p>
+<ul>
+<li>Researchers are becoming <strong>disconnected</strong> from the underlying details of LLMs, and increasingly living on top of high level abstractions.</li>
+<li>Moving up levels of abstraction can allow you to move faster in some ways, BUT</li>
+<li>there are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn.</li>
+<li>Thus: <strong>build build Modern LLMs from Scratch</strong> to build deeper understanding, and improve capacity to do more fundamental research.</li>
+</ul>
+<p>I found the course delivered well on this premise- I feel much better equipped to understand/iterate on recent research, and considerably more capable at systems skills increasingly required for meaningful work. Full courses are rarely better</p>
+<p>This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations if you’re considering auditing it as well.</p>
+
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
+  author = {Timm, Andy},
+  title = {CS336: {Language} {Models} {From} {Scratch}},
+  date = {2026-01-03},
+  url = {https://andytimm.github.io/posts/cs336/cs336_review.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2026" class="csl-entry quarto-appendix-citeas">
+Timm, Andy. 2026. <span>“CS336: Language Models From Scratch.”</span>
+January 3, 2026. <a href="https://andytimm.github.io/posts/cs336/cs336_review.html">https://andytimm.github.io/posts/cs336/cs336_review.html</a>.
+</div></div></section></div> ]]></description>
+  <category>LLMs</category>
+  <category>Variational Inference</category>
+  <guid>https://andytimm.github.io/posts/cs336/cs336_review.html</guid>
+  <pubDate>Sat, 03 Jan 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Taking Synthetic Respondents Seriously</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/synthetic_respondents_pt1/synth_respondents_pt1.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>AAPOR this year was wonderful- a chance to learn from and connect with dozens of pollsters and survey researchers who are nerdy precisely in many of the ways I am. That said, I generally found myself disappointed with the rigor and <em>vibes</em> of discussion around synthetic respondents at the conference<sup>1</sup>. The night before the conference started, Grow Progress (where I work) co-hosted a happy hour. In a discussion with a few other progressive pollsters, one hope we all expressed for the conference was for someone to rigorously steelman the case for synthetic sample.</p>
+<p>Broadly, I left AAPOR not having heard such a case for integration of synthetic sample into polling and opinion research, so I want to provide my own attempt at that steelman here. I take issue with both extremes of this debdate- both the breathless hype of market research folks who discuss present day, workable drop-in total replacement of human respondents, and the equally exasperating methodological conservatives who seem content to point to the (real) limitations and biases of current LLMs as justification for writing off the <strong>possibility</strong> of LLMs utility to their research.</p>
+<p>Instead, I’m most excited about a research agenda focused on mixing human and LLM responses with estimators that provably increase precision of estimates where LLMs track ground truth human respondents, but guards against bias where LLMs do not. The basic contours of my argument here are: 1. The language of ‘Synthetic Respondents’ feels conceptually unhelpful- instead, we’re better off thinking of LLMs as producing <strong>conditional predictions</strong>, which are, of course, imperfect proxies for human responses 2. Using imperfect predictions/proxies of outcomes to improve estimates is an exceedingly well studied statistical problem- we’re quite capable of reliably mitigating bias when leveraging these predictions, whilst still gaining huge amounts of precision when appropriate. 3. Broader improvements to LLMs and techniques for specializing LLMs for survey research will likely continue to improve the baseline quality of such predictions- suggesting that benefits from these ‘mixed subjects designs’ will continue to increase over time, and grow in applicability.</p>
+<section id="the-plan" class="level1">
+<h1>The Plan</h1>
+<p>This post will cover points 1 and 2 above- a follow up post will get more into the weeds of elicting good predictions from LLMs.</p>
+<p>For this post, we’ll work purely with simulated data. That is, I’ll ask you to grant for a moment that LLMs can indeed produce at least somewhat relevant predictions of human survey response[2^]. By simulating stand-ins for LLM predictions<sup>2</sup> ranging from useless to remarkably predictive, I’ll introduce a variety of estimators capable of leveraging good such predictions and roughly, of ignoring bad ones. From there, we can further simulate a variety of well known flaws of LLM survey responses like excessively consistent answers, and illustrate estimators stil capable of sifting signal from noise to improve precision.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>To state the obvious, AAPOR is a huge conference! Apologies in advance if there was a session where the discussion felt significantly better than what I’ve outlined here; I’d love to see materials for any sessions I missed. To be clear, there were also lots of really fantastic sessions on other uses from AI in survey research from folks like Mas @ Applecart, and Josh Learner from NORC; I’m specifically taking issue with the discussion of synthetic sample, where folks felt distinctly uncalibrated in their takes.↩︎</p></li>
+<li id="fn2"><p>One might say…. Synthetic synthetic responses?↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2025,
+  author = {Timm, Andy},
+  title = {Taking {Synthetic} {Respondents} {Seriously}},
+  date = {2025-07-12},
+  url = {https://andytimm.github.io/posts/synthetic_respondents_pt1/synth_respondents_pt1.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2025" class="csl-entry quarto-appendix-citeas">
+Timm, Andy. 2025. <span>“Taking Synthetic Respondents Seriously.”</span>
+July 12, 2025. <a href="https://andytimm.github.io/posts/synthetic_respondents_pt1/synth_respondents_pt1.html">https://andytimm.github.io/posts/synthetic_respondents_pt1/synth_respondents_pt1.html</a>.
+</div></div></section></div> ]]></description>
+  <category>Synthetic Respondents</category>
+  <guid>https://andytimm.github.io/posts/synthetic_respondents_pt1/synth_respondents_pt1.html</guid>
+  <pubDate>Sat, 12 Jul 2025 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Kangaroos, Foster’s, and E.T. Jaynes</title>
   <dc:creator>Andy Timm</dc:creator>
@@ -126,6 +210,73 @@ January 26, 2025. <a href="https://andytimm.github.io/posts/kangaroos_fosters_ja
   <media:content url="https://andytimm.github.io/posts/kangaroos_fosters_jaynes/imgs/fosters_kangaroo.webp" medium="image" type="image/webp"/>
 </item>
 <item>
+  <title>A Tale of Two Design Effects-</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Now that the cycle is over, and I have a bit more time to write, I want to unpack some interesting (also, <em>frustrating</em>) moments in polling that occurred this cycle.</p>
+<p>Let’s start with one that occupied pollster twitter for several days: are we all dirty herders? Or are we just increasingly weighting on quite predictive things like party or 2020 vote choice? Moreover, why do these look similar to so many folks, and what could pollsters have done to avoid this misconception?</p>
+<p>Here’s a rough outline:</p>
+<ol type="1">
+<li>Weighting can reduce variance (I’ll show how), but some people interpreted low variability of 2024 vote choice estimates<sup>1</sup> as a blindingly obvious sign of herding.</li>
+<li>The above misconception isn’t terribly surprising, given how pervasively our industry tends to think of and communicate about variance and weighting in terms of Kish’s design effect. I’ll explain how Kish’s design effect generally encodes an assumption about weighting increasing variance, and show an alternative design effect (Henry/Valliant) that does correctly get smaller when weighting should reduce variance.</li>
+<li>…But any discussion of design effects that get smaller due to weighting need to grapple with the fact that empirically, our MoE’s are generally far too narrow, not too wide. As Andrew Gelman loves to say, take the stated MoE, and double it to get a realistic one. So to square that circle, I’ll discuss about what each deff gets right and wrong, and sketch out about what more ambitious uncertainty quantification could look like.</li>
+</ol>
+<p>More ambitiously, I’d like to use this post as a jumping off point to discuss the design based inference roots of the polling industry, and the tensions that perspective faces as accuracy increasingly demands a more and more model based approach in the era of low responses rates and broad adoption of non-probability methods.</p>
+<section id="weighting-can-reduce-variance" class="level1">
+<h1>Weighting Can Reduce Variance</h1>
+<p>Let’s briefly lay out the argument I’m responding to here:</p>
+<ol type="1">
+<li>Polls give us their margin of error<sup>2</sup>, so we should have a reasonable sense of the expected spread of estimates we should expect over lots of surveys. For example, a <img src="https://latex.codecogs.com/png.latex?N%20=%20800"> poll should have roughly a +/-6pp margin of error on the difference between Harris and Trump’s vote share<sup>3</sup>.</li>
+<li>In October, it felt like nearly all the battleground state polls showed the candidates within like 2.5pp and often even less.</li>
+<li>If we take the reported MoEs seriously, we should see about 20% of polls show differences larger than 3.8 points, and 5% should show differences larger than 6 points. If we take the reported MoEs, something has to be seriously fishy.</li>
+</ol>
+</section>
+<section id="why-does-that-look-like-herding" class="level1">
+<h1>Why does that look like Herding?</h1>
+<section id="kishs-design-effect" class="level2">
+<h2 class="anchored" data-anchor-id="kishs-design-effect">Kish’s Design Effect</h2>
+</section>
+<section id="henry-valliants-design-effect" class="level2">
+<h2 class="anchored" data-anchor-id="henry-valliants-design-effect">Henry &amp; Valliant’s Design Effect</h2>
+</section>
+</section>
+<section id="but-gelman-says-my-moe-is-too-small" class="level1">
+<h1>But Gelman says my MoE is too small!</h1>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Relative to the polls stated margin of error.↩︎</p></li>
+<li id="fn2"><p>Possibly adjusted to be wider by a design effect.↩︎</p></li>
+<li id="fn3"><p>Note that this is the MoE on the difference between the two (higher than just the MoE on 1 proportion), and that I’m not adjusting for a design effect here. The specifics might make this a bit wider or narrower, but I’ll be more precise in a moment when it actually matters.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2024,
+  author = {Timm, Andy},
+  title = {A {Tale} of {Two} {Design} {Effects-}},
+  date = {2024-11-27},
+  url = {https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2024" class="csl-entry quarto-appendix-citeas">
+Timm, Andy. 2024. <span>“A Tale of Two Design Effects-.”</span> November
+27, 2024. <a href="https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html">https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</a>.
+</div></div></section></div> ]]></description>
+  <category>Survey Weighting</category>
+  <category>Nate Silver griping</category>
+  <guid>https://andytimm.github.io/posts/a_tale_of_two_design_effects/two_design_effects.html</guid>
+  <pubDate>Wed, 27 Nov 2024 05:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Better discrete choice modeling through the rank ordered logit</title>
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/doing_maxdiff_better/better_maxdiff.html</link>
@@ -211,9 +362,9 @@ January 26, 2025. <a href="https://andytimm.github.io/posts/kangaroos_fosters_ja
 <strong>Data Generation for Simulation Study</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span></code></pre></div>
+font-style: inherit;">library</span>(tidyverse)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'tidyverse' was built under R version 4.2.3</code></pre>
 </div>
@@ -256,9 +407,9 @@ font-style: inherit;">library</span>(tidyverse)</span></code></pre></div>
 ✖ dplyr::lag()    masks stats::lag()
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(rstan)</span></code></pre></div>
+font-style: inherit;">library</span>(rstan)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'rstan' was built under R version 4.2.1</code></pre>
 </div>
@@ -288,15 +439,15 @@ The following object is masked from 'package:tidyr':
 
     extract</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(ibd)</span></code></pre></div>
+font-style: inherit;">library</span>(ibd)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'ibd' was built under R version 4.2.3</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(crossdes)</span></code></pre></div>
+font-style: inherit;">library</span>(crossdes)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'crossdes' was built under R version 4.2.3</code></pre>
 </div>
@@ -304,9 +455,9 @@ font-style: inherit;">library</span>(crossdes)</span></code></pre></div>
 <pre><code>Loading required package: AlgDesign
 Loading required package: gtools</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(combinat)</span></code></pre></div>
+font-style: inherit;">library</span>(combinat)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
 Attaching package: 'combinat'
@@ -315,7 +466,7 @@ The following object is masked from 'package:utils':
 
     combn</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">options</span>(<span class="at" style="color: #657422;
 background-color: null;
@@ -417,7 +568,7 @@ font-style: inherit;"># Show W * t(Gamma) to make sure it looks right</span></sp
 background-color: null;
 font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">t</span>(Gamma)</span></code></pre></div>
+font-style: inherit;">t</span>(Gamma)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               [,1]          [,2]          [,3]         [,4]         [,5]
   [1,] -1.147325812   1.453389560 -0.1201172125  0.964840281 -4.537077496
@@ -1221,7 +1372,7 @@ font-style: inherit;">t</span>(Gamma)</span></code></pre></div>
 [799,] -1.747572181   4.054734706 -1.3492809247 -1.534892400 -3.305015726
 [800,]  0.498296810   0.506639979  0.6839018920 -1.723128274  0.169399823</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Correlation of decisionmaker random slopes</span></span>
 <span id="cb27-2">Omega <span class="ot" style="color: #003B4F;
@@ -1307,7 +1458,7 @@ font-style: inherit;"># Again, quick plot to sanity check</span></span>
 background-color: null;
 font-style: inherit;">plot</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div>
+font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1315,7 +1466,7 @@ font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Create X -- let's make this a dummy matrix</span></span>
 <span id="cb28-2">X <span class="ot" style="color: #003B4F;
@@ -1422,11 +1573,11 @@ font-style: inherit;">mean</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">rgumbel</span>(<span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1e6</span>))</span></code></pre></div>
+font-style: inherit;">1e6</span>))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.576678</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Ok, now we need to simulate choices. Each person in each task compares each </span></span>
 <span id="cb30-2"><span class="co" style="color: #5E5E5E;
@@ -1556,7 +1707,7 @@ font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">n</span>())</span></code></pre></div>
+font-style: inherit;">n</span>())</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'individual'. You can override using the
 `.groups` argument.</code></pre>
@@ -1570,7 +1721,7 @@ font-style: inherit;">n</span>())</span></code></pre></div>
 <strong>Best choice logit model</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1">best <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1">best <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -1724,7 +1875,7 @@ background-color: null;
 font-style: inherit;">  target += log_prob' * choice;</span></span>
 <span id="cb32-51"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">}"</span></span></code></pre></div>
+font-style: inherit;">}"</span></span></code></pre></div></div>
 </div>
 </details>
 <p>Much of this logic handles the multilevel component and covariates, but the real key is the last few lines where the likelihood is built. That’s where the problem will arise when we extend the above model into MaxDiff:</p>
@@ -1733,7 +1884,7 @@ font-style: inherit;">}"</span></span></code></pre></div>
 <strong>MaxDiff model</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1">best_worst <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1">best_worst <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -1902,7 +2053,7 @@ background-color: null;
 font-style: inherit;">  target += log_prob_worst' * worst_choice;</span></span>
 <span id="cb33-56"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">}"</span></span></code></pre></div>
+font-style: inherit;">}"</span></span></code></pre></div></div>
 </div>
 </details>
 <p>Comparing the two, you can definitely see the implementation simplicity MaxDiff provides; we’re essentially just building out <code>log_prob_worst</code> and pulling it into the likelihood. Boom, done.</p>
@@ -1912,7 +2063,7 @@ font-style: inherit;">}"</span></span></code></pre></div>
 <strong>Fit the two models, and gather predictions to compare</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Again, note that this code is largely just reproducing https://khakieconomics.github.io/2018/12/27/Ranked-random-coefficients-logit.html,</span></span>
 <span id="cb34-2"><span class="co" style="color: #5E5E5E;
@@ -2056,23 +2207,23 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">stan_model</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">model_code =</span> best)</span></code></pre></div>
+font-style: inherit;">model_code =</span> best)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
 'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1">compiled_bw_choice_model <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1">compiled_bw_choice_model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">stan_model</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">model_code =</span> best_worst)</span></code></pre></div>
+font-style: inherit;">model_code =</span> best_worst)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
 'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1">best_choice_fit <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1">best_choice_fit <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2084,7 +2235,7 @@ font-style: inherit;">data =</span> data_list_best_choice, </span>
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There were 15 divergent transitions after warmup. See
 https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
@@ -2103,7 +2254,7 @@ https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1">best__worst_choice_fit <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1">best__worst_choice_fit <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2115,7 +2266,7 @@ font-style: inherit;">data =</span> data_list_best_worst, </span>
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There were 2 divergent transitions after warmup. See
 https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
@@ -2134,7 +2285,7 @@ https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Now make some predictions to compare</span></span>
 <span id="cb48-2">best_choice <span class="ot" style="color: #003B4F;
@@ -2328,11 +2479,11 @@ font-style: inherit;"># Combine the datasets</span></span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">bind_rows</span>(best_choice, best_worst_choice)</span></code></pre></div>
+font-style: inherit;">bind_rows</span>(best_choice, best_worst_choice)</span></code></pre></div></div>
 </div>
 </details>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Plot results</span></span>
 <span id="cb49-2"><span class="fu" style="color: #4758AB;
@@ -2448,7 +2599,7 @@ font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">legend.position=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"none"</span>)</span></code></pre></div>
+font-style: inherit;">"none"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2459,7 +2610,7 @@ font-style: inherit;">"none"</span>)</span></code></pre></div>
 </div>
 <p>To be clear, what’s plotted here are respondent level utilities for each choice. Concerningly, it doesn’t even seem clear that the best-worst choice model performs better here despite the extra data. The fact that we have to do this at all doesn’t bode well, but let’s compare the RMSE’s of the predictions versus the (simulated and thus known) truth to confirm:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Is the MaxDiff model actually better?</span></span>
 <span id="cb50-2">combined_data <span class="sc" style="color: #5E5E5E;
@@ -2490,7 +2641,7 @@ font-style: inherit;">-</span> median)<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2</span>)))</span></code></pre></div>
+font-style: inherit;">2</span>)))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 2
   Dataset      RMSE
@@ -2538,7 +2689,7 @@ font-style: inherit;">2</span>)))</span></code></pre></div>
 <strong>Model 3: Rank-Ordered Logit for Connected Graphs</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1">ranked <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1">ranked <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -2731,7 +2882,7 @@ background-color: null;
 font-style: inherit;">  }</span></span>
 <span id="cb52-64"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">}"</span></span></code></pre></div>
+font-style: inherit;">}"</span></span></code></pre></div></div>
 </div>
 </details>
 <p>Take a second to reason through the above code; we’re able to use all of the information a full ranking provides to us, without having to force any interrelationship between best and worst to exist that may or may not exist. Also, notice that there’s nothing here specifically for the “connected graph of choices” part of model- that’s all in the choice set generation, which we’ll do next.</p>
@@ -2745,7 +2896,7 @@ font-style: inherit;">}"</span></span></code></pre></div>
 <strong>Updated data generation for connected graph illustration</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Number of individuals</span></span>
 <span id="cb53-2">I <span class="ot" style="color: #003B4F;
@@ -2818,7 +2969,7 @@ font-style: inherit;"># Show W * t(Gamma) to make sure it looks right</span></sp
 background-color: null;
 font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">t</span>(Gamma)</span></code></pre></div>
+font-style: inherit;">t</span>(Gamma)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                [,1]         [,2]         [,3]          [,4]         [,5]
   [1,] -1.5412624799 -1.492174492 -5.116226558  -1.347807230  0.001574089
@@ -3222,7 +3373,7 @@ font-style: inherit;">t</span>(Gamma)</span></code></pre></div>
 [399,] -1.7802306370  3.391903955 -0.259946656   0.034371577 -2.626135392
 [400,] -2.0346276380  0.687385242  0.123381126  -4.826722847 -0.954933517</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Correlation of decisionmaker random slopes</span></span>
 <span id="cb55-2">Omega <span class="ot" style="color: #003B4F;
@@ -3308,7 +3459,7 @@ font-style: inherit;"># Again, quick plot to sanity check</span></span>
 background-color: null;
 font-style: inherit;">plot</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div>
+font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -3316,7 +3467,7 @@ font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1">bibd <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1">bibd <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -3347,11 +3498,11 @@ background-color: null;
 font-style: inherit;"># Returns 1 if the design is connected</span></span>
 <span id="cb56-8"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">is.connected</span>(bibd)</span></code></pre></div>
+font-style: inherit;">is.connected</span>(bibd)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Create a mapping from BIBD options to attribute levels; idea is to make</span></span>
 <span id="cb58-2"><span class="co" style="color: #5E5E5E;
@@ -3516,11 +3667,11 @@ font-style: inherit;">mean</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">rgumbel</span>(<span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1e6</span>))</span></code></pre></div>
+font-style: inherit;">1e6</span>))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.5771369</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb60" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Ok, now we need to simulate choices. Each person in each task compares each </span></span>
 <span id="cb60-2"><span class="co" style="color: #5E5E5E;
@@ -3650,7 +3801,7 @@ font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">n</span>())</span></code></pre></div>
+font-style: inherit;">n</span>())</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'individual'. You can override using the
 `.groups` argument.</code></pre>
@@ -3668,7 +3819,7 @@ font-style: inherit;">n</span>())</span></code></pre></div>
 <strong>Comparing ROL to best choice, and MaxDiff models</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1">data_list_best_choice <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1">data_list_best_choice <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -3886,7 +4037,7 @@ font-style: inherit;">data =</span> data_list_best_choice, </span>
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There were 2 divergent transitions after warmup. See
 https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
@@ -3905,7 +4056,7 @@ https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb67" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Compile and fit MaxDiff model</span></span>
 <span id="cb67-2">compiled_maxdiff_model <span class="ot" style="color: #003B4F;
@@ -3927,7 +4078,7 @@ font-style: inherit;">data =</span> data_list_best_worst,</span>
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: The largest R-hat is NA, indicating chains have not mixed.
 Running the chains for more iterations may help. See
@@ -3943,7 +4094,7 @@ https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb71" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Compile and fit ROL model</span></span>
 <span id="cb71-2">compiled_rol_model <span class="ot" style="color: #003B4F;
@@ -3952,12 +4103,12 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">stan_model</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">model_code =</span> ranked)</span></code></pre></div>
+font-style: inherit;">model_code =</span> ranked)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
 'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb73" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1">rol_fit <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1">rol_fit <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -3969,7 +4120,7 @@ font-style: inherit;">data =</span> data_list_ranked_rcl,</span>
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There were 1 divergent transitions after warmup. See
 https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
@@ -3993,7 +4144,7 @@ https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb79" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1">best_choice <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1">best_choice <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -4276,11 +4427,11 @@ font-style: inherit;"># Combine all results</span></span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">bind_rows</span>(best_choice, maxdiff_choice, rol_choice)</span></code></pre></div>
+font-style: inherit;">bind_rows</span>(best_choice, maxdiff_choice, rol_choice)</span></code></pre></div></div>
 </div>
 </details>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb80" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb80" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">ggplot</span>(all_results, <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -4399,7 +4550,7 @@ font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">legend.position=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"bottom"</span>)</span></code></pre></div>
+font-style: inherit;">"bottom"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -4410,7 +4561,7 @@ font-style: inherit;">"bottom"</span>)</span></code></pre></div>
 </div>
 <p>At a squint, rank-ordered logit &gt; best choice &gt; MaxDiff as I’ve argued. Notice though that unlike the MaxDiff model, both best choice and rank-ordered logit look unbiased; the ROL model simply seems more efficient. Let’s check the RMSE to confirm:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb81" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1">all_results <span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb81" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1">all_results <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span></span>
 <span id="cb81-2">  <span class="fu" style="color: #4758AB;
@@ -4438,7 +4589,7 @@ font-style: inherit;">-</span> median)<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2</span>)))</span></code></pre></div>
+font-style: inherit;">2</span>)))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
   Dataset             RMSE
@@ -4476,7 +4627,7 @@ font-style: inherit;">2</span>)))</span></code></pre></div>
 <strong>Setting up sim study with J = 5</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb83" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb83" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Number of individuals</span></span>
 <span id="cb83-2">I <span class="ot" style="color: #003B4F;
@@ -4549,7 +4700,7 @@ font-style: inherit;"># Show W * t(Gamma) to make sure it looks right</span></sp
 background-color: null;
 font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">t</span>(Gamma)</span></code></pre></div>
+font-style: inherit;">t</span>(Gamma)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               [,1]        [,2]         [,3]         [,4]         [,5]
   [1,] -1.216579571  2.70873392   4.76010662 -4.382515769 -0.937908838
@@ -4953,7 +5104,7 @@ font-style: inherit;">t</span>(Gamma)</span></code></pre></div>
 [399,]  1.033377609  0.63334602   1.72819503  0.960919556  3.077539059
 [400,]  1.270341353 -2.39520487  -0.27432219 -2.138915024 -2.486122999</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb85" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Correlation of decisionmaker random slopes</span></span>
 <span id="cb85-2">Omega <span class="ot" style="color: #003B4F;
@@ -5039,7 +5190,7 @@ font-style: inherit;"># Again, quick plot to sanity check</span></span>
 background-color: null;
 font-style: inherit;">plot</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div>
+font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -5047,7 +5198,7 @@ font-style: inherit;">as.data.frame</span>(beta_i))</span></code></pre></div>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb86" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Create X -- let's make this a dummy matrix</span></span>
 <span id="cb86-2">X <span class="ot" style="color: #003B4F;
@@ -5154,11 +5305,11 @@ font-style: inherit;">mean</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">rgumbel</span>(<span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1e6</span>))</span></code></pre></div>
+font-style: inherit;">1e6</span>))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.5779057</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb88" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb88" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Ok, now we need to simulate choices. Each person in each task compares each </span></span>
 <span id="cb88-2"><span class="co" style="color: #5E5E5E;
@@ -5304,7 +5455,7 @@ font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">n</span>())</span></code></pre></div>
+font-style: inherit;">n</span>())</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'individual'. You can override using the
 `.groups` argument.</code></pre>
@@ -5314,7 +5465,7 @@ font-style: inherit;">n</span>())</span></code></pre></div>
 <p>Ok, onto new material; we’ll generate a “permutation matrix” of all the ways the <img src="https://latex.codecogs.com/png.latex?J%20-%202"> middle options can occur, which we’ll iterate over to calculate all the possible likelihoods.</p>
 <p>For example, here with <img src="https://latex.codecogs.com/png.latex?J%20=%205">, the permutation matrix will have the following 6 permutations:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb90" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1">n_tied <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb90" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1">n_tied <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> J <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -5339,7 +5490,7 @@ font-style: inherit;">nrow</span>(permutation_matrix)</span>
 <span id="cb90-5"></span>
 <span id="cb90-6"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">print</span>(permutation_matrix)</span></code></pre></div>
+font-style: inherit;">print</span>(permutation_matrix)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3]
 [1,]    1    2    3
@@ -5357,7 +5508,7 @@ font-style: inherit;">print</span>(permutation_matrix)</span></code></pre></div>
 <strong>ROL with unknown middle preferences</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb92" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1">stan_data_rol_ties <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb92" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1">stan_data_rol_ties <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5648,7 +5799,7 @@ background-color: null;
 font-style: inherit;">}</span></span>
 <span id="cb92-96"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"</span></span></code></pre></div>
+font-style: inherit;">"</span></span></code></pre></div></div>
 </div>
 </details>
 <p>Summing up all the possible middle options should be fairly transparent, but if you’re interested in the <code>log_sum_exp</code> tricks I’m using to speed this up, see this footnote<sup>12</sup>.</p>
@@ -5667,7 +5818,7 @@ font-style: inherit;">"</span></span></code></pre></div>
 <strong>ROL with Efron approximation of unknown middle options</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb93" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1">efron_model <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb93" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1">efron_model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
 background-color: null;
@@ -5874,7 +6025,7 @@ background-color: null;
 font-style: inherit;">}</span></span>
 <span id="cb93-72"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"</span></span></code></pre></div>
+font-style: inherit;">"</span></span></code></pre></div></div>
 </div>
 </details>
 <p>The beauty of the Efron approximation is that it works remarkably well in practice, especially compared to alternatives. As discussed for example in <a href="https://pubmed.ncbi.nlm.nih.gov/9333345/">Hertz-Picciotto and Rockhill (1997)</a>, the Efron method tends to outperform other approximations, particularly when dealing with moderate to heavy ties (read: unknown middle rankings).</p>
@@ -5888,7 +6039,7 @@ font-style: inherit;">"</span></span></code></pre></div>
 <strong>4 way Comparison Setup</strong>
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb94" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1">compiled_maxdiff_model <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb94" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1">compiled_maxdiff_model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5901,23 +6052,23 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">stan_model</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">model_code =</span> rol_with_unknown_middle_options)</span></code></pre></div>
+font-style: inherit;">model_code =</span> rol_with_unknown_middle_options)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
 'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb96" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1">compiled_efron_model <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb96" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1">compiled_efron_model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">stan_model</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">model_code =</span> efron_model)</span></code></pre></div>
+font-style: inherit;">model_code =</span> efron_model)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in readLines(file.path(makevar_files)): incomplete final line found on
 'C:\Users\timma\Documents/.R/Makevars.win'</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb98" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1">compiled_rol_model <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb98" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1">compiled_rol_model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6128,7 +6279,7 @@ font-style: inherit;">data =</span> stan_data_maxdiff, <span class="at" style="c
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
 Running the chains for more iterations may help. See
@@ -6139,7 +6290,7 @@ https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb101" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1">fit_rol_ties <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb101" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1">fit_rol_ties <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6171,7 +6322,7 @@ font-style: inherit;">data =</span> stan_data_rol, <span class="at" style="color
 background-color: null;
 font-style: inherit;">iter =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">800</span>)</span></code></pre></div>
+font-style: inherit;">800</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
 Running the chains for more iterations may help. See
@@ -6181,7 +6332,7 @@ Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior vari
 Running the chains for more iterations may help. See
 https://mc-stan.org/misc/warnings.html#tail-ess</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb103" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1">normalize_utilities <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1">normalize_utilities <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
@@ -6598,14 +6749,14 @@ font-style: inherit;">element_text</span>(<span class="at" style="color: #657422
 background-color: null;
 font-style: inherit;">hjust =</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0.5</span>))</span></code></pre></div>
+font-style: inherit;">0.5</span>))</span></code></pre></div></div>
 </div>
 </details>
 <p>Before we show the comparison plot, here’s a minor technical caveat. The natural scale of the utilities the two unknown handling models produce is different than that of the MaxDiff and ROL without ties models. To plot them usefully against one another, I thus have to normalize the utilities. This makes it a bit harder to compare these plots to the last few, but unfortunately its necessary for a valid comparison.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb104" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb104" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">print</span>(fourway_comparison_plot)</span></code></pre></div>
+font-style: inherit;">print</span>(fourway_comparison_plot)</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -6616,9 +6767,9 @@ font-style: inherit;">print</span>(fourway_comparison_plot)</span></code></pre><
 </div>
 <p>So roughly from the plot: ROL without unknowns &gt; ROL with full marginal likelihood for unknowns ~ ROL with Efron Approximation for Unknowns &gt; MaxDiff. Let’s sanity check that by looking at RMSEs.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb105" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">print</span>(rmse_comparison)</span></code></pre></div>
+font-style: inherit;">print</span>(rmse_comparison)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                Model      RMSE
 1             MaxDiff 0.4370070
@@ -6702,6 +6853,7 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 
 
 
+
 <p>This is a draft of a paper I wrote in grad school on whether formation of voting habits exhibits any heterogeneity by race, party, or gender, using data from the Florida voter file. Putting it online since I’ve shown the draft to a few folks at this point and someone mentioned it’d be nice to have it publicly available.</p>
 <p><strong>TL;DR:</strong> It doesn’t seem like there is any strong heterogeneity by race, party, or gender in voting habit formation, although there’s some evidence that non-affiliated voters might form habits less readily. This is encouraging as a Democrat; if our folks struggled to form voting habits easily, the task of expanding the electorate would be much harder. Due to the complexity of methods needed to study this problem, I have a considerable amount of uncertainty over both the true effect sizes of habit formation and the “causes of effects” - whether what’s happening is really habit<sup>1</sup>.</p>
 <p>Happy to share replication materials if asked, just reach out (the data is too large for github).</p>
@@ -6724,7 +6876,7 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <p>There were two major steps in cleaning this data. First, I removed all voters who requested a public records exemption. These are voters who have a legal reason to have their information hidden from the public, for example domestic violence survivors or those who have restraining orders filed against others. Accepted exemptions still have their voting history listed, but all demographic and geographic information is lost, thus rendering the redacted data unhelpful for my purposes. I also checked for any seemingly impossible votes cast (for example, voting underage), but in this edition of the file no such problems appeared to occur compared to earlier editions of the file.</p>
 <p>Second, I group the roughly 13 million Florida voters by birthdate cohort, calculating summaries of each cohort’s voting behavior and demographic characteristics. These are then filtered to the 1.9 million voters who turned 18 or almost did in the last 10 years. This grouping sidesteps the potential problems arising from the fact the voter file only includes people registered to vote. While there is not a complete list of just eligible and just ineligible 17 and 18-year olds, through this cohort grouping, we can work with the upstream/downstream votes cast by cohorts above and below the eligibility threshold instead. Unfortunately, this also adds some additional complexity to interpreting results, as most potential violations of the fuzzy regression discontinuity design assumptions would occur at the individual level. As noted earlier, this also narrows the population of causal inference: we can only reason about registered voter compliers, not the broader adult population. Unlike earlier work, I also compute the proportion of each race, gender, and party in each cohort, which both allow for examining heterogeneity and act as additional controls in estimation. A last question of data quality that might be concerning is a possibility of attrition, or of movement across states between election pairs. If, for instance, voters move out of Florida, but are not removed from the voter file, they would appear not to vote in subsequent elections, biasing the CACEs downward. Alternatively, voters might move into Florida but not correctly have their prior state’s voting history brought with them to the Florida file. Coppock &amp; Green explored this question extensively in their appendix, using a private vendor’s data on net inflows and outflows of voters between states. Their overall conclusion is that the net change in the Florida voting population is small, and that even their more extreme estimates of net change to the voter file would not bias the CACE estimates much. While I do not have access to their vendor’s data, and thus am not able to show that net inflow remained the same between 2013 and 2018, I can think of little reason Florida would experience a large change in it’s young adult voting population between those years due to movement between states. More broadly, this concern also applies to upstream-experiment-as-IV designs, as almost all of these use the voter file first as a list of people to target, and second as a way to check voting history (and thus experiment effect sizes) after the fact. Unfortunately, as Coppock &amp; Green show, the potential bias from this depends on a complicated interaction of whether inflow or outflow is higher, and the voting histories of those who leave. All of this makes it hard to predict if final CACE estimates are biased up or down in total, if such an effect were to exist.</p>
 <p>Below in table 1 is a demographic profile of the sample after the filtering to those who turned 18 in the last 10 years. First, we can see that there are a large number of total votes cast, making it plausible that a sufficient number of compliers exist for somewhat precise estimates. It is fortunate that Florida is simultaneously the third most populous state in the United States, and has rich demographic data as well. As expected, presidential years have much higher turnout. I can combine the different year totals for a variety of different estimates: two presidential to presidential year estimates, 2 midterm to midterm year estimates, and 2 presidential to midterm year estimates. Each of these have theoretical value, as they represent different types of habit formation as I will discuss later. Also, the proportion of each demographic group can help calibrate our expectations around precision of estimates. With Asians being 2% of this population, it’s unrealistic to expect particularly precise estimates for them, but we should be able to make more headway for the other racial, gender, and party groups.</p>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>variable</th>
@@ -6811,13 +6963,13 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure 1: Example Discontinuity 1</figcaption>
+<figcaption>Figure 1: Example Discontinuity 1</figcaption>
 </figure>
 </div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_2.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure 2: Example Discontinuity 2</figcaption>
+<figcaption>Figure 2: Example Discontinuity 2</figcaption>
 </figure>
 </div>
 </section>
@@ -6849,7 +7001,7 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <section id="instrument-effectiveness" class="level2">
 <h2 class="anchored" data-anchor-id="instrument-effectiveness">Instrument Effectiveness</h2>
 <p>Given that strength of instruments is a major concern in this body of research, and given prior work has posited CACEs from subset estimation like I use would be too imprecise to really understand heterogeneity, it is important to give a precise characterization of my instrument’s strength. This can be easily done using just the first stage of my 2SLS estimates above, effectively presenting how many downstream votes we expect our instrument to generate for a variety of specifications. In table 2 below, the first estimate is the number of votes we believe to be generated by our instrument (the coefficient on <img src="https://latex.codecogs.com/png.latex?%CE%B1_1">) for the 2008-2012 pair. Past work has been comfortable presenting this level of result as sufficiently precise. Next is the 2010-2014 pair, which prior work has also interpreted extensively. Restricting my data to blacks who are only 20% of the voting population is instructive- while fewer votes are of course generated, we can still expect an amount of precision in black presidential pairs similar to that in the full population in midterms. Hispanic voters show a similar trend given a similar share of the population, and white voter estimates will be even more precise as they are over half of Floridian voters. It is also important to show where this strategy breaks down- with the Asian (2% of population) subset, our estimates will be very imprecise, even for the presidential pair, and effectively useless for the midterms. Stepping back, given there is no prior knowledge about heterogeneity of CACEs by race, party, and gender, even these relatively coarse instruments are capable of showing any strong trends that exist, or ruling out ones that do not.</p>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Subgroup</th>
@@ -6899,10 +7051,10 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_3.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure 3: CACE Estimates for Presidential Pairs</figcaption>
+<figcaption>Figure 3: CACE Estimates for Presidential Pairs</figcaption>
 </figure>
 </div>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 16%">
 <col style="width: 21%">
@@ -6996,10 +7148,10 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_4.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure 4: Midterm CACEs</figcaption>
+<figcaption>Figure 4: Midterm CACEs</figcaption>
 </figure>
 </div>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 16%">
 <col style="width: 21%">
@@ -7093,10 +7245,10 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_5.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure 5: Dropoff CACEs</figcaption>
+<figcaption>Figure 5: Dropoff CACEs</figcaption>
 </figure>
 </div>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 16%">
 <col style="width: 21%">
@@ -7195,7 +7347,7 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <p>Beyond allowing me to estimate heterogeneous CACEs, retaining more information from the Florida voter file than previous work allows me to explore a greater variety of robustness checks as well. In order, I discuss including or excluding control variables, bandwidth variation, jumps in any of the covariates at the discontinuity, and a falsification check leveraging the fact that some cohorts of voters turned 18 not in a federal election. Of these, only bandwidth raise any concern.</p>
 <p>First, as a simple check of the robustness, one might wonder if inclusion of my 9 new controls significantly changes any of the CACE estimates I present. I compared my estimates presented in the results section against both the same estimates excluding the control blocks in equations (1) and (2), and my full FL estimates to those presented by Coppock and Green. In both cases, the point estimates moved little, although the standard errors were reduced slightly as expected. This result also lends some credibility to earlier work like Coppock &amp; Green’s, and Dinas (2012)’s; if my estimates were sensitive to inclusion of controls, their work likely would be as well, calling into question the viability of the FRD estimation in states that don’t provide such rich demographic data. As suggested by Coppock &amp; Green however, the major source of variation does seem to be temporal variation, which is accounted for with the lagged variable. Code carrying out these comparisons can be found in the appendix.</p>
 <p>Bandwidth provides more of a concern for my estimates: while bandwidth selection algorithms suggest the full 365-day bandwidth presented regardless of metrics to optimize for, or polynomial used, the estimates shrink towards zero as smaller and smaller bandwidths around the upstream election are used to estimate the CACE. Across all possible metrics to optimize for, kernels, and up to order 3 polynomial, all bandwidth selection algorithms formulations I tried using the rdRobust R package agreed that using the full 365 bandwidth was the best choice. As an illustration of the shrinking CACEs across varying bandwidths, in table 6 I present the 2008-2012 (presidential) election pair CACE point estimates at 5 different possible bandwidths. While the unweighted average of these subset estimates is of course not substantively meaningful, I include it as an aid in seeing the trend. A similar pattern occurs for all the other 5 election pairs I estimate- a full matrix of such estimates for all elections (also including their SEs) is in the appendix.</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 17%">
 <col style="width: 15%">
@@ -7350,13 +7502,13 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Is Voting Habit Forming 2/images/fig_6.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure 6: Covariates don’t seem to jump at 2008 discontinuity; further similar plots can be found in appendix.</figcaption>
+<figcaption>Figure 6: Covariates don’t seem to jump at 2008 discontinuity; further similar plots can be found in appendix.</figcaption>
 </figure>
 </div>
 <p>Of course, a small variation across the bandwidth might be too small to see in these smaller plots, but still large enough to bias my results. More formally, we can test this using regression, by seeing whether the eligibility indicator <img src="https://latex.codecogs.com/png.latex?Z"> is a strong predictor of each covariate <img src="https://latex.codecogs.com/png.latex?Y"> in the equation below:</p>
 <p><img src="https://latex.codecogs.com/png.latex?Y=%5Cbeta_0+%5Cbeta_1%20Z+%5Cbeta_2%20T+%5Cbeta_3%20T%20*%20Z+%5Cvarepsilon"></p>
 <p>I show the <img src="https://latex.codecogs.com/png.latex?%CE%B2_1"> estimates for the 2008 discontinuity below in table 8- as we would expect, eligibility in 2008 is a poor tool for predicting all demographic covariates- all the coefficients are effectively zero, and none are statistically significant.</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 26%">
 <col style="width: 25%">
@@ -7432,7 +7584,7 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <p>Thus, to compare the two, I estimate two different intent to treat (ITT) effects using the regression below:</p>
 <p><img src="https://latex.codecogs.com/png.latex?Y=%5Cbeta_0+%5Cbeta_1%20Z+%5Cbeta_2%20T+%5Cbeta_3%20T%20*%20Z+%5Cvarepsilon"></p>
 <p>Where <img src="https://latex.codecogs.com/png.latex?Y"> is now the 2012 vote total in both cases, but the days to eligibility and eligibility indicator are switched from 2008 (correct) and 2007 (falsified) numbers. While these shouldn’t be interpreted as proper causal estimates of the effect of habit, in table 9 we receive a point estimate for <img src="https://latex.codecogs.com/png.latex?%CE%B2_1"> of roughly zero in the falsified case, with a similar precision to the correctly specified ITT one.</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 34%">
 <col style="width: 21%">
@@ -7495,7 +7647,7 @@ Rank Ordered Logit.”</span> August 6, 2024. <a href="https://andytimm.github.i
 <li id="fn1"><p>It’s hard to TL;DR why I’m unsure about causes of effects, but essentially the methods don’t give us much ability to differentiate the “direct” effect of voting in one electing on voting in the next, versus anything that initial vote sets in action before the following election. For example, a campaign attempting to turn you out to vote would be impossible to distinguish from the direct effect of habit using this approach. Given that non-affiliated voters generally get less targeted turnout outreach, one plausible story is that voting doesn’t so much form habits as opt you into political contact of numerous types because you are seen as a “likely voter”.↩︎</p></li>
 <li id="fn2"><p>I avoid the term independent for these voters because many states have independent or independence parties, which is a common source of confusion.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Timm, Andy},
   title = {Who {Forms} {Voting} {Habits?}},
   date = {2023-12-18},
@@ -7521,6 +7673,7 @@ Voting Habit Forming 2/voting_habits_heterogenity.html</a>.
 
 
 
+
 <p>I recently gave a talk on <strong>Regularized Raking</strong> at the <a href="https://nyhackr.org/index.html">New York Open Statistical Programming Meetup</a>.</p>
 <p>Here is the abstract:</p>
 <blockquote class="blockquote">
@@ -7533,7 +7686,7 @@ Voting Habit Forming 2/voting_habits_heterogenity.html</a>.
 
 
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Timm, Andy},
   title = {My Talk on {Regularized} {Raking} at {NYOSPM}},
   date = {2023-12-05},
@@ -7555,6 +7708,7 @@ NYOSPM.”</span> December 5, 2023. <a href="https://andytimm.github.io/posts/NY
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/Variational MRP Pt7/variational_mrp_pt7.html</link>
   <description><![CDATA[ 
+
 
 
 
@@ -7593,7 +7747,7 @@ NYOSPM.”</span> December 5, 2023. <a href="https://andytimm.github.io/posts/NY
 <p>To fit this variational approximation, I’m using Agrawal, Domke, and Sheldon’s <a href="https://github.com/abhiagwl/vistan/tree/master">vistan</a>, which is a companion python package to their great paper <a href="https://proceedings.neurips.cc/paper/2020/file/c91e3483cf4f90057d02aa492d2b25b1-Paper.pdf">Advances In Black-Box VI</a>.</p>
 <p>Here’s a footnote with more implementation details<sup>3</sup>, but for purposes of this post, I’ll just reference the parameters of the main setup function here:</p>
 <div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1">vistan.algorithm(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1">vistan.algorithm(</span>
 <span id="cb1-2">    vi_family <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
@@ -7697,7 +7851,7 @@ background-color: null;
 font-style: inherit;">=</span>  <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.01</span></span>
-<span id="cb1-21">)</span></code></pre></div>
+<span id="cb1-21">)</span></code></pre></div></div>
 </div>
 <p>Let’s talk about:</p>
 <ol type="1">
@@ -7771,7 +7925,7 @@ font-style: inherit;">0.01</span></span>
 <li id="fn6"><p>See the paper for a longer explanation for why it’s still unbiased, but essentially this term has expectation zero. for some samples it may not be zero, but it’s sufficient for the unbiasedness of the broader gradient that it have expectation zero.↩︎</p></li>
 <li id="fn7"><p>Beyond this <a href="https://pyro.ai/examples/boosting_bbvi.html">toy example</a> in Pyro, I can’t find much. Again, prove me wrong if you know of something.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
@@ -7794,6 +7948,7 @@ MRP Pt7/variational_mrp_pt7.html</a>.
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6.html</link>
   <description><![CDATA[ 
+
 
 
 
@@ -7833,13 +7988,7 @@ MRP Pt7/variational_mrp_pt7.html</a>.
 <p>We should keep in mind that <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> is ultimately a diagnostic tool for importance sampling, and in cases where the needs of importance sampling and simple variational inference diverge, <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> can give a misleading answer.</p>
 <p>Let’s re-use an example from the importance sampling post to illustrate this. What happens if we approximate the red distribution below with the green one?</p>
 <div class="cell">
-
-</div>
-<div class="cell">
-
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">mixture <span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">mixture <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -7886,14 +8035,18 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">xlab</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">""</span>)</span></code></pre></div>
+font-style: inherit;">""</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The green distribution here is a prime candidate to importance sample to approximate the red one- it coves all the needed mass, and we can massively down weight the irrelevant points in the center. On the other hand, this’d be a really, really bad variational approximation to use raw, since it has a ton of mass between the two modes which will blow up our loss. Because the needs of PSIS-based estimators and unadjusted VI diverge, <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> is low, but the approximation would be pretty bad:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">importance_ratios <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">importance_ratios <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -7983,7 +8136,7 @@ font-style: inherit;">NA</span>)</span>
 background-color: null;
 font-style: inherit;">$</span>diagnostics<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>pareto_k</span></code></pre></div>
+font-style: inherit;">$</span>pareto_k</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -1.737515</code></pre>
 </div>
@@ -7995,7 +8148,7 @@ font-style: inherit;">$</span>pareto_k</span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> inherits a common issue with most KL Divergence adjacent metrics: it’s ultimately something we evaluate locally, so if there’s a part of the posterior totally unknown to our <img src="https://latex.codecogs.com/png.latex?q(x)">, it won’t be able to tell you what you’re missing.</p>
 <p>We already used 1 example from the importance sampling post, so let’s keep that moving. What do you think will happen with <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> with the green approximation below that misses a whole mode?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">mixture <span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">mixture <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -8042,14 +8195,18 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">xlab</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">""</span>)</span></code></pre></div>
+font-style: inherit;">""</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>If you guessed <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> will say everything is perfect when it’s not, you’re correct:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">second_importance_ratios <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">second_importance_ratios <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -8142,7 +8299,7 @@ font-style: inherit;">NA</span>)</span>
 background-color: null;
 font-style: inherit;">$</span>diagnostics<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>pareto_k</span></code></pre></div>
+font-style: inherit;">$</span>pareto_k</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.07343881</code></pre>
 </div>
@@ -8150,7 +8307,7 @@ font-style: inherit;">$</span>pareto_k</span></code></pre></div>
 <p>That’s… not great. Since we evaluate the importance ratio and thus eventually <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> at the collection of values in <img src="https://latex.codecogs.com/png.latex?q(x)">, the diagnostic has no real way to know we’re missing an entire mode, and unlike in the above case there’s no easy fix here.</p>
 <p>Another interesting question this example raises is what happens in high dimensions, where it’s much less intuitive what “missing one or several modes” looks like. Just by increasing the sd of the normal <img src="https://latex.codecogs.com/png.latex?q(x)"> a little in the example, we see a sudden, large increase in <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D">;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">third_importance_ratios <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">third_importance_ratios <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -8234,15 +8391,15 @@ font-style: inherit;">$</span>ratios),</span>
 background-color: null;
 font-style: inherit;">r_eff =</span> <span class="cn" style="color: #8f5902;
 background-color: null;
-font-style: inherit;">NA</span>)</span></code></pre></div>
+font-style: inherit;">NA</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Some Pareto k diagnostic values are too high. See help('pareto-k-diagnostic') for details.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">psis_result_3<span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">psis_result_3<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">$</span>diagnostics<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>pareto_k</span></code></pre></div>
+font-style: inherit;">$</span>pareto_k</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3.70381</code></pre>
 </div>
@@ -8298,7 +8455,7 @@ font-style: inherit;">$</span>pareto_k</span></code></pre></div>
 <p>What are some properties of this distance? I already mentioned a major downside (this looks nasty to estimate in general, and indeed it is). What are the upsides of this?</p>
 <p>Unlike the KL or <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E2"> divergences we’ve looked at before, the Wasserstein distance takes into account the metric on the underlying space! Let’s unpack that by again drawing on the optimal transport problem for intuition. The Wasserstein distance takes into account not only the differences in the values or probabilities assigned to different points in the distributions but also the actual “spatial”<sup>4</sup> arrangement of those points.</p>
 <p>This is a incredibly useful property because the summaries of the posterior we care about in general also rely on the underlying metric. This is basically how the arbitrarily poor mean and variance examples above work; they exploit the lack of use of an underlying metric. That allows Huggins et al.&nbsp;to derive one of the key results of the paper</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 6%">
 </colgroup>
@@ -8327,7 +8484,7 @@ font-style: inherit;">$</span>pareto_k</span></code></pre></div>
 <p>To do this, define the moment constants <img src="https://latex.codecogs.com/png.latex?C_p%5E%7B%5Cmathrm%7BPI%7D%7D(%5Cxi)"> and <img src="https://latex.codecogs.com/png.latex?C_p%5E%7B%5Cmathrm%7BEI%7D%7D(%5Cxi)">. For <img src="https://latex.codecogs.com/png.latex?p%20%5Cgeq%201">, <img src="https://latex.codecogs.com/png.latex?%5Cxi"> is p-polynomially integrable if <img src="https://latex.codecogs.com/png.latex?%0AC_p%5E%7B%5Cmathrm%7BPI%7D%7D(%5Cxi):=2%20%5Cinf%20_%7B%5Ctheta_0%7D%5Cleft%5C%7B%5Cint%5Cleft%5C%7C%5Ctheta-%5Ctheta_0%5Cright%5C%7C_2%5Ep%20%5Cxi(%5Cmathrm%7Bd%7D%20%5Ctheta)%5Cright%5C%7D%5E%7B%5Cfrac%7B1%7D%7Bp%7D%7D%3C%5Cinfty%0A"> and that <img src="https://latex.codecogs.com/png.latex?%5Cxi"> is p-exponentially integrable if <img src="https://latex.codecogs.com/png.latex?%0AC_p%5E%7B%5Cmathrm%7BEI%7D%7D(%5Cxi):=2%20%5Cinf%20_%7B%5Ctheta_0,%20%5Cepsilon%3E0%7D%5Cleft%5B%5Cfrac%7B1%7D%7B%5Cepsilon%7D%5Cleft%5C%7B%5Cfrac%7B3%7D%7B2%7D+%5Clog%20%5Cint%20e%5E%7B%5Cepsilon%5Cleft%5C%7C%5Ctheta-%5Ctheta_0%5Cright%5C%7C_2%5Ep%7D%20%5Cxi(%5Cmathrm%7Bd%7D%20%5Ctheta)%5Cright%5C%7D%5Cright%5D%5E%7B%5Cfrac%7B1%7D%7Bp%7D%7D%3C%5Cinfty%0A"></p>
 <p>Next, with the assumption that the variational approximation <img src="https://latex.codecogs.com/png.latex?q"> has polynomial (respectively, exponential) tails, our next result provides a bound on the <img src="https://latex.codecogs.com/png.latex?p">-Wasserstein distance using the <img src="https://latex.codecogs.com/png.latex?%5Cchi%5E2">-divergence (respectively, the KL divergence).</p>
 <p>This is saying we require at least polynomial, and ideally exponential moments for <img src="https://latex.codecogs.com/png.latex?q"> and <img src="https://latex.codecogs.com/png.latex?p">, which isn’t that strenuous of a requirement. Then:</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 6%">
 </colgroup>
@@ -8342,7 +8499,7 @@ font-style: inherit;">$</span>pareto_k</span></code></pre></div>
 <p>We first define for any distribution <img src="https://latex.codecogs.com/png.latex?%5Ceta">:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathrm%7BH%7D_%5Calpha(%5Cxi,%20%5Ceta):=%5Cfrac%7B%5Calpha%7D%7B%5Calpha-1%7D%5Cleft%5C%7B%5Coperatorname%7BCUBO%7D_%5Calpha(%5Cxi)-%5Coperatorname%7BELBO%7D(%5Ceta)%5Cright%5C%7D%0A"></p>
 <p>Then we get:</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 6%">
 </colgroup>
@@ -8426,17 +8583,18 @@ font-style: inherit;">$</span>pareto_k</span></code></pre></div>
 <li id="fn8"><p>Fun fact: a key algorithmic detail here is any software implementation of TADDAA is that it must print “taddaa!” upon completing. Without this, users will lack a sense of magic or wonder that the algorithm otherwise instills.↩︎</p></li>
 <li id="fn9"><p>They provide an implementation and replication materials here: https://github.com/TARPS-group/TADDAA. But from my early looks at this, this is more what’s needed to make the paper reproducible than a robust suite of tools for using TADDAA fully. It’s worth pointing out this is a major downside, since the other metrics I discuss all have pretty easy to use tools which implement them for general models at this point.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
-  author = {Andy Timm},
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2023-06-17},
-  url = {https://andytimm.github.io/variational_mrp_pt6.html},
+  url = {https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
-Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> June 17, 2023. <a href="https://andytimm.github.io/variational_mrp_pt6.html">https://andytimm.github.io/variational_mrp_pt6.html</a>.
+Timm, Andy. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> June 17, 2023. <a href="https://andytimm.github.io/posts/Variational MRP Pt6/variational_mrp_pt6.html">https://andytimm.github.io/posts/Variational
+MRP Pt6/variational_mrp_pt6.html</a>.
 </div></div></section></div> ]]></description>
   <category>MRP</category>
   <category>Variational Inference</category>
@@ -8450,6 +8608,7 @@ Posterior Distributions.”</span> June 17, 2023. <a href="https://andytimm.gith
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html</link>
   <description><![CDATA[ 
+
 
 
 
@@ -8486,7 +8645,7 @@ Posterior Distributions.”</span> June 17, 2023. <a href="https://andytimm.gith
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/normalizing-flow.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Image Credit to <a href="https://siboehm.com/articles/19/normalizing-flow-network">Simon Boehm</a> here</figcaption><p></p>
+<figcaption>Image Credit to <a href="https://siboehm.com/articles/19/normalizing-flow-network">Simon Boehm</a> here</figcaption>
 </figure>
 </div>
 <p>If we have a random variable <img src="https://latex.codecogs.com/png.latex?x">, with distribution <img src="https://latex.codecogs.com/png.latex?q(x)">, some function <img src="https://latex.codecogs.com/png.latex?f"> with an inverse <img src="https://latex.codecogs.com/png.latex?f%5E%7B-1%7D%20=%20g,%20g%20%5Ccirc%20f(x)%20=%20x">, then the distribution of the result of one iteration of x through, <img src="https://latex.codecogs.com/png.latex?q%5E%5Cprime(x)"> is:</p>
@@ -8520,7 +8679,7 @@ Posterior Distributions.”</span> June 17, 2023. <a href="https://andytimm.gith
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/ring_true_density.png" class="img-fluid" alt="Wow such estimator, very deep"></p>
 <p>This is a solid starting example in that this’d be quite hard to fit with a mean-field normal variational family, but it’s pretty easy to define in PyTorch as well:</p>
 <div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># https://github.com/e-hulten/planar-flows/blob/master/target_distribution.py</span></span>
 <span id="cb1-2"><span class="kw" style="color: #003B4F;
@@ -8612,7 +8771,7 @@ font-style: inherit;">1e-6</span>)</span>
 <span id="cb1-7">                <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
-font-style: inherit;">return</span> u</span></code></pre></div>
+font-style: inherit;">return</span> u</span></code></pre></div></div>
 </div>
 <p>Now let’s define our loss for training, which will just be a slight reformulation of our ELBO:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20-%20%5Cmathbb%7BE%7D%5Blogq(z)%5D%0A"></p>
@@ -8621,7 +8780,7 @@ font-style: inherit;">return</span> u</span></code></pre></div>
 <p>Next, the forward pass structure. The <code>forward</code> method is the is the core of the computational graph structure in PyTorch. It defines operations that are applied to the input tensors to compute the output, and gives PyTorch the needed information for automatic differentiation, which allows smooth calculation and backpropagation of loss through the model to train it. This <code>VariationalLoss</code> module will run at the end of the forward pass to calculate the loss and allow us to pass it back through the graph for training.</p>
 <p>Keeping with the structure above of numbering successive stages of the flow, <code>z0</code> here is our base distribution, and <code>z</code> will be the learned approximation to the target. In addition to the terms you’d expect in the ELBO, we’re also tracking and making use of the sum of the log determinant of the Jacobians to a handle on the distortion of the base density the flows apply.</p>
 <div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># https://github.com/e-hulten/planar-flows/blob/master/loss.py</span></span>
 <span id="cb2-2"><span class="kw" style="color: #003B4F;
@@ -8687,7 +8846,7 @@ font-style: inherit;">return</span> (base_log_prob <span class="op" style="color
 background-color: null;
 font-style: inherit;">-</span> target_density_log_prob <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">-</span> sum_log_det_J).mean()</span></code></pre></div>
+font-style: inherit;">-</span> sum_log_det_J).mean()</span></code></pre></div></div>
 </div>
 </section>
 <section id="a-basic-flow" class="level1">
@@ -8699,7 +8858,7 @@ font-style: inherit;">-</span> sum_log_det_J).mean()</span></code></pre></div>
 <p>If you’re more used to working with neural nets, you might wonder why we choose the non-linearity <img src="https://latex.codecogs.com/png.latex?tanh"> here, which generally isn’t as popular as something like <img src="https://latex.codecogs.com/png.latex?ReLU"> or its variants in more recent years due to it’s more unstable gradient flows. As the authors show in appendix <img src="https://latex.codecogs.com/png.latex?A.1">, functions like the above aren’t actually always invertible, and choosing <img src="https://latex.codecogs.com/png.latex?tanh"> allows them to impose some constraints that make things reliably invertible. See the appendix for more details about how that works, or take a careful look at Edvard’s implementation of the single function below. Realize this sort of constitutes a workaround; ideally we wouldn’t have to force constraints like this for our flow to work.</p>
 <p>There isn’t that much that’s new conceptually in this PyTorch code; we’re defining the layer as a stackable module, which provides torch what it needs to calculate both the forward and backward pass of an arbitrary number of layers.</p>
 <div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># From https://github.com/e-hulten/planar-flows/blob/master/planar_transform.py</span></span>
 <span id="cb3-2"></span>
@@ -8975,11 +9134,11 @@ background-color: null;
 font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span></span>
-<span id="cb3-44">      )</span></code></pre></div>
+<span id="cb3-44">      )</span></code></pre></div></div>
 </div>
 <p>Where things will start to get exciting is multiple layers of the flow; here’s how we can make an abstraction that allows us to stack up <img src="https://latex.codecogs.com/png.latex?K"> layers of the flow to control the flexibility of our approximation.</p>
 <div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">class</span> PlanarFlow(nn.Module):</span>
@@ -9082,12 +9241,12 @@ font-style: inherit;">=</span> layer(z)</span>
 <span id="cb4-20">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
-font-style: inherit;">return</span> z, log_det_J</span></code></pre></div>
+font-style: inherit;">return</span> z, log_det_J</span></code></pre></div></div>
 </div>
 <p>Let’s run this for a single layer to introduce the training loop, and build some intuition on the planar flow.</p>
 <p>The hyperparameter names here should be fairly intuitive, but it’s worth pointing out that the batch size, learning rate (<code>lr</code>), and choice of Adam as an optimizer are all pretty basic reasonable first tries, but something you’d want to consider tuning in a more complicated context- we inherit that level of fiddly-ness when we choose to approach VI using normalizing flows. Also, note that I’m hiding setting up the plot code since it doesn’t add anything to the intuition here.</p>
 <div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
 <span id="cb5-2">target_distr <span class="op" style="color: #5E5E5E;
@@ -9267,14 +9426,14 @@ font-style: inherit;">0</span>:</span>
 <span id="cb5-35">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
-<span id="cb5-36">        plot_training(model, flow_length, batch_num, lr, axlim)</span></code></pre></div>
+<span id="cb5-36">        plot_training(model, flow_length, batch_num, lr, axlim)</span></code></pre></div></div>
 </div>
 <p>At each iteration, we pass the normal draws thorugh the flow, calculate the loss, and propagate that loss backward through the flow to train it using gradient descent.</p>
 <p>Here’s a gif<sup>6</sup> of what that looks like over the course of training. With just a single layer of planar flow of course, this isn’t expressive enough to capture the full density, but we can see why this approach has some promise- it’s learning to cover the target density, rather than us having to get creative in specifying a base density that does this.</p>
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/1_layer.gif" class="img-fluid" alt="Maximally engineered two biomodal"></p>
 <p>Let’s try a more serious attempt, with a depth of 32:</p>
 <div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#From https://github.com/e-hulten/planar-flows/blob/master/train.py</span></span>
 <span id="cb6-2">target_distr <span class="op" style="color: #5E5E5E;
@@ -9456,7 +9615,7 @@ font-style: inherit;">0</span>:</span>
 <span id="cb6-35">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Save plots during training. Plots are saved to the 'train_plots' folder.</span></span>
-<span id="cb6-36">        plot_training(model, flow_length, batch_num, lr, axlim)</span></code></pre></div>
+<span id="cb6-36">        plot_training(model, flow_length, batch_num, lr, axlim)</span></code></pre></div></div>
 </div>
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/32_layer.gif" class="img-fluid" alt="An actually useful normalizing flow"></p>
 <p>Now we’ve got it! With this planar flow, we’ve transformed our base normal into a pretty complex (for 2-D) distribution, cool!</p>
@@ -9474,7 +9633,7 @@ font-style: inherit;"># Save plots during training. Plots are saved to the 'trai
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt5/images/real_nvp_illustration.png" class="img-fluid figure-img" alt="transforming half of the dimensions as a function of the other half"></p>
-<p></p><figcaption class="figure-caption">Figure credit due to <a href="https://blog.evjang.com/2018/01/nf2.html">Eric Jang</a>; he uses the notation <img src="https://latex.codecogs.com/png.latex?%5Calpha"> and <img src="https://latex.codecogs.com/png.latex?%5Cmu"> instead of <img src="https://latex.codecogs.com/png.latex?s"> and <img src="https://latex.codecogs.com/png.latex?t"></figcaption><p></p>
+<figcaption>Figure credit due to <a href="https://blog.evjang.com/2018/01/nf2.html">Eric Jang</a>; he uses the notation <img src="https://latex.codecogs.com/png.latex?%5Calpha"> and <img src="https://latex.codecogs.com/png.latex?%5Cmu"> instead of <img src="https://latex.codecogs.com/png.latex?s"> and <img src="https://latex.codecogs.com/png.latex?t"></figcaption>
 </figure>
 </div>
 <p>This has a lot of really appealing properties. First, this has a triangular Jacobian:</p>
@@ -9512,17 +9671,18 @@ font-style: inherit;"># Save plots during training. Plots are saved to the 'trai
 <li id="fn6"><p>Depending on your browser settings you may need to refresh the page here to watch it run.↩︎</p></li>
 <li id="fn7"><p>Ok fine, you probably get that down to <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BO%7D(n%5E%7B2.8...%7D)"> using <a href="https://en.wikipedia.org/wiki/Strassen_algorithm">Strassen</a> which is implemented essentially everywhere that matters.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
-  author = {Andy Timm},
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2023-06-11},
-  url = {https://andytimm.github.io/variational_mrp_pt5.html},
+  url = {https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
-Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> June 11, 2023. <a href="https://andytimm.github.io/variational_mrp_pt5.html">https://andytimm.github.io/variational_mrp_pt5.html</a>.
+Timm, Andy. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> June 11, 2023. <a href="https://andytimm.github.io/posts/Variational MRP Pt5/variational_mrp_pt5.html">https://andytimm.github.io/posts/Variational
+MRP Pt5/variational_mrp_pt5.html</a>.
 </div></div></section></div> ]]></description>
   <category>MRP</category>
   <category>Variational Inference</category>
@@ -9536,6 +9696,7 @@ Posterior Distributions.”</span> June 11, 2023. <a href="https://andytimm.gith
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html</link>
   <description><![CDATA[ 
+
 
 
 
@@ -9587,13 +9748,7 @@ Posterior Distributions.”</span> June 11, 2023. <a href="https://andytimm.gith
 <h3 class="anchored" data-anchor-id="how-does-iw-elbo-change-the-vi-problem-conceptually">How does IW-ELBO change the VI problem conceptually?</h3>
 <p>The tighter bound is nice, but importance sampling also has the side effect (done right, side benefit) of modifying our incentives in choosing a variational family. To see what I mean, we can re-use the example distributions from last post we used to build intuition for KL Divergence, where red was the true distribution, and green were our potential approximations. If we’re not going to draw multiple samples and weight them, it makes sense to choose something like the first plot below. Every draw in the middle of the two target modes is expensive per our ELBO objective, so better to choose a mode.</p>
 <div class="cell">
-
-</div>
-<div class="cell">
-
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">rkl_plot <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">rkl_plot <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> mixture <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -9697,9 +9852,13 @@ font-style: inherit;">""</span>)</span>
 <span id="cb1-10"></span>
 <span id="cb1-11"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div>
+font-style: inherit;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>If we can use importance sampling though, quite the opposite is be true! Note that we’re still using the ELBO, a reverse-KL based metric- that hasn’t changed. What has changed is our ability to mitigate the objective costs of those samples between the two extremes. Via this “train time” implementation of IS, points outside the two target modes will get lower importance weights, and points within the modes will get higher ones, so as long as we’re covering the modes with some reasonable amount of probability mass, and drawing enough samples we can actually do better with the distribution centered between the modes.</p>
@@ -9715,7 +9874,7 @@ font-style: inherit;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre>
 <p>Above, I described a common failure mode for IS estimators, where some weights are orders of magnitude larger than others, with this long right tail of ratios dominating the weighted average and blowing up the variance of the estimator. Pareto-Smoothed Importance Sampling proposes to model those tail values as coming from a Generalized Pareto Distribution, a distribution for describing extreme values, and replace the most extreme weights with modeled (and more stable) values.</p>
 <p>For concreteness, let’s introduce a simple 1-D example. We’ll aim to use importance sampling to approximate distributions <span style="color:red;"><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D(%5Cmu%20=%200,%5Csigma%20=%201,t%20=5">)</span> and <span style="color:blue;"><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BC%7D(x_0=%200,%5Cgamma%20=%2010)"></span> with a <span style="color:green;"><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(%5Cmu%20=%200,%5Csigma%20=%201">)</span> distribution. If that sounds like the opposite of preferring wide tails on <img src="https://latex.codecogs.com/png.latex?q(x)">’s I described above, you’re right, but using a poor choice here will illustrate some useful properties.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">simulated_data <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">simulated_data <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -9838,17 +9997,21 @@ font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">legend.position=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"none"</span>)</span></code></pre></div>
+font-style: inherit;">"none"</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Removed 6245 rows containing non-finite values (stat_density).</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The tails on that Cauchy distribution are super, super wide compared to our normal, so the samples far, far out in the tails of the normal will need massive weights to approximate the cauchy. The t-distribution is wider too, so we’ll need some higher weights, but not nearly as many. As a way to visualize this, you can see that just a handful of draws have weights away from ~1, but these weights are as much as 5000x higher than the mean ratio, and will dominate any average we make of them.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">simulated_data <span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">simulated_data <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span></span>
 <span id="cb4-2">  <span class="fu" style="color: #4758AB;
@@ -9889,14 +10052,18 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">ggtitle</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"A pretty typical 'unsaveable' set of importance ratios"</span>)</span></code></pre></div>
+font-style: inherit;">"A pretty typical 'unsaveable' set of importance ratios"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The t-distribution ratio plot would look similar, but with a much smaller y-scale. The max weight would still be much larger than the average, but more than an order of magnitude or so less large:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">mean_t <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">mean_t <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -9941,7 +10108,7 @@ font-style: inherit;">";"</span>,</span>
 background-color: null;
 font-style: inherit;">"The cauchy cause is more extreme- the mean of the cauchy is: "</span>,mean_c,<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">" compared to a max of "</span>,max_c))</span></code></pre></div>
+font-style: inherit;">" compared to a max of "</span>,max_c))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "the mean of the t is: 0.995904306317625 compared to a max of 164.448932152079;The cauchy cause is more extreme- the mean of the cauchy is: 0.283655933763642 compared to a max of 1428.22324178729"</code></pre>
 </div>
@@ -9956,7 +10123,7 @@ font-style: inherit;">" compared to a max of "</span>,max_c))</span></code></pre
 <p>What about actually practical to work with variance? This is the really cool bit- <img src="https://latex.codecogs.com/png.latex?k%20%3C%20.7"> turns out to be a remarkably robust indicator of when we can expect PSIS to work in a ton of different simulation studies and practical examples.</p>
 <p>Why is this true? 1.4 fractional moments seems awful arbitrary, right? Let’s ask an alternative question, and kill two birds with one stone: what sample size do we need for PSIS to work? <a href="https://arxiv.org/abs/1511.01437">Chaterjee and Draconis (2018)</a> showed that for a given accuracy, how big <img src="https://latex.codecogs.com/png.latex?S"> needs to be for importance sampling more broadly depends on how close <img src="https://latex.codecogs.com/png.latex?q(x)"> is to <img src="https://latex.codecogs.com/png.latex?p(x)"> in KL distance- we need to satisfy <img src="https://latex.codecogs.com/png.latex?log(S)%20%5Cgeq%20%5Cmathbb%7BE%7D_%7B%5Ctheta%20%5Csim%20q(x)%7D%5Br(%5Ctheta)log(r(%5Ctheta))%5D"> to get accuracy.</p>
 <p>Well, we don’t know the distribution of <img src="https://latex.codecogs.com/png.latex?r">, we should have some pretty good intuition that the important part (read: that explosive, variance ruining tail) is Pareto. If we take <img src="https://latex.codecogs.com/png.latex?r"> as exactly Pareto, you can trace out <img src="https://latex.codecogs.com/png.latex?S"> for different <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"><sup>4</sup>, and to give a few example points-</p>
-<table class="table">
+<table class="caption-top table">
 <caption>for given <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D">, roughly what <img src="https://latex.codecogs.com/png.latex?S"> is needed if <img src="https://latex.codecogs.com/png.latex?r"> is exactly Pareto</caption>
 <colgroup>
 <col style="width: 75%">
@@ -9990,7 +10157,7 @@ font-style: inherit;">" compared to a max of "</span>,max_c))</span></code></pre
 <p>While we of course know <img src="https://latex.codecogs.com/png.latex?r"> isn’t Pareto exactly exactly, hopefully this helps with intuition around <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bk%7D"> telling us when we’re getting into “sampling forever to have any chance at all to control the variance” land.</p>
 <p>Neat! So what does that look like for our Cauchy and T distribution example?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">manageable_psis <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">manageable_psis <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -10022,7 +10189,7 @@ font-style: inherit;">NA</span>)</span>
 <span id="cb7-6"></span>
 <span id="cb7-7">manageable_psis<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>diagnostics</span></code></pre></div>
+font-style: inherit;">$</span>diagnostics</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$pareto_k
 [1] 0.5963495
@@ -10030,9 +10197,9 @@ font-style: inherit;">$</span>diagnostics</span></code></pre></div>
 $n_eff
 [1] 62963.93</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">unmanageable_psis<span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">unmanageable_psis<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>diagnostics</span></code></pre></div>
+font-style: inherit;">$</span>diagnostics</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$pareto_k
 [1] 0.8533127
@@ -10107,17 +10274,18 @@ $n_eff
 <li id="fn5"><p>One fascinating caveat here is that they proved this only for the case where we know the normalizing constant, not the self-normalized case we pretty much always have to live with, but they have some numerical results and some pretty common sense arguments that the result should extend in most reasonable cases to SNIS as well.↩︎</p></li>
 <li id="fn6"><p>Worth noting that one of the authors here is Michael l. Jordan, which is a pretty good heuristic for “this will be a banger of a stats paper”.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
-  author = {Andy Timm},
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+  author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2023-05-27},
-  url = {https://andytimm.github.io/variational_mrp_pt4.html},
+  url = {https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2023" class="csl-entry quarto-appendix-citeas">
-Andy Timm. 2023. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.github.io/variational_mrp_pt4.html">https://andytimm.github.io/variational_mrp_pt4.html</a>.
+Timm, Andy. 2023. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.github.io/posts/Variational MRP Pt4/variational_mrp_pt4.html">https://andytimm.github.io/posts/Variational
+MRP Pt4/variational_mrp_pt4.html</a>.
 </div></div></section></div> ]]></description>
   <category>MRP</category>
   <category>Variational Inference</category>
@@ -10130,6 +10298,7 @@ Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.githu
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3.html</link>
   <description><![CDATA[ 
+
 
 
 
@@ -10166,18 +10335,18 @@ Posterior Distributions.”</span> May 27, 2023. <a href="https://andytimm.githu
 </ol>
 <p>let’s quickly sketch what this might look like in the case of a simple mixture of normals with a single normal as a variational family:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span></code></pre></div>
+font-style: inherit;">library</span>(ggplot2)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'ggplot2' was built under R version 4.2.3</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(gridExtra)</span>
 <span id="cb3-2"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span></code></pre></div>
+font-style: inherit;">library</span>(tidyverse)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'tidyverse' was built under R version 4.2.3</code></pre>
 </div>
@@ -10205,7 +10374,7 @@ font-style: inherit;">library</span>(tidyverse)</span></code></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'lubridate' was built under R version 4.2.3</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">mixture <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">mixture <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -10357,9 +10526,13 @@ font-style: inherit;">""</span>)</span>
 <span id="cb13-14"></span>
 <span id="cb13-15"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div>
+font-style: inherit;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt3/variational_mrp_3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>To approximate the same exact red distribution <img src="https://latex.codecogs.com/png.latex?p(x)">, Inclusive KL (1) and Exclusive KL (2) would optimize the green <img src="https://latex.codecogs.com/png.latex?q(p)"> in quite different manner.</p>
@@ -10421,7 +10594,7 @@ font-style: inherit;">grid.arrange</span>(rkl_plot,fkl_plot)</span></code></pre>
 <li id="fn5"><p>I thought about a section to explain the reparameterization trick, but there are enough good explanations online of the trick. If you’re interested in learning more about why this is important for optimization through stocastic models, I’d recommend starting with Gregory Gundersen’s explanation <a href="https://gregorygundersen.com/blog/2018/04/29/reparameterization/">here</a> and then move on to the original Kingma &amp; Welling, 2013 paper. As general advice on understanding it better though, I’ll echo Greg’s point that some of the online explanations I’ve seen are a bit loose- the key is that we want to express a gradient of an expectation (can’t MC estimate for sure) as an expectation of a gradient (which we can MC estimate provided our convenient deterministic function <img src="https://latex.codecogs.com/png.latex?g"> is differentiable).↩︎</p></li>
 <li id="fn6"><p>In a few posts, we’re theoryposting for a bit.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div id="quarto-reuse" class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2023,
   author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
@@ -10448,6 +10621,7 @@ MRP Pt3/variational_mrp_3.html</a>.
 
 
 
+
 <p>This is the second post in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality.</p>
 <p>In the last post, I laid out why such reformulating the Bayesian inference problem as optimization might be desirable, but previewed why this might be quite hard to find high quality approximations amenable to optimization. I then introduced our running example (predicting national/sub-national opinion on an abortion question from the CCES using MRP), and gave an initial introduction to a version of Variational Inference where we maximize the Evidence Lower Bound (ELBO) as an objective, and do so using a mean-field Gaussian approximation. We saw that with 60k examples, this took about 8 hours to fit with MCMC, but 144 seconds (!) with VI.</p>
 <p>In this post, we’ll explore the shortcomings of this initial approximation, and take a first pass at trying to better with a more complex (full rank) variational approximation. The goal is to get a better feel for what failing models could look like, at least in this relatively simple case.</p>
@@ -10458,9 +10632,6 @@ MRP Pt3/variational_mrp_3.html</a>.
 <li>Some theory on why posterior approximation with VI can be so poor</li>
 <li>Seeing if some more sophisticated techniques like normalizing flows help</li>
 </ol>
-<div class="cell">
-
-</div>
 <section id="the-disclaimer" class="level1">
 <h1>The disclaimer</h1>
 <p>One sort of obvious objections to how I’ve set up this series is “Why not talk about theory on why VI approximations can be poor before trying stuff?”. While in practice I did read a lot of the papers for the next post before writing this one, I think there’s a lot of value is looking at failed solutions to a problem to build up intuition about what our failure mode looks like, and what it might require to get it right.</p>
@@ -10468,7 +10639,7 @@ MRP Pt3/variational_mrp_3.html</a>.
 <section id="toplines" class="level1">
 <h1>Toplines</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">meanfield_60k <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">meanfield_60k <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -10587,9 +10758,9 @@ font-style: inherit;">"MCMC MRP estimate mean, sd: "</span>, <span class="fu" st
 background-color: null;
 font-style: inherit;">round</span>(mrp_estimate_mcmc, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">3</span>))</span></code></pre></div>
+font-style: inherit;">3</span>))</span></code></pre></div></div>
 </div>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
@@ -10616,7 +10787,7 @@ font-style: inherit;">3</span>))</span></code></pre></div>
 <h1>State Level Estimates</h1>
 <p>What happens if we produce state level estimates, similar to the plot last post comparing MRP to a simple weighted estimate? Note that I’ll steer away from the MRP Case Study example here in a few ways. I’ll use <code>tidybayes</code> for working with the draws (more elegant than their loop based approach), and I’ll use more draws (helps with simulation error in smaller states).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">mcmc_state_level <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">mcmc_state_level <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -10643,7 +10814,7 @@ font-style: inherit;">1000</span>)</span>
 background-color: null;
 font-style: inherit;">%&gt;%</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">glimpse</span>()</span></code></pre></div>
+font-style: inherit;">glimpse</span>()</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 12,000,000
 Columns: 13
@@ -10666,7 +10837,7 @@ $ .epred     &lt;dbl&gt; 0.5771322, 0.5189677, 0.5483006, 0.5421404, 0.5417602, 
 <p>If you haven’t worked with <code>tidybayes</code> before, the glimpse above should help give some intuition about the new shape of the data- we’ve take the 12,000 row <code>poststrat_df_60k</code>, and added a row per observation per draw, with the prediction (.epred) and related metadata. This gives 12,000 x 1,000 = 12 million rows. This really isn’t the most space efficient storage, but it allows for very elegant <code>dplyr</code> style manipulation of results and quick exploration.</p>
 <p>Let’s now plot and compare the 50 and 95% credible intervals by state between the two models.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">mcmc_state_summary <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">mcmc_state_summary <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> mcmc_state_level <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -10858,9 +11029,13 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">ylab</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"State"</span>)</span></code></pre></div>
+font-style: inherit;">"State"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>… That looks concerning.</p>
@@ -10873,7 +11048,7 @@ font-style: inherit;">"State"</span>)</span></code></pre></div>
 <p>That last point is particularly important because it suggests there’s no easy rule of thumb for mechanically correcting these intervals, or deciding which could be plausible approximations without the MCMC plot alongside to guide that process. We can’t use VI to save a ton of time, infer the intervals consistently need to x% be wider, and call it a day- we need to reckon more precisely with why they’re distorted.</p>
 <p>Let’s return now to the point about how the shape has gone wrong. Below is a dot plot (<a href="https://dl.acm.org/doi/10.1145/2858036.2858558">Kay et al., 2016</a>)- each point here represents about 1% of the probability mass. I enjoy this approach to posterior visualization when things are getting weird, as this clarifies a lot about the full shape of the posterior distribution, making fewer smoothing assumptions like a density or eye plot might.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">mcmc_state_points <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">mcmc_state_points <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> mcmc_state_level <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -11026,9 +11201,13 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">ylab</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"State"</span>)</span></code></pre></div>
+font-style: inherit;">"State"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Eek. The closer to the individual draws we get, the less these two models seem to be producing comparable estimates. This isn’t me expressing an aesthetic preference for smooth, unimodal distributions- the MFVI plots in this view imply beliefs like “support for this policy in Wyoming is overwhelmingly likely to fall in 1 of 3 narrow ranges, all other values are unlikely”<sup>2</sup>. Other similar humorous claims are easy to find.</p>
@@ -11042,7 +11221,7 @@ font-style: inherit;">"State"</span>)</span></code></pre></div>
 <p>So we managed to structure our Bayesian inference problem as an optimization problem. Can’t we just optimize better? Maybe with more training the result will be less bad?</p>
 <p>the <code>tol_rel_obj</code> parameter control’s the convergence tolerance on the relative norm of the objective. In other words, it controls what (change in the) Evidence Lower Bound value we consider accurate enough to stop at. The default is 0.01, which feels a bit opaque, but let’s try setting it way down to 1e-8 (1Mx lower). Then we can plot it alongside the MCMC estimates and original MF-VI attempt.</p>
 <div class="cell" data-warnings="false">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">tic</span>()</span>
 <span id="cb6-2">fit_60k_1e8 <span class="ot" style="color: #003B4F;
@@ -11163,7 +11342,7 @@ font-style: inherit;">"meanfield"</span>,</span>
 background-color: null;
 font-style: inherit;">seed =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">605</span>)</span></code></pre></div>
+font-style: inherit;">605</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Chain 1: ------------------------------------------------------------
 Chain 1: EXPERIMENTAL ALGORITHM:
@@ -11302,13 +11481,13 @@ Otherwise consider using sampling instead.</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>Setting 'QR' to TRUE can often be helpful when using one of the variational inference algorithms. See the documentation for the 'QR' argument.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">toc</span>()</span></code></pre></div>
+font-style: inherit;">toc</span>()</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>298.73 sec elapsed</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">lower_tol_draws <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">lower_tol_draws <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -11435,9 +11614,13 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">ylab</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"State"</span>)</span></code></pre></div>
+font-style: inherit;">"State"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>… That certainly looks different, but I don’t really think I’d say it looks meaningfully better<sup>4</sup>.</p>
@@ -11450,7 +11633,7 @@ font-style: inherit;">"State"</span>)</span></code></pre></div>
 <p>let’s now try the full-rank approximation. Gather than each <img src="https://latex.codecogs.com/png.latex?z_j"> getting it’s own independent Gaussian, this uses a single multivariate normal distribution- so we can now (roughly) learn correlation structure, fancy.</p>
 <p><img src="https://latex.codecogs.com/png.latex?q(z)%20=%20%5Cmathcal%7BN%7D(z%7C%5Cmu,%5CSigma)"></p>
 <div class="cell" data-warnings="false">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">tic</span>()</span>
 <span id="cb13-2">fit_60k_fullrank <span class="ot" style="color: #003B4F;
@@ -11576,7 +11759,7 @@ font-style: inherit;">TRUE</span>,</span>
 background-color: null;
 font-style: inherit;">seed =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">605</span>)</span></code></pre></div>
+font-style: inherit;">605</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Chain 1: ------------------------------------------------------------
 Chain 1: EXPERIMENTAL ALGORITHM:
@@ -11713,13 +11896,13 @@ Chain 1: COMPLETED.</code></pre>
 tol_rel_obj may help if variational algorithm has terminated prematurely.
 Otherwise consider using sampling instead.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">toc</span>()</span></code></pre></div>
+font-style: inherit;">toc</span>()</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>350.16 sec elapsed</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">full_rank_draws <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">full_rank_draws <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> poststrat_df_60k <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -11847,9 +12030,13 @@ font-style: inherit;">+</span></span>
 background-color: null;
 font-style: inherit;">ylab</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"State"</span>)</span></code></pre></div>
+font-style: inherit;">"State"</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
-<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The first thing to note here is that unlike the mean-field approximation, fitting this model required some tinkering to get it to fit. I ended up needing to set <code>QR = TRUE</code> (ie, use a QR decomposition) to get this to fit at all (unless I set the initialization to 0, at which point the posterior collapsed to nearly a single point).</p>
@@ -11875,17 +12062,18 @@ font-style: inherit;">"State"</span>)</span></code></pre></div>
 <li id="fn3"><p>Phrase due to Richard McElreath. The magic of good visualizations like Kay et al.’s is that makes it trivial to let pattern recognition go to work, and be able to go “oh, that looks wrong”.↩︎</p></li>
 <li id="fn4"><p>Also, apologies for showing every 100 iterations; the rstanarm parameter to set this, <code>refresh</code> doesn’t appear to work properly with non-MCMC models, so I can either not show the ELBO or blow up the post with this.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
-  author = {Andy Timm},
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+  author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2022-11-20},
-  url = {https://andytimm.github.io/Variational_MRP_pt2.html},
+  url = {https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas">
-Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.github.io/Variational_MRP_pt2.html">https://andytimm.github.io/Variational_MRP_pt2.html</a>.
+Timm, Andy. 2022. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.github.io/posts/Variational MRP Pt2/Variational_MRP_pt2.html">https://andytimm.github.io/posts/Variational
+MRP Pt2/Variational_MRP_pt2.html</a>.
 </div></div></section></div> ]]></description>
   <category>MRP</category>
   <category>Variational Inference</category>
@@ -11898,6 +12086,7 @@ Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.
   <dc:creator>Andy Timm</dc:creator>
   <link>https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html</link>
   <description><![CDATA[ 
+
 
 
 
@@ -11920,12 +12109,12 @@ Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.
 <h1>Spherical Cow Sadness</h1>
 <section id="ive-got-that" class="level5">
 <h5 class="anchored" data-anchor-id="ive-got-that">I’ve got that…</h5>
-<div class="quarto-layout-panel">
+<div class="quarto-layout-panel" data-layout="[25,-2,10]">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="quarto-layout-cell" style="flex-basis: 67.6%;justify-content: center;">
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/rstanarm_disclaimer.png" class="img-fluid"></p>
 </div>
-<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 5.4%;justify-content: center;">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 5.4%;justify-content: flex-start;">
 <p>&nbsp;</p>
 </div>
 <div class="quarto-layout-cell" style="flex-basis: 27.0%;justify-content: center;">
@@ -11977,7 +12166,7 @@ Posterior Distributions.”</span> November 20, 2022. <a href="https://andytimm.
 <p>Why this dataset and this model for this series? The question we model itself isn’t super important- as long as we can expect some significant regional and demographic variation in the outcome we’ll be able to explore if VI smoothes away some posterior complexity that MCMC can capture. Drawing an example from the CCES is quite useful, as the 60k total sample is much larger than typical publicly available surveys, and so we can check behavior under larger N sizes. Practically, fitting this with <code>rstanarm</code> allows us to switch easily from a great MCMC implementation to a decent VI optimizer quickly for some early tests. Finally, the complexity and runtime of the model is a nice balance of being something that we can fit with MCMC in a not terrible amount of time for comparison’s sake, and something challenging enough that it should teach us something about VI’s ability to handle non-toy models of the world.</p>
 <p>Fitting this<sup>4</sup> with MCMC in <code>rstanarm</code> is as simple as:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Fit in stan_glmer</span></span>
 <span id="cb1-2">fit <span class="ot" style="color: #003B4F;
@@ -12085,14 +12274,14 @@ font-style: inherit;">0</span>,</span>
 background-color: null;
 font-style: inherit;">seed =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">605</span>)</span></code></pre></div>
+font-style: inherit;">605</span>)</span></code></pre></div></div>
 </div>
 <p>Since it isn’t relevant for the rest of my discussion here, I’ll summarize the model diagnostics here and say that this seems to be a pretty reasonable fit- no issues with divergences, and no issues with poor <img src="https://latex.codecogs.com/png.latex?%5Chat%7Br%7D">’s. Worth quickly pointing out that we did have to tune <code>adapt_delta</code> a bit to get no divergences though- even before getting to fitting this with VI, a model like this requires some adjustments to fit correctly.</p>
 <p>With a model like this on just a 5k sample, we can produce pretty solid state level predictions that have clearly benefited from being fit with a Bayesian multilevel model:</p>
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/5k_sample_full_results.png" class="img-fluid"></p>
 <p>With a 5k sample, MRP lands much closer to the complete weighted survey than a 5k unweighted sample: neat. That’s certainly not a fully fair comparison, but it gives some intution around the promise of this approach.</p>
 <p>Somewhat less neat is that even a 5k sample here takes about 13 minutes to fit. How does this change as we fit on more and more of the data?</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
 <col style="width: 75%">
@@ -12144,18 +12333,18 @@ font-style: inherit;">605</span>)</span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D%5Blogp(z,x)%5D%20-%20%5Cmathbb%7BE%7D%5Blogq(z)%5D"></p>
 <p>This is just the negative of the first two terms above, leaving aside the <img src="https://latex.codecogs.com/png.latex?logp(x)">. Why can we treat maximizing this as minimizing the KL divergence? The <img src="https://latex.codecogs.com/png.latex?logp(x)"> term is just a constant (with respect to q), so regardless of how we vary q, this will still be a valid alternative objective. We call this the Evidence Lower Bound (ELBO)<sup>6</sup>.</p>
 <p>If it’s helpful for intuition, play around with this great interactive ELBO optimizer by Felix Köhler:</p>
-<div class="quarto-layout-panel">
-<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-panel" data-layout-nrow="2">
+<div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/elboplot.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://andytimm.github.io/posts/Variational MRP Pt1/elboeqs.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Link to demonstration <a href="https://englishprobabilistic-machine-learningelbo-interactive--or5u7m.streamlitapp.com/">here</a>; check out Felix’s Youtube explanation of the ELBO <a href="https://www.youtube.com/watch?v=HxQ94L8n0vU">also</a>!</figcaption><p></p>
+<figcaption>Link to demonstration <a href="https://englishprobabilistic-machine-learningelbo-interactive--or5u7m.streamlitapp.com/">here</a>; check out Felix’s Youtube explanation of the ELBO <a href="https://www.youtube.com/watch?v=HxQ94L8n0vU">also</a>!</figcaption>
 </figure>
 </div>
 </div>
@@ -12172,7 +12361,7 @@ font-style: inherit;">605</span>)</span></code></pre></div>
 <p>Each latent <img src="https://latex.codecogs.com/png.latex?z_j"> get it’s own variational factor with density <img src="https://latex.codecogs.com/png.latex?q_j(z_j)">, whose knobs we play with to maximize the ELBO. In the particular implementation below normal distributions are used, plenty of other options like t distributions are common too.</p>
 <p>Probably not the best we can do, but let’s give it a roll. Since we’ve been told this will scale really well too supposedly, let’s use all 60k of the observations just to get a sense how it’ll compare to our 8+ hours in that case.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">tic</span>()</span>
 <span id="cb2-2">fit_60k <span class="ot" style="color: #003B4F;
@@ -12288,7 +12477,7 @@ background-color: null;
 font-style: inherit;">605</span>)</span>
 <span id="cb2-13"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">toc</span>()</span></code></pre></div>
+font-style: inherit;">toc</span>()</span></code></pre></div></div>
 </div>
 <p>This finishes in a blazing <strong>144.03 seconds</strong>. Is this a good fit, or have we created a ridiculous spherical cow?</p>
 <p>You’ll have to find out in the next post. Thanks for reading!</p>
@@ -12309,17 +12498,18 @@ font-style: inherit;">toc</span>()</span></code></pre></div>
 <li id="fn6"><p>Why is this a lower bound? Notice that we could write the evidence from above equations as <img src="https://latex.codecogs.com/png.latex?logp(x)%20=%20KL(q(z)%7C%7Cp(z%7Cx))%20+%20ELBO(q)">. Since the KL divergence is non-negative (it’s zero when distributions <img src="https://latex.codecogs.com/png.latex?p"> and <img src="https://latex.codecogs.com/png.latex?q"> are identical), the ELBO is a lower bound of the evidence.↩︎</p></li>
 <li id="fn7"><p>If this seems like it could go fully spherical cow, both literally in the sense that if we use a bunch of independent normals we make a sphere, and in the sense that this may not represent the full complexity of public opinion, you’re correct. Assuming independence here could very easily cause problems, and part of why this VI strategy is so challenging is the subset of things we can easily optimize doesn’t have the best overlap with fully realistic distributional assumptions over our latent variables.↩︎</p></li>
 </ol>
-</section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div quarto-reuse="quarto-reuse" class="quarto-appendix-contents"><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></div></section><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
-  author = {Andy Timm},
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2022,
+  author = {Timm, Andy},
   title = {Variational {Inference} for {MRP} with {Reliable} {Posterior}
     {Distributions}},
   date = {2022-10-10},
-  url = {https://andytimm.github.io/variational_mrp_pt1.html},
+  url = {https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2022" class="csl-entry quarto-appendix-citeas">
-Andy Timm. 2022. <span>“Variational Inference for MRP with Reliable
-Posterior Distributions.”</span> October 10, 2022. <a href="https://andytimm.github.io/variational_mrp_pt1.html">https://andytimm.github.io/variational_mrp_pt1.html</a>.
+Timm, Andy. 2022. <span>“Variational Inference for MRP with Reliable
+Posterior Distributions.”</span> October 10, 2022. <a href="https://andytimm.github.io/posts/Variational MRP Pt1/variational_mrp_pt1.html">https://andytimm.github.io/posts/Variational
+MRP Pt1/variational_mrp_pt1.html</a>.
 </div></div></section></div> ]]></description>
   <category>MRP</category>
   <category>BART</category>

@@ -16,7 +16,6 @@
         "  - Variational Inference\n",
         "  - Normalizing Flows\n",
         "---\n",
-        "\n",
         "   \n",
         "This is section 5 in my series on using Variational Inference to speed up relatively complex Bayesian models like Multilevel Regression and Poststratification without the approximation being of disastrously poor quality. \n",
         "\n",
@@ -196,7 +195,7 @@
         "this may moderately new to PyTorch, I'll explain in detail\n",
         "than normal what each operation is doing and why we need it.\n"
       ],
-      "id": "288278e4"
+      "id": "e2ebaebf"
     },
     {
       "cell_type": "code",
@@ -217,7 +216,7 @@
         "torch.set_default_device('cuda')\n",
         "device = torch.device(\"cuda:0\" if torch.cuda.is_available() else \"cpu\")"
       ],
-      "id": "15b34504",
+      "id": "51c77c3c",
       "execution_count": null,
       "outputs": []
     },
@@ -232,9 +231,9 @@
         "![](images/ring_true_density.png){fig-alt=\"Wow such estimator, very deep\"}\n",
         "\n",
         "This is a solid starting example in that this'd be quite\n",
-        "hard to fit with a mean-field normal variational family, but it's pretty easy to define in PyTorch as well:\n"
+        "hard to fit with a mean-field normal variational family, but it's pretty easy to define in PyTorch as well:"
       ],
-      "id": "759cc0f6"
+      "id": "6870222f"
     },
     {
       "cell_type": "code",
@@ -248,7 +247,7 @@
         "                u = u - torch.log(exp1 + exp2 + 1e-6)\n",
         "                return u"
       ],
-      "id": "b7c3b255",
+      "id": "d3a284b0",
       "execution_count": null,
       "outputs": []
     },
@@ -279,9 +278,9 @@
         "`z0` here is our base distribution, and `z` will be the learned approximation\n",
         "to the target. In addition to the terms you'd expect in the ELBO, we're also\n",
         "tracking and making use of the sum of the log determinant of the Jacobians to\n",
-        "a handle on the distortion of the base density the flows apply.\n"
+        "a handle on the distortion of the base density the flows apply."
       ],
-      "id": "3093822c"
+      "id": "71b0e7a2"
     },
     {
       "cell_type": "code",
@@ -377,7 +376,7 @@
         "          \n",
         "          return two_moons_density"
       ],
-      "id": "5a0c437d",
+      "id": "b28c825e",
       "execution_count": null,
       "outputs": []
     },
@@ -397,7 +396,7 @@
         "      target_density_log_prob = -self.distr(z)\n",
         "      return (base_log_prob - target_density_log_prob - sum_log_det_J).mean()"
       ],
-      "id": "b5ea8430",
+      "id": "7045c791",
       "execution_count": null,
       "outputs": []
     },
@@ -437,9 +436,9 @@
         "There isn't that much that's new conceptually in this PyTorch code; we're\n",
         "defining the layer as a stackable module, which provides torch what it\n",
         "needs to calculate both the forward and backward pass of an arbitrary\n",
-        "number of layers.\n"
+        "number of layers."
       ],
-      "id": "aa133247"
+      "id": "d4278d35"
     },
     {
       "cell_type": "code",
@@ -490,7 +489,7 @@
         "          self.u + (m_wtu - wtu) * self.w / torch.norm(self.w, p=2, dim=1) ** 2\n",
         "      )"
       ],
-      "id": "74575a43",
+      "id": "dba18419",
       "execution_count": null,
       "outputs": []
     },
@@ -500,9 +499,9 @@
       "source": [
         "Where things will start to get exciting is multiple layers of the flow; here's\n",
         "how we can make an abstraction that allows us to stack up $K$ layers\n",
-        "of the flow to control the flexibility of our approximation.\n"
+        "of the flow to control the flexibility of our approximation."
       ],
-      "id": "b534d31d"
+      "id": "fbaff434"
     },
     {
       "cell_type": "code",
@@ -529,7 +528,7 @@
         "\n",
         "        return z, log_det_J"
       ],
-      "id": "a36b4728",
+      "id": "4ed63e80",
       "execution_count": null,
       "outputs": []
     },
@@ -545,9 +544,9 @@
         "all pretty basic reasonable first tries, but something you'd want to consider tuning\n",
         "in a more complicated context- we inherit that level of fiddly-ness when we choose\n",
         "to approach VI using normalizing flows. Also, note that I'm hiding setting up the plot code\n",
-        "since it doesn't add anything to the intuition here.\n"
+        "since it doesn't add anything to the intuition here."
       ],
-      "id": "b8154d68"
+      "id": "40559cfa"
     },
     {
       "cell_type": "code",
@@ -726,7 +725,7 @@
         "        plt.setp(axes, xticks=[], yticks=[])\n",
         "    plt.show()"
       ],
-      "id": "01ba9dd6",
+      "id": "ef515b1c",
       "execution_count": null,
       "outputs": []
     },
@@ -772,7 +771,7 @@
         "        # Save plots during training. Plots are saved to the 'train_plots' folder.\n",
         "        plot_training(model, flow_length, batch_num, lr, axlim)"
       ],
-      "id": "58bb8f96",
+      "id": "fa0fe3a5",
       "execution_count": null,
       "outputs": []
     },
@@ -791,9 +790,9 @@
         "\n",
         "![](images/1_layer.gif){fig-alt=\"Maximally engineered two biomodal\"}\n",
         "\n",
-        "Let's try a more serious attempt, with a depth of 32:\n"
+        "Let's try a more serious attempt, with a depth of 32:"
       ],
-      "id": "e0857227"
+      "id": "3456581c"
     },
     {
       "cell_type": "code",
@@ -837,7 +836,7 @@
         "        # Save plots during training. Plots are saved to the 'train_plots' folder.\n",
         "        plot_training(model, flow_length, batch_num, lr, axlim)"
       ],
-      "id": "2bc2317b",
+      "id": "0ede6650",
       "execution_count": null,
       "outputs": []
     },
@@ -1004,7 +1003,7 @@
         "[Strassen](https://en.wikipedia.org/wiki/Strassen_algorithm) which is implemented\n",
         "essentially everywhere that matters."
       ],
-      "id": "0bd909b8"
+      "id": "224297eb"
     }
   ],
   "metadata": {
@@ -1012,7 +1011,7 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
-      "path": "C:\\Python311\\share\\jupyter\\kernels\\python3"
+      "path": "/home/atimm/anaconda3/share/jupyter/kernels/python3"
     }
   },
   "nbformat": 4,
