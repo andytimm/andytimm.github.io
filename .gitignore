@@ -12,3 +12,10 @@
 
 # Scratch/local work
 scratch/
+
+# WSL Zone.Identifier files
+*:Zone.Identifier
+
+# Dropbox extended attributes
+*:com.dropbox.attrs
+*:com.dropbox.attributes
