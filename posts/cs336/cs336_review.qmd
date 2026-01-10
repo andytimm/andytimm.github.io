@@ -30,12 +30,57 @@ I found the course delivered on this premise- I feel better equipped to understa
 
 ![](imgs/design-decisions.png)
 
-CS336 has great lectures, but the p
+CS336 has great lectures that survey current best practices, but the primary meat of the course is in the assignments, which ask you to *build*. That is, building a full tokenizer, and basic LLM from scratch are both in the first (2 week!) assignment. The second (2 week!!) assignment has you implement both Flash Attention in Triton, and handroll a version of efficient-ish DDP. 
+
+The expectations here are (wonderfully) high- each assignment asks for a relatively low level implementation of a conceptual building block of modern LLMs, each of which would be a meaty side project in their own right.
+
+Fortunately, these assignments are nicely scaffolded and provide opinionated input on key design decisions, which reduces the system design burden. So you're asked to draw the rest of the fucking owl,
+but they do give you guidance on which circles to draw first.
+
+The course is structured around 5 assignments, as shown above. Beyond 
+Assigne
+
+
+Oh, and if you're a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me
+make sure my implementations were efficient, not just technically correct.
 
 # Prerequisites
 
-# Practical Thoughts- Time Commitment and Course Schedule
+Here are what the course says the prerequisites are:
 
-# Practical Thoughts- Using LLMs to learn LLMs?
+> **Proficiency in Python**
+>
+> The majority of class assignments will be in Python. Unlike most other AI classes, students will be given minimal scaffolding. The amount of code you will write will be at least an order of magnitude greater than for other classes. Therefore, being proficient in Python and software engineering is paramount.
+>
+> **Experience with deep learning and systems optimization**
+>
+> A significant part of the course will involve making neural language models run quickly and efficiently on GPUs across multiple machines. We expect students to be able to have a strong familiarity with PyTorch and know basic systems concepts like the memory hierarchy.
+>
+> **College Calculus, Linear Algebra (e.g. MATH 51, CME 100)**
+>
+> You should be comfortable understanding matrix/vector notation and operations.
+>
+> **Basic Probability and Statistics (e.g. CS 109 or equivalent)**
+>
+> You should know the basics of probabilities, Gaussian distributions, mean, standard deviation, etc.
+>
+> **Machine Learning (e.g. CS221, CS229, CS230, CS124, CS224N)**
+>
+> You should be comfortable with the basics of machine learning and deep learning.
 
-# Practical Thoughts- 
+I think this is pretty accurate. 
+
+As an auditor, you can certainly Try Harder to work around weaknesses in any of these areas. I personally was fairly rusty with PyTorch, but was able to work the kinks out over assignment 1, though
+it took a decent number of hours' work.
+
+That said, if you've only ever really worked with high level PyTorch modules and/or vibecoded
+much of your recent LLM tinkering, it might be most efficient to spend some hands-on time with a resource like Sebastian Raschka's great [Build a Large Language from Scratch](https://www.manning.com/books/build-a-large-language-model-from-scratch).
+I learned in grad school that treating most prereqs as suggestions was healthy, but I'd say in this case the course expectations are high enough that you'd need to be pretty cracked to
+move efficiently through the assignments if the above doesn't sound like you yet. 
+# Practical Thoughts- Cost and Limitations as an Auditor
+
+# Practical Thoughts- Course Schedule and Time Commitment
+
+# Practical(ish) Thoughts- Using LLMs to learn LLM Engineering?
+
+# Getting the Most from CS336
