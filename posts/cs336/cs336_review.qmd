@@ -67,10 +67,10 @@ The course is structured around 5 assignments. The topics in each are mostly sho
 
 ## Lectures/Leaderboards
 
-I won't go through all the lectures to the same degree, but will say they're on average fantastic resources that impart a lot of research taste, emerging. It's worth noting that for most auditors, many of these will be dense, and worth watching slowly, rewinding, and pausing to chase down resources and ask your friendly local Claude lots of questions.
+I won't go through all the lectures to the same degree, but will say they're on average fantastic resources that impart a lot of research taste, emerging points of design choice concensus, and potentially promising research directions. It's worth noting that for most auditors, many of these will be sufficiently dense to be worth watching slowly, rewinding, pausing to chase down references, and ask your friendly local Claude lots of questions.
 
-If you're a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me
-make sure my implementations were actually reasonable, not just minimally technically correct. Even if you're not that type of person, I'd definitely reccomend finding the public implementations near the top of the leaderboard to learn from once you've tried your own hand at the assignments.
+As a fun bonus, If you're a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me
+make sure my implementations were actually reasonable, not just minimally technically correct. Even if you're not that type of person, it'd be a sensible move to look into the details of some of the top implementations after you've tried hard enough to build your own.
 
 # Prerequisites
 
