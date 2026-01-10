@@ -269,8 +269,9 @@ ul.task-list li input[type="checkbox"] {
 <h1>Practical Thoughts- Cost and Limitations as an Auditor</h1>
 <p>If you’re auditing, you’ll likely need to rent GPU time. I ended up spending <strong>$453.23</strong> completing the course.</p>
 <p>That said, probably ~$150-$200 of that was on my own side experiments to chase my curiosities (which I strongly endorse doing- more below). You could also very realistically save cash by utilizing even a modestly beefy local CPU or GPU, and being more patient than me. The assignments list some ways to scale down the assignments to sidestep renting compute, but I generally felt like these would’ve reduced what I learned.</p>
-<p>Beyond cost, there are two main logical challenges with auditing I’d highlight-</p>
+<p>Beyond cost, there are three main logistical challenges with auditing I’d highlight-</p>
 <p><strong>Assignment 3:</strong> The bulk of assignment 3 relies on an API only available to Stanford CS336 students. I personally did what was possible as an auditor and spend a week digging into some questions I had about the scaling laws literature, did a few smaller experiments myself, and was happy with that, but I’d love to see alternative suggestions that fufill more of the full spirit of the assignment.</p>
+<p><strong>Assignment 4:</strong> This is more minor than the other two, but the Leaderboard section of this assignment (towards the end) provides some initial Common Crawl WET files to start from to in-course students. While you can look at various details of <a href="https://t.co/t2c40gjLNU">Paloma</a> to get some reasonable thoughts on where to start, this complication added bonus steps, and it’s harder to fairly compete on this leaderboard than the other two.</p>
 <p><strong>Assignment 5:</strong> Assignment 5 relies on the Hendryk’s MATH dataset, which has been taken down because of a copyright claim. The course suggests a few alternatives, but I’d actually nominate <a href="https://huggingface.co/datasets/open-r1/OpenR1-Math-220k">OpenR1-Math-220k</a> as a somewhat nicer alternative. You’ll need to flex some of the data cleaning skills from assignment 3 to make a dataset with optimal token sizes and difficulty for the assignment, but that was time well spent, IMO. Learning to clean/preare data for SFT/RL was a fun experience!</p>
 <p>Otherwise, course staff did a really, truly excellent job of making the course accessible, which I really appreciated. Many details here, like frequent pointers in assignments for auditors and public github leaderboards, go far beyond the typical academic level of commitment to open access of knowledge, and Stanford NLP and the course instructors/staff deserve serious props here!</p>
 </section>
@@ -318,7 +319,16 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="getting-the-most-from-cs336" class="level1">
 <h1>Getting the Most from CS336</h1>
-<p>This was an incredibly nice course.</p>
+<p>Some final thoughts on getting the most out of this class that didn’t deserve their own section:</p>
+<p><strong>Don’t rush the lectures:</strong> I know this is primarily an implementation based course, but the couple times I rushed through the lectures I ended up regretting it. My guess is you can probably pretty productively spend up to 2.5x the original lecture time engaging with each lecture more deeply. Some of the most practically useful things I learned came through digging into Tatsu’s references, for example!</p>
+<p><strong>Write down early what you’ll allow LLMs to do:</strong> Especially as an auditor with a day job, I was really glad I spent some time writing down some clear lines on what I’d use Claude Code to help me with, and then translating them into a <code>CLAUDE.md</code> to ensure you don’t ask for a hint and get a solution. As always with using LLMs for self-learning, I think it’s likely a mistake to err too much in either direction here, and you really need to get clear on what your learning goals are to decide where on this tradeoff curve you want to live.</p>
+<p><strong>Leave time to follow your curiosity:</strong> Like Damek Davis noted in his great live-tweet of the course, the number of little research project ideas I had ballooned during this course. I got a ton out of implementing these either myself or via Claude where that felt acceptable. Some things I messed around with:</p>
+<ul>
+<li>Implementing (hilariously inefficient versions of) some novel linear attention architectures like <a href="https://sustcsonglin.github.io/blog/2024/deltanet-1/">DeltaNet</a> that are increasingly making their way into public (and presumably private) frontier models to enable larger context windows</li>
+<li>Implementing some efficient-ish GPU kernels for bidirectional attention (like one might use in a transformer based regression or classification model). Not because doing this by hand actually is a novel speedup, but because changing fundamental assumptions like causal attention is fun/instructive.</li>
+<li>Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like <a href="https://allenai.org/blog/olmo3">Olmo 3</a> or <a href="https://huggingface.co/zai-org/GLM-4.7">GLM 4.7</a>.</li>
+</ul>
+<p>This was a fantastic course, and I’m really glad I built time into my life to work through it. If you have any questions, feel free to reach out!</p>
 
 
 </section>
