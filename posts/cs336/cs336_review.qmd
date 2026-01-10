@@ -37,12 +37,40 @@ The expectations here are (wonderfully) high- each assignment asks for a relativ
 Fortunately, these assignments are nicely scaffolded and provide opinionated input on key design decisions, which reduces the system design burden. So you're asked to draw the rest of the fucking owl,
 but they do give you guidance on which circles to draw first.
 
-The course is structured around 5 assignments, as shown above. Beyond 
-Assigne
+## Assignments 
 
+The course is structured around 5 assignments. The topics in each are mostly shown above, but here's a short teaser for each:
 
-Oh, and if you're a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me
-make sure my implementations were efficient, not just technically correct.
+**Assignment 1**
+
+- **Build a Tokenizer:** Tokenization is a primary source of spooky confusing bullshit^TM^ with LLMs. Building your own tokenizer gives you a finer grained model of how tokenizers work, what tradeoffs exist in tokenization, and (personally) really helped me feel I understood what I was doing fixing tokenizer issues better.
+- **Build a basic Transformer LLM from Scratch:** Implementing everything from the MLPs on up, by hand, quickly identifies and requires you to fix any basic holes in your understanding.
+- **Ablations—why are best practices best practices?** Best practices in transformer architecture like depth/width ratios, hyperparameter choices, and so on can feel like the field blindly hill climbed their way to "what worked best". While this is certainly true to some extent, ablating many of the core points of architecture agreement will give you stronger intuition for why certain choices are points of convergence across labs.
+
+**Assignment 2**
+
+- **Benchmark & Implement Flash Attention:** LLM's success is heavily the story of scaling. Implementations that scale require understanding low level details of how GPUs work, how their design influences algorithmic choices, and what resources you're most constrained by when. Flash Attention is a marvel of all these elements coming together, so implementing (most of) it from scratch forces you to understand the details, and feel the binding resource constraints. 
+- **Implement DDP:** Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP definitely isn't the height of this paradigm, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.
+
+**Assignment 3**
+
+- **Feeling the Scaling Laws:** Scaling Laws tell us, with a surprising degree of accuracy, what performance to expect from models as we scale them up. If you actually had to make decisions about a larger training run, what small experiments would you prioritize to make decisions for the final run? You'll feel the scaling curves you've seen in your bones a bit more after this assignment.
+
+**Assignment 4**
+
+- **Cleaning Common Crawl:** There's SO MUCH web data, and LLMs, like all ML models, are pretty garbage in, garbage out. There are so, so many issues with web scrapes—you can't fix all of them, and you're always going to be in triage mode. What cleaning has emerged as best practice?
+- **Tinkering with Data Decisions:** By ablating various cleaning decisions, you can develop a bit more feel for WHY certain cleaning steps get prioritized, and where remaining alpha lies.
+
+**Assignment 5**
+
+- **Implementing SFT/Simple RLVR/GRPO RLVR/(Optionally) RLHF via DPO:** There's so, so much beyond training a good base model that goes into making a capable LLM that is nice to work with. What are all of these steps, how has implementing them evolved with reinforcement learning and especially RL from Verifiable Rewards? How do these stages interact? At a granular level, how much do small tweaks to these mid and post-training steps change the resulting LLM?
+
+## Lectures/Leaderboards
+
+I won't go through all the lectures to the same degree, but will say they're on average fantastic resources that impart a lot of research taste, emerging. It's worth noting that for most auditors, many of these will be dense, and worth watching slowly, rewinding, and pausing to chase down resources and ask your friendly local Claude lots of questions.
+
+If you're a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me
+make sure my implementations were actually reasonable, not just minimally technically correct. Even if you're not that type of person, I'd definitely reccomend finding the public implementations near the top of the leaderboard to learn from once you've tried your own hand at the assignments.
 
 # Prerequisites
 
@@ -70,13 +98,15 @@ Here are what the course says the prerequisites are:
 
 I think this is pretty accurate. 
 
-As an auditor, you can certainly Try Harder to work around weaknesses in any of these areas. I personally was fairly rusty with PyTorch, but was able to work the kinks out over assignment 1, though
+You can certainly Try Harder to work around weaknesses in any of these areas. I personally was fairly rusty with PyTorch, but was able to work the kinks out over assignment 1, though
 it took a decent number of hours' work.
 
 That said, if you've only ever really worked with high level PyTorch modules and/or vibecoded
 much of your recent LLM tinkering, it might be most efficient to spend some hands-on time with a resource like Sebastian Raschka's great [Build a Large Language from Scratch](https://www.manning.com/books/build-a-large-language-model-from-scratch).
-I learned in grad school that treating most prereqs as suggestions was healthy, but I'd say in this case the course expectations are high enough that you'd need to be pretty cracked to
-move efficiently through the assignments if the above doesn't sound like you yet. 
+
+I learned in grad school that treating most prereqs as mere suggestions was healthy, but I'd say in this case, the course expectations are high enough that you'd need to be pretty cracked to
+move efficiently through the assignments if the above doesn't sound much like you yet. 
+
 # Practical Thoughts- Cost and Limitations as an Auditor
 
 # Practical Thoughts- Course Schedule and Time Commitment
