@@ -147,6 +147,6 @@ However, it's important to note that the assignments are very much not created e
 
 If this is a meaningful distinction to you, the course largely felt "CS/SWE Hard", not "Stats/Math Hard" to me, with the exception of one relatively gnarly part of Assignment 5 around GRPO. If you're not like me in this sense, you may find assignments 1/2 a bit easier, and 5 more challenging/time consuming.  
 
-# Practical(ish) Thoughts- Using LLMs to learn LLM Engineering?
-
 # Getting the Most from CS336
+
+This was an incredibly nice course. 
