@@ -12,14 +12,30 @@ categories:
 
 > If you wish to make an apple pie from scratch, you must first invent the universe. - Carl Sagan, probably
 
-In December, I finished working through Stanford NLP's [CS336: Language Models From Scratch](https://stanford-cs336.github.io/spring2025/).
+In December, I finished working through Stanford NLP's [CS336: Language Models From Scratch](https://stanford-cs336.github.io/spring2025/). This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations if you're considering auditing it as well. 
+
 The basic premise of the course is that:
 
-- Researchers are becoming **disconnected** from the underlying details of LLMs, and increasingly living on top of high level abstractions.
-- Moving up levels of abstraction can allow you to move faster in some ways, BUT
+- Researchers/Engineers are becoming **disconnected** from the underlying details of LLMs.
+- Moving up these levels of abstraction can allow you to move faster
+
+BUT:
+
 - there are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn. 
-- Thus: **build build Modern LLMs from Scratch** to build deeper understanding, and improve capacity to do more fundamental research.
+- Thus: **build Modern LLMs from scratch** to build deeper understanding, and improve capacity to do more fundamental research.
 
-I found the course delivered well on this premise- I feel much better equipped to understand/iterate on recent research, and considerably more capable at systems skills increasingly required for meaningful work. Full courses are rarely better 
+I found the course delivered on this premise- I feel better equipped to understand/iterate on recent research, and considerably more capable at systems skills increasingly required for meaningful LLM engineering. Full courses are rarely better than fully self guided learning/projects for me, so this a strong endorsement.
 
-This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations if you're considering auditing it as well. 
+# Course Contents
+
+![](imgs/design-decisions.png)
+
+CS336 has great lectures, but the p
+
+# Prerequisites
+
+# Practical Thoughts- Time Commitment and Course Schedule
+
+# Practical Thoughts- Using LLMs to learn LLMs?
+
+# Practical Thoughts- 
