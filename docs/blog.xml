@@ -10,7 +10,7 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.8.26</generator>
-<lastBuildDate>Sat, 03 Jan 2026 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 10 Jan 2026 05:00:00 GMT</lastBuildDate>
 <item>
   <title>CS336: Language Models From Scratch</title>
   <dc:creator>Andy Timm</dc:creator>
@@ -178,18 +178,18 @@
 </section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
   author = {Timm, Andy},
   title = {CS336: {Language} {Models} {From} {Scratch}},
-  date = {2026-01-03},
+  date = {2026-01-10},
   url = {https://andytimm.github.io/posts/cs336/cs336_review.html},
   langid = {en}
 }
 </code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2026" class="csl-entry quarto-appendix-citeas">
 Timm, Andy. 2026. <span>“CS336: Language Models From Scratch.”</span>
-January 3, 2026. <a href="https://andytimm.github.io/posts/cs336/cs336_review.html">https://andytimm.github.io/posts/cs336/cs336_review.html</a>.
+January 10, 2026. <a href="https://andytimm.github.io/posts/cs336/cs336_review.html">https://andytimm.github.io/posts/cs336/cs336_review.html</a>.
 </div></div></section></div> ]]></description>
   <category>LLMs</category>
   <category>AI</category>
   <guid>https://andytimm.github.io/posts/cs336/cs336_review.html</guid>
-  <pubDate>Sat, 03 Jan 2026 05:00:00 GMT</pubDate>
+  <pubDate>Sat, 10 Jan 2026 05:00:00 GMT</pubDate>
   <media:content url="https://andytimm.github.io/posts/cs336/imgs/applepie.png" medium="image" type="image/png" height="96" width="144"/>
 </item>
 <item>
