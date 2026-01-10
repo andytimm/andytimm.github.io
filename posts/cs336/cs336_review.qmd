@@ -10,7 +10,9 @@ categories:
   - Variational Inference
 ---
 
-> If you wish to make an apple pie from scratch, you must first invent the universe. - Carl Sagan, probably
+> If you wish to make an apple pie from scratch, you must first invent the universe.
+>
+> *— Carl Sagan, probably*
 
 In December, I finished working through Stanford NLP's [CS336: Language Models From Scratch](https://stanford-cs336.github.io/spring2025/). This post is a short review of the class, summary of who I think would benefit most, and a bunch of practical tips/considerations if you're considering auditing it as well. 
 
@@ -109,7 +111,7 @@ move efficiently through the assignments if the above doesn't sound much like yo
 
 # Practical Thoughts- Cost and Limitations as an Auditor
 
-If you're auditing, you'll likely want to rent GPU time. I ended up spending **$453.23** completing the course. 
+If you're auditing, you'll likely need to rent GPU time. I ended up spending **$453.23** completing the course. 
 
 That said, probably ~$150-$200 of that was on my own side experiments to chase my curiosities (which I strongly endorse doing- more below). You could also very realistically save cash by utilizing even a modestly beefy local CPU or GPU, and being more patient than me. The assignments list some ways to scale down the assignments to sidestep renting compute, but I generally felt like these would've reduced what I learned.
 
@@ -119,19 +121,31 @@ Beyond cost, there are two main logical challenges with auditing I'd highlight-
 
 **Assignment 5:** Assignment 5 relies on the Hendryk's MATH dataset, which has been taken down because of a copyright claim. The course suggests a few alternatives, but I'd actually nominate [OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) as a somewhat nicer alternative. You'll need to flex some of the data cleaning skills from assignment 3 to make a dataset with optimal token sizes and difficulty for the assignment, but that was time well spent, IMO. Learning to clean/preare data for SFT/RL was a fun experience!
 
-Other than that, 2 guest lectures didn't have videos posted in the spring 2024 version, but otherwise course staff did a really, really excellent job of making the course accessible to auditors!
+Otherwise, course staff did a really, truly excellent job of making the course accessible, which I really appreciated. Many details here, like frequent pointers in assignments for auditors and public github leaderboards, go far beyond the typical academic level of commitment to open access of knowledge, and Stanford NLP and the course instructors/staff deserve serious props here!
 
 # Practical Thoughts- Course Schedule and Time Commitment
 
 > **Why you should not take this course**
->You actually want to get research done this quarter. (Talk to your advisor.)
-> -Actual advice from Percy in lecture 1, lol
+>
+> You actually want to get research done this quarter. (Talk to your advisor.)
+>
+> *— Actual advice from Percy in lecture 1, lol*
 
-As you probably have inferrred from the course website, this course expects
+I generally model myself as having a limited number of "good SWE/ML mind" hours a week, many of which go to my lovely day job. Doing this course in my evenings and a solid long coffee shop day (sometimes two) each weekend  was doable, but required significantly reducing my time engaging with other research/doing side projects. That is, I expect most working auditors doing all assignment parts, and fully engaging with the course will find their non-work sharp hours fairly relatively monopolized unless you're far more of a grinder than I am.
 
-I generally 
+Logistically, the Stanford course ran for 10 weeks, so in theory, ~2 weeks per assignment. In brief, **I was able to complete the course in ~16 hours a week over 12 weeks** (ignoring a vacation mostly not thinking about LLMs), which roughly aligns with the [Stanford Online 20h per courseweek estimate](https://online.stanford.edu/courses/cs336-language-modeling-scratch).
 
-Logistically, the Stanford course ran for 10 weeks, so ~2 weeks per assignment. 
+However, it's important to note that the assignments are very much not created equal. Assignments 1/2 were by far the hardest/most time consuming for me, followed closely by assignment 5. In contrast, week 3 largely isn't available to auditors, and week 4 was pretty chill. In practice, my schedule looked something like:
+
+| Assignment | Time |
+|------------|------|
+| 1 | 3 weeks |
+| 2 | 3 weeks |
+| 3 | 1 week, if that |
+| 4 | 2 weeks |
+| 5 + Optional Alignment Component | 3 weeks |
+
+If this is a meaningful distinction to you, the course largely felt "CS/SWE Hard", not "Stats/Math Hard" to me, with the exception of one relatively gnarly part of Assignment 5 around GRPO. If you're not like me in this sense, you may find assignments 1/2 a bit easier, and 5 more challenging/time consuming.  
 
 # Practical(ish) Thoughts- Using LLMs to learn LLM Engineering?
 
