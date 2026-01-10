@@ -53,7 +53,7 @@ The course is structured around 5 assignments. The topics in each are mostly sho
 **Assignment 2**
 
 - **Benchmark & Implement Flash Attention:** LLM's success is heavily the story of scaling. Implementations that scale require understanding low level details of how GPUs work, how their design influences algorithmic choices, and what resources you're most constrained by when. Flash Attention is a marvel of all these elements coming together, so implementing (much of) it from scratch forces you to understand the details, and feel the binding resource constraints. 
-- **Implement DDP:** Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP[^4] definitely isn't the height of this paradigm, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.
+- **Implement DDP:** Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP[^4] definitely isn't the whole parallelism story, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.
 
 **Assignment 3**
 
@@ -162,7 +162,7 @@ Some final thoughts on getting the most out of this class that didn't deserve th
 
 - Implementing (hilariously inefficient versions of) some novel linear attention architectures like [DeltaNet](https://sustcsonglin.github.io/blog/2024/deltanet-1/) that are increasingly making their way into public (and presumably private) frontier models to enable larger context windows
 - Implementing some efficient-ish GPU kernels for bidirectional attention (like one might use in a transformer based regression or classification model). Not because doing this by hand actually is a novel speedup, but because changing fundamental assumptions like causal attention is fun/instructive.
-- Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like [Olmo 3](https://allenai.org/blog/olmo3) or [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7).
+- Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like [Olmo 3](https://allenai.org/blog/olmo3) (and similar RL techniques in [GLM-4.5](https://z.ai/blog/glm-4.5)).
 
 This was a fantastic course, and I'm really glad I built time into my life to work through it. If you have any questions, feel free to reach out!
 

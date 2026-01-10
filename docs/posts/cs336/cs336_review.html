@@ -222,7 +222,7 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Assignment 2</strong></p>
 <ul>
 <li><strong>Benchmark &amp; Implement Flash Attention:</strong> LLM’s success is heavily the story of scaling. Implementations that scale require understanding low level details of how GPUs work, how their design influences algorithmic choices, and what resources you’re most constrained by when. Flash Attention is a marvel of all these elements coming together, so implementing (much of) it from scratch forces you to understand the details, and feel the binding resource constraints.</li>
-<li><strong>Implement DDP:</strong> Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> definitely isn’t the height of this paradigm, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.</li>
+<li><strong>Implement DDP:</strong> Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> definitely isn’t the whole parallelism story, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.</li>
 </ul>
 <p><strong>Assignment 3</strong></p>
 <ul>
@@ -325,7 +325,7 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>Implementing (hilariously inefficient versions of) some novel linear attention architectures like <a href="https://sustcsonglin.github.io/blog/2024/deltanet-1/">DeltaNet</a> that are increasingly making their way into public (and presumably private) frontier models to enable larger context windows</li>
 <li>Implementing some efficient-ish GPU kernels for bidirectional attention (like one might use in a transformer based regression or classification model). Not because doing this by hand actually is a novel speedup, but because changing fundamental assumptions like causal attention is fun/instructive.</li>
-<li>Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like <a href="https://allenai.org/blog/olmo3">Olmo 3</a> or <a href="https://huggingface.co/zai-org/GLM-4.7">GLM 4.7</a>.</li>
+<li>Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like <a href="https://allenai.org/blog/olmo3">Olmo 3</a> (and similar RL techniques in <a href="https://z.ai/blog/glm-4.5">GLM-4.5</a>).</li>
 </ul>
 <p>This was a fantastic course, and I’m really glad I built time into my life to work through it. If you have any questions, feel free to reach out!</p>
 
