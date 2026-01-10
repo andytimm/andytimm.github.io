@@ -109,7 +109,29 @@ move efficiently through the assignments if the above doesn't sound much like yo
 
 # Practical Thoughts- Cost and Limitations as an Auditor
 
+If you're auditing, you'll likely want to rent GPU time. I ended up spending **$453.23** completing the course. 
+
+That said, probably ~$150-$200 of that was on my own side experiments to chase my curiosities (which I strongly endorse doing- more below). You could also very realistically save cash by utilizing even a modestly beefy local CPU or GPU, and being more patient than me. The assignments list some ways to scale down the assignments to sidestep renting compute, but I generally felt like these would've reduced what I learned.
+
+Beyond cost, there are two main logical challenges with auditing I'd highlight-
+
+**Assignment 3:** The bulk of assignment 3 relies on an API only available to Stanford CS336 students. I personally did what was possible as an auditor and spend a week digging into some questions I had about the scaling laws literature, did a few smaller experiments myself, and was happy with that, but I'd love to see alternative suggestions that fufill more of the full spirit of the assignment.
+
+**Assignment 5:** Assignment 5 relies on the Hendryk's MATH dataset, which has been taken down because of a copyright claim. The course suggests a few alternatives, but I'd actually nominate [OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) as a somewhat nicer alternative. You'll need to flex some of the data cleaning skills from assignment 3 to make a dataset with optimal token sizes and difficulty for the assignment, but that was time well spent, IMO. Learning to clean/preare data for SFT/RL was a fun experience!
+
+Other than that, 2 guest lectures didn't have videos posted in the spring 2024 version, but otherwise course staff did a really, really excellent job of making the course accessible to auditors!
+
 # Practical Thoughts- Course Schedule and Time Commitment
+
+> **Why you should not take this course**
+>You actually want to get research done this quarter. (Talk to your advisor.)
+> -Actual advice from Percy in lecture 1, lol
+
+As you probably have inferrred from the course website, this course expects
+
+I generally 
+
+Logistically, the Stanford course ran for 10 weeks, so ~2 weeks per assignment. 
 
 # Practical(ish) Thoughts- Using LLMs to learn LLM Engineering?
 
