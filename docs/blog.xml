@@ -10,7 +10,188 @@
 <atom:link href="https://andytimm.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Personal website of Andy Timm</description>
 <generator>quarto-1.8.26</generator>
-<lastBuildDate>Sun, 26 Jan 2025 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 03 Jan 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>CS336: Language Models From Scratch</title>
+  <dc:creator>Andy Timm</dc:creator>
+  <link>https://andytimm.github.io/posts/cs336/cs336_review.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<blockquote class="blockquote">
+<p>If you wish to make an <del>apple pie</del> LLM from scratch, you must first invent the <del>universe</del> systems considerations.</p>
+<p><em>— Carl Sagan, probably</em></p>
+</blockquote>
+<p>In December, I finished working through Stanford NLP’s <a href="https://stanford-cs336.github.io/spring2025/">CS336: Language Models From Scratch</a>. This post is a short review of the class, and a bunch of practical tips/considerations if you’re considering auditing it as well.</p>
+<p>The basic premise of the course is that:</p>
+<ul>
+<li>Researchers/Engineers are becoming <strong>disconnected</strong> from the underlying details of LLMs.</li>
+<li>Moving up these levels of abstraction can allow you to move faster.</li>
+</ul>
+<p>BUT:</p>
+<ul>
+<li>there are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn.</li>
+<li>Thus: <strong>build Modern LLMs from scratch</strong> to build deeper understanding, and improve capacity to do more fundamental research.</li>
+</ul>
+<p>I found the course delivered on this premise- I feel better equipped to understand/iterate on recent research. I’m considerably more capable at the systems skills<sup>1</sup> increasingly required for meaningful LLM engineering. Full courses are rarely better than fully self guided learning/projects for me, so this a strong endorsement.</p>
+<section id="course-contents" class="level1">
+<h1>Course Contents</h1>
+<p><img src="https://andytimm.github.io/posts/cs336/imgs/design-decisions.png" class="img-fluid"></p>
+<p>CS336 has great lectures that survey current best practices, but the primary meat of the course is in the assignments, which ask you to <em>build</em>. That is, building a full tokenizer, and basic LLM from scratch are both in the first (2 week!) assignment. The second (2 week!!) assignment has you implement both Flash Attention in Triton, and handroll a version of efficient-ish DDP.</p>
+<p>The expectations here are (wonderfully) high- each assignment asks for a relatively low level implementation of a conceptual building block of modern LLMs, each of which would be a meaty side project in their own right.</p>
+<p>Fortunately, these assignments are nicely scaffolded and provide opinionated input on key design decisions, which reduces the system design burden. So you’re asked to draw the rest of the fucking owl<sup>2</sup>, but they do give you guidance on which circles to draw first.</p>
+<section id="assignments" class="level2">
+<h2 class="anchored" data-anchor-id="assignments">Assignments</h2>
+<p>The course is structured around 5 assignments. The topics in each are mostly shown above, but here’s a short teaser for each:</p>
+<p><strong>Assignment 1</strong></p>
+<ul>
+<li><strong>Build a Tokenizer:</strong> Tokenization is a primary source of spooky confusing bullshit<sup>TM</sup> with LLMs<sup>3</sup>. Building your own tokenizer gives you a finer grained model of how tokenizers work, what tradeoffs exist in tokenization, and (personally) really helped me feel I understood what I was doing fixing tokenizer issues better.</li>
+<li><strong>Build a basic Transformer LLM from Scratch:</strong> Implementing everything from the MLPs on up, by hand, quickly identifies and requires you to fix any basic holes in your understanding.</li>
+<li><strong>Ablations—why are best practices best practices?</strong> Best practices in hyperparameter choices like depth/width ratios and so on can feel like the field blindly hill climbed their way to “what worked best”. While this is certainly true to some extent, ablating many of the core points of architecture agreement will give you stronger intuition for why certain choices are points of convergence across labs.</li>
+</ul>
+<p><strong>Assignment 2</strong></p>
+<ul>
+<li><strong>Benchmark &amp; Implement Flash Attention:</strong> LLM’s success is heavily the story of scaling. Implementations that scale require understanding low level details of how GPUs work, how their design influences algorithmic choices, and what resources you’re most constrained by when. Flash Attention is a marvel of all these elements coming together, so implementing (much of) it from scratch forces you to understand the details, and feel the binding resource constraints.</li>
+<li><strong>Implement DDP:</strong> Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP<sup>4</sup> definitely isn’t the height of this paradigm, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.</li>
+</ul>
+<p><strong>Assignment 3</strong></p>
+<ul>
+<li><strong>Feeling the Scaling Laws:</strong> Scaling Laws tell us, with a surprising degree of accuracy, what performance to expect from models as we scale them up. If you actually had to make decisions about a larger training run, what small experiments would you prioritize to make decisions for the final run? You’ll feel the scaling curves you’ve seen in your bones a bit more after this assignment.</li>
+</ul>
+<p><strong>Assignment 4</strong></p>
+<ul>
+<li><strong>Cleaning Common Crawl:</strong> There’s SO MUCH web data, and LLMs, like all ML models, are pretty garbage in, garbage out. There are so, so many issues with web scrapes—you can’t fix all of them, and you’re always going to be in triage mode. What cleaning has emerged as best practice?</li>
+<li><strong>Tinkering with Data Decisions:</strong> By ablating various cleaning decisions, you can develop a bit more feel for WHY certain cleaning steps get prioritized, and where remaining alpha lies.</li>
+</ul>
+<p><strong>Assignment 5</strong></p>
+<ul>
+<li><strong>Implementing SFT/Simple RLVR/GRPO RLVR/(Optionally) RLHF via DPO:</strong> There’s so, so much beyond training a good base model that goes into making a capable LLM that is nice to work with. What are all of these steps, how has implementing them evolved with reinforcement learning and especially RL from verifiable rewards? How do these stages interact? At a granular level, how much do small tweaks to these mid and post-training steps change the resulting LLM?</li>
+</ul>
+</section>
+<section id="lecturesleaderboards" class="level2">
+<h2 class="anchored" data-anchor-id="lecturesleaderboards">Lectures/Leaderboards</h2>
+<p>I won’t go through all the lectures to the same degree, but will say they’re on average fantastic resources that impart a lot of research taste, emerging points of design choice consensus, and potentially promising research directions. It’s worth noting that for most auditors, many of these will be sufficiently dense to be worth watching slowly, rewinding, pausing to chase down references, and ask your friendly local Claude lots of questions.</p>
+<p>As a fun bonus, If you’re a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me make sure my implementations were actually reasonable, not just minimally technically correct. Even if you’re not that type of person, it’d be a sensible move to look into the details of some of the top implementations after you’ve tried hard enough to build your own.</p>
+</section>
+</section>
+<section id="prerequisites" class="level1">
+<h1>Prerequisites</h1>
+<p>Here are what the course says the prerequisites are:</p>
+<blockquote class="blockquote">
+<p><strong>Proficiency in Python</strong></p>
+<p>The majority of class assignments will be in Python. Unlike most other AI classes, students will be given minimal scaffolding. The amount of code you will write will be at least an order of magnitude greater than for other classes. Therefore, being proficient in Python and software engineering is paramount.</p>
+<p><strong>Experience with deep learning and systems optimization</strong></p>
+<p>A significant part of the course will involve making neural language models run quickly and efficiently on GPUs across multiple machines. We expect students to be able to have a strong familiarity with PyTorch and know basic systems concepts like the memory hierarchy.</p>
+<p><strong>College Calculus, Linear Algebra (e.g.&nbsp;MATH 51, CME 100)</strong></p>
+<p>You should be comfortable understanding matrix/vector notation and operations.</p>
+<p><strong>Basic Probability and Statistics (e.g.&nbsp;CS 109 or equivalent)</strong></p>
+<p>You should know the basics of probabilities, Gaussian distributions, mean, standard deviation, etc.</p>
+<p><strong>Machine Learning (e.g.&nbsp;CS221, CS229, CS230, CS124, CS224N)</strong></p>
+<p>You should be comfortable with the basics of machine learning and deep learning.</p>
+</blockquote>
+<p>I think this is pretty accurate.</p>
+<p>You can certainly Try Harder to work around weaknesses in any of these areas. I personally was fairly rusty with PyTorch, but was able to work the kinks out over assignment 1, though it took a decent number of hours’ work.</p>
+<p>That said, if you’ve only ever really worked with high level PyTorch modules and/or vibecoded much of your recent LLM tinkering, it might be most efficient to spend some hands-on time with a resource like Sebastian Raschka’s great <a href="https://www.manning.com/books/build-a-large-language-model-from-scratch">Build a Large Language from Scratch</a>.</p>
+<p>I learned in grad school that treating most prereqs as mere suggestions was healthy, but I’d say in this case, the course expectations are high enough that you’d need to be pretty cracked to move efficiently through the assignments if the above doesn’t sound much like you yet.</p>
+</section>
+<section id="practical-thoughts--cost-and-limitations-as-an-auditor" class="level1">
+<h1>Practical Thoughts- Cost and Limitations as an Auditor</h1>
+<p>If you’re auditing, you’ll likely need to rent GPU time. I ended up spending <strong>$353.23</strong> completing the course<sup>5</sup>.</p>
+<p>That said, probably ~$150-$200 of that was on my own side experiments to chase my curiosities (which I strongly endorse doing- more below). You could also very realistically save cash by utilizing even a modestly beefy local CPU or GPU, and being more patient than me. The assignments list some ways to scale down the assignments to sidestep renting compute, but I generally felt like these would’ve reduced what I learned.</p>
+<p>Beyond cost, there are three main logistical challenges with auditing I’d highlight-</p>
+<p><strong>Assignment 3:</strong> The bulk of assignment 3 relies on an API only available to Stanford CS336 students. I personally did what was possible as an auditor and spend a week digging into some questions I had about the scaling laws literature, did a few smaller experiments myself, and was happy with that, but I’d love to see alternative suggestions that fulfill more of the full spirit of the assignment.</p>
+<p><strong>Assignment 4:</strong> This is more minor than the other two, but the Leaderboard section of this assignment (towards the end) provides some initial Common Crawl WET files to start from to in-course students. While you can look at various details of <a href="https://huggingface.co/datasets/allenai/paloma/tree/main/c4_100_domains">Paloma</a> to get some reasonable thoughts on where to start, this complication added bonus steps, and it’s harder to fairly compete on this leaderboard than the other two.</p>
+<p><strong>Assignment 5:</strong> Assignment 5 relies on the Hendrycks’ MATH dataset, which has been taken down because of a copyright claim. The course suggests a few alternatives, but I’d actually nominate <a href="https://huggingface.co/datasets/open-r1/OpenR1-Math-220k">OpenR1-Math-220k</a> as a somewhat nicer alternative. You’ll need to flex some of the data cleaning skills from assignment 3 to make a dataset with optimal token sizes and difficulty for the assignment, but that was time well spent, IMO. Learning to clean/prepare data for SFT/RL was a fun experience!</p>
+<p>Otherwise, course staff did a really, truly excellent job of making the course accessible, which I really appreciated. Many details here, like frequent pointers in assignments for auditors and public github leaderboards, go far beyond the typical academic level of commitment to open access of knowledge, and Stanford NLP and the course instructors/staff deserve serious props here!</p>
+</section>
+<section id="practical-thoughts--course-schedule-and-time-commitment" class="level1">
+<h1>Practical Thoughts- Course Schedule and Time Commitment</h1>
+<blockquote class="blockquote">
+<p><strong>Why you should not take this course</strong></p>
+<p>You actually want to get research done this quarter. (Talk to your advisor.)</p>
+<p><em>— Actual advice from Percy in lecture 1, lol</em></p>
+</blockquote>
+<p>I generally model myself as having a limited number of “good SWE/ML mind” hours a week, many of which go to my lovely day job. Doing this course in my evenings and a solid long coffee shop day (sometimes two) each weekend was doable, but required significantly reducing my time engaging with other research/doing side projects. That is, I expect most working auditors doing all assignment parts, and fully engaging with the course will find their non-work sharp hours fairly relatively monopolized unless you’re far more of a grinder than I am.</p>
+<p>Logistically, the Stanford course ran for 10 weeks, so in theory, ~2 weeks per assignment. In brief, <strong>I was able to complete the course in ~16 hours a week over 12 weeks</strong> (ignoring a vacation mostly not thinking about LLMs), which roughly aligns with the <a href="https://online.stanford.edu/courses/cs336-language-modeling-scratch">Stanford Online 20h per courseweek estimate</a>.</p>
+<p>However, it’s important to note that the assignments are very much not created equal. Assignments 1/2 were by far the hardest/most time consuming for me, followed closely by assignment 5. In contrast, week 3 largely isn’t available to auditors, and week 4 was pretty chill. In practice, my schedule looked something like:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Assignment</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>3 weeks</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>3 weeks</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>1 week, if that</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>2 weeks</td>
+</tr>
+<tr class="odd">
+<td>5 + Optional Alignment Component</td>
+<td>3 weeks</td>
+</tr>
+</tbody>
+</table>
+<p>If this is a meaningful distinction to you, the course largely felt “CS/SWE Hard”, not “Stats/Math Hard” to me, with the exception of one relatively gnarly part of Assignment 5 around GRPO. If you’re not like me in this sense, you may find assignments 1/2 a bit easier, and 5 more challenging/time consuming.</p>
+</section>
+<section id="getting-the-most-from-cs336" class="level1">
+<h1>Getting the Most from CS336</h1>
+<p>Some final thoughts on getting the most out of this class that didn’t deserve their own section:</p>
+<p><strong>Don’t rush the lectures:</strong> I know this is primarily an implementation based course, but the couple times I rushed through the lectures to make time for coding I ended up regretting it. My guess is you can probably pretty productively spend up to 2.5x the original lecture time engaging with each lecture more deeply. Some of the most practically useful things I learned came through digging into Tatsu’s references, for example!</p>
+<p><strong>Write down early what you’ll allow LLMs to do:</strong> Especially as an auditor with a day job, I was really glad I spent some time writing down some clear lines on what I’d use Claude Code to help me with, and then translating them into a <code>CLAUDE.md</code> to ensure you don’t ask for a hint and get a solution. As always with using LLMs for self-learning, I think it’s likely a mistake to err too much in either direction here, and you really need to get clear on what your learning goals are to decide where on this tradeoff curve you want to live.</p>
+<p><strong>Leave time to follow your curiosity:</strong> Like Damek Davis[^6] noted in his great <a href="https://x.com/damekdavis/status/1968079612044509347">live-tweet</a> of the course, the number of little research project ideas I had ballooned during this course. I got a ton out of implementing these either myself or via Claude where that felt acceptable. Some things I messed around with:</p>
+<ul>
+<li>Implementing (hilariously inefficient versions of) some novel linear attention architectures like <a href="https://sustcsonglin.github.io/blog/2024/deltanet-1/">DeltaNet</a> that are increasingly making their way into public (and presumably private) frontier models to enable larger context windows</li>
+<li>Implementing some efficient-ish GPU kernels for bidirectional attention (like one might use in a transformer based regression or classification model). Not because doing this by hand actually is a novel speedup, but because changing fundamental assumptions like causal attention is fun/instructive.</li>
+<li>Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like <a href="https://allenai.org/blog/olmo3">Olmo 3</a> or <a href="https://huggingface.co/zai-org/GLM-4.7">GLM 4.7</a>.</li>
+</ul>
+<p>This was a fantastic course, and I’m really glad I built time into my life to work through it. If you have any questions, feel free to reach out!</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Think actually making those GPUs go BRRRR, memory hierarchy awareness, actually using multiple GPUs well.↩︎</p></li>
+<li id="fn2"><p><img src="https://andytimm.github.io/posts/cs336/imgs/the_owl.png" class="img-fluid">↩︎</p></li>
+<li id="fn3"><p>I’ll cite <a href="https://www.lesswrong.com/posts/aPeJE8bSo6rAFoLqg/solidgoldmagikarp-plus-prompt-generation">SolidGoldMagikarp</a> for fun. But also, they make <a href="https://www.youtube.com/watch?v=zduSFxRajkE">Andrej Karpathy sad</a>, so you know they’re cursed.↩︎</p></li>
+<li id="fn4"><p>Distributed Data Parallel— one of the simpler strategies for training across multiple GPUs by replicating the model on each device and synchronizing gradients.↩︎</p></li>
+<li id="fn5"><p>I like Runpod, but very possible something else is cheaper now.↩︎</p></li>
+</ol>
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
+  author = {Timm, Andy},
+  title = {CS336: {Language} {Models} {From} {Scratch}},
+  date = {2026-01-03},
+  url = {https://andytimm.github.io/posts/cs336/cs336_review.html},
+  langid = {en}
+}
+</code></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2026" class="csl-entry quarto-appendix-citeas">
+Timm, Andy. 2026. <span>“CS336: Language Models From Scratch.”</span>
+January 3, 2026. <a href="https://andytimm.github.io/posts/cs336/cs336_review.html">https://andytimm.github.io/posts/cs336/cs336_review.html</a>.
+</div></div></section></div> ]]></description>
+  <category>LLMs</category>
+  <category>AI</category>
+  <guid>https://andytimm.github.io/posts/cs336/cs336_review.html</guid>
+  <pubDate>Sat, 03 Jan 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://andytimm.github.io/posts/cs336/imgs/applepie.png" medium="image" type="image/png" height="96" width="144"/>
+</item>
 <item>
   <title>Kangaroos, Foster’s, and E.T. Jaynes</title>
   <dc:creator>Andy Timm</dc:creator>
