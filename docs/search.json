@@ -298,7 +298,7 @@
     "href": "index.html",
     "title": "About",
     "section": "",
-    "text": "I’m a Senior Data Scientist at Grow Progress, where I build our platform for fast, cost-effective, and easily interpretable message testing at scale. Before this, I was a Manager of Data Science at 605, where I worked on problems of causal inference, forecasting, and persuadability modeling.\nSome recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference. Examples of each of these can be found on my blog.\nBefore grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.\nThis site showcases some of my larger side projects, particularly those benefiting from expository writing.\n\n    \n\n\n\n    \n\n\n\n    \n\n\n\n    \n\n\n\n    \n\n\n\n\n\n\nMy Bookshelf as of January 2024"
+    "text": "I’m a data scientist at Grow Progress; we test ads and do survey research, helping Democrats and progressive organizations win elections. Before this, I was a data science manager at 605, where I worked on problems of causal inference, forecasting, and heterogeneous treatment effects modeling.\nSome recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference.\nBefore grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.\n\n    \n\n\n\n    \n\n\n\n    \n\n\n\n    \n\n\n\n    \n\n\n\n\n\n\nMy office bookshelf as of 2026;"
   },
   {
     "objectID": "blog.html",

@@ -1,21 +1,19 @@
 ---
 page-layout: full
-image: assets/sept-2022-bookshelf.jpg
+image: assets/bookshelf_2026.jpg
 resources:
-    - "sept-2022-bookshelf.jpg"
+    - "bookshelf_2026.jpg"
 ---
 
 ::: {.grid}
 ::: {.g-col-12 .g-col-md-8}
 # About
 
-I'm a Senior Data Scientist at [Grow Progress](https://growprogress.ai/), where I build our platform for fast, cost-effective, and easily interpretable message testing at scale. Before this, I was a Manager of Data Science at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and persuadability modeling.
+I'm a data scientist at [Grow Progress](https://growprogress.ai/); we test ads and do survey research, helping Democrats and progressive organizations win elections. Before this, I was a data science manager at [605](https://www.605.tv/), where I worked on problems of causal inference, forecasting, and heterogeneous treatment effects modeling.
 
-Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference. Examples of each of these can be found on my blog.
+Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference.
 
 Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing chess.
-
-This site showcases some of my larger side projects, particularly those benefiting from expository writing.
 
 ```{=html}
 <a class="btn btn-outline-dark", href="https://www.linkedin.com/in/andrew-timm-b70857a2/" target="_blank" rel="noopener noreferrer">
@@ -42,8 +40,8 @@ This site showcases some of my larger side projects, particularly those benefiti
 
 ::: {.g-col-12 .g-col-md-4}
 <figure style="margin: 0;">
-  <img src="assets/aug2024-bookshelf.jpeg" alt="My Bookshelf as of January 2024" style="max-height: 800px; width: auto; display: block; max-width: 100%;">
-  <figcaption>My Bookshelf as of January 2024</figcaption>
+  <img src="assets/bookshelf_2026.jpg" alt="My Bookshelf as of 2026" style="max-height: 800px; width: auto; display: block; max-width: 100%;">
+  <figcaption>My office bookshelf as of 2026;\n </figcaption>
 </figure>
 :::
 :::
