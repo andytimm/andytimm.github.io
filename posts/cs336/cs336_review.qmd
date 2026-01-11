@@ -8,7 +8,6 @@ freeze: auto
 image: imgs/applepie.png
 categories:
   - LLMs
-  - AI
 ---
 
 > If you wish to make an ~~apple pie~~ LLM from scratch, you must first invent the ~~universe~~ systems considerations.
@@ -24,20 +23,20 @@ The basic premise of the course is that:
 
 BUT:
 
-- there are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn. 
+- There are elements of deeper understanding, research taste, and implementation prowess that are increasingly easy to never learn. 
 - Thus: **build Modern LLMs from scratch** to build deeper understanding, and improve capacity to do more fundamental research.
 
-I found the course delivered on this premise- I feel better equipped to understand/iterate on recent research. I'm considerably more capable at the systems skills[^1] increasingly required for meaningful LLM engineering. Full courses are rarely better than fully self guided learning/projects for me, so this a strong endorsement.
+The course delivered on this premise- I feel better equipped to understand/iterate on recent research. I'm considerably more capable at the systems skills[^1] increasingly required for meaningful LLM engineering. Full courses are rarely better than fully self guided learning/projects for me, so this is a strong endorsement.
 
 # Course Contents
 
 ![](imgs/design-decisions.png)
 
-CS336 has great lectures that survey current best practices, but the primary meat of the course is in the assignments, which ask you to *build*. That is, building a full tokenizer, and basic LLM from scratch are both in the first (2 week!) assignment. The second (2 week!!) assignment has you implement both Flash Attention in Triton, and handroll a version of efficient-ish DDP. 
+CS336 has great lectures that survey current best practices, but the primary meat of the course is in the assignments, which ask you to *build*. That is, building a full tokenizer, and basic LLM from scratch are both in the first (2 week!) assignment. The second (2 week!!) assignment has you implement both Flash Attention in Triton, and handroll a version of efficient-ish DDP[^2]. 
 
 The expectations here are (wonderfully) high- each assignment asks for a relatively low level implementation of a conceptual building block of modern LLMs, each of which would be a meaty side project in their own right.
 
-Fortunately, these assignments are nicely scaffolded and provide opinionated input on key design decisions, which reduces the system design burden. So you're asked to draw the rest of the fucking owl[^2],
+Fortunately, these assignments are nicely scaffolded and provide opinionated input on key design decisions, which reduces the system design burden. So you're asked to draw the rest of the fucking owl[^3],
 but they do give you guidance on which circles to draw first.
 
 ## Assignments 
@@ -46,14 +45,14 @@ The course is structured around 5 assignments. The topics in each are mostly sho
 
 **Assignment 1**
 
-- **Build a Tokenizer:** Tokenization is a primary source of spooky confusing bullshit^TM^ with LLMs[^3]. Building your own tokenizer gives you a finer grained model of how tokenizers work, what tradeoffs exist in tokenization, and (personally) really helped me feel I understood what I was doing fixing tokenizer issues better.
+- **Build a Tokenizer:** Tokenization is a primary source of spooky confusing bullshit^TM^ with LLMs[^4]. Building your own tokenizer gives you a finer grained model of how tokenizers work, what tradeoffs exist in tokenization, and (personally) really helped me feel more confident fixing tokenizer issues.
 - **Build a basic Transformer LLM from Scratch:** Implementing everything from the MLPs on up, by hand, quickly identifies and requires you to fix any basic holes in your understanding.
-- **Ablations—why are best practices best practices?** Best practices in hyperparameter choices like depth/width ratios and so on can feel like the field blindly hill climbed their way to "what worked best". While this is certainly true to some extent, ablating many of the core points of architecture agreement will give you stronger intuition for why certain choices are points of convergence across labs.
+- **Ablations—why are best practices best practices?** Best practices in hyperparameter choices like depth/width ratios and so on can feel like the field blindly hill climbed their way to "what worked best". While there's truth to this, ablating many of the core points of architecture agreement will give you stronger intuition for why certain choices are points of convergence across labs.
 
 **Assignment 2**
 
-- **Benchmark & Implement Flash Attention:** LLM's success is heavily the story of scaling. Implementations that scale require understanding low level details of how GPUs work, how their design influences algorithmic choices, and what resources you're most constrained by when. Flash Attention is a marvel of all these elements coming together, so implementing (much of) it from scratch forces you to understand the details, and feel the binding resource constraints. 
-- **Implement DDP:** Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP[^4] definitely isn't the whole parallelism story, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.
+- **Benchmark & Implement Flash Attention:** LLM's success is heavily the story of scaling. Implementations that scale require understanding low level details of how GPUs work, how their design influences algorithmic choices, and which resources constrain you most. Flash Attention is a marvel of all these elements coming together, so implementing (much of) it from scratch forces you to understand the details, and feel the binding resource constraints. 
+- **Implement DDP:** Going beyond training/finetuning/RLing relatively small models requires intelligently using multiple GPUs. DDP definitely isn't the whole parallelism story, but implementing it from scratch makes you really feel and develop intuition for the communications challenges inherent in this type of scale up.
 
 **Assignment 3**
 
@@ -70,7 +69,7 @@ The course is structured around 5 assignments. The topics in each are mostly sho
 
 ## Lectures/Leaderboards
 
-I won't go through all the lectures to the same degree, but will say they're on average fantastic resources that impart a lot of research taste, emerging points of design choice consensus, and potentially promising research directions. It's worth noting that for most auditors, many of these will be sufficiently dense to be worth watching slowly, rewinding, pausing to chase down references, and ask your friendly local Claude lots of questions.
+I won't go through all the lectures to the same degree, but will say they're on average fantastic resources that impart a lot of research taste, emerging points of design choice consensus, and potentially promising research directions. It's worth noting that for most auditors, many of these will be sufficiently dense to be worth watching slowly, rewinding, pausing to chase down references, and asking your friendly local Claude lots of questions.
 
 As a fun bonus, If you're a competitive little gremlin like me, Assignments 1/2/4 have a public leaderboard. I personally found aiming to get scores in the top 33% of each of these helped me
 make sure my implementations were actually reasonable, not just minimally technically correct. Even if you're not that type of person, it'd be a sensible move to look into the details of some of the top implementations after you've tried hard enough to build your own.
@@ -99,13 +98,13 @@ Here are what the course says the prerequisites are:
 >
 > You should be comfortable with the basics of machine learning and deep learning.
 
-I think this is pretty accurate. 
+This is accurate. 
 
 You can certainly Try Harder to work around weaknesses in any of these areas. I personally was fairly rusty with PyTorch, but was able to work the kinks out over assignment 1, though
 it took a decent number of hours' work.
 
 That said, if you've only ever really worked with high level PyTorch modules and/or vibecoded
-much of your recent LLM tinkering, it might be most efficient to spend some hands-on time with a resource like Sebastian Raschka's great [Build a Large Language from Scratch](https://www.manning.com/books/build-a-large-language-model-from-scratch).
+much of your recent LLM tinkering, it might be most efficient to spend some hands-on time with a resource like Sebastian Raschka's great [Build a Large Language Model from Scratch](https://www.manning.com/books/build-a-large-language-model-from-scratch).
 
 I learned in grad school that treating most prereqs as mere suggestions was healthy, but I'd say in this case, the course expectations are high enough that you'd need to be pretty cracked to
 move efficiently through the assignments if the above doesn't sound much like you yet. 
@@ -114,15 +113,15 @@ move efficiently through the assignments if the above doesn't sound much like yo
 
 If you're auditing, you'll likely need to rent GPU time. I ended up spending **$353.23** completing the course[^5]. 
 
-That said, probably ~$150-$200 of that was on my own side experiments to chase my curiosities (which I strongly endorse doing- more below). You could also very realistically save cash by utilizing even a modestly beefy local CPU or GPU, and being more patient than me. The assignments list some ways to scale down the assignments to sidestep renting compute, but I generally felt like these would've reduced what I learned.
+That said, ~$150-$200 of that was on my own side experiments to follow my curiosity (which I strongly endorse doing- more below). You could also very realistically save cash by utilizing even a modestly beefy local CPU or GPU, and being more patient than me. The assignments list some ways to scale down the assignments to sidestep renting compute, but I generally felt like these would've reduced what I learned.
 
 Beyond cost, there are three main logistical challenges with auditing I'd highlight-
 
-**Assignment 3:** The bulk of assignment 3 relies on an API only available to Stanford CS336 students. I personally did what was possible as an auditor and spend a week digging into some questions I had about the scaling laws literature, did a few smaller experiments myself, and was happy with that, but I'd love to see alternative suggestions that fulfill more of the full spirit of the assignment.
+**Assignment 3:** The bulk of assignment 3 relies on an API only available to Stanford CS336 students. I personally did what was possible as an auditor and spent a week digging into some questions I had about the scaling laws literature, did a few smaller experiments myself, and was happy with that, but I'd love to see alternative suggestions that fulfill more of the full spirit of the assignment.
 
 **Assignment 4:** This is more minor than the other two, but the Leaderboard section of this assignment (towards the end) provides some initial Common Crawl WET files to start from to in-course students. While you can look at various details of [Paloma](https://huggingface.co/datasets/allenai/paloma/tree/main/c4_100_domains) to get some reasonable thoughts on where to start, this complication added bonus steps, and it's harder to fairly compete on this leaderboard than the other two.
 
-**Assignment 5:** Assignment 5 relies on the Hendrycks' MATH dataset, which has been taken down because of a copyright claim. The course suggests a few alternatives, but I'd actually nominate [OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) as a somewhat nicer alternative. You'll need to flex some of the data cleaning skills from assignment 3 to make a dataset with optimal token sizes and difficulty for the assignment, but that was time well spent, IMO. Learning to clean/prepare data for SFT/RL was a fun experience!
+**Assignment 5:** Assignment 5 relies on the Hendrycks' MATH dataset, which has been taken down because of a copyright claim. The course suggests a few alternatives, but I'd actually nominate [OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) as a nicer alternative. You'll need to flex some of the data cleaning skills from assignment 3 to make a dataset with optimal token sizes and difficulty for the assignment, but that was time well spent, IMO. Learning to clean/prepare data for SFT/RL was a fun experience!
 
 Otherwise, course staff did a really, truly excellent job of making the course accessible, which I really appreciated. Many details here, like frequent pointers in assignments for auditors and public github leaderboards, go far beyond the typical academic level of commitment to open access of knowledge, and Stanford NLP and the course instructors/staff deserve serious props here!
 
@@ -134,11 +133,11 @@ Otherwise, course staff did a really, truly excellent job of making the course a
 >
 > *— Actual advice from Percy in lecture 1, lol*
 
-I generally model myself as having a limited number of "good SWE/ML mind" hours a week, many of which go to my lovely day job. Doing this course in my evenings and a solid long coffee shop day (sometimes two) each weekend  was doable, but required significantly reducing my time engaging with other research/doing side projects. That is, I expect most working auditors doing all assignment parts, and fully engaging with the course will find their non-work sharp hours fairly relatively monopolized unless you're far more of a grinder than I am.
+I generally model myself as having a limited number of "good SWE/ML mind" hours a week, many of which go to my lovely day job. Doing this course in my evenings and a solid long coffee shop day (sometimes two) each weekend  was doable, but required significantly reducing my time engaging with other research/doing side projects. That is, I expect most working auditors doing all assignment parts, and fully engaging with the course will find their non-work sharp hours fairly monopolized unless you're far more of a grinder than I am.
 
 Logistically, the Stanford course ran for 10 weeks, so in theory, ~2 weeks per assignment. In brief, **I was able to complete the course in ~16 hours a week over 12 weeks** (ignoring a vacation mostly not thinking about LLMs), which roughly aligns with the [Stanford Online 20h per courseweek estimate](https://online.stanford.edu/courses/cs336-language-modeling-scratch).
 
-However, it's important to note that the assignments are very much not created equal. Assignments 1/2 were by far the hardest/most time consuming for me, followed closely by assignment 5. In contrast, week 3 largely isn't available to auditors, and week 4 was pretty chill. In practice, my schedule looked something like:
+However, it's important to note that the assignments are very much not created equal. Assignments 1/2 were by far the hardest/most time consuming for me, followed closely by assignment 5. In contrast, Assignment 3 largely isn't available to auditors, and Assignment 4 was pretty chill. In practice, my schedule looked something like:
 
 | Assignment | Time |
 |------------|------|
@@ -148,30 +147,30 @@ However, it's important to note that the assignments are very much not created e
 | 4 | 2 weeks |
 | 5 + Optional Alignment Component | 3 weeks |
 
-If this is a meaningful distinction to you, the course largely felt "CS/SWE Hard", not "Stats/Math Hard" to me, with the exception of one relatively gnarly part of Assignment 5 around GRPO. If you're not like me in this sense, you may find assignments 1/2 a bit easier, and 5 more challenging/time consuming.  
+If this is a meaningful distinction to you, the course felt "CS/SWE Hard", not "Stats/Math Hard" to me, with the exception of one relatively gnarly part of Assignment 5 around GRPO. If you're not like me in this sense, you may find assignments 1/2 a bit easier, and 5 more challenging/time consuming.  
 
 # Getting the Most from CS336
 
 Some final thoughts on getting the most out of this class that didn't deserve their own section:
 
-**Don't rush the lectures:** I know this is primarily an implementation based course, but the couple times I rushed through the lectures to make time for coding I ended up regretting it. My guess is you can probably pretty productively spend up to 2.5x the original lecture time engaging with each lecture more deeply. Some of the most practically useful things I learned came through digging into Tatsu's references, for example!
+**Don't rush the lectures:** I know this is primarily an implementation based course, but the couple times I rushed through the lectures to make time for coding I ended up regretting it. You can productively spend up to 2.5x the original lecture time engaging with each lecture more deeply. Some of the most practically useful things I learned came through digging into Tatsu's references, for example!
 
-**Write down early what you'll allow LLMs to do:** Especially as an auditor with a day job, I was really glad I spent some time writing down some clear lines on what I'd use Claude Code to help me with, and then translating them into a `CLAUDE.md` to ensure you don't ask for a hint and get a solution. As always with using LLMs for self-learning, I think it's likely a mistake to err too much in either direction here, and you really need to get clear on what your learning goals are to decide where on this tradeoff curve you want to live.
+**Write down early what you'll allow LLMs to do:** Especially as an auditor with a day job, I was really glad I spent some time writing down some clear lines on what I'd use Claude Code to help me with, and then translating them into a `CLAUDE.md` to ensure you don't ask for a hint and get a solution. As always with using LLMs for self-learning, it's a mistake to err too much in either direction here, and you really need to get clear on what your learning goals are to decide where on this tradeoff curve you want to live.
 
-**Leave time to follow your curiosity:** Like Damek Davis[^6] noted in his great [live-tweet](https://x.com/damekdavis/status/1968079612044509347) of the course, the number of little research project ideas I had ballooned during this course. I got a ton out of implementing these either myself or via Claude where that felt acceptable. Some things I messed around with:
+**Leave time to follow your curiosity:** Like Damek Davis noted in his great [live-tweet](https://x.com/damekdavis/status/1968079612044509347) of the course, the number of little research project ideas I had ballooned during this course. I got a ton out of implementing these either myself or via Claude where that felt acceptable. Some things I messed around with:
 
 - Implementing (hilariously inefficient versions of) some novel linear attention architectures like [DeltaNet](https://sustcsonglin.github.io/blog/2024/deltanet-1/) that are increasingly making their way into public (and presumably private) frontier models to enable larger context windows
-- Implementing some efficient-ish GPU kernels for bidirectional attention (like one might use in a transformer based regression or classification model). Not because doing this by hand actually is a novel speedup, but because changing fundamental assumptions like causal attention is fun/instructive.
+- Implementing some efficient-ish GPU kernels for bidirectional attention (like one might use in a transformer based regression or classification model). Not because doing this by hand is actually a novel speedup, but because changing fundamental assumptions like causal attention is fun/instructive.
 - Adding in a bunch of the slight tweaks to GRPO that have come out since the course, that are present in recent public models like [Olmo 3](https://allenai.org/blog/olmo3) (and similar RL techniques in [GLM-4.5](https://z.ai/blog/glm-4.5)).
 
 This was a fantastic course, and I'm really glad I built time into my life to work through it. If you have any questions, feel free to reach out!
 
-[^1]: Think actually making those GPUs go BRRRR, memory hierarchy awareness, actually using multiple GPUs well.
+[^1]: Think actually making those GPUs go BRRRR, actually using multiple GPUs well, and understanding what constraints bottleneck you when.
 
-[^2]: ![](imgs/the_owl.png)
+[^2]: Distributed Data Parallel— one of the simpler strategies for training across multiple GPUs by replicating the model on each device and synchronizing gradients.
 
-[^3]: I'll cite [SolidGoldMagikarp](https://www.lesswrong.com/posts/aPeJE8bSo6rAFoLqg/solidgoldmagikarp-plus-prompt-generation) for fun. But also, they make [Andrej Karpathy sad](https://www.youtube.com/watch?v=zduSFxRajkE), so you know they're cursed.
+[^3]: ![](imgs/the_owl.png)
 
-[^4]: Distributed Data Parallel— one of the simpler strategies for training across multiple GPUs by replicating the model on each device and synchronizing gradients.
+[^4]: I'll cite [SolidGoldMagikarp](https://www.lesswrong.com/posts/aPeJE8bSo6rAFoLqg/solidgoldmagikarp-plus-prompt-generation) for fun. But also, they make [Andrej Karpathy sad](https://www.youtube.com/watch?v=zduSFxRajkE), so you know they're cursed.
 
 [^5]: I like Runpod, but very possible something else is cheaper now. 
