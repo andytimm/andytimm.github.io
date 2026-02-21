@@ -50,7 +50,7 @@
   </url>
   <url>
     <loc>https://andytimm.github.io/index.html</loc>
-    <lastmod>2026-01-11T02:24:18.015Z</lastmod>
+    <lastmod>2026-02-08T22:09:05.833Z</lastmod>
   </url>
   <url>
     <loc>https://andytimm.github.io/blog.html</loc>
@@ -99,5 +99,9 @@
   <url>
     <loc>https://andytimm.github.io/posts/cs336/cs336_review.html</loc>
     <lastmod>2026-01-11T01:37:15.027Z</lastmod>
+  </url>
+  <url>
+    <loc>https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html</loc>
+    <lastmod>2026-02-21T20:24:39.299Z</lastmod>
   </url>
 </urlset>

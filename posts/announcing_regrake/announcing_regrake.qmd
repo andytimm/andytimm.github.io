@@ -1,0 +1,101 @@
+---
+layout: post
+title: "regrake: Regularized Raking in R"
+subtitle: "New year, new package release"
+date: 2026-02-21
+draft: true
+categories:
+  - surveys
+  - weighting
+  - R
+---
+
+My new R package `regrake` (for regularized raking) is now live! 
+
+Regularized raking enables more flexible functional forms in adherence to population targets, meaningful regularization, and ultimately more expressive and efficient survey weights.
+
+A good longer introduction to regularized raking is [these slides](https://github.com/andytimm/nyospm_regrake_public).
+
+You can install the package from GitHub (CRAN coming soon):
+
+```r
+remotes::install_github("andytimm/regrake")
+```
+
+The rest of this post shows off some of the features I'm most excited about.
+
+## Flexible raking and regularization
+
+<weighting is hard vibes in a sentence or two>
+
+<Flexible targets + regularization + a plot>
+
+My experience has been that a little bit of regularization and flexibility in functional form go a long way. More complex tools like MRP and more recent variants definitely have their place, often you get much of the 
+
+## Formula interface
+
+I've always been inspired by the elegance of `brms`'s formula interface: Even complex models feel pretty easy to express elegantly. I've tried to capture some of that experience here.
+
+`regrake` makes it pretty easy to specify relatively complex constraints, like the mix of exact constraints on marginal totals and L2 constraints on interactions:
+
+```r
+regrake(
+  data = survey_data,
+  formula = ~ rr_exact(age) + rr_exact(sex) + rr_exact(race) +
+              rr_exact(education) + rr_exact(region) +
+              rr_l2(region:education) +
+              rr_l2(region:race) +
+              rr_l2(education:race),
+  population_data = pop_targets,
+  pop_type = "proportions",
+  regularizer = "entropy",
+  lambda = 10
+)
+```
+
+Swapping a constraint from `rr_exact()` to `rr_l2()`, or tweaking λ to adjust regularization, is a one-line change, which makes it easy to iterate and compare.
+
+## Target input interfaces that don't suck
+
+Structuring weighting target inputs in R has always been moderately annoying to me. One thing I'm happy with here is that I've been able to support a pretty wide set of input formats.
+
+For example, I find the `autumn` df format pretty elegant:
+
+| variable | level   | target |
+|----------|---------|--------|
+| sex      | M       | 0.49   |
+| sex      | F       | 0.51   |
+| age      | young   | 0.45   |
+| age      | old     | 0.55   |
+| sex:age  | M:young | 0.20   |
+| sex:age  | M:old   | 0.29   |
+| sex:age  | F:young | 0.25   |
+| sex:age  | F:old   | 0.26   |
+
+But the package is just as happy to take an `anesrake` style list:
+
+```
+$sex
+    M     F
+ 0.49  0.51
+
+$age
+young   old
+ 0.45  0.55
+
+$`sex:age`
+M:young   M:old F:young   F:old
+   0.20    0.29    0.25    0.26
+```
+
+Or a poststratification table:
+
+| sex | age   | count |
+|-----|-------|-------|
+| M   | young | 2000  |
+| M   | old   | 2900  |
+| F   | young | 2500  |
+| F   | old   | 2600  |
+
+
+These are ultimately all converted back to the autumn format for use. My hope is that this fluidity with inputs makes it a bit easier to try regularized raking on your data. 

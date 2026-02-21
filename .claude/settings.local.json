@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:\\\\Users\\\\timma\\\\Documents\\\\personal-quarto-website-2022\" status)",
+      "Bash(git -C \"c:\\\\Users\\\\timma\\\\Documents\\\\personal-quarto-website-2022\" restore .)",
+      "Bash(git -C \"c:\\\\Users\\\\timma\\\\Documents\\\\personal-quarto-website-2022\" clean -fd -- docs/posts/announcing_regrake/ docs/site_libs/bootstrap/bootstrap-82348daeeb1715b674cd594e670d93f4.min.css docs/site_libs/quarto-html/quarto-syntax-highlighting-05fe91a66cf75bbbb8c9664867fe5124.css)",
+      "Bash(git -C \"c:\\\\Users\\\\timma\\\\Documents\\\\personal-quarto-website-2022\" restore docs/index.html docs/listings.json docs/robots.txt docs/search.json docs/sitemap.xml)"
+    ]
+  }
+}

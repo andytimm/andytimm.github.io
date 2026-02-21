@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Andy Timm">
+<meta name="dcterms.date" content="2026-02-21">
 
-<title>Andy Timm</title>
+<title>regrake: Regularized Raking in R – Andy Timm</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,25 +22,59 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-05fe91a66cf75bbbb8c9664867fe5124.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-82348daeeb1715b674cd594e670d93f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-05fe91a66cf75bbbb8c9664867fe5124.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-82348daeeb1715b674cd594e670d93f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -66,31 +102,30 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
 
 
-<link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="Andy Timm">
-<meta property="og:description" content="Personal website of Andy Timm">
-<meta property="og:image" content="https://andytimm.github.io/assets/bookshelf_2026.jpg">
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="regrake: Regularized Raking in R – Andy Timm">
+<meta property="og:description" content="New year, new package release">
 <meta property="og:site_name" content="Andy Timm">
-<meta name="twitter:title" content="Andy Timm">
-<meta name="twitter:description" content="Personal website of Andy Timm">
-<meta name="twitter:image" content="https://andytimm.github.io/assets/bookshelf_2026.jpg">
+<meta name="twitter:title" content="regrake: Regularized Raking in R – Andy Timm">
+<meta name="twitter:description" content="New year, new package release">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andy Timm</span>
     </a>
   </div>
@@ -101,15 +136,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./software.html"> 
+    <a class="nav-link" href="../../software.html"> 
 <span class="menu-text">Software</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./blog.html"> 
+    <a class="nav-link" href="../../blog.html"> 
 <span class="menu-text">Rarely Updated Blog</span></a>
   </li>  
 </ul>
@@ -120,45 +155,206 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">regrake: Regularized Raking in R</h1>
+            <p class="subtitle lead">New year, new package release</p>
+                                <div class="quarto-categories">
+                <div class="quarto-category">surveys</div>
+                <div class="quarto-category">weighting</div>
+                <div class="quarto-category">R</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://andytimm.github.io">Andy Timm</a> </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 21, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#flexible-raking-and-regularization" id="toc-flexible-raking-and-regularization" class="nav-link active" data-scroll-target="#flexible-raking-and-regularization">Flexible raking and regularization</a></li>
+  <li><a href="#formula-interface" id="toc-formula-interface" class="nav-link" data-scroll-target="#formula-interface">Formula interface</a></li>
+  <li><a href="#target-input-interfaces-that-dont-suck" id="toc-target-input-interfaces-that-dont-suck" class="nav-link" data-scroll-target="#target-input-interfaces-that-dont-suck">Target input interfaces that don’t suck</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-<section id="about" class="level1">
-<h1>About</h1>
-<p>I’m a data scientist at <a href="https://growprogress.ai/">Grow Progress</a>; we test ads and do survey research, helping Democrats and progressive organizations win elections. Before this, I was a data science manager at <a href="https://www.605.tv/">605</a>, where I worked on problems of causal inference, forecasting, and heterogeneous treatment effects modeling.</p>
-<p>Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference.</p>
-<p>Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing ssbm.</p>
-<a class="btn btn-outline-dark" ,="" href="https://www.linkedin.com/in/andrew-timm-b70857a2/" target="_blank" rel="noopener noreferrer">
-    <i class="bi bi-linkedin" role="img" aria-label="LinkedIn"></i>
-</a>
 
-<a class="btn btn-outline-dark" ,="" href="https://github.com/andytimm" target="_blank" rel="noopener noreferrer">
-    <i class="bi bi-github" role="img" aria-label="Github"></i>
-</a>
+<p>My new R package <code>regrake</code> (for regularized raking) is now live!</p>
+<p>Regularized raking enables more flexible functional forms in adherence to population targets, meaningful regularization, and ultimately more expressive and efficient survey weights.</p>
+<p>A good longer introduction to regularized raking is <a href="https://github.com/andytimm/nyospm_regrake_public">these slides</a>.</p>
+<p>You can install the package from GitHub (CRAN coming soon):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"andytimm/regrake"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The rest of this post briefly illustrates a few things I’m excited about here.</p>
+<section id="flexible-raking-and-regularization" class="level2">
+<h2 class="anchored" data-anchor-id="flexible-raking-and-regularization">Flexible raking and regularization</h2>
+<p><weighting is="" hard="" vibes="" in="" a="" sentence="" or="" two=""></weighting></p>
+<p>&lt;Flexible targets + regularization + a plot&gt;</p>
+<p>My experience has been that a little bit of regularization and flexibility in functional form go a long way. More complex tools like MRP and more recent variants definitely have their place, often you get much of the</p>
+</section>
+<section id="formula-interface" class="level2">
+<h2 class="anchored" data-anchor-id="formula-interface">Formula interface</h2>
+<p>I’ve always been inspired by the elegance of <code>brms</code>’s formula interface: Even complex models feel pretty easy to express elegantly. I’ve tried to capture some of that experience here.</p>
+<p><code>regrake</code> makes it pretty easy to specify relatively complex constraints, like the mix of exact</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">regrake</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> survey_data,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="sc">~</span> <span class="fu">rr_exact</span>(age) <span class="sc">+</span> <span class="fu">rr_exact</span>(sex) <span class="sc">+</span> <span class="fu">rr_exact</span>(race) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_exact</span>(education) <span class="sc">+</span> <span class="fu">rr_exact</span>(region) <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(region<span class="sc">:</span>education) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(region<span class="sc">:</span>race) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(education<span class="sc">:</span>race),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">population_data =</span> pop_targets,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">pop_type =</span> <span class="st">"proportions"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">regularizer =</span> <span class="st">"entropy"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">10</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Swapping a constraint from <code>rr_exact()</code> to <code>rr_l2()</code>, or tweaking λ to adjust regularization, is a one-line change, which makes it easy to iterate and compare.</p>
+</section>
+<section id="target-input-interfaces-that-dont-suck" class="level2">
+<h2 class="anchored" data-anchor-id="target-input-interfaces-that-dont-suck">Target input interfaces that don’t suck</h2>
+<p>Structuring weighting target inputs in R has always been moderately annoying to me. One thing I’m happy with here is that I’ve been able to support a pretty wide set of input formats.</p>
+<p>For example, I find the <code>autumn</code> df format pretty elegant:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>variable</th>
+<th>level</th>
+<th>target</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sex</td>
+<td>M</td>
+<td>0.49</td>
+</tr>
+<tr class="even">
+<td>sex</td>
+<td>F</td>
+<td>0.51</td>
+</tr>
+<tr class="odd">
+<td>age</td>
+<td>young</td>
+<td>0.45</td>
+</tr>
+<tr class="even">
+<td>age</td>
+<td>old</td>
+<td>0.55</td>
+</tr>
+<tr class="odd">
+<td>sex:age</td>
+<td>M:young</td>
+<td>0.20</td>
+</tr>
+<tr class="even">
+<td>sex:age</td>
+<td>M:old</td>
+<td>0.29</td>
+</tr>
+<tr class="odd">
+<td>sex:age</td>
+<td>F:young</td>
+<td>0.25</td>
+</tr>
+<tr class="even">
+<td>sex:age</td>
+<td>F:old</td>
+<td>0.26</td>
+</tr>
+</tbody>
+</table>
+<p>But the package is just as happy to take an <code>anesrake</code> style list:</p>
+<pre><code>$sex
+    M     F
+ 0.49  0.51
 
-<a class="btn btn-outline-dark" ,="" href="https://bsky.app/profile/andytimm.bsky.social" target="_blank" rel="noopener noreferrer">
-    <img src="assets/bluesky-1.svg" alt="Bluesky" style="width: 20px; height: 20px; filter: brightness(0);">
-</a>
+$age
+young   old
+ 0.45  0.55
 
-<a class="btn btn-outline-dark" ,="" href="https://twitter.com/Andy_Timm" target="_blank" rel="noopener noreferrer">
-    <i class="bi bi-twitter" role="img" aria-label="Twitter"></i>
-</a>
-
-<a class="btn btn-outline-dark" ,="" href="mailto:timmandrew1@gmail.com" target="_blank" rel="noopener noreferrer">
-    <i class="bi bi-envelope" role="img" aria-label="email"></i>
-</a>
+$`sex:age`
+M:young   M:old F:young   F:old
+   0.20    0.29    0.25    0.26</code></pre>
+<p>Or a poststratification table:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>sex</th>
+<th>age</th>
+<th>count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>young</td>
+<td>2000</td>
+</tr>
+<tr class="even">
+<td>M</td>
+<td>old</td>
+<td>2900</td>
+</tr>
+<tr class="odd">
+<td>F</td>
+<td>young</td>
+<td>2500</td>
+</tr>
+<tr class="even">
+<td>F</td>
+<td>old</td>
+<td>2600</td>
+</tr>
+</tbody>
+</table>
+<p>These are ultimately all converted back to the autumn format for use. My hope is that this fluidity with inputs makes it a bit easier to try regularized raking on your data.</p>
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
+  author = {Timm, Andy},
+  title = {Regrake: {Regularized} {Raking} in {R}},
+  date = {2026-02-21},
+  url = {https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2026" class="csl-entry quarto-appendix-citeas" role="listitem">
+Timm, Andy. 2026. <span>“Regrake: Regularized Raking in R.”</span>
+February 21, 2026. <a href="https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html">https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html</a>.
+</div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -581,4 +777,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>
