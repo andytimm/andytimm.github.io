@@ -3,10 +3,26 @@ title: "Software"
 editor: visual
 ---
 
+## `regrake`
+
+An R package for regularized raking, based on the optimization framework of [Barratt, Angeris, and Boyd (2021)](https://doi.org/10.1007/s11222-021-10001-1). `regrake` enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a `brms`-inspired formula interface and accepts a wide variety of target input formats.
+
+```{=html}
+    <a class="btn btn-outline-dark btn-sm" href="https://stanford.edu/~boyd/papers/optimal_representative_sampling.html" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-file-text" role="img" aria-label="Original Paper"></i>
+        Original Paper
+    </a> <a class="btn btn-outline-dark btn-sm" href="https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-info" role="img" aria-label="Website"></i>
+        Website
+    </a> <a class="btn btn-outline-dark btn-sm" href="https://github.com/andytimm/regrake" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-github" role="img" aria-label="Github"></i>
+        Github
+    </a>
+```
+
 ## `rswjax`
 
-A [JAX](https://github.com/google/jax) implementation of optimal representative sample weighting, drawing heavily on the original `rsw` implementation of Barratt, Angeris, and Boyd ([rsw](https://github.com/cvxgrp/rsw/tree/master)). Thanks to rewriting some core operations in JAX, it is significantly faster than `rsw` for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition,
-it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in [regularized raking](https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html), and wanting to iterate faster on large weighting problems.
+A [JAX](https://github.com/google/jax) implementation of optimal representative sample weighting, drawing heavily on the original `rsw` implementation of Barratt, Angeris, and Boyd ([rsw](https://github.com/cvxgrp/rsw/tree/master)). Thanks to rewriting some core operations in JAX, it is significantly faster than `rsw` for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). While JAX isn't the most natural fit here, this was a fun way to build something complex, and practice making it fast with JAX! I started this project because of my interest in [regularized raking](https://andytimm.github.io/posts/NYSOPM_talk_regularized_raking/NYOSPM_talk.html), and wanting to iterate faster on large weighting problems.
 
 ```{=html}
     <a class="btn btn-outline-dark btn-sm" href="https://stanford.edu/~boyd/papers/optimal_representative_sampling.html" target="_blank" rel="noopener noreferrer">

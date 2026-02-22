@@ -130,14 +130,14 @@
     "href": "software.html",
     "title": "Software",
     "section": "",
-    "text": "A JAX implementation of optimal representative sample weighting, drawing heavily on the original rsw implementation of Barratt, Angeris, and Boyd (rsw). Thanks to rewriting some core operations in JAX, it is significantly faster than rsw for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition, it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in regularized raking, and wanting to iterate faster on large weighting problems.\n    \n    \n    Original Paper\n\n     \n        \n        Github\n     \n        \n        Package"
+    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github"
   },
   {
     "objectID": "software.html#rswjax",
     "href": "software.html#rswjax",
     "title": "Software",
-    "section": "",
-    "text": "A JAX implementation of optimal representative sample weighting, drawing heavily on the original rsw implementation of Barratt, Angeris, and Boyd (rsw). Thanks to rewriting some core operations in JAX, it is significantly faster than rsw for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). In addition, it adds a number of quality of life improvements, like early stopping if optimization produces NaNs, warnings for common issues like not including loss functions for every column, and a broader test suite. I started this project because of my interest in regularized raking, and wanting to iterate faster on large weighting problems.\n    \n    \n    Original Paper\n\n     \n        \n        Github\n     \n        \n        Package"
+    "section": "rswjax",
+    "text": "rswjax\nA JAX implementation of optimal representative sample weighting, drawing heavily on the original rsw implementation of Barratt, Angeris, and Boyd (rsw). Thanks to rewriting some core operations in JAX, it is significantly faster than rsw for medium-large datasets, especially those with many columns (ex: 5k+ rows, 20+ columns). While JAX isn’t the most natural fit here, this was a fun way to build something complex, and practice making it fast with JAX! I started this project because of my interest in regularized raking, and wanting to iterate faster on large weighting problems.\n    \n    \n    Original Paper\n\n     \n        \n        Github\n     \n        \n        Package"
   },
   {
     "objectID": "software.html#retrodesign",
@@ -733,5 +733,12 @@
     "title": "regrake: Regularized Raking in R",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nCheck out this long list of weighting variables- many of which my mentors from an earlier era of polling would find anathema to weight on!  Source: NYT/Siena National Poll Toplines, January 2026↩︎\nI’m being a little loose here in service of keeping the post going. If you take away “raking has linear regression vibes”, and “regularized regression has lasso/ridge/horseshoe vibes” I’m happy. More precisely, Deville & Särndal show that all calibration estimators, raking included, produce point estimates asymptotically equivalent to the generalized regression (GREG) estimator, which adjusts the Horvitz-Thompson estimator via a linear regression on the calibration margins. So raking on age and sex separately implicitly fits a main-effects-only linear model; no interactions. The weights themselves differ across calibration distance functions (raking guarantees positivity, for instance), but the estimates converge IIRC.↩︎\nFor anybody else who reads “won’t” as a challenge here, I’m aware of the various tricks one can resort to here. Picking and choosing interactions to keep, raking in stages, or being flexible with what “converged” needs to mean…. all these could probably get something close to the example to fit. The example is (deliberately) just simple enough that vanilla raking starts to struggle- you could force it to work. My claim here is that you shouldn’t have to resort to these sometimes hacky tricks we’ve collectively figured out: instead, try to formalize the solution you actually want, and optimize against that.↩︎\nSimilar to the above footnote, if your reaction here is that you’ve got plenty heuristic tools like trimming or winsorization to bring down that variance/deff cost, again my claim is that you shouldn’t have to do this. Instead, you can write down the optimization problem you actually want to solve, weighting induced variance limitations included, and directly solve that.↩︎"
+  },
+  {
+    "objectID": "software.html#regrake",
+    "href": "software.html#regrake",
+    "title": "Software",
+    "section": "",
+    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github"
   }
 ]
