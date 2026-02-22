@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/announcing_regrake/announcing_regrake.html",
       "/posts/cs336/cs336_review.html",
       "/posts/kangaroos_fosters_jaynes/kangaroos_fosters_jaynes.html",
       "/posts/doing_maxdiff_better/better_maxdiff.html",

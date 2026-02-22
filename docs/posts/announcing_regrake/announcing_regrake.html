@@ -111,18 +111,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="regrake: Regularized Raking in R – Andy Timm">
 <meta property="og:description" content="New year, new package release">
-<meta property="og:image" content="https://andytimm.github.io/posts/announcing_regrake/images/plot2.png">
+<meta property="og:image" content="https://andytimm.github.io/posts/announcing_regrake/images/regrake_cover_photo.png">
 <meta property="og:site_name" content="Andy Timm">
-<meta property="og:image:height" content="1003">
-<meta property="og:image:width" content="2136">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1120">
 <meta name="twitter:title" content="regrake: Regularized Raking in R – Andy Timm">
 <meta name="twitter:description" content="New year, new package release">
-<meta name="twitter:image" content="https://andytimm.github.io/posts/announcing_regrake/images/plot2.png">
+<meta name="twitter:image" content="https://andytimm.github.io/posts/announcing_regrake/images/regrake_cover_photo.png">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image-height" content="1003">
-<meta name="twitter:image-width" content="2136">
+<meta name="twitter:image-height" content="960">
+<meta name="twitter:image-width" content="1120">
 </head>
 
 <body class="nav-fixed">
@@ -206,8 +206,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#flexible-raking-and-regularization" id="toc-flexible-raking-and-regularization" class="nav-link active" data-scroll-target="#flexible-raking-and-regularization">Flexible raking and regularization</a></li>
   <li><a href="#formula-interface" id="toc-formula-interface" class="nav-link" data-scroll-target="#formula-interface">Formula interface</a></li>
-  <li><a href="#target-input-interfaces-that-dont-suck" id="toc-target-input-interfaces-that-dont-suck" class="nav-link" data-scroll-target="#target-input-interfaces-that-dont-suck">Target input interfaces that don’t suck</a></li>
-  <li><a href="#learning-more" id="toc-learning-more" class="nav-link" data-scroll-target="#learning-more">Learning more</a></li>
+  <li><a href="#target-input-interfaces-that-dont-suck" id="toc-target-input-interfaces-that-dont-suck" class="nav-link" data-scroll-target="#target-input-interfaces-that-dont-suck">Target Input Interfaces That Don’t Suck</a></li>
+  <li><a href="#learning-more" id="toc-learning-more" class="nav-link" data-scroll-target="#learning-more">Learning More</a></li>
   </ul>
 </nav>
     </div>
@@ -219,7 +219,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>My new R package <code>regrake</code> is now live!</p>
-<p>Regularized raking enables more flexible functional forms in raking to population targets, meaningful regularization, and ultimately more expressive and efficient survey weights.</p>
+<p>Regularized raking enables more flexible functional forms in raking to population targets, supports meaningful regularization, and ultimately leads to more expressive and efficient survey weights.</p>
 <p>You can install the package from GitHub (CRAN coming soon):</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"andytimm/regrake"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The rest of this post gives a light overview of the problem regularized raking solves, and introduces some interface elements I’m excited by.</p>
@@ -227,9 +227,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="flexible-raking-and-regularization">Flexible raking and regularization</h2>
 <p>Survey researchers increasingly ask a lot of our weights. We know our sample can be subtly or not so subtly unrepresentative in hard to fix ways, and expansive weighting schemes, no matter how imperfect, are part of the toolkit to address these challenges. Take, for example, the growing list of weighting variables in any recent NYT survey<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <p>What does this have to with <strong>how</strong> exactly we fit our weights, though?</p>
-<p>I find an analogy to predictive modeling instructive here. The early calibration literature like Deville &amp; Särndal (1992) makes it pretty clear that raking is well understood as linear regression on the weighting problem. Like with linear regression in the predictive context, we can add more marginal terms and interactions to (perhaps) fit a better model. Layering in more and more predictors like this allow one to extract further signal from your data, but you’ll quickly begins to feel the inflexibility of the regression framework as problems get more complex.</p>
+<p>I find an analogy to predictive modeling instructive here. The early calibration literature like <a href="https://doi.org/10.1080/01621459.1992.10475217">Deville &amp; Särndal (1992)</a> makes it pretty clear that raking is well understood as linear regression on the weighting problem. Like with linear regression in the predictive context, we can add more marginal terms and interactions to (perhaps) fit a better model. Layering in more and more predictors like this allow one to extract further signal from your data, but you’ll quickly begin to feel the inflexibility of the regression framework as problems get more complex.</p>
 <p>Pushing all the way to a highly flexible, probably Bayesian or machine learning model to pull more signal out of available data without a variance explosion works, but often a simple lasso, ridge, or horseshoe prior regression model provides most of the additional signal for minimal additional effort. I think the regularized raking available in <code>regrake</code> offers a compelling level of flexibility without much more implementation complexity.</p>
-<p>Here’s an example: In the 2016 pew study I’m weighting in the slides linked below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these — whomst amongst us hasn’t worried about non-college midwestern whites? However, a more fully interacted model won’t<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> converge with basic raking, and the nearby partial solutions pay a relatively large variance cost<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/regrake_cover_photo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:75.0%"></p>
+</figure>
+</div>
+<p>Here’s an example: In the 2016 pew study I’m weighting in the slides below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these — whomst amongst us hasn’t worried about non-college midwestern whites? However, a more fully interacted model won’t<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> converge with basic raking, and the nearby partial solutions pay a relatively large variance cost<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
 <p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -237,12 +242,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption>being 1pp off targets on the harder margins ins’t bad at all!</figcaption>
 </figure>
 </div>
-<p>While there are certainly applications that call for going all the way to something more complex like MRP and its’ recent improvements, my sense is regularized raking can deliver much of the incremental benefit at lower effort.</p>
+<p>While there are certainly applications that call for going all the way to something more complex like MRP, my sense is regularized raking can deliver much of the incremental benefit at lower effort. Coming back to that predictive modeling analogy, the sample you start with and the variables you choose to weight on still matter probably will more than anything about how you weight, but more expressive tools give you better options.</p>
 </section>
 <section id="formula-interface" class="level2">
 <h2 class="anchored" data-anchor-id="formula-interface">Formula interface</h2>
 <p>I’ve always been inspired by the elegance of <code>brms</code>’s formula interface: Even complex models feel pretty easy to express elegantly. I’ve tried to capture some of that experience here.</p>
-<p><code>regrake</code> makes it pretty easy to specify relatively complex constraints, like the mix of exact constraints on marginal totals and L2 constraints on interactions:</p>
+<p><code>regrake</code> makes it pretty easy to specify relatively complex constraints, like a mix of exact constraints on marginal totals and L2 constraints on interactions:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">regrake</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> survey_data,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="sc">~</span> <span class="fu">rr_exact</span>(recode_age_bucket) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_female) <span class="sc">+</span></span>
@@ -257,67 +262,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">regularizer =</span> <span class="st">"entropy"</span>,</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">10</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Swapping a constraint from <code>rr_exact()</code> to <code>rr_l2()</code>, or tweaking λ to adjust regularization, is a one-line change, which makes it easy to iterate and compare.</p>
+<p>Swapping a constraint from <code>rr_exact()</code> to <code>rr_l2()</code>, or tweaking <code>lambda</code> to adjust regularization, is a one-line change, which makes it easy to iterate and compare.</p>
 </section>
 <section id="target-input-interfaces-that-dont-suck" class="level2">
-<h2 class="anchored" data-anchor-id="target-input-interfaces-that-dont-suck">Target input interfaces that don’t suck</h2>
+<h2 class="anchored" data-anchor-id="target-input-interfaces-that-dont-suck">Target Input Interfaces That Don’t Suck</h2>
 <p>Structuring weighting target inputs in R has always been moderately annoying to me. One thing I’m happy with here is that I’ve been able to support a pretty wide set of input formats.</p>
 <p>For example, I find the <code>autumn</code> df format pretty elegant:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>variable</th>
-<th>level</th>
-<th>target</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>sex</td>
-<td>M</td>
-<td>0.49</td>
-</tr>
-<tr class="even">
-<td>sex</td>
-<td>F</td>
-<td>0.51</td>
-</tr>
-<tr class="odd">
-<td>age</td>
-<td>young</td>
-<td>0.45</td>
-</tr>
-<tr class="even">
-<td>age</td>
-<td>old</td>
-<td>0.55</td>
-</tr>
-<tr class="odd">
-<td>sex:age</td>
-<td>M:young</td>
-<td>0.20</td>
-</tr>
-<tr class="even">
-<td>sex:age</td>
-<td>M:old</td>
-<td>0.29</td>
-</tr>
-<tr class="odd">
-<td>sex:age</td>
-<td>F:young</td>
-<td>0.25</td>
-</tr>
-<tr class="even">
-<td>sex:age</td>
-<td>F:old</td>
-<td>0.26</td>
-</tr>
-</tbody>
-</table>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable =</span> <span class="fu">c</span>(<span class="st">"sex"</span>, <span class="st">"sex"</span>, <span class="st">"age"</span>, <span class="st">"age"</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">"sex:age"</span>, <span class="st">"sex:age"</span>, <span class="st">"sex:age"</span>, <span class="st">"sex:age"</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">level    =</span> <span class="fu">c</span>(<span class="st">"M"</span>, <span class="st">"F"</span>, <span class="st">"young"</span>, <span class="st">"old"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>               <span class="st">"M:young"</span>, <span class="st">"M:old"</span>, <span class="st">"F:young"</span>, <span class="st">"F:old"</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">target   =</span> <span class="fu">c</span>(<span class="fl">0.49</span>, <span class="fl">0.51</span>, <span class="fl">0.45</span>, <span class="fl">0.55</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>               <span class="fl">0.20</span>, <span class="fl">0.29</span>, <span class="fl">0.25</span>, <span class="fl">0.26</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>targets</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code># A tibble: 8 × 3
+  variable level   target
+  &lt;chr&gt;    &lt;chr&gt;    &lt;dbl&gt;
+1 sex      M         0.49
+2 sex      F         0.51
+3 age      young     0.45
+4 age      old       0.55
+5 sex:age  M:young   0.20
+6 sex:age  M:old     0.29
+7 sex:age  F:young   0.25
+8 sex:age  F:old     0.26</code></pre>
 <p>But the package is just as happy to take an <code>anesrake</code> style list:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">sex       =</span> <span class="fu">c</span>(<span class="at">M =</span> <span class="fl">0.49</span>, <span class="at">F =</span> <span class="fl">0.51</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age       =</span> <span class="fu">c</span>(<span class="at">young =</span> <span class="fl">0.45</span>, <span class="at">old =</span> <span class="fl">0.55</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">sex:age</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">M:young</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.20</span>, <span class="st">`</span><span class="at">M:old</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.29</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                <span class="st">`</span><span class="at">F:young</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.25</span>, <span class="st">`</span><span class="at">F:old</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.26</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>targets</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre><code>$sex
-    M     F
- 0.49  0.51
+   M    F
+0.49 0.51
 
 $age
 young   old
@@ -327,43 +308,27 @@ $`sex:age`
 M:young   M:old F:young   F:old
    0.20    0.29    0.25    0.26</code></pre>
 <p>Or a poststratification table:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>sex</th>
-<th>age</th>
-<th>count</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>M</td>
-<td>young</td>
-<td>2000</td>
-</tr>
-<tr class="even">
-<td>M</td>
-<td>old</td>
-<td>2900</td>
-</tr>
-<tr class="odd">
-<td>F</td>
-<td>young</td>
-<td>2500</td>
-</tr>
-<tr class="even">
-<td>F</td>
-<td>old</td>
-<td>2600</td>
-</tr>
-</tbody>
-</table>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pop_table <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>sex, <span class="sc">~</span>age,     <span class="sc">~</span>count,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"M"</span>,  <span class="st">"young"</span>,  <span class="dv">2000</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"M"</span>,  <span class="st">"old"</span>,    <span class="dv">2900</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"F"</span>,  <span class="st">"young"</span>,  <span class="dv">2500</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"F"</span>,  <span class="st">"old"</span>,    <span class="dv">2600</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>pop_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code># A tibble: 4 × 3
+  sex   age   count
+  &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;
+1 M     young  2000
+2 M     old    2900
+3 F     young  2500
+4 F     old    2600</code></pre>
 <p>These are ultimately all converted back to the autumn format for use. My hope is that this fluidity with inputs makes it a bit easier to try regularized raking on your data.</p>
 </section>
 <section id="learning-more" class="level2">
-<h2 class="anchored" data-anchor-id="learning-more">Learning more</h2>
-<p>If this has piqued your interest, a good longer introduction to regularized raking is <a href="https://github.com/andytimm/nyospm_regrake_public">these slides</a>, from a talk I gave at <a href="https://nyhackr.org/">NYOSPM</a>.</p>
-<p>If the underlying optimization logic is interesting to you, I’d check out the original paper- it’s a really clean, elegant application of alternating direction method of multiplier ideas.</p>
+<h2 class="anchored" data-anchor-id="learning-more">Learning More</h2>
+<p>If this has piqued your interest, a good longer introduction to regularized raking is <a href="https://github.com/andytimm/nyospm_regrake_public">these slides</a>, a slightly updated version of a talk I gave at <a href="https://nyhackr.org/">NYOSPM</a>.</p>
+<p>If the underlying optimization logic is interesting to you, I’d check out <a href="https://doi.org/10.1007/s11222-021-10001-1">the original paper</a> (Barratt, Angeris, and Boyd 2021)- it’s a really clean, elegant application of alternating direction method of multiplier (ADMM) ideas.</p>
 
 
 </section>
