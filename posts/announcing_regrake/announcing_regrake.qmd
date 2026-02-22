@@ -2,7 +2,7 @@
 layout: post
 title: "regrake: Regularized Raking in R"
 subtitle: "New year, new package release"
-date: 2026-02-21
+date: 2026-02-22
 draft: true
 categories:
   - surveys
@@ -10,11 +10,9 @@ categories:
   - R
 ---
 
-My new R package `regrake` (for regularized raking) is now live! 
+My new R package `regrake` is now live! 
 
-Regularized raking enables more flexible functional forms in adherence to population targets, meaningful regularization, and ultimately more expressive and efficient survey weights.
-
-A good longer introduction to regularized raking is [these slides](https://github.com/andytimm/nyospm_regrake_public).
+Regularized raking enables more flexible functional forms in raking to population targets, supports meaningful regularization, and ultimately leads to more expressive and efficient survey weights.
 
 You can install the package from GitHub (CRAN coming soon):
 
@@ -22,15 +20,27 @@ You can install the package from GitHub (CRAN coming soon):
 remotes::install_github("andytimm/regrake")
 ```
 
-The rest of this post shows off some of the features I'm most excited about.
+The rest of this post gives a light overview of the problem regularized raking solves, and introduces some interface elements I'm excited by.
 
 ## Flexible raking and regularization
 
-<weighting is hard vibes in a sentence or two>
+Survey researchers increasingly ask a lot of our weights. We know our sample can be subtly or not so subtly unrepresentative in hard to fix ways, and expansive weighting schemes, no matter how imperfect, are part of the toolkit to address these challenges. Take, for example, the growing list of weighting variables in any recent NYT survey[^1].
 
-<Flexible targets + regularization + a plot>
+What does this have to with **how** exactly we fit our weights, though?
 
-My experience has been that a little bit of regularization and flexibility in functional form go a long way. More complex tools like MRP and more recent variants definitely have their place, often you get much of the 
+I find an analogy to predictive modeling instructive here. The early calibration literature like Deville & Särndal (1992) makes it pretty clear that raking is well understood as linear regression on the weighting problem. Like with linear regression in the predictive context, we can add more marginal terms and interactions to (perhaps) fit a better model. Layering in more and more predictors like this allow one to extract further signal from your data, but you'll quickly begins to feel the inflexibility of the regression framework as problems get more complex.
+
+Pushing all the way to a highly flexible, probably Bayesian or machine learning model to pull more signal out of available data without a variance explosion works, but often a simple lasso, ridge, or horseshoe prior regression model provides most of the additional signal for minimal additional effort. I think the regularized raking available in `regrake` offers a compelling level of flexibility without much more implementation complexity.
+
+Here's an example: In the 2016 pew study I'm weighting in the slides linked below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these --- whomst amongst us hasn't worried about non-college midwestern whites? However, a more fully interacted model won't[^2] converge with basic raking, and the nearby partial solutions pay a relatively large variance cost[^3].
+
+A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:
+
+![being 1pp off targets on the harder margins ins't bad at all!](images/plot2.png)
+
+While there are certainly applications that call for going all the way to something more complex like MRP and its' recent improvements, my sense is regularized raking can deliver much of the incremental benefit at lower effort.
+
+Separate from the 
 
 ## Formula interface
 
@@ -41,11 +51,13 @@ I've always been inspired by the elegance of `brms`'s formula interface: Even co
 ```r
 regrake(
   data = survey_data,
-  formula = ~ rr_exact(age) + rr_exact(sex) + rr_exact(race) +
-              rr_exact(education) + rr_exact(region) +
-              rr_l2(region:education) +
-              rr_l2(region:race) +
-              rr_l2(education:race),
+  formula = ~ rr_exact(recode_age_bucket) + rr_exact(recode_female) +
+              rr_exact(recode_inputstate) + rr_exact(recode_region) +
+              rr_exact(recode_educ) + rr_exact(recode_race) +
+              rr_l2(recode_region:recode_educ) +
+              rr_l2(recode_region:recode_race) +
+              rr_l2(recode_educ:recode_race) +
+              rr_l2(recode_region:recode_educ:recode_race),
   population_data = pop_targets,
   pop_type = "proportions",
   regularizer = "entropy",
@@ -98,4 +110,16 @@ Or a poststratification table:
 | F   | old   | 2600  |
 
 
-These are ultimately all converted back to the autumn format for use. My hope is that this fluidity with inputs makes it a bit easier to try regularized raking on your data. 
+These are ultimately all converted back to the autumn format for use. My hope is that this fluidity with inputs makes it a bit easier to try regularized raking on your data.
+
+## Learning more
+
+If this has piqued your interest, a good longer introduction to regularized raking is [these slides](https://github.com/andytimm/nyospm_regrake_public), from a talk I gave at [NYOSPM](https://nyhackr.org/).
+
+If the underlying optimization logic is interesting to you, I'd check out the original paper- it's a really clean, elegant application of alternating direction method of multiplier ideas.
+
+[^1]: Check out this long list of weighting variables- many of which my mentors from an earlier era of polling would find anathema to weight on! ![Weighting variables from a recent NYT/Siena poll](images/nyt_weighting_variables.png) Source: [NYT/Siena National Poll Toplines, January 2026](https://www.nytimes.com/interactive/2026/01/26/polls/times-siena-national-poll-toplines.html)
+
+[^2]: For anybody else who reads "won't" as a challenge here, I'm aware of the various tricks one can resort to here. Picking and choosing interactions to keep, raking in stages, or being flexible with what "converged" needs to mean.... all these could probably get something close to the example to fit. The example is (deliberately) just simple enough that vanilla raking starts to struggle- you could force it to work. My claim here is that you shouldn't have to resort to these sometimes hacky tricks we've collectively figured out: instead, try to formalize the solution you actually want, and optimize against that.
+
+[^3]: Similar to the above footnote, if your reaction here is that you've got plenty heuristic tools like trimming or windsorization to bring down that variance/deff cost, again my claim is that you shouldn't have to do this. Instead, you can write down the optimzation problem you actually want to solve, weighting induced variance limitations included, and directly solve that.

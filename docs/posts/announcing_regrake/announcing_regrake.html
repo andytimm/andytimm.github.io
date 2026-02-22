@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andy Timm">
-<meta name="dcterms.date" content="2026-02-21">
+<meta name="dcterms.date" content="2026-02-22">
 
 <title>regrake: Regularized Raking in R – Andy Timm</title>
 <style>
@@ -105,23 +105,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
+<meta name="quarto:status" content="draft">
 
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="regrake: Regularized Raking in R – Andy Timm">
 <meta property="og:description" content="New year, new package release">
+<meta property="og:image" content="https://andytimm.github.io/posts/announcing_regrake/images/plot2.png">
 <meta property="og:site_name" content="Andy Timm">
+<meta property="og:image:height" content="1003">
+<meta property="og:image:width" content="2136">
 <meta name="twitter:title" content="regrake: Regularized Raking in R – Andy Timm">
 <meta name="twitter:description" content="New year, new package release">
+<meta name="twitter:image" content="https://andytimm.github.io/posts/announcing_regrake/images/plot2.png">
 <meta name="twitter:creator" content="@andy_timm">
 <meta name="twitter:site" content="@andy_timm">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="1003">
+<meta name="twitter:image-width" content="2136">
 </head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner"><div id="quarto-draft-alert" class="alert alert-warning"><i class="bi bi-pencil-square"></i>Draft</div>
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -181,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">February 21, 2026</p>
+        <p class="date">February 22, 2026</p>
       </div>
     </div>
     
@@ -200,6 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#flexible-raking-and-regularization" id="toc-flexible-raking-and-regularization" class="nav-link active" data-scroll-target="#flexible-raking-and-regularization">Flexible raking and regularization</a></li>
   <li><a href="#formula-interface" id="toc-formula-interface" class="nav-link" data-scroll-target="#formula-interface">Formula interface</a></li>
   <li><a href="#target-input-interfaces-that-dont-suck" id="toc-target-input-interfaces-that-dont-suck" class="nav-link" data-scroll-target="#target-input-interfaces-that-dont-suck">Target input interfaces that don’t suck</a></li>
+  <li><a href="#learning-more" id="toc-learning-more" class="nav-link" data-scroll-target="#learning-more">Learning more</a></li>
   </ul>
 </nav>
     </div>
@@ -210,34 +218,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>My new R package <code>regrake</code> (for regularized raking) is now live!</p>
-<p>Regularized raking enables more flexible functional forms in adherence to population targets, meaningful regularization, and ultimately more expressive and efficient survey weights.</p>
-<p>A good longer introduction to regularized raking is <a href="https://github.com/andytimm/nyospm_regrake_public">these slides</a>.</p>
+<p>My new R package <code>regrake</code> is now live!</p>
+<p>Regularized raking enables more flexible functional forms in raking to population targets, meaningful regularization, and ultimately more expressive and efficient survey weights.</p>
 <p>You can install the package from GitHub (CRAN coming soon):</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"andytimm/regrake"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The rest of this post briefly illustrates a few things I’m excited about here.</p>
+<p>The rest of this post gives a light overview of the problem regularized raking solves, and introduces some interface elements I’m excited by.</p>
 <section id="flexible-raking-and-regularization" class="level2">
 <h2 class="anchored" data-anchor-id="flexible-raking-and-regularization">Flexible raking and regularization</h2>
-<p><weighting is="" hard="" vibes="" in="" a="" sentence="" or="" two=""></weighting></p>
-<p>&lt;Flexible targets + regularization + a plot&gt;</p>
-<p>My experience has been that a little bit of regularization and flexibility in functional form go a long way. More complex tools like MRP and more recent variants definitely have their place, often you get much of the</p>
+<p>Survey researchers increasingly ask a lot of our weights. We know our sample can be subtly or not so subtly unrepresentative in hard to fix ways, and expansive weighting schemes, no matter how imperfect, are part of the toolkit to address these challenges. Take, for example, the growing list of weighting variables in any recent NYT survey<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>What does this have to with <strong>how</strong> exactly we fit our weights, though?</p>
+<p>I find an analogy to predictive modeling instructive here. The early calibration literature like Deville &amp; Särndal (1992) makes it pretty clear that raking is well understood as linear regression on the weighting problem. Like with linear regression in the predictive context, we can add more marginal terms and interactions to (perhaps) fit a better model. Layering in more and more predictors like this allow one to extract further signal from your data, but you’ll quickly begins to feel the inflexibility of the regression framework as problems get more complex.</p>
+<p>Pushing all the way to a highly flexible, probably Bayesian or machine learning model to pull more signal out of available data without a variance explosion works, but often a simple lasso, ridge, or horseshoe prior regression model provides most of the additional signal for minimal additional effort. I think the regularized raking available in <code>regrake</code> offers a compelling level of flexibility without much more implementation complexity.</p>
+<p>Here’s an example: In the 2016 pew study I’m weighting in the slides linked below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these — whomst amongst us hasn’t worried about non-college midwestern whites? However, a more fully interacted model won’t<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> converge with basic raking, and the nearby partial solutions pay a relatively large variance cost<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/plot2.png" class="img-fluid figure-img"></p>
+<figcaption>being 1pp off targets on the harder margins ins’t bad at all!</figcaption>
+</figure>
+</div>
+<p>While there are certainly applications that call for going all the way to something more complex like MRP and its’ recent improvements, my sense is regularized raking can deliver much of the incremental benefit at lower effort.</p>
 </section>
 <section id="formula-interface" class="level2">
 <h2 class="anchored" data-anchor-id="formula-interface">Formula interface</h2>
 <p>I’ve always been inspired by the elegance of <code>brms</code>’s formula interface: Even complex models feel pretty easy to express elegantly. I’ve tried to capture some of that experience here.</p>
-<p><code>regrake</code> makes it pretty easy to specify relatively complex constraints, like the mix of exact</p>
+<p><code>regrake</code> makes it pretty easy to specify relatively complex constraints, like the mix of exact constraints on marginal totals and L2 constraints on interactions:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">regrake</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> survey_data,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="sc">~</span> <span class="fu">rr_exact</span>(age) <span class="sc">+</span> <span class="fu">rr_exact</span>(sex) <span class="sc">+</span> <span class="fu">rr_exact</span>(race) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_exact</span>(education) <span class="sc">+</span> <span class="fu">rr_exact</span>(region) <span class="sc">+</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(region<span class="sc">:</span>education) <span class="sc">+</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(region<span class="sc">:</span>race) <span class="sc">+</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(education<span class="sc">:</span>race),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">population_data =</span> pop_targets,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">pop_type =</span> <span class="st">"proportions"</span>,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">regularizer =</span> <span class="st">"entropy"</span>,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">10</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="sc">~</span> <span class="fu">rr_exact</span>(recode_age_bucket) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_female) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_exact</span>(recode_inputstate) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_region) <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_exact</span>(recode_educ) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_race) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_educ) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_race) <span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_educ<span class="sc">:</span>recode_race) <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_educ<span class="sc">:</span>recode_race),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">population_data =</span> pop_targets,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">pop_type =</span> <span class="st">"proportions"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">regularizer =</span> <span class="st">"entropy"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">10</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Swapping a constraint from <code>rr_exact()</code> to <code>rr_l2()</code>, or tweaking λ to adjust regularization, is a one-line change, which makes it easy to iterate and compare.</p>
 </section>
 <section id="target-input-interfaces-that-dont-suck" class="level2">
@@ -340,20 +359,33 @@ M:young   M:old F:young   F:old
 </tbody>
 </table>
 <p>These are ultimately all converted back to the autumn format for use. My hope is that this fluidity with inputs makes it a bit easier to try regularized raking on your data.</p>
+</section>
+<section id="learning-more" class="level2">
+<h2 class="anchored" data-anchor-id="learning-more">Learning more</h2>
+<p>If this has piqued your interest, a good longer introduction to regularized raking is <a href="https://github.com/andytimm/nyospm_regrake_public">these slides</a>, from a talk I gave at <a href="https://nyhackr.org/">NYOSPM</a>.</p>
+<p>If the underlying optimization logic is interesting to you, I’d check out the original paper- it’s a really clean, elegant application of alternating direction method of multiplier ideas.</p>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Check out this long list of weighting variables- many of which my mentors from an earlier era of polling would find anathema to weight on! <img src="images/nyt_weighting_variables.png" class="img-fluid" alt="Weighting variables from a recent NYT/Siena poll"> Source: <a href="https://www.nytimes.com/interactive/2026/01/26/polls/times-siena-national-poll-toplines.html">NYT/Siena National Poll Toplines, January 2026</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>For anybody else who reads “won’t” as a challenge here, I’m aware of the various tricks one can resort to here. Picking and choosing interactions to keep, raking in stages, or being flexible with what “converged” needs to mean…. all these could probably get something close to the example to fit. The example is (deliberately) just simple enough that vanilla raking starts to struggle- you could force it to work. My claim here is that you shouldn’t have to resort to these sometimes hacky tricks we’ve collectively figured out: instead, try to formalize the solution you actually want, and optimize against that.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Similar to the above footnote, if your reaction here is that you’ve got plenty heuristic tools like trimming or windsorization to bring down that variance/deff cost, again my claim is that you shouldn’t have to do this. Instead, you can write down the optimzation problem you actually want to solve, weighting induced variance limitations included, and directly solve that.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
   author = {Timm, Andy},
   title = {Regrake: {Regularized} {Raking} in {R}},
-  date = {2026-02-21},
+  date = {2026-02-22},
   url = {https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-timm2026" class="csl-entry quarto-appendix-citeas" role="listitem">
 Timm, Andy. 2026. <span>“Regrake: Regularized Raking in R.”</span>
-February 21, 2026. <a href="https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html">https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html</a>.
+February 22, 2026. <a href="https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html">https://andytimm.github.io/posts/announcing_regrake/announcing_regrake.html</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
