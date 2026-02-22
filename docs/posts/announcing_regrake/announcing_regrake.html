@@ -105,7 +105,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <style>html{ scroll-behavior: smooth; }</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
 
-<meta name="quarto:status" content="draft">
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -128,7 +127,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner"><div id="quarto-draft-alert" class="alert alert-warning"><i class="bi bi-pencil-square"></i>Draft</div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -226,7 +225,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="flexible-raking-and-regularization" class="level2">
 <h2 class="anchored" data-anchor-id="flexible-raking-and-regularization">Flexible raking and regularization</h2>
 <p>Survey researchers increasingly ask a lot of our weights. We know our sample can be subtly or not so subtly unrepresentative in hard to fix ways, and expansive weighting schemes, no matter how imperfect, are part of the toolkit to address these challenges. Take, for example, the growing list of weighting variables in any recent NYT survey<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-<p>What does this have to with <strong>how</strong> exactly we fit our weights, though?</p>
+<p>What does this have to do with <strong>how</strong> exactly we fit our weights, though?</p>
 <p>I find an analogy to predictive modeling instructive here. The early calibration literature like <a href="https://doi.org/10.1080/01621459.1992.10475217">Deville &amp; Särndal (1992)</a> makes it pretty clear that raking is well understood as linear regression on the weighting problem. Like with linear regression in the predictive context, we can add more marginal terms and interactions to (perhaps) fit a better model. Layering in more and more predictors like this allow one to extract further signal from your data, but you’ll quickly begin to feel the inflexibility of the regression framework as problems get more complex.</p>
 <p>Pushing all the way to a highly flexible, probably Bayesian or machine learning model to pull more signal out of available data without a variance explosion works, but often a simple lasso, ridge, or horseshoe prior regression model provides most of the additional signal for minimal additional effort. I think the regularized raking available in <code>regrake</code> offers a compelling level of flexibility without much more implementation complexity.</p>
 <div class="quarto-figure quarto-figure-center">
@@ -238,8 +237,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/plot2.png" class="img-fluid figure-img"></p>
-<figcaption>being 1pp off targets on the harder margins ins’t bad at all!</figcaption>
+<p><img src="images/constraint_balance.png" class="img-fluid figure-img"></p>
+<figcaption>being 1pp off targets on the harder margins isn’t bad at all!</figcaption>
 </figure>
 </div>
 <p>While there are certainly applications that call for going all the way to something more complex like MRP, my sense is regularized raking can deliver much of the incremental benefit at lower effort. Coming back to that predictive modeling analogy, the sample you start with and the variables you choose to weight on still matter probably will more than anything about how you weight, but more expressive tools give you better options.</p>
@@ -328,7 +327,7 @@ M:young   M:old F:young   F:old
 <section id="learning-more" class="level2">
 <h2 class="anchored" data-anchor-id="learning-more">Learning More</h2>
 <p>If this has piqued your interest, a good longer introduction to regularized raking is <a href="https://github.com/andytimm/nyospm_regrake_public">these slides</a>, a slightly updated version of a talk I gave at <a href="https://nyhackr.org/">NYOSPM</a>.</p>
-<p>If the underlying optimization logic is interesting to you, I’d check out <a href="https://doi.org/10.1007/s11222-021-10001-1">the original paper</a> (Barratt, Angeris, and Boyd 2021)- it’s a really clean, elegant application of alternating direction method of multiplier (ADMM) ideas.</p>
+<p>If the underlying optimization logic is interesting to you, I’d check out <a href="https://doi.org/10.1007/s11222-021-10001-1">Barratt, Angeris, and Boyd (2021)</a>- it’s a really clean, elegant application of alternating direction method of multiplier (ADMM) ideas and super readable.</p>
 
 
 </section>
@@ -339,7 +338,7 @@ M:young   M:old F:young   F:old
 <ol>
 <li id="fn1"><p>Check out this long list of weighting variables- many of which my mentors from an earlier era of polling would find anathema to weight on! <img src="images/nyt_weighting_variables.png" class="img-fluid" alt="Weighting variables from a recent NYT/Siena poll"> Source: <a href="https://www.nytimes.com/interactive/2026/01/26/polls/times-siena-national-poll-toplines.html">NYT/Siena National Poll Toplines, January 2026</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>For anybody else who reads “won’t” as a challenge here, I’m aware of the various tricks one can resort to here. Picking and choosing interactions to keep, raking in stages, or being flexible with what “converged” needs to mean…. all these could probably get something close to the example to fit. The example is (deliberately) just simple enough that vanilla raking starts to struggle- you could force it to work. My claim here is that you shouldn’t have to resort to these sometimes hacky tricks we’ve collectively figured out: instead, try to formalize the solution you actually want, and optimize against that.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Similar to the above footnote, if your reaction here is that you’ve got plenty heuristic tools like trimming or windsorization to bring down that variance/deff cost, again my claim is that you shouldn’t have to do this. Instead, you can write down the optimzation problem you actually want to solve, weighting induced variance limitations included, and directly solve that.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Similar to the above footnote, if your reaction here is that you’ve got plenty heuristic tools like trimming or windsorization to bring down that variance/deff cost, again my claim is that you shouldn’t have to do this. Instead, you can write down the optimization problem you actually want to solve, weighting induced variance limitations included, and directly solve that.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{timm2026,
   author = {Timm, Andy},

@@ -3,7 +3,6 @@ layout: post
 title: "regrake: Regularized Raking in R"
 subtitle: "New year, new package release"
 date: 2026-02-22
-draft: false
 image: images/regrake_cover_photo.png
 categories:
   - surveys
