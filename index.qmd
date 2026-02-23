@@ -1,6 +1,5 @@
 ---
 toc: false
-image: assets/bookshelf_2026.jpg
 resources:
     - "bookshelf_2026.jpg"
 ---
@@ -11,7 +10,7 @@ I'm a data scientist at [Grow Progress](https://growprogress.ai/); we test ads a
 
 Some recurring themes of my work are modern methods for survey weighting, efficient estimation of causal effects, and scalable Bayesian inference.
 
-Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing ssbm.
+Before grad school, I was a field and data staffer up and down the ballot in Minnesota. When not thinking about politics, I can most often be found running, reading, or playing various [fighting games](https://en.wikipedia.org/wiki/Fighting_game_community).
 
 ```{=html}
 <a class="btn btn-outline-dark", href="https://www.linkedin.com/in/andrew-timm-b70857a2/" target="_blank" rel="noopener noreferrer">
