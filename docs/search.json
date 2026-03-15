@@ -130,7 +130,7 @@
     "href": "software.html",
     "title": "Software",
     "section": "",
-    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github"
+    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github\n     \n        \n        r-universe"
   },
   {
     "objectID": "software.html#rswjax",
@@ -739,7 +739,7 @@
     "href": "software.html#regrake",
     "title": "Software",
     "section": "",
-    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github"
+    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github\n     \n        \n        r-universe"
   },
   {
     "objectID": "posts/announcing_regrake/announcing_regrake.html#learning-more-contributing",
