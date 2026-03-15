@@ -23,14 +23,16 @@
 
 <p>My new R package <code>regrake</code> is now live!</p>
 <p>Regularized raking enables more flexible functional forms in raking to population targets, supports meaningful regularization, and ultimately leads to more expressive and efficient survey weights.</p>
-<p>You can install the package from GitHub (CRAN coming soon):</p>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">remotes<span class="sc" style="color: #5E5E5E;
+<p>You can install the package from r-universe or github:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+font-style: inherit;">install.packages</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">install_github</span>(<span class="st" style="color: #20794D;
+font-style: inherit;">"regrake"</span>, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">"andytimm/regrake"</span>)</span></code></pre></div>
+font-style: inherit;">repos =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://andytimm.r-universe.dev"</span>)</span></code></pre></div>
 <p>The rest of this post gives a light overview of the problem regularized raking solves, and introduces some interface elements I’m excited by.</p>
 <section id="flexible-raking-and-regularization" class="level2">
 <h2 class="anchored" data-anchor-id="flexible-raking-and-regularization">Flexible raking and regularization</h2>
@@ -44,11 +46,11 @@ font-style: inherit;">"andytimm/regrake"</span>)</span></code></pre></div>
 </figure>
 </div>
 <p>Here’s an example: In the 2016 pew study I’m weighting in the slides below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these — whomst amongst us hasn’t worried about non-college midwestern whites? However, a more fully interacted model won’t<sup>3</sup> converge with basic raking, and the nearby partial solutions pay a relatively large variance cost<sup>4</sup>.</p>
-<p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:</p>
+<p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence.</p>
+<p>The plot below shows deviation from population targets across all the constraints — being within about 1 percentage point on the harder interaction terms allows us to fit something more expressive:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://andytimm.github.io/posts/announcing_regrake/images/constraint_balance.png" class="img-fluid figure-img"></p>
-<figcaption>being 1pp off targets on the harder margins isn’t bad at all!</figcaption>
+<p><img src="https://andytimm.github.io/posts/announcing_regrake/images/constraint_balance.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 <p>While there are certainly applications that call for going all the way to something more complex like MRP, my sense is regularized raking can deliver much of the incremental benefit at lower effort. Coming back to that predictive modeling analogy, the sample you start with and the variables you choose to weight on still matter more than anything about how you weight, but more expressive tools give you better action space.</p>
@@ -69,55 +71,39 @@ font-style: inherit;">formula =</span> <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">rr_exact</span>(recode_age_bucket) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">rr_exact</span>(recode_age_bucket <span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rr_exact</span>(recode_female) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">+</span> recode_female <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb2-4">              <span class="fu" style="color: #4758AB;
+<span id="cb2-4">                       recode_inputstate <span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">rr_exact</span>(recode_inputstate) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rr_exact</span>(recode_region) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">+</span> recode_region <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb2-5">              <span class="fu" style="color: #4758AB;
+<span id="cb2-5">                       recode_educ <span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">rr_exact</span>(recode_educ) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rr_exact</span>(recode_race) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">+</span> recode_race) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
 <span id="cb2-6">              <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">rr_l2</span>(recode_region<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">:</span>recode_educ) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">:</span>recode_educ <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb2-7">              <span class="fu" style="color: #4758AB;
+<span id="cb2-7">                    recode_region<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">rr_l2</span>(recode_region<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span>recode_race) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">:</span>recode_race <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb2-8">              <span class="fu" style="color: #4758AB;
+<span id="cb2-8">                    recode_educ<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">rr_l2</span>(recode_educ<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span>recode_race) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">:</span>recode_race <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb2-9">              <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rr_l2</span>(recode_region<span class="sc" style="color: #5E5E5E;
+<span id="cb2-9">                    recode_region<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span>recode_educ<span class="sc" style="color: #5E5E5E;
 background-color: null;

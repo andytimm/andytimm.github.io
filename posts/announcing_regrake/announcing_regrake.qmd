@@ -14,10 +14,10 @@ My new R package `regrake` is now live!
 
 Regularized raking enables more flexible functional forms in raking to population targets, supports meaningful regularization, and ultimately leads to more expressive and efficient survey weights.
 
-You can install the package from GitHub (CRAN coming soon):
+You can install the package from r-universe or github:
 
 ```r
-remotes::install_github("andytimm/regrake")
+install.packages("regrake", repos = "https://andytimm.r-universe.dev")
 ```
 
 The rest of this post gives a light overview of the problem regularized raking solves, and introduces some interface elements I'm excited by.
@@ -36,9 +36,11 @@ Pushing all the way to a highly flexible, probably Bayesian or machine learning 
 
 Here's an example: In the 2016 pew study I'm weighting in the slides below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these --- whomst amongst us hasn't worried about non-college midwestern whites? However, a more fully interacted model won't[^3] converge with basic raking, and the nearby partial solutions pay a relatively large variance cost[^4].
 
-A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:
+A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence. 
 
-![being 1pp off targets on the harder margins isn't bad at all!](images/constraint_balance.png){fig-align="center"}
+The plot below shows deviation from population targets across all the constraints — being within about 1 percentage point on the harder interaction terms allows us to fit something more expressive:
+
+![](images/constraint_balance.png){fig-align="center"}
 
 While there are certainly applications that call for going all the way to something more complex like MRP, my sense is regularized raking can deliver much of the incremental benefit at lower effort. Coming back to that predictive modeling analogy, the sample you start with and the variables you choose to weight on still matter more than anything about how you weight, but more expressive tools give you better action space.
 
@@ -51,13 +53,13 @@ I've always been inspired by the elegance of `brms`'s formula interface: Even co
 ```r
 regrake(
   data = survey_data,
-  formula = ~ rr_exact(recode_age_bucket) + rr_exact(recode_female) +
-              rr_exact(recode_inputstate) + rr_exact(recode_region) +
-              rr_exact(recode_educ) + rr_exact(recode_race) +
-              rr_l2(recode_region:recode_educ) +
-              rr_l2(recode_region:recode_race) +
-              rr_l2(recode_educ:recode_race) +
-              rr_l2(recode_region:recode_educ:recode_race),
+  formula = ~ rr_exact(recode_age_bucket + recode_female +
+                       recode_inputstate + recode_region +
+                       recode_educ + recode_race) +
+              rr_l2(recode_region:recode_educ +
+                    recode_region:recode_race +
+                    recode_educ:recode_race +
+                    recode_region:recode_educ:recode_race),
   population_data = pop_targets,
   pop_type = "proportions",
   regularizer = "entropy",

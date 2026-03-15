@@ -219,8 +219,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>My new R package <code>regrake</code> is now live!</p>
 <p>Regularized raking enables more flexible functional forms in raking to population targets, supports meaningful regularization, and ultimately leads to more expressive and efficient survey weights.</p>
-<p>You can install the package from GitHub (CRAN coming soon):</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"andytimm/regrake"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can install the package from r-universe or github:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"regrake"</span>, <span class="at">repos =</span> <span class="st">"https://andytimm.r-universe.dev"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The rest of this post gives a light overview of the problem regularized raking solves, and introduces some interface elements I’m excited by.</p>
 <section id="flexible-raking-and-regularization" class="level2">
 <h2 class="anchored" data-anchor-id="flexible-raking-and-regularization">Flexible raking and regularization</h2>
@@ -234,11 +234,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>Here’s an example: In the 2016 pew study I’m weighting in the slides below, we should have some intuition that getting Trump vote choice right is relevantly about not just marginal distributions of weighting dimensions like age, gender, race, region, and education, but also many interactions between these — whomst amongst us hasn’t worried about non-college midwestern whites? However, a more fully interacted model won’t<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> converge with basic raking, and the nearby partial solutions pay a relatively large variance cost<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
-<p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence:</p>
+<p>A sensible path forward available with regularized raking is to still require exact matching on all the marginal distributions, but optimize for merely least squares close target adherence on relevant 2 and 3-way interactions. When combined with some relatively light touch regularization, we end up with pretty clean target adherence.</p>
+<p>The plot below shows deviation from population targets across all the constraints — being within about 1 percentage point on the harder interaction terms allows us to fit something more expressive:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/constraint_balance.png" class="img-fluid figure-img"></p>
-<figcaption>being 1pp off targets on the harder margins isn’t bad at all!</figcaption>
+<p><img src="images/constraint_balance.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 <p>While there are certainly applications that call for going all the way to something more complex like MRP, my sense is regularized raking can deliver much of the incremental benefit at lower effort. Coming back to that predictive modeling analogy, the sample you start with and the variables you choose to weight on still matter more than anything about how you weight, but more expressive tools give you better action space.</p>
@@ -249,13 +249,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>regrake</code> makes it pretty easy to specify relatively complex constraints, like a mix of exact constraints on marginal totals and L2 constraints on interactions:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">regrake</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> survey_data,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="sc">~</span> <span class="fu">rr_exact</span>(recode_age_bucket) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_female) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_exact</span>(recode_inputstate) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_region) <span class="sc">+</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_exact</span>(recode_educ) <span class="sc">+</span> <span class="fu">rr_exact</span>(recode_race) <span class="sc">+</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_educ) <span class="sc">+</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_race) <span class="sc">+</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_educ<span class="sc">:</span>recode_race) <span class="sc">+</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_educ<span class="sc">:</span>recode_race),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="sc">~</span> <span class="fu">rr_exact</span>(recode_age_bucket <span class="sc">+</span> recode_female <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                       recode_inputstate <span class="sc">+</span> recode_region <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                       recode_educ <span class="sc">+</span> recode_race) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rr_l2</span>(recode_region<span class="sc">:</span>recode_educ <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                    recode_region<span class="sc">:</span>recode_race <span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                    recode_educ<span class="sc">:</span>recode_race <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                    recode_region<span class="sc">:</span>recode_educ<span class="sc">:</span>recode_race),</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">population_data =</span> pop_targets,</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">pop_type =</span> <span class="st">"proportions"</span>,</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">regularizer =</span> <span class="st">"entropy"</span>,</span>
