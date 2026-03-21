@@ -126,7 +126,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#regrake" id="toc-regrake" class="nav-link active" data-scroll-target="#regrake"><code>regrake</code></a></li>
+  <li><a href="#nutpier" id="toc-nutpier" class="nav-link active" data-scroll-target="#nutpier"><code>nutpieR</code></a></li>
+  <li><a href="#regrake" id="toc-regrake" class="nav-link" data-scroll-target="#regrake"><code>regrake</code></a></li>
   <li><a href="#rswjax" id="toc-rswjax" class="nav-link" data-scroll-target="#rswjax"><code>rswjax</code></a></li>
   <li><a href="#retrodesign" id="toc-retrodesign" class="nav-link" data-scroll-target="#retrodesign"><code>retrodesign</code></a></li>
   </ul>
@@ -154,6 +155,20 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="nutpier" class="level2">
+<h2 class="anchored" data-anchor-id="nutpier"><code>nutpieR</code></h2>
+<p>R bindings for the <a href="https://github.com/pymc-devs/nuts-rs">nuts-rs</a> MCMC sampler, providing a fast alternative for sampling Stan models. <code>nutpieR</code> uses <a href="https://github.com/roualdes/bridgestan">BridgeStan</a> to compile and evaluate Stan models, then keeps R entirely out of the sampling loop – parallel chains execute in Rust. Thanks to the wonderful mass matrix preconditioning this provides, this is on average 2x as fast as the Stan sampler over the tasks in <code>posteriorDB</code>, though favorable models can see as much as a 5x speedup.</p>
+    <a class="btn btn-outline-dark btn-sm" href="https://arxiv.org/abs/2603.18845" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-file-text" role="img" aria-label="Helpful Paper"></i>
+        Introductory Paper
+    </a> <a class="btn btn-outline-dark btn-sm" href="https://github.com/andytimm/nutpieR" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-github" role="img" aria-label="Github"></i>
+        Github
+    </a> <a class="btn btn-outline-dark btn-sm" href="https://andytimm.r-universe.dev/nutpieR" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-box-seam" role="img" aria-label="r-universe"></i>
+        r-universe
+    </a>
+</section>
 <section id="regrake" class="level2">
 <h2 class="anchored" data-anchor-id="regrake"><code>regrake</code></h2>
 <p>An R package for regularized raking, based on the optimization framework of <a href="https://doi.org/10.1007/s11222-021-10001-1">Barratt, Angeris, and Boyd (2021)</a>. <code>regrake</code> enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a <code>brms</code>-inspired formula interface and accepts a wide variety of target input formats.</p>

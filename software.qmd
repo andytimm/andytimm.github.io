@@ -3,6 +3,23 @@ title: "Software"
 editor: visual
 ---
 
+## `nutpieR`
+
+R bindings for the [nuts-rs](https://github.com/pymc-devs/nuts-rs) MCMC sampler, providing a fast alternative for sampling Stan models. `nutpieR` uses [BridgeStan](https://github.com/roualdes/bridgestan) to compile and evaluate Stan models, then keeps R entirely out of the sampling loop -- parallel chains execute in Rust. Thanks to the wonderful mass matrix preconditioning this provides, this is on average 2x as fast as the Stan sampler over the tasks in `posteriorDB`, though favorable models can see as much as a 5x speedup.
+
+```{=html}
+    <a class="btn btn-outline-dark btn-sm" href="https://arxiv.org/abs/2603.18845" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-file-text" role="img" aria-label="Helpful Paper"></i>
+        Introductory Paper
+    </a> <a class="btn btn-outline-dark btn-sm" href="https://github.com/andytimm/nutpieR" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-github" role="img" aria-label="Github"></i>
+        Github
+    </a> <a class="btn btn-outline-dark btn-sm" href="https://andytimm.r-universe.dev/nutpieR" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-box-seam" role="img" aria-label="r-universe"></i>
+        r-universe
+    </a>
+```
+
 ## `regrake`
 
 An R package for regularized raking, based on the optimization framework of [Barratt, Angeris, and Boyd (2021)](https://doi.org/10.1007/s11222-021-10001-1). `regrake` enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a `brms`-inspired formula interface and accepts a wide variety of target input formats.

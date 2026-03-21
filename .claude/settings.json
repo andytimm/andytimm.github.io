@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo:*)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''description'''',''''''''\\)\\); print\\(d.get\\(''''html_url'''',''''''''\\)\\); print\\(d.get\\(''''homepage'''',''''''''\\)\\)\")"
+    ]
+  }
+}

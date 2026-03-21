@@ -130,7 +130,7 @@
     "href": "software.html",
     "title": "Software",
     "section": "",
-    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github\n     \n        \n        r-universe"
+    "text": "R bindings for the nuts-rs MCMC sampler, providing a fast alternative for sampling Stan models. nutpieR uses BridgeStan to compile and evaluate Stan models, then keeps R entirely out of the sampling loop – parallel chains execute in Rust. Thanks to the wonderful mass matrix preconditioning this provides, this is on average 2x as fast as the Stan sampler over the tasks in posteriorDB, though favorable models can see as much as a 5x speedup.\n    \n        \n        Introductory Paper\n     \n        \n        Github\n     \n        \n        r-universe"
   },
   {
     "objectID": "software.html#rswjax",
@@ -738,8 +738,8 @@
     "objectID": "software.html#regrake",
     "href": "software.html#regrake",
     "title": "Software",
-    "section": "",
-    "text": "An R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github\n     \n        \n        r-universe"
+    "section": "regrake",
+    "text": "regrake\nAn R package for regularized raking, based on the optimization framework of Barratt, Angeris, and Boyd (2021). regrake enables more flexible functional forms in raking to population targets — mixing exact and soft (L2) constraints, supporting meaningful regularization, and ultimately producing more expressive and efficient survey weights. It features a brms-inspired formula interface and accepts a wide variety of target input formats.\n    \n        \n        Original Paper\n     \n        \n        Website\n     \n        \n        Github\n     \n        \n        r-universe"
   },
   {
     "objectID": "posts/announcing_regrake/announcing_regrake.html#learning-more-contributing",
@@ -747,5 +747,12 @@
     "title": "regrake: Regularized Raking in R",
     "section": "Learning More + Contributing",
     "text": "Learning More + Contributing\nIf this has piqued your interest, a good longer introduction to regularized raking is these slides, a slightly updated version of a talk I gave at NYOSPM.\nIf the underlying optimization logic is interesting to you, I’d check out Barratt, Angeris, and Boyd (2021)- it’s a really clean, elegant application of alternating direction method of multipliers (ADMM) ideas and super readable.\nOf course, this is a 1.0 release, so there are bound to be minor issues floating around. If you run into any issues or have an idea to expand the functionality, I’d welcome issues on GitHub."
+  },
+  {
+    "objectID": "software.html#nutpier",
+    "href": "software.html#nutpier",
+    "title": "Software",
+    "section": "",
+    "text": "R bindings for the nuts-rs MCMC sampler, providing a fast alternative for sampling Stan models. nutpieR uses BridgeStan to compile and evaluate Stan models, then keeps R entirely out of the sampling loop – parallel chains execute in Rust. Thanks to the wonderful mass matrix preconditioning this provides, this is on average 2x as fast as the Stan sampler over the tasks in posteriorDB, though favorable models can see as much as a 5x speedup.\n    \n        \n        Introductory Paper\n     \n        \n        Github\n     \n        \n        r-universe"
   }
 ]
